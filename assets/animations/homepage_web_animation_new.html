@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Thermal Dawn — Energy Flow</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@500;600&family=Inter:wght@500;600&display=swap" rel="stylesheet"/>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0a0a0a; --orange: #E87C2A; --green: #2EC68A; --red: #E84A2A;
+  --white: rgba(255,255,255,0.88); --dim: rgba(255,255,255,0.3);
+}
+html, body { background: var(--bg); min-height: 100vh; font-family: 'DM Sans', sans-serif; color: var(--white); overflow-x: hidden; }
+.scene { display: flex; flex-direction: column; align-items: center; padding: 32px 20px 60px; max-width: 900px; margin: 0 auto; }
+.label-row { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--orange); margin-bottom: 10px; }
+.controls { display: flex; flex-direction: column; align-items: center; gap: 14px; margin-bottom: 28px; width: 100%; }
+.storage-toggle-wrap { display: flex; align-items: center; gap: 12px; }
+.storage-label { font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--dim); transition: color 0.3s; }
+.storage-label.active { color: var(--white); }
+.toggle-track { width: 52px; height: 28px; border-radius: 14px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); position: relative; cursor: pointer; transition: all 0.3s; }
+.toggle-track.on { background: rgba(46,198,138,0.2); border-color: rgba(46,198,138,0.5); }
+.toggle-knob { width: 22px; height: 22px; border-radius: 11px; background: rgba(255,255,255,0.25); position: absolute; top: 2px; left: 2px; transition: all 0.3s cubic-bezier(0.4,0,0.2,1); }
+.toggle-track.on .toggle-knob { left: 26px; background: var(--green); box-shadow: 0 0 10px rgba(46,198,138,0.6); }
+.tod-wrap { display: flex; gap: 8px; }
+.tod-btn { padding: 8px 20px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); background: transparent; color: var(--dim); font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; transition: all 0.2s; }
+.tod-btn.active-day   { border-color: #E87C2A55; background: #E87C2A18; color: var(--orange); }
+.tod-btn.active-night-s { border-color: #2EC68A55; background: #2EC68A18; color: var(--green); }
+.tod-btn.active-night-n { border-color: #E84A2A55; background: #E84A2A18; color: var(--red); }
+.timer-bar-wrap { width: 100%; max-width: 400px; height: 3px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden; }
+.timer-bar { height: 100%; background: var(--orange); width: 0%; border-radius: 2px; transition: background 0.4s; }
+.scene-title { text-align: center; margin-bottom: 24px; }
+.scene-title h2 { font-size: clamp(18px,3.5vw,28px); font-weight: 600; letter-spacing: -0.02em; margin-bottom: 6px; }
+.scene-title p  { font-size: 13px; color: var(--dim); }
+.svg-wrap { width: 100%; max-width: 780px; }
+svg { width: 100%; height: auto; overflow: visible; }
+
+@keyframes pulse-flow {
+  0%   { stroke-dashoffset: 200; opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { stroke-dashoffset: 0; opacity: 0; }
+}
+@keyframes glow-pulse  { 0%,100%{opacity:0.4} 50%{opacity:1} }
+@keyframes window-glow { 0%,100%{fill:rgba(232,124,42,0.08)} 50%{fill:rgba(232,124,42,0.28)} }
+@keyframes float-label { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-3px)} }
+@keyframes sun-spin    { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+@keyframes fan-spin    { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+
+.flow-line { fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2.5; stroke-dasharray: 8 6; animation: pulse-flow 2.2s ease-in-out infinite; }
+.flow-delay-1 { animation-delay: 0.4s; }
+.flow-delay-2 { animation-delay: 0.8s; }
+.flow-delay-3 { animation-delay: 1.2s; }
+.flow-delay-4 { animation-delay: 1.6s; }
+.glow-dot { animation: glow-pulse 1.8s ease-in-out infinite; }
+.sun-rays  { transform-origin: 615px 38px; animation: sun-spin 14s linear infinite; }
+.window    { animation: window-glow 3s ease-in-out infinite; }
+.window-2  { animation-delay: 0.7s; }
+.window-3  { animation-delay: 1.4s; }
+.fan-blades { animation: fan-spin 1.6s linear infinite; transform-box: fill-box; transform-origin: center; }
+.fan-blades.off { animation: none; }
+
+.info-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-top: 28px; width: 100%; max-width: 780px; }
+@media (max-width:560px){ .info-row { grid-template-columns:1fr; gap:10px; } }
+.info-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; padding: 16px; transition: all 0.4s; }
+.info-card.hl-o { border-color: var(--orange); background: rgba(232,124,42,0.06); }
+.info-card.hl-g { border-color: var(--green);  background: rgba(46,198,138,0.06); }
+.info-card.hl-r { border-color: var(--red);    background: rgba(232,74,42,0.06); }
+.ic-icon  { font-size: 18px; margin-bottom: 8px; }
+.ic-title { font-size: 12px; font-weight: 600; margin-bottom: 4px; }
+.ic-body  { font-size: 11px; color: var(--dim); line-height: 1.5; }
+</style>
+</head>
+<body>
+<div class="scene">
+  <div class="label-row">Thermal Dawn — Energy Flow</div>
+
+  <div class="controls">
+    <div class="storage-toggle-wrap">
+      <span class="storage-label" id="lbl-no">Without Storage</span>
+      <div class="toggle-track on" id="storage-toggle">
+        <div class="toggle-knob"></div>
+      </div>
+      <span class="storage-label active" id="lbl-yes">With Storage</span>
+    </div>
+    <div class="tod-wrap">
+      <button class="tod-btn active-day" id="btn-day">☀ Daytime charging</button>
+      <button class="tod-btn" id="btn-night">🌙 Evening comfort</button>
+    </div>
+    <div class="timer-bar-wrap"><div class="timer-bar" id="timer-bar"></div></div>
+  </div>
+
+  <div class="scene-title">
+    <h2 id="scene-heading">With Thermal Storage: Your Solar. All Night Long.</h2>
+    <p  id="scene-sub">See how Thermal Dawn captures daytime solar and delivers it as comfort after dark.</p>
+  </div>
+
+  <div class="svg-wrap">
+  <svg viewBox="115 0 580 425" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <filter id="glow-orange" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="glow-green" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <linearGradient id="sky-day"   x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#170d05"/><stop offset="100%" stop-color="#0a0a0a"/></linearGradient>
+      <linearGradient id="sky-night" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#05050f"/><stop offset="100%" stop-color="#0a0a0a"/></linearGradient>
+      <linearGradient id="wall-grad" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#2c2c30"/><stop offset="100%" stop-color="#26262a"/></linearGradient>
+      <linearGradient id="roof-grad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#28282c"/><stop offset="100%" stop-color="#232328"/></linearGradient>
+      <linearGradient id="roof-grad-back" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1c1c20"/><stop offset="100%" stop-color="#18181c"/></linearGradient>
+      <linearGradient id="steel-grad"    x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#8a8d94"/><stop offset="50%" stop-color="#65686e"/><stop offset="100%" stop-color="#4a4d52"/></linearGradient>
+      <linearGradient id="steel-side"    x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4a4d52"/><stop offset="100%" stop-color="#34373c"/></linearGradient>
+      <linearGradient id="steel-top"     x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#9a9da4"/><stop offset="100%" stop-color="#70737a"/></linearGradient>
+      <linearGradient id="slat-grad"     x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#0c0c0e"/><stop offset="100%" stop-color="#1a1a1c"/></linearGradient>
+      <linearGradient id="slat-side-grad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#202022"/><stop offset="100%" stop-color="#141416"/></linearGradient>
+      <linearGradient id="hp-front-grad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#2a2a2c"/><stop offset="100%" stop-color="#171719"/></linearGradient>
+      <linearGradient id="hp-side-grad"  x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1f1f21"/><stop offset="100%" stop-color="#141416"/></linearGradient>
+      <linearGradient id="hp-top-grad"   x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#2c2c2e"/><stop offset="100%" stop-color="#1d1d1f"/></linearGradient>
+      <linearGradient id="pad-grad"      x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#36363c"/><stop offset="100%" stop-color="#2c2c34"/></linearGradient>
+      <linearGradient id="panel-grad"    x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#0a1118"/><stop offset="100%" stop-color="#070b10"/></linearGradient>
+      <radialGradient id="store-glow-o" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#E87C2A" stop-opacity="0.5"/><stop offset="100%" stop-color="#E87C2A" stop-opacity="0"/></radialGradient>
+      <radialGradient id="store-glow-g" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#2EC68A" stop-opacity="0.55"/><stop offset="100%" stop-color="#2EC68A" stop-opacity="0"/></radialGradient>
+    </defs>
+
+    <!-- Sky -->
+    <rect id="sky-bg" x="115" y="0" width="580" height="425" fill="url(#sky-day)"/>
+
+    <!-- Sun -->
+    <g id="sun-g">
+      <circle cx="615" cy="38" r="30" fill="#E87C2A" opacity="0.10"/>
+      <circle cx="615" cy="38" r="18" fill="#E87C2A" opacity="0.22"/>
+      <circle cx="615" cy="38" r="9"  fill="#E87C2A" opacity="0.7"/>
+      <g class="sun-rays">
+        <line x1="615" y1="6"  x2="615" y2="0"  stroke="#E87C2A" stroke-width="2" opacity="0.5"/>
+        <line x1="615" y1="70" x2="615" y2="76" stroke="#E87C2A" stroke-width="2" opacity="0.5"/>
+        <line x1="583" y1="38" x2="577" y2="38" stroke="#E87C2A" stroke-width="2" opacity="0.5"/>
+        <line x1="647" y1="38" x2="653" y2="38" stroke="#E87C2A" stroke-width="2" opacity="0.5"/>
+        <line x1="592" y1="15" x2="588" y2="11" stroke="#E87C2A" stroke-width="2" opacity="0.5"/>
+        <line x1="638" y1="61" x2="642" y2="65" stroke="#E87C2A" stroke-width="2" opacity="0.5"/>
+        <line x1="638" y1="15" x2="642" y2="11" stroke="#E87C2A" stroke-width="2" opacity="0.5"/>
+        <line x1="592" y1="61" x2="588" y2="65" stroke="#E87C2A" stroke-width="2" opacity="0.5"/>
+      </g>
+    </g>
+    <!-- Moon -->
+    <g id="moon-g" style="opacity:0">
+      <circle cx="615" cy="40" r="18" fill="#c8d8ff" opacity="0.15"/>
+      <circle cx="627" cy="33" r="14" fill="#0a0a18" opacity="0.9"/>
+      <circle cx="560" cy="30" r="1.5" fill="white" opacity="0.6"/>
+      <circle cx="655" cy="20" r="1"   fill="white" opacity="0.5"/>
+      <circle cx="675" cy="55" r="1.5" fill="white" opacity="0.4"/>
+      <circle cx="540" cy="60" r="1"   fill="white" opacity="0.6"/>
+      <circle cx="505" cy="28" r="1.5" fill="white" opacity="0.3"/>
+      <circle cx="600" cy="90" r="1"   fill="white" opacity="0.5"/>
+    </g>
+
+    <!-- ══ GRID POLE ══ -->
+    <line x1="665" y1="95" x2="665" y2="410" stroke="#333" stroke-width="2"/>
+    <line x1="648" y1="118" x2="682" y2="118" stroke="#333" stroke-width="2"/>
+    <line x1="652" y1="118" x2="652" y2="126" stroke="#555" stroke-width="1"/>
+    <line x1="678" y1="118" x2="678" y2="126" stroke="#555" stroke-width="1"/>
+    <path d="M652,124 Q610,150 560,162" fill="none" stroke="#2a2a2a" stroke-width="1.5"/>
+    <g id="g-grid-passive">
+      <rect x="628" y="150" width="62" height="22" rx="4" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+      <text x="659" y="165" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="rgba(255,255,255,0.3)">Grid</text>
+    </g>
+
+    <!-- ══ HOUSE ══ -->
+    <polygon points="390,390 645,247 645,127 390,270" fill="#25252a" stroke="#3a3a3e" stroke-width="0.5"/>
+    <polygon points="390,390 220,295 220,175 390,270" fill="url(#wall-grad)" stroke="#2a2a2c" stroke-width="0.5"/>
+    <polygon points="355,370 355,315 390,335 390,390" fill="#1a1a1e" stroke="#3a3a3e" stroke-width="0.5"/>
+    <circle cx="382" cy="352" r="2.5" fill="#5a5a5e" opacity="0.7"/>
+    <polygon class="window"           points="240,282 270,298 270,272 240,256" fill="rgba(232,124,42,0.10)" stroke="#2a2a2c" stroke-width="0.5"/>
+    <polygon class="window window-2"  points="280,302 310,318 310,292 280,276" fill="rgba(232,124,42,0.08)" stroke="#2a2a2c" stroke-width="0.5"/>
+    <polygon class="window window-3"  points="320,322 350,338 350,312 320,296" fill="rgba(232,124,42,0.08)" stroke="#2a2a2c" stroke-width="0.5"/>
+
+    <!-- Roof -->
+    <polygon points="220,175 390,270 305,173" fill="url(#wall-grad)" stroke="#2a2a2c" stroke-width="0.5"/>
+    <polygon points="220,175 305,173 560,30 475,32" fill="url(#roof-grad-back)" stroke="#2a2a2c" stroke-width="0.5"/>
+    <polygon points="390,270 645,127 560,30 305,173" fill="url(#roof-grad)" stroke="#2a2a2c" stroke-width="0.5"/>
+    <line x1="305" y1="173" x2="560" y2="30" stroke="#2a2a2c" stroke-width="0.5"/>
+
+    <!-- Solar panels -->
+    <g opacity="0.85">
+      <polygon points="420,239 598,139 534,66 356,166" fill="url(#panel-grad)" stroke="#1e3a5f" stroke-width="0.5"/>
+      <line x1="388" y1="203" x2="566" y2="103" stroke="#1e3a5f" stroke-width="0.5" opacity="0.7"/>
+      <line x1="479" y1="206" x2="415" y2="133" stroke="#1e3a5f" stroke-width="0.5" opacity="0.5"/>
+      <line x1="539" y1="172" x2="475" y2="99" stroke="#1e3a5f" stroke-width="0.5" opacity="0.5"/>
+      <line x1="356" y1="166" x2="534" y2="66" stroke="rgba(74,156,232,0.25)" stroke-width="0.5"/>
+      <g id="panel-shine">
+        <polygon points="420,239 598,139 534,66 356,166" fill="rgba(232,124,42,0.10)"/>
+      </g>
+    </g>
+
+    <!-- Roof eave shadows -->
+    <polygon points="220,175 390,270 390,272 220,177" fill="#000" opacity="0.45"/>
+    <polygon points="390,270 645,127 645,129 390,272" fill="#000" opacity="0.45"/>
+
+    <!-- Mounting pad -->
+    <polygon points="390,390 645,247 682,268 427,411" fill="url(#pad-grad)" stroke="#3a3a3e" stroke-width="0.5"/>
+    <polygon points="427,411 682,268 682,270 427,413" fill="#000" opacity="0.55"/>
+    <polygon points="390,390 427,411 427,413 390,392" fill="#000" opacity="0.55"/>
+
+    <!-- Ground contact shadows -->
+    <ellipse cx="442" cy="388" rx="28" ry="4" fill="#000" opacity="0.45"/>
+    <ellipse cx="517" cy="360" rx="38" ry="5" fill="#000" opacity="0.45"/>
+
+    <!-- ══ STATIC HEATING CIRCUIT (faint guide rails) ══ -->
+    <g>
+      <path fill="none" stroke="rgba(255,255,255,0.10)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" d="M520,294 L480,317 L440,339 L390,367 L350,345 L310,322 L270,300 L240,283"/>
+      <path fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" d="M240,267 L270,284 L310,306 L350,329 L390,351 L440,323 L480,301 L520,278"/>
+      <path fill="none" stroke="rgba(255,255,255,0.10)" stroke-width="1" stroke-linecap="round" d="M240,283 C232,283 232,267 240,267"/>
+      <circle cx="390" cy="367" r="2.5" fill="#0a0a0a" stroke="rgba(255,255,255,0.35)" stroke-width="1"/>
+      <circle cx="310" cy="322" r="2.5" fill="#0a0a0a" stroke="rgba(255,255,255,0.35)" stroke-width="1"/>
+      <circle cx="240" cy="283" r="2.5" fill="#0a0a0a" stroke="rgba(255,255,255,0.35)" stroke-width="1"/>
+    </g>
+
+    <!-- ══ THERMAL BATTERY (with-storage mode only) ══ -->
+    <g id="g-battery">
+      <ellipse id="store-glow-el" cx="517" cy="310" rx="55" ry="80" fill="url(#store-glow-o)" opacity="0"/>
+
+      <polygon points="461,269 489,285 489,305 461,289" fill="url(#steel-side)" stroke="#3a3d43" stroke-width="0.3"/>
+      <polygon points="461,289 489,305 489,366 461,350" fill="url(#slat-side-grad)" stroke="#2a2a2c" stroke-width="0.4"/>
+      <g stroke="#050505" stroke-width="0.6" opacity="0.85">
+        <line x1="467" y1="293" x2="467" y2="353"/>
+        <line x1="473" y1="296" x2="473" y2="357"/>
+        <line x1="479" y1="299" x2="479" y2="360"/>
+        <line x1="485" y1="303" x2="485" y2="364"/>
+      </g>
+      <g stroke="#3a3a3c" stroke-width="0.3" opacity="0.5">
+        <line x1="468" y1="294" x2="468" y2="354"/>
+        <line x1="474" y1="297" x2="474" y2="358"/>
+        <line x1="480" y1="300" x2="480" y2="361"/>
+        <line x1="486" y1="303" x2="486" y2="364"/>
+      </g>
+
+      <polygon points="461,269 518,238 546,254 489,285" fill="url(#steel-top)" stroke="#3a3d43" stroke-width="0.4"/>
+      <polygon points="466,272 514,246 522,250 473,277" fill="#a8acb4" opacity="0.3"/>
+
+      <polygon points="489,285 546,254 546,274 489,305" fill="url(#steel-grad)" stroke="#3a3d43" stroke-width="0.4"/>
+      <text x="518" y="280" text-anchor="middle" font-family="DM Mono,monospace" font-size="4.8" font-weight="700" fill="#1a1c20" letter-spacing="0.6" transform="matrix(1,-0.544,0,1,0,281.8)">THERMAL DAWN</text>
+      <polygon points="491,287 545,257 545,259 491,289" fill="#a8acb4" opacity="0.35"/>
+
+      <polygon points="489,305 546,274 546,335 489,366" fill="url(#slat-grad)" stroke="#000" stroke-width="0.4"/>
+      <g stroke="#000" stroke-width="0.9" opacity="0.85">
+        <line x1="495" y1="302" x2="495" y2="363"/>
+        <line x1="500" y1="300" x2="500" y2="361"/>
+        <line x1="506" y1="296" x2="506" y2="357"/>
+        <line x1="512" y1="293" x2="512" y2="354"/>
+        <line x1="518" y1="289" x2="518" y2="350"/>
+        <line x1="523" y1="287" x2="523" y2="348"/>
+        <line x1="529" y1="283" x2="529" y2="344"/>
+        <line x1="535" y1="280" x2="535" y2="341"/>
+        <line x1="540" y1="277" x2="540" y2="338"/>
+      </g>
+      <g stroke="#252525" stroke-width="0.4" opacity="0.55">
+        <line x1="497" y1="301" x2="497" y2="362"/>
+        <line x1="509" y1="294" x2="509" y2="355"/>
+        <line x1="520" y1="288" x2="520" y2="349"/>
+        <line x1="532" y1="281" x2="532" y2="342"/>
+        <line x1="543" y1="275" x2="543" y2="336"/>
+      </g>
+
+      <circle id="store-led" cx="540" cy="265" r="1.5" fill="#2EC68A" opacity="0.7"/>
+    </g>
+
+    <!-- ══ FLOW: NIGHT WITH STORAGE — discharging (behind heat pump) ══ -->
+    <g id="g-flow-night-s" style="opacity:0">
+      <path class="flow-line" stroke="var(--green)" d="M475,285 L475,318 L390,367"/>
+      <path class="flow-line flow-delay-1" stroke="var(--green)" d="M390,367 L350,345 L310,322 L270,300 L240,283"/>
+      <path class="flow-line flow-delay-3" stroke="rgba(46,198,138,0.6)" stroke-dasharray="6 6" d="M240,267 L270,284 L310,306 L350,329 L390,351 L475,302 L475,295"/>
+    </g>
+
+    <!-- ══ HEAT PUMP ══ -->
+    <g>
+      <polygon points="404,382 421,392 421,334 404,324" fill="url(#hp-side-grad)" stroke="#3a3a3c" stroke-width="0.5"/>
+      <g stroke="#0a0a0a" stroke-width="0.5" opacity="0.85">
+        <line x1="408" y1="334" x2="418" y2="340"/>
+        <line x1="408" y1="342" x2="418" y2="348"/>
+        <line x1="408" y1="350" x2="418" y2="356"/>
+        <line x1="408" y1="358" x2="418" y2="364"/>
+        <line x1="408" y1="366" x2="418" y2="372"/>
+        <line x1="408" y1="374" x2="418" y2="380"/>
+        <line x1="408" y1="382" x2="418" y2="388"/>
+      </g>
+
+      <polygon points="404,324 447,300 464,310 421,334" fill="url(#hp-top-grad)" stroke="#1a1a1a" stroke-width="0.4"/>
+      <polygon points="421,392 464,368 464,310 421,334" fill="url(#hp-front-grad)" stroke="#1a1a1a" stroke-width="0.5"/>
+
+      <g>
+        <circle cx="442" cy="337" r="10" fill="#0a0a0a" stroke="#3a3a3c" stroke-width="0.7"/>
+        <circle cx="442" cy="337" r="9"  fill="#050505"/>
+        <g id="hp-fan-1" class="fan-blades">
+          <path d="M442,329 Q447,332 445,337 Q442,335 442,329 Z" fill="#1a1a1a"/>
+          <path d="M442,345 Q437,342 439,337 Q442,339 442,345 Z" fill="#1a1a1a"/>
+          <path d="M434,338 Q437,333 442,336 Q439,340 434,338 Z" fill="#1a1a1a"/>
+          <path d="M450,336 Q447,341 442,338 Q445,334 450,336 Z" fill="#1a1a1a"/>
+        </g>
+        <circle cx="442" cy="337" r="1.6" fill="#2a2a2a" stroke="#444" stroke-width="0.3"/>
+        <circle id="hp-ring-1" cx="442" cy="337" r="11.5" fill="none" stroke="#E87C2A" stroke-width="1.2" opacity="0.75" style="animation:glow-pulse 1s ease-in-out infinite"/>
+      </g>
+      <g>
+        <circle cx="442" cy="366" r="10" fill="#0a0a0a" stroke="#3a3a3c" stroke-width="0.7"/>
+        <circle cx="442" cy="366" r="9"  fill="#050505"/>
+        <g id="hp-fan-2" class="fan-blades" style="animation-delay:-0.5s">
+          <path d="M442,358 Q447,361 445,366 Q442,364 442,358 Z" fill="#1a1a1a"/>
+          <path d="M442,374 Q437,371 439,366 Q442,368 442,374 Z" fill="#1a1a1a"/>
+          <path d="M434,367 Q437,362 442,365 Q439,369 434,367 Z" fill="#1a1a1a"/>
+          <path d="M450,365 Q447,370 442,367 Q445,363 450,365 Z" fill="#1a1a1a"/>
+        </g>
+        <circle cx="442" cy="366" r="1.6" fill="#2a2a2a" stroke="#444" stroke-width="0.3"/>
+        <circle id="hp-ring-2" cx="442" cy="366" r="11.5" fill="none" stroke="#E87C2A" stroke-width="1.2" opacity="0.75" style="animation:glow-pulse 1s ease-in-out infinite 0.5s"/>
+      </g>
+
+      <g id="hp-off-overlay" style="opacity:0">
+        <polygon points="421,392 464,368 464,310 421,334" fill="#0a0a0a" opacity="0.72"/>
+        <text x="442" y="356" text-anchor="middle" font-family="DM Mono,monospace" font-size="8" fill="rgba(255,255,255,0.25)" transform="matrix(1,-0.56,0,1,0,250)">OFF</text>
+      </g>
+    </g>
+
+    <!-- ══ FLOW: DAY WITH STORAGE — solar charging ══ -->
+    <g id="g-flow-day-s" style="opacity:0">
+      <!-- Sun -> panels -->
+      <path class="flow-line" stroke="var(--orange)" d="M600,55 Q555,98 490,150"/>
+      <!-- Panels -> heat pump -->
+      <path class="flow-line flow-delay-1" stroke="var(--orange)" d="M480,168 C480,235 455,278 449,302"/>
+      <!-- Heat pump -> battery (charging) -->
+      <path class="flow-line flow-delay-2" stroke="var(--orange)" stroke-width="3.5" d="M464,310 L478,302"/>
+      <path class="flow-line flow-delay-3" stroke="rgba(232,124,42,0.7)" stroke-width="2" stroke-dasharray="5 4" d="M478,308 L464,316"/>
+      <ellipse class="glow-dot" cx="478" cy="302" rx="3.5" ry="3.5" fill="#E87C2A" opacity="0.6" filter="url(#glow-orange)"/>
+      <ellipse class="glow-dot" cx="464" cy="310" rx="3.5" ry="3.5" fill="#E87C2A" opacity="0.55" filter="url(#glow-orange)"/>
+    </g>
+
+    <!-- ══ FLOW: DAY NO STORAGE — solar exported to grid ══ -->
+    <g id="g-flow-day-n" style="opacity:0">
+      <path class="flow-line" stroke="var(--orange)" d="M600,55 Q555,98 490,150"/>
+      <path class="flow-line flow-delay-1" stroke="var(--orange)" d="M560,140 Q620,120 660,128"/>
+      <ellipse class="glow-dot" cx="660" cy="128" rx="6" ry="6" fill="#E87C2A" opacity="0.7" filter="url(#glow-orange)"/>
+    </g>
+
+    <!-- ══ FLOW: NIGHT NO STORAGE — grid powering heat pump ══ -->
+    <g id="g-flow-night-n" style="opacity:0">
+      <!-- Grid -> heat pump -->
+      <path class="flow-line" stroke="var(--red)" d="M660,150 C628,245 535,300 466,310"/>
+      <!-- Heat pump -> home loop (supply + return on the same rails as the discharge flow) -->
+      <path class="flow-line flow-delay-1" stroke="var(--red)" d="M408,366 L390,367 L350,345 L310,322 L270,300 L240,283"/>
+      <path class="flow-line flow-delay-3" stroke="rgba(232,74,42,0.55)" stroke-dasharray="6 6" d="M240,267 L270,284 L310,306 L350,329 L390,351 L408,352"/>
+      <ellipse class="glow-dot" cx="466" cy="310" rx="7" ry="7" fill="#E84A2A" opacity="0.6" filter="url(#glow-orange)"/>
+    </g>
+
+    <!-- ══ FLOATING LABELS ══ -->
+    <g id="lbl-solar" style="animation:float-label 3s ease-in-out infinite">
+      <rect x="430" y="92" width="110" height="26" rx="5" fill="rgba(232,124,42,0.15)" stroke="rgba(232,124,42,0.4)" stroke-width="1"/>
+      <text x="485" y="109" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" font-weight="600" fill="#E87C2A">Solar Panels</text>
+      <line x1="478" y1="118" x2="478" y2="146" stroke="#E87C2A" stroke-width="1" opacity="0.4"/>
+    </g>
+    <g id="lbl-hp" style="animation:float-label 4s ease-in-out infinite 1s">
+      <rect x="296" y="286" width="92" height="26" rx="5" fill="#0f0f0f"/>
+      <rect x="296" y="286" width="92" height="26" rx="5" fill="rgba(232,124,42,0.12)" stroke="rgba(232,124,42,0.35)" stroke-width="1"/>
+      <text x="342" y="303" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" font-weight="600" fill="#E87C2A">Heat Pump</text>
+      <line x1="388" y1="304" x2="424" y2="330" stroke="#E87C2A" stroke-width="1" opacity="0.4"/>
+    </g>
+    <g id="lbl-grid-export" style="opacity:0;animation:float-label 2.8s ease-in-out infinite 0.6s">
+      <rect x="588" y="90" width="102" height="26" rx="5" fill="rgba(232,124,42,0.12)" stroke="rgba(232,124,42,0.35)" stroke-width="1"/>
+      <text x="639" y="107" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" font-weight="600" fill="#E87C2A">→ Grid export</text>
+      <line x1="660" y1="116" x2="664" y2="128" stroke="#E87C2A" stroke-width="1" opacity="0.4"/>
+    </g>
+    <g id="lbl-store-night" style="opacity:0;animation:float-label 3.5s ease-in-out infinite 0.5s">
+      <rect x="556" y="238" width="120" height="26" rx="5" fill="rgba(46,198,138,0.12)" stroke="rgba(46,198,138,0.35)" stroke-width="1"/>
+      <text x="616" y="255" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" font-weight="600" fill="#2EC68A">35 kWh stored</text>
+      <line x1="556" y1="255" x2="541" y2="265" stroke="#2EC68A" stroke-width="1" opacity="0.4"/>
+    </g>
+    <g id="lbl-radiators" style="opacity:0;animation:float-label 3.2s ease-in-out infinite 0.8s">
+      <rect x="120" y="248" width="92" height="26" rx="5" fill="rgba(46,198,138,0.12)" stroke="rgba(46,198,138,0.35)" stroke-width="1"/>
+      <text x="166" y="265" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" font-weight="600" fill="#2EC68A">Radiators</text>
+      <line x1="212" y1="265" x2="240" y2="283" stroke="#2EC68A" stroke-width="1" opacity="0.4"/>
+    </g>
+    <g id="lbl-underfloor" style="opacity:0;animation:float-label 2.9s ease-in-out infinite 1.1s">
+      <rect x="300" y="392" width="92" height="26" rx="5" fill="rgba(46,198,138,0.12)" stroke="rgba(46,198,138,0.35)" stroke-width="1"/>
+      <text x="346" y="409" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" font-weight="600" fill="#2EC68A">Underfloor</text>
+      <line x1="370" y1="392" x2="390" y2="370" stroke="#2EC68A" stroke-width="1" opacity="0.4"/>
+    </g>
+    <g id="lbl-fancoil" style="opacity:0;animation:float-label 3.6s ease-in-out infinite 0.2s">
+      <rect x="240" y="350" width="80" height="26" rx="5" fill="rgba(46,198,138,0.12)" stroke="rgba(46,198,138,0.35)" stroke-width="1"/>
+      <text x="280" y="367" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" font-weight="600" fill="#2EC68A">Fan coil</text>
+      <line x1="320" y1="358" x2="350" y2="345" stroke="#2EC68A" stroke-width="1" opacity="0.4"/>
+    </g>
+    <g id="lbl-grid-import" style="opacity:0;animation:float-label 2.5s ease-in-out infinite 0.3s">
+      <rect x="588" y="128" width="102" height="26" rx="5" fill="rgba(232,74,42,0.12)" stroke="rgba(232,74,42,0.4)" stroke-width="1"/>
+      <text x="639" y="145" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" font-weight="600" fill="#E84A2A">← Grid import</text>
+      <line x1="660" y1="154" x2="664" y2="162" stroke="#E84A2A" stroke-width="1" opacity="0.4"/>
+    </g>
+    <g id="lbl-peak-rate" style="opacity:0;animation:float-label 3.2s ease-in-out infinite 0.8s">
+      <rect x="118" y="298" width="112" height="26" rx="5" fill="rgba(232,74,42,0.12)" stroke="rgba(232,74,42,0.4)" stroke-width="1"/>
+      <text x="174" y="315" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" font-weight="600" fill="#E84A2A">Peak rate 💸</text>
+      <line x1="230" y1="305" x2="240" y2="285" stroke="#E84A2A" stroke-width="1" opacity="0.4"/>
+    </g>
+  </svg>
+  </div>
+
+  <!-- INFO CARDS -->
+  <div class="info-row">
+    <div class="info-card hl-o" id="card-0"><div class="ic-icon">☀️</div><div class="ic-title" id="c0-title">Daytime Charging</div><div class="ic-body" id="c0-body">Solar panels power the heat pump during the day, charging the thermal store while electricity is free.</div></div>
+    <div class="info-card"     id="card-1"><div class="ic-icon" id="c1-icon">◉</div><div class="ic-title" id="c1-title">35 kWh Stored</div><div class="ic-body" id="c1-body">Enough heat for an entire evening and overnight — without touching the grid.</div></div>
+    <div class="info-card"     id="card-2"><div class="ic-icon" id="c2-icon">♨️</div><div class="ic-title" id="c2-title">Evening Comfort</div><div class="ic-body" id="c2-body">Heat pump switches off at sunset. Stored heat flows through radiators and underfloor all evening — no grid needed.</div></div>
+  </div>
+</div>
+
+<script>
+(function() {
+  var mode = 'day';
+  var hasStorage = true;
+  var timerProgress = 0;
+  var timerInterval = null;
+  var CYCLE_MS = 6000;
+
+  var COPY = {
+    s: {
+      day: {
+        h: 'With Thermal Storage: Your Solar. All Night Long.',
+        s: 'See how Thermal Dawn captures daytime solar and delivers it as comfort after dark.',
+        btnDay: '☀ Daytime charging',
+        btnNight: '🌙 Evening comfort',
+        cards: [
+          { title:'Daytime Charging', icon:'☀️', body:'Solar panels power the heat pump during the day, charging the thermal store while electricity is free.', hl:'hl-o' },
+          { title:'35 kWh Stored',    icon:'◉',  body:'Enough heat for an entire evening and overnight — without touching the grid.', hl:'' },
+          { title:'Evening Comfort',  icon:'♨️', body:'Heat pump switches off at sunset. Stored heat flows through radiators and underfloor all evening — no grid needed.', hl:'' }
+        ]
+      },
+      night: {
+        h: 'With Thermal Storage: Your Solar. All Night Long.',
+        s: 'See how Thermal Dawn captures daytime solar and delivers it as comfort after dark.',
+        btnDay: '☀ Daytime charging',
+        btnNight: '🌙 Evening comfort',
+        cards: [
+          { title:'Daytime Charging', icon:'☀️', body:'Solar panels power the heat pump during the day, charging the thermal store while electricity is free.', hl:'' },
+          { title:'35 kWh Stored',    icon:'◉',  body:'Enough heat for an entire evening and overnight — without touching the grid.', hl:'' },
+          { title:'Evening Comfort',  icon:'♨️', body:'Heat pump switches off at sunset. Stored heat flows through radiators and underfloor all evening — no grid needed.', hl:'hl-g' }
+        ]
+      }
+    },
+    n: {
+      day: {
+        h: 'Without Storage: Buy High, Sell Low.',
+        s: 'Without thermal storage, you sell cheap solar during the day — then buy expensive peak-rate grid power all evening.',
+        btnDay: '☀ Cheap exports',
+        btnNight: '🌙 Evening cost',
+        cards: [
+          { title:'Daytime Export',    icon:'☀️', body:'Your solar generates power during the day — but with nowhere to store it, it\'s exported to the grid at near-zero feed-in rates.', hl:'hl-o' },
+          { title:'No Storage',        icon:'◉',  body:'Without thermal storage there\'s nowhere to keep your solar energy for later use.', hl:'' },
+          { title:'Evening Grid Cost', icon:'♨️', body:'When the sun sets, the heat pump switches on — drawing expensive peak-rate electricity from the grid all evening.', hl:'' }
+        ]
+      },
+      night: {
+        h: 'Without Storage: Buy High, Sell Low.',
+        s: 'Without thermal storage, you sell cheap solar during the day — then buy expensive peak-rate grid power all evening.',
+        btnDay: '☀ Cheap exports',
+        btnNight: '🌙 Evening cost',
+        cards: [
+          { title:'Daytime Export',    icon:'☀️', body:'Your solar generates power during the day — but with nowhere to store it, it\'s exported to the grid at near-zero feed-in rates.', hl:'' },
+          { title:'No Storage',        icon:'◉',  body:'Without thermal storage there\'s nowhere to keep your solar energy for later use.', hl:'' },
+          { title:'Evening Grid Cost', icon:'♨️', body:'When the sun sets, the heat pump switches on — drawing expensive peak-rate electricity from the grid all evening.', hl:'hl-r' }
+        ]
+      }
+    }
+  };
+
+  function show(id, val) {
+    var el = document.getElementById(id);
+    if (el) el.style.opacity = val ? '1' : '0';
+  }
+
+  function applyState() {
+    var isDay = (mode === 'day');
+    var isSto = hasStorage;
+    var key = isSto ? 's' : 'n';
+    var d = COPY[key][mode];
+
+    // Sky / celestial
+    document.getElementById('sky-bg').setAttribute('fill', isDay ? 'url(#sky-day)' : 'url(#sky-night)');
+    show('sun-g',    isDay);
+    show('moon-g',  !isDay);
+    show('panel-shine', isDay);
+
+    // Thermal battery visibility
+    show('g-battery', isSto);
+
+    // Animated flows (exactly one group visible at a time)
+    show('g-flow-day-s',   isDay &&  isSto);
+    show('g-flow-night-s', !isDay && isSto);
+    show('g-flow-day-n',   isDay && !isSto);
+    show('g-flow-night-n', !isDay && !isSto);
+
+    // Heat pump running state: charging by day-with-storage, or grid-heating at night-without-storage
+    var hpOn = (isDay && isSto) || (!isDay && !isSto);
+    show('hp-ring-1', hpOn);
+    show('hp-ring-2', hpOn);
+    show('hp-off-overlay', !hpOn);
+    ['hp-fan-1','hp-fan-2'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.classList.toggle('off', !hpOn);
+    });
+    // Heat pump ring colour (red when running on peak-rate grid)
+    var ringCol = (!isDay && !isSto) ? '#E84A2A' : '#E87C2A';
+    ['hp-ring-1','hp-ring-2'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.setAttribute('stroke', ringCol);
+    });
+
+    // Battery glow + status LED
+    var sg = document.getElementById('store-glow-el');
+    if (sg) {
+      sg.setAttribute('fill', isDay ? 'url(#store-glow-o)' : 'url(#store-glow-g)');
+      sg.style.opacity = isSto ? '0.55' : '0';
+    }
+    var led = document.getElementById('store-led');
+    if (led) {
+      led.setAttribute('fill', isDay ? '#E87C2A' : '#2EC68A');
+      led.setAttribute('opacity', isSto ? '0.95' : '0.4');
+    }
+
+    // Floating labels
+    show('lbl-solar',       isDay);
+    show('lbl-hp',          isDay);
+    show('lbl-grid-export', isDay && !isSto);
+    show('lbl-store-night', !isDay && isSto);
+    show('lbl-radiators',   !isDay && isSto);
+    show('lbl-underfloor',  !isDay && isSto);
+    show('lbl-fancoil',     !isDay && isSto);
+    show('lbl-grid-import', !isDay && !isSto);
+    show('lbl-peak-rate',   !isDay && !isSto);
+    show('g-grid-passive',   isDay || isSto);   // hide passive grid label when buying
+
+    // Button states
+    var btnDay   = document.getElementById('btn-day');
+    var btnNight = document.getElementById('btn-night');
+    btnDay.className   = isDay  ? 'tod-btn active-day' : 'tod-btn';
+    btnNight.className = isDay  ? 'tod-btn' : (isSto ? 'tod-btn active-night-s' : 'tod-btn active-night-n');
+    btnDay.textContent   = d.btnDay;
+    btnNight.textContent = d.btnNight;
+
+    // Toggle UI
+    document.getElementById('storage-toggle').classList.toggle('on', isSto);
+    document.getElementById('lbl-no').classList.toggle('active', !isSto);
+    document.getElementById('lbl-yes').classList.toggle('active', isSto);
+
+    // Timer bar colour
+    document.getElementById('timer-bar').style.background =
+      isDay ? 'var(--orange)' : (isSto ? 'var(--green)' : 'var(--red)');
+
+    // Heading / sub
+    document.getElementById('scene-heading').textContent = d.h;
+    document.getElementById('scene-sub').textContent     = d.s;
+
+    // Cards
+    var cardHls = ['hl-o','hl-g','hl-r'];
+    d.cards.forEach(function(c, i) {
+      var card = document.getElementById('card-' + i);
+      cardHls.forEach(function(hl) { card.classList.remove(hl); });
+      if (c.hl) card.classList.add(c.hl);
+      card.children[0].textContent = c.icon;
+      card.children[1].textContent = c.title;
+      card.children[2].textContent = c.body;
+    });
+  }
+
+  function startTimer() {
+    clearInterval(timerInterval);
+    timerInterval = setInterval(function() {
+      timerProgress += 100 / (CYCLE_MS / 100);
+      if (timerProgress >= 100) {
+        timerProgress = 0;
+        mode = (mode === 'day') ? 'night' : 'day';
+        applyState();
+      }
+      document.getElementById('timer-bar').style.width = timerProgress + '%';
+    }, 100);
+  }
+
+  document.getElementById('btn-day').addEventListener('click', function() {
+    mode = 'day'; timerProgress = 0;
+    document.getElementById('timer-bar').style.width = '0%';
+    applyState();
+  });
+  document.getElementById('btn-night').addEventListener('click', function() {
+    mode = 'night'; timerProgress = 0;
+    document.getElementById('timer-bar').style.width = '0%';
+    applyState();
+  });
+  document.getElementById('storage-toggle').addEventListener('click', function() {
+    hasStorage = !hasStorage;
+    applyState();
+  });
+
+  applyState();
+  startTimer();
+})();
+</script>
+</body>
+</html>

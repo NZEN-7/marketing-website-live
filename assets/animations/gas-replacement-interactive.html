@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Thermal Dawn</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #0D0D0D; min-height: 100%; max-width: 100%; overflow-x: hidden; }
+  body { display: flex; justify-content: center; padding: 16px; font-family: 'DM Sans', system-ui, sans-serif; }
+  #root { width: 100%; max-width: 620px; overflow: hidden; }
+  svg { max-width: 100%; overflow: hidden; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+var _React = React,
+  useState = _React.useState,
+  useEffect = _React.useEffect,
+  useRef = _React.useRef;
+var C = {
+  bg: "#0D0D0D",
+  orange: "#E87C2A",
+  green: "#2EC68A",
+  red: "#E84A2A",
+  grey: "#6B7280",
+  text: "rgba(255,255,255,0.88)",
+  dim: "rgba(255,255,255,0.4)",
+  cardBg: "rgba(255,255,255,0.04)",
+  cardBorder: "rgba(255,255,255,0.08)"
+};
+var tagColors = {
+  REPLACED: C.red,
+  REMOVED: C.red,
+  NEW: C.green,
+  UNLOCKED: C.green,
+  STAYS: C.grey,
+  EXISTING: C.grey,
+  UNUSED: C.grey,
+  OPTIONAL: C.orange
+};
+var cxf = function cxf(c) {
+  return c.x + c.w / 2;
+};
+var cyf = function cyf(c) {
+  return c.y + c.h / 2;
+};
+var rght = function rght(c) {
+  return c.x + c.w;
+};
+var bot = function bot(c) {
+  return c.y + c.h;
+};
+var tp = function tp(c) {
+  return c.y;
+};
+var lft = function lft(c) {
+  return c.x;
+};
+
+// ─── SHARED positions (same in both views) ───────────────────────────────────
+// Right column outputs — identical coords in before AND after
+var SHARED = {
+  radiator: {
+    x: 385,
+    y: 30,
+    w: 115,
+    h: 60
+  },
+  underfloor: {
+    x: 385,
+    y: 148,
+    w: 115,
+    h: 60
+  },
+  fcu: {
+    x: 385,
+    y: 265,
+    w: 115,
+    h: 65
+  },
+  hotwater: {
+    x: 385,
+    y: 388,
+    w: 115,
+    h: 60
+  },
+  // Solar and battery — bottom left, same in both views
+  solar: {
+    x: 20,
+    y: 390,
+    w: 115,
+    h: 60
+  },
+  battery: {
+    x: 165,
+    y: 390,
+    w: 115,
+    h: 60
+  }
+};
+
+// Trunk x is same in both views
+var TRUNK_X = 330;
+
+// ─── BEFORE ──────────────────────────────────────────────────────────────────
+// Left side: Gas Connection + Gas Boiler
+// Right side: Radiators, Underfloor (no FCU/HotWater in before — gas doesn't do those)
+// Bottom: Solar + Battery (dimmed/unused)
+
+var B = {
+  gas: {
+    id: "gas",
+    label: "Gas Connection",
+    sub: "$2,000+/yr",
+    icon: "⛽",
+    x: 20,
+    y: 30,
+    w: 115,
+    h: 60,
+    color: C.red,
+    tag: "REMOVED",
+    info: "Gas prices have risen 40%+ in five years. This connection — and its ongoing cost — is eliminated entirely when you switch to Thermal Dawn."
+  },
+  boiler: {
+    id: "boiler",
+    label: "Gas Boiler",
+    sub: "Burns gas to heat water",
+    icon: "🔥",
+    x: 155,
+    y: 25,
+    w: 115,
+    h: 68,
+    color: C.red,
+    tag: "REPLACED",
+    info: "Your gas boiler heats water by burning gas — expensive, polluting, and getting more expensive every year. This is the only part of your system Thermal Dawn replaces."
+  },
+  radiator: _objectSpread(_objectSpread({
+    id: "radiator",
+    label: "Radiators",
+    sub: "Warm water circulates",
+    icon: "♨"
+  }, SHARED.radiator), {}, {
+    color: C.grey,
+    tag: "STAYS",
+    info: "Your radiators stay exactly as they are. Thermal Dawn connects to your existing hydronic pipework — no radiator replacement needed."
+  }),
+  underfloor: _objectSpread(_objectSpread({
+    id: "underfloor",
+    label: "Underfloor",
+    sub: "Radiant heat circuits",
+    icon: "▦"
+  }, SHARED.underfloor), {}, {
+    color: C.grey,
+    tag: "STAYS",
+    info: "Underfloor circuits stay exactly as they are. The warm water flowing through them will simply come from a cleaner, cheaper source."
+  }),
+  solar: _objectSpread(_objectSpread({
+    id: "solar_b",
+    label: "Solar Panels",
+    sub: "Generating... but not helping heating",
+    icon: "☀"
+  }, SHARED.solar), {}, {
+    color: C.grey,
+    tag: "UNUSED",
+    info: "You have solar panels generating clean energy during the day — but none of that is going to your heating. Your boiler burns gas regardless. All that daytime solar gets exported for near-zero feed-in rates."
+  }),
+  battery: _objectSpread(_objectSpread({
+    id: "battery_b",
+    label: "Home Battery",
+    sub: "Stores electricity... not heat",
+    icon: "🔋"
+  }, SHARED.battery), {}, {
+    color: C.grey,
+    tag: "UNUSED",
+    info: "Even with a home battery, your heating still runs on gas. The battery stores electricity for lights and appliances — but your biggest energy load is still burning fossil fuels every time it runs."
+  })
+};
+var beforeList = Object.values(B);
+var unusedBefore = new Set(["solar_b", "battery_b"]);
+
+// Boiler connects to radiator and underfloor via trunk at TRUNK_X
+// Solar/battery have dead-end stubs
+var beforePipes = function beforePipes() {
+  return [
+  // Gas → Boiler horizontal (both at radiator row)
+  {
+    x1: rght(B.gas),
+    y1: cyf(B.radiator),
+    x2: lft(B.boiler),
+    y2: cyf(B.radiator),
+    gas: true
+  },
+  // Boiler → trunk → radiator + underfloor
+  {
+    x1: rght(B.boiler),
+    y1: cyf(B.radiator),
+    x2: TRUNK_X,
+    y2: cyf(B.radiator),
+    warm: true
+  }, {
+    x1: TRUNK_X,
+    y1: cyf(B.radiator),
+    x2: TRUNK_X,
+    y2: cyf(B.underfloor),
+    warm: true
+  }, {
+    x1: TRUNK_X,
+    y1: cyf(B.radiator),
+    x2: lft(B.radiator),
+    y2: cyf(B.radiator),
+    warm: true
+  }, {
+    x1: TRUNK_X,
+    y1: cyf(B.underfloor),
+    x2: lft(B.underfloor),
+    y2: cyf(B.underfloor),
+    warm: true
+  },
+  // Solar/battery dead stubs
+  {
+    x1: cxf(B.solar),
+    y1: tp(B.solar),
+    x2: cxf(B.solar),
+    y2: tp(B.solar) - 40,
+    unused: true
+  }, {
+    x1: cxf(B.battery),
+    y1: tp(B.battery),
+    x2: cxf(B.battery),
+    y2: tp(B.battery) - 40,
+    unused: true
+  }];
+};
+
+// ─── AFTER ───────────────────────────────────────────────────────────────────
+// Left column: Thermal Store, Heat Pump, Smart Controls
+// Bottom (same as before): Solar + Battery (now green/active)
+// Right column: Radiators, Underfloor, FCU, HotWater (same x/y as before for radiator+underfloor)
+
+var A = {
+  store: {
+    id: "store",
+    label: "Thermal Store",
+    sub: "35 kWh stored heat",
+    icon: "◉",
+    x: 155,
+    y: 25,
+    w: 115,
+    h: 68,
+    color: C.green,
+    tag: "NEW",
+    info: "The thermal store is the heart of the system. It holds 35 kWh of heat energy — enough to power your heating, cooling, and hot water through the evening and overnight without touching the grid."
+  },
+  heatpump: {
+    id: "heatpump",
+    label: "Heat Pump",
+    sub: "Runs on daytime solar",
+    icon: "⚡",
+    x: 20,
+    y: 30,
+    w: 115,
+    h: 60,
+    color: C.green,
+    tag: "NEW",
+    info: "An efficient reverse-cycle heat pump replaces your gas boiler. It runs during the day using your excess solar — free energy you were previously exporting for almost nothing. Also provides cooling in summer."
+  },
+  controls: {
+    id: "controls",
+    label: "Smart Controls",
+    sub: "AI-optimised scheduling",
+    icon: "◈",
+    x: 20,
+    y: 155,
+    w: 115,
+    h: 60,
+    color: C.green,
+    tag: "NEW",
+    info: "Thermal Dawn's control system orchestrates your solar, battery, and heat pump — forecasting generation, reading your tariff schedule, and deciding exactly when and how hard to charge the thermal store. Fully automatic, every day."
+  },
+  solar: _objectSpread(_objectSpread({
+    id: "solar_a",
+    label: "Solar Panels",
+    sub: "Now powering your heating",
+    icon: "☀"
+  }, SHARED.solar), {}, {
+    color: C.green,
+    tag: "UNLOCKED",
+    info: "Your existing solar panels now power your heating — your biggest energy load. Instead of exporting surplus solar for near-zero feed-in rates, you store it as heat for the evening. Finally, your panels are doing their best work."
+  }),
+  battery: _objectSpread(_objectSpread({
+    id: "battery_a",
+    label: "Home Battery",
+    sub: "Now part of the whole picture",
+    icon: "🔋"
+  }, SHARED.battery), {}, {
+    color: C.green,
+    tag: "UNLOCKED",
+    info: "Your home battery now works as part of a complete energy system. Smart Controls coordinates battery and thermal store together — battery for appliances, thermal store for heating and cooling. Nothing wasted."
+  }),
+  radiator: _objectSpread(_objectSpread({
+    id: "radiator2",
+    label: "Radiators",
+    sub: "Unchanged — stay as-is",
+    icon: "♨"
+  }, SHARED.radiator), {}, {
+    color: C.grey,
+    tag: "STAYS",
+    info: "Your radiators stay exactly as they are. Thermal Dawn connects to your existing hydronic pipework — no radiator replacement, no mess, no disruption."
+  }),
+  underfloor: _objectSpread(_objectSpread({
+    id: "underfloor2",
+    label: "Underfloor",
+    sub: "Unchanged — stay as-is",
+    icon: "▦"
+  }, SHARED.underfloor), {}, {
+    color: C.grey,
+    tag: "STAYS",
+    info: "Underfloor circuits stay exactly as they are. Same radiant comfort — just powered by stored solar instead of burning gas."
+  }),
+  fcu: _objectSpread(_objectSpread({
+    id: "fcu",
+    label: "Fan Coil Units",
+    sub: "Ducted or non-ducted",
+    icon: "🌬"
+  }, SHARED.fcu), {}, {
+    color: C.orange,
+    tag: "OPTIONAL",
+    info: "Fan coil units give you heating and cooling in rooms without radiators or underfloor. Available wall-mounted, ceiling cassette (non-ducted), or connected to existing ducts for whole-home coverage."
+  }),
+  hotwater: _objectSpread(_objectSpread({
+    id: "hotwater",
+    label: "Hot Water",
+    sub: "Optional add-on",
+    icon: "🚿"
+  }, SHARED.hotwater), {}, {
+    color: C.orange,
+    tag: "OPTIONAL",
+    info: "The same thermal store can supply domestic hot water — eliminating your gas hot water system in the same installation. Ask about this during your site assessment."
+  })
+};
+var afterList = Object.values(A);
+var afterPipes = function afterPipes() {
+  return [
+  // Solar → Controls (vertical up left side)
+  {
+    x1: cxf(A.solar),
+    y1: tp(A.solar),
+    x2: cxf(A.solar),
+    y2: bot(A.controls),
+    warm: false
+  },
+  // Battery → joins solar line horizontally
+  {
+    x1: lft(A.battery),
+    y1: cyf(A.battery),
+    x2: rght(A.solar),
+    y2: cyf(A.battery),
+    warm: false
+  },
+  // Controls top → heat pump bottom (left column up)
+  {
+    x1: cxf(A.controls),
+    y1: tp(A.controls),
+    x2: cxf(A.heatpump),
+    y2: bot(A.heatpump),
+    warm: false
+  },
+  // Heat pump right → thermal store left (both in radiator row)
+  {
+    x1: rght(A.heatpump),
+    y1: cyf(A.radiator),
+    x2: lft(A.store),
+    y2: cyf(A.radiator),
+    warm: true
+  },
+  // Store right → horizontal to trunk
+  {
+    x1: rght(A.store),
+    y1: cyf(A.radiator),
+    x2: TRUNK_X,
+    y2: cyf(A.radiator),
+    warm: true
+  },
+  // Vertical trunk
+  {
+    x1: TRUNK_X,
+    y1: cyf(A.radiator),
+    x2: TRUNK_X,
+    y2: cyf(A.hotwater),
+    warm: true
+  },
+  // Branches to outputs
+  {
+    x1: TRUNK_X,
+    y1: cyf(A.radiator),
+    x2: lft(A.radiator),
+    y2: cyf(A.radiator),
+    warm: true
+  }, {
+    x1: TRUNK_X,
+    y1: cyf(A.underfloor),
+    x2: lft(A.underfloor),
+    y2: cyf(A.underfloor),
+    warm: true
+  }, {
+    x1: TRUNK_X,
+    y1: cyf(A.fcu),
+    x2: lft(A.fcu),
+    y2: cyf(A.fcu),
+    warm: true
+  }, {
+    x1: TRUNK_X,
+    y1: cyf(A.hotwater),
+    x2: lft(A.hotwater),
+    y2: cyf(A.hotwater),
+    warm: true
+  }];
+};
+
+// ─── UI Components ────────────────────────────────────────────────────────────
+
+function Tag(_ref) {
+  var label = _ref.label;
+  var display = label === "UNLOCKED" ? "EXISTING" : label;
+  var col = tagColors[label] || "#fff";
+  return /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 9,
+      fontFamily: "monospace",
+      fontWeight: 700,
+      letterSpacing: "0.1em",
+      color: col,
+      border: "1px solid " + col + "44",
+      borderRadius: 3,
+      padding: "1px 5px",
+      marginLeft: 6
+    }
+  }, display);
+}
+function XMark(_ref2) {
+  var x = _ref2.x,
+    y = _ref2.y;
+  var s = 7;
+  return /*#__PURE__*/React.createElement("g", null, /*#__PURE__*/React.createElement("line", {
+    x1: x - s,
+    y1: y - s,
+    x2: x + s,
+    y2: y + s,
+    stroke: "rgba(232,74,42,0.8)",
+    strokeWidth: "2.5",
+    strokeLinecap: "round"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: x + s,
+    y1: y - s,
+    x2: x - s,
+    y2: y + s,
+    stroke: "rgba(232,74,42,0.8)",
+    strokeWidth: "2.5",
+    strokeLinecap: "round"
+  }));
+}
+function Box(_ref3) {
+  var comp = _ref3.comp,
+    active = _ref3.active,
+    _onClick = _ref3.onClick,
+    unused = _ref3.unused;
+  var isActive = active === comp.id;
+  var faded = unused && !isActive;
+  var borderCol = isActive ? comp.color : faded ? "rgba(255,255,255,0.18)" : "rgba(255,255,255,0.11)";
+  return /*#__PURE__*/React.createElement("g", {
+    onClick: function onClick() {
+      return _onClick(comp.id);
+    },
+    style: {
+      cursor: "pointer",
+      opacity: faded ? 0.75 : 1
+    }
+  }, /*#__PURE__*/React.createElement("rect", {
+    x: comp.x,
+    y: comp.y,
+    width: comp.w,
+    height: comp.h,
+    rx: 8,
+    fill: isActive ? comp.color + "20" : "rgba(255,255,255,0.03)",
+    stroke: borderCol,
+    strokeWidth: isActive ? 1.5 : 1,
+    strokeDasharray: faded ? "4 3" : "none"
+  }), /*#__PURE__*/React.createElement("text", {
+    x: cxf(comp),
+    y: comp.y + 21,
+    textAnchor: "middle",
+    fontSize: "15",
+    fill: isActive ? comp.color : faded ? "rgba(255,255,255,0.35)" : "rgba(255,255,255,0.38)"
+  }, comp.icon), /*#__PURE__*/React.createElement("text", {
+    x: cxf(comp),
+    y: comp.y + 38,
+    textAnchor: "middle",
+    fontSize: "11",
+    fontWeight: "600",
+    fontFamily: "DM Sans,system-ui,sans-serif",
+    fill: isActive ? "rgba(255,255,255,0.95)" : faded ? "rgba(255,255,255,0.65)" : "rgba(255,255,255,0.72)"
+  }, comp.label), /*#__PURE__*/React.createElement("text", {
+    x: cxf(comp),
+    y: comp.y + 52,
+    textAnchor: "middle",
+    fontSize: "8.5",
+    fontFamily: "DM Sans,system-ui,sans-serif",
+    fill: isActive ? "rgba(255,255,255,0.48)" : "rgba(255,255,255,0.28)"
+  }, comp.sub));
+}
+function Pipe(_ref4) {
+  var x1 = _ref4.x1,
+    y1 = _ref4.y1,
+    x2 = _ref4.x2,
+    y2 = _ref4.y2,
+    warm = _ref4.warm,
+    unused = _ref4.unused,
+    gas = _ref4.gas;
+  return /*#__PURE__*/React.createElement("line", {
+    x1: x1,
+    y1: y1,
+    x2: x2,
+    y2: y2,
+    stroke: unused ? "rgba(232,74,42,0.2)" : gas ? "rgba(232,74,42,0.7)" : warm ? "rgba(232,124,42,0.7)" : "rgba(255,255,255,0.18)",
+    strokeWidth: unused ? 1 : 2,
+    strokeDasharray: unused ? "4 3" : "none"
+  });
+}
+function App() {
+  var _useState = useState("before"),
+    _useState2 = _slicedToArray(_useState, 2),
+    view = _useState2[0],
+    setView = _useState2[1];
+  var _useState3 = useState(null),
+    _useState4 = _slicedToArray(_useState3, 2),
+    active = _useState4[0],
+    setActive = _useState4[1];
+  var containerRef = useRef(null);
+  useEffect(function () {
+    function reportHeight() {
+      if (containerRef.current) {
+        var h = containerRef.current.offsetHeight + 32;
+        window.parent.postMessage({
+          type: "setHeight",
+          height: h
+        }, "*");
+      }
+    }
+    reportHeight();
+    var timer = setTimeout(reportHeight, 100);
+    return function () {
+      clearTimeout(timer);
+    };
+  }, [view, active]);
+  var comps = view === "before" ? beforeList : afterList;
+  var pipes = view === "before" ? beforePipes() : afterPipes();
+  var unused = view === "before" ? unusedBefore : new Set();
+  var activeC = comps.find(function (c) {
+    return c.id === active;
+  });
+
+  // Both views use same viewBox height — after is taller due to FCU+HotWater
+  // Before: content ends at underfloor bottom = 148+60=208, solar bottom = 405+65=470
+  // After:  content ends at hotwater bottom   = 388+60=448, solar bottom = 470
+  // Use 500 for both so layout is stable on switch
+  var VB = "0 0 510 470";
+  return /*#__PURE__*/React.createElement("div", {
+    ref: containerRef,
+    style: {
+      background: C.bg,
+      color: C.text,
+      fontFamily: "'DM Sans',system-ui,sans-serif",
+      borderRadius: 16,
+      overflow: "hidden",
+      border: "1px solid rgba(255,255,255,0.07)",
+      maxWidth: 620,
+      width: "100%"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "20px 24px 12px"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: "'DM Mono',monospace",
+      fontSize: 10,
+      letterSpacing: "0.12em",
+      textTransform: "uppercase",
+      color: C.orange,
+      marginBottom: 6
+    }
+  }, "Thermal Dawn \u2014 Hydronic System"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 18,
+      fontWeight: 600,
+      letterSpacing: "-0.02em",
+      marginBottom: 14
+    }
+  }, "Same Pipes. Smarter Heat Source."), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      background: "rgba(255,255,255,0.05)",
+      borderRadius: 8,
+      padding: 3,
+      width: "fit-content",
+      marginBottom: 6
+    }
+  }, ["before", "after"].map(function (v) {
+    return /*#__PURE__*/React.createElement("button", {
+      key: v,
+      onClick: function onClick() {
+        setView(v);
+        setActive(null);
+      },
+      style: {
+        padding: "7px 22px",
+        borderRadius: 6,
+        border: "none",
+        background: view === v ? v === "before" ? "#E84A2A22" : "#2EC68A22" : "transparent",
+        color: view === v ? v === "before" ? C.red : C.green : C.dim,
+        fontFamily: "'DM Mono',monospace",
+        fontSize: 11,
+        fontWeight: 600,
+        letterSpacing: "0.08em",
+        textTransform: "uppercase",
+        cursor: "pointer",
+        outline: view === v ? "1px solid " + (v === "before" ? "#E84A2A44" : "#2EC68A44") : "none"
+      }
+    }, v === "before" ? "Gas Boiler" : "Thermal Dawn");
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: C.dim
+    }
+  }, "Click any component to learn more")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "0 24px"
+    }
+  }, /*#__PURE__*/React.createElement("svg", {
+    width: "100%",
+    viewBox: VB,
+    style: {
+      display: "block"
+    }
+  }, pipes.map(function (p, i) {
+    return /*#__PURE__*/React.createElement(Pipe, _extends({
+      key: i
+    }, p));
+  }), view === "before" && /*#__PURE__*/React.createElement("g", null, /*#__PURE__*/React.createElement(XMark, {
+    x: cxf(B.solar),
+    y: tp(B.solar) - 28
+  }), /*#__PURE__*/React.createElement(XMark, {
+    x: cxf(B.battery),
+    y: tp(B.battery) - 28
+  })), comps.map(function (comp) {
+    return /*#__PURE__*/React.createElement(Box, {
+      key: comp.id,
+      comp: comp,
+      active: active,
+      onClick: function onClick(id) {
+        setActive(active === id ? null : id);
+      },
+      unused: unused.has(comp.id)
+    });
+  }))), view === "before" && /*#__PURE__*/React.createElement("div", {
+    style: {
+      margin: "0 24px 12px",
+      padding: "10px 14px",
+      background: "rgba(232,74,42,0.06)",
+      border: "1px solid rgba(232,74,42,0.15)",
+      borderRadius: 8,
+      fontSize: 12,
+      color: "rgba(255,255,255,0.5)",
+      lineHeight: 1.5
+    }
+  }, "You have solar and a battery \u2014 but your heating still burns gas. None of that clean energy is reaching your biggest load."), /*#__PURE__*/React.createElement("div", {
+    style: {
+      margin: "0 24px 24px",
+      minHeight: 90,
+      padding: "16px 18px",
+      background: activeC ? activeC.color + "10" : C.cardBg,
+      border: "1px solid " + (activeC ? activeC.color + "30" : C.cardBorder),
+      borderRadius: 10
+    }
+  }, activeC ? /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      marginBottom: 8
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 16,
+      marginRight: 8
+    }
+  }, activeC.icon), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontWeight: 600,
+      fontSize: 14
+    }
+  }, activeC.label), /*#__PURE__*/React.createElement(Tag, {
+    label: activeC.tag
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      lineHeight: 1.65,
+      color: "rgba(255,255,255,0.72)"
+    }
+  }, activeC.info)) : /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      color: C.dim,
+      lineHeight: 1.65
+    }
+  }, view === "before" ? "A standard gas hydronic system — even with solar and a battery. Your biggest energy load is still running on gas, completely disconnected from the clean energy you're generating." : "Thermal Dawn replaces only the heat source. Your pipes, radiators, and underfloor circuits stay exactly as they are. Fan coil units and hot water are optional add-ons.")));
+}
+ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App, null));
+</script>
+</body>
+</html>

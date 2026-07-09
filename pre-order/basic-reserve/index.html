@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Basic Reserve · $190 Refundable | Thermal Dawn</title>
+<meta name="description" content="Reserve your Thermal Dawn system with a fully refundable $190 deposit. Hold your place in the install queue and lock in early-customer pricing. No obligation.">
+<link rel="canonical" href="https://www.thermaldawn.com.au/pre-order/basic-reserve/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Basic Reserve · $190 Refundable | Thermal Dawn">
+<meta property="og:description" content="Reserve your Thermal Dawn system with a fully refundable $190 deposit. Hold your place in the install queue and lock in early-customer pricing. No obligation.">
+<meta property="og:image" content="https://www.thermaldawn.com.au/assets/img/og-image.png">
+<meta property="og:url" content="https://www.thermaldawn.com.au/pre-order/basic-reserve/">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/assets/img/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">
+<link rel="preload" href="/assets/fonts/Montserrat-Black.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/Montserrat-Regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body>
+<header id="site-header"></header>
+<main>
+
+  <!-- 1. HERO -->
+  <section class="hero hero--plain">
+    <div class="hero__inner">
+      <div class="wrap">
+        <h1>Reserve your Thermal Dawn system</h1>
+        <p class="subhead">You're not buying a system today, you're holding your place in the install queue and locking in early-customer pricing. Your deposit is <strong>100% refundable</strong> and there's <strong>no obligation until you approve a fixed quote</strong> after your home assessment.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. WHAT HAPPENS AFTER YOU RESERVE -->
+  <section class="section">
+    <div class="wrap narrow">
+      <h2>What happens after you reserve</h2>
+      <ol>
+        <li><strong>You pay your refundable deposit</strong>: that's all that's needed to hold your spot.</li>
+        <li><strong>We send you a short home-assessment form</strong> (about 10 minutes) so we can give you accurate numbers and confirm Thermal Dawn fits your home.</li>
+        <li><strong>We follow up personally</strong> and prepare your fixed installed quote, one price, no surprises.</li>
+        <li><strong>You approve and we lock your install date.</strong> Nothing more to pay until you approve. Changed your mind? Your deposit is fully refundable up to your build slot.</li>
+        <li><strong>Install and commissioning</strong>: most homes in one to two days, then your home runs on stored solar.</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- 3. OFFER SUMMARY -->
+  <section class="section section--paper2">
+    <div class="wrap narrow">
+      <div class="card card--pad-lg">
+        <h2>Basic Reserve · $190, fully refundable</h2>
+        <p>What you're locking in:</p>
+        <ul>
+          <li><strong>10% off RRP</strong> (up to $1,000 saved)</li>
+          <li>A held place in the install queue</li>
+          <li>Quarterly updates and community access</li>
+          <li>100% refundable until your build slot</li>
+        </ul>
+        <p class="mb0">Want the largest discount, earliest install slot, and longest warranty? Compare with <a href="/pre-order/founder-premium/">Founder Premium</a>.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. RESERVATION -->
+  <section class="section">
+    <div class="wrap narrow">
+      <h2>Reserve your spot</h2>
+      <form class="form" name="basic-reserve" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/thank-you/basic-reserve/">
+        <input type="hidden" name="form-name" value="basic-reserve">
+        <p class="hp"><label>Don't fill this out: <input name="bot-field"></label></p>
+        <div class="field">
+          <label for="br-name">Name <span class="req">*</span></label>
+          <input id="br-name" name="name" required>
+        </div>
+        <div class="field">
+          <label for="br-email">Email <span class="req">*</span></label>
+          <input id="br-email" name="email" type="email" required>
+        </div>
+        <div class="field">
+          <label for="br-phone">Phone</label>
+          <input id="br-phone" name="phone" type="tel">
+        </div>
+        <div class="field">
+          <label for="br-address">Address</label>
+          <input id="br-address" name="address">
+        </div>
+        <div class="field">
+          <label for="br-notes">Anything else we should know?</label>
+          <textarea id="br-notes" name="notes"></textarea>
+        </div>
+        <button class="btn btn--primary" type="submit">Reserve my spot <span class="arrow"></span></button>
+      </form>
+
+      <h3 style="margin-top:34px">Complete your deposit</h3>
+      <p>Once you've submitted your details, complete your fully refundable $190 deposit to lock in your spot.</p>
+      <div class="btn-row">
+        <!-- STRIPE PLACEHOLDER: replaced with the real Stripe Payment Link via /assets/js/config.js (TD_CONFIG.stripe.basicReserve). -->
+        <a class="btn btn--primary" data-stripe="basicReserve" href="#STRIPE-BASIC-RESERVE">Pay refundable $190 deposit <span class="arrow"></span></a>
+      </div>
+    </div>
+  </section>
+
+</main>
+<footer id="site-footer" class="site-footer"></footer>
+<script src="/assets/js/config.js" defer></script>
+<script src="/assets/js/site.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Find Your Heating Upgrade Path — Thermal Dawn</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F5F0E8;
+    --ink: #1A1612;
+    --muted: #6B6259;
+    --rule: #D4C9B8;
+    --accent: #C4440A;
+    --accent-soft: #F0DDD4;
+    --green: #2D6A4F;
+    --green-soft: #D4EAE0;
+    --yellow: #B8860B;
+    --yellow-soft: #F5EDD4;
+    --card: #FDFAF5;
+    --card-hover: #FAF5EC;
+    --selected: #1A1612;
+    --td-row: #FDF3EC;
+    --td-border: #E8C9B4;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+  }
+
+  /* ── SHELL ── */
+  .shell { min-height: 100vh; display: flex; flex-direction: column; }
+
+  /* ── TOP BAR ── */
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 32px; border-bottom: 1px solid var(--rule);
+    position: sticky; top: 0; background: var(--bg); z-index: 20;
+  }
+
+  .logo {
+    font-family: 'DM Mono', monospace; font-size: 12px;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--accent); text-decoration: none;
+  }
+
+  .progress-wrap { display: flex; align-items: center; gap: 12px; }
+
+  .progress-label {
+    font-family: 'DM Mono', monospace; font-size: 11px;
+    color: var(--muted); letter-spacing: 0.06em;
+  }
+
+  .progress-track {
+    width: 120px; height: 2px; background: var(--rule);
+    border-radius: 2px; overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%; background: var(--accent); border-radius: 2px;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* ── QUIZ SECTION ── */
+  #quiz-section { flex: 1; display: flex; flex-direction: column; }
+
+  .steps-viewport {
+    flex: 1; position: relative; overflow: hidden; min-height: 520px;
+  }
+
+  .step {
+    position: absolute; inset: 0; display: block;
+    padding: 56px 32px 100px;
+    opacity: 0; transform: translateX(60px); pointer-events: none;
+    transition: opacity 0.45s cubic-bezier(0.4,0,0.2,1), transform 0.45s cubic-bezier(0.4,0,0.2,1);
+    overflow-y: auto;
+  }
+
+  .step.active { opacity: 1; transform: translateX(0); pointer-events: all; }
+  .step.exiting { opacity: 0; transform: translateX(-60px); }
+
+  .step-inner { max-width: 600px; margin: 0 auto; width: 100%; }
+
+  .step-eyebrow {
+    font-family: 'DM Mono', monospace; font-size: 11px;
+    letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent);
+    margin-bottom: 16px; display: flex; align-items: center; gap: 10px;
+  }
+
+  .step-eyebrow::after { content: ''; flex: 1; height: 1px; background: var(--rule); }
+
+  .step-q {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(24px, 4vw, 38px); line-height: 1.2;
+    font-weight: 400; margin-bottom: 10px;
+  }
+
+  .step-q em { font-style: italic; color: var(--accent); }
+
+  .step-hint { color: var(--muted); font-size: 14px; margin-bottom: 32px; line-height: 1.5; }
+
+  /* ── OPTION TILES ── */
+  .options-list { display: flex; flex-direction: column; gap: 8px; }
+
+  .opt {
+    display: flex; align-items: center; gap: 16px;
+    padding: 16px 20px; background: var(--card);
+    border: 1px solid var(--rule); border-radius: 6px; cursor: pointer;
+    transition: border-color 0.2s, background 0.2s, transform 0.15s;
+    text-align: left; width: 100%; font-family: inherit;
+    font-size: 15px; font-weight: 300; color: var(--ink); line-height: 1.4;
+  }
+
+  .opt:hover { border-color: var(--ink); background: var(--card-hover); transform: translateX(3px); }
+  .opt.selected { border-color: var(--selected); background: var(--selected); color: var(--bg); transform: translateX(3px); }
+
+  .opt-check {
+    width: 20px; height: 20px; border: 1.5px solid var(--rule);
+    border-radius: 50%; flex-shrink: 0; display: flex;
+    align-items: center; justify-content: center;
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .opt.selected .opt-check { border-color: var(--accent); background: var(--accent); }
+
+  .opt-check-inner {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: white; opacity: 0; transition: opacity 0.2s;
+  }
+
+  .opt.selected .opt-check-inner { opacity: 1; }
+  .multi .opt-check { border-radius: 3px; }
+  .multi .opt-check-inner { width: 10px; height: 10px; border-radius: 1px; }
+
+  /* ── STEP NAV ── */
+  .step-nav {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--rule);
+  }
+
+  .btn-back {
+    background: none; border: none; font-family: 'DM Mono', monospace;
+    font-size: 12px; letter-spacing: 0.08em; color: var(--muted);
+    cursor: pointer; padding: 8px 0; display: flex; align-items: center; gap: 8px;
+    transition: color 0.2s;
+  }
+  .btn-back:hover { color: var(--ink); }
+
+  .btn-next {
+    background: var(--ink); color: var(--bg); border: none;
+    padding: 12px 28px; font-family: 'DM Mono', monospace;
+    font-size: 13px; letter-spacing: 0.08em; border-radius: 3px; cursor: pointer;
+    transition: background 0.2s, opacity 0.2s, transform 0.15s;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .btn-next:disabled { opacity: 0.35; cursor: not-allowed; }
+  .btn-next:not(:disabled):hover { background: var(--accent); transform: translateX(2px); }
+
+  .btn-skip {
+    background: none; border: none; font-family: 'DM Mono', monospace;
+    font-size: 11px; color: var(--muted); cursor: pointer;
+    text-decoration: underline; padding: 4px 0; transition: color 0.2s;
+  }
+  .btn-skip:hover { color: var(--ink); }
+
+  /* ── PERSISTENT SKIP FOOTER ── */
+  .skip-footer {
+    position: sticky; bottom: 0;
+    background: linear-gradient(to top, var(--bg) 70%, transparent);
+    padding: 16px 32px 20px; display: flex; justify-content: center;
+    z-index: 10; transition: opacity 0.3s;
+  }
+
+  .skip-footer.hidden { opacity: 0; pointer-events: none; }
+
+  .skip-footer-btn {
+    background: var(--bg); border: 1px solid var(--rule);
+    font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.08em;
+    color: var(--muted); cursor: pointer;
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 16px; border-radius: 100px;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .skip-footer-btn:hover { border-color: var(--ink); color: var(--ink); }
+
+  /* ── RESULT SCREEN ── */
+  #step-result { padding: 56px 32px 80px; }
+
+  .result-inner { max-width: 680px; margin: 0 auto; width: 100%; }
+
+  .result-eyebrow {
+    font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--accent); margin-bottom: 12px;
+  }
+
+  .result-heading {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(28px, 5vw, 48px); line-height: 1.1;
+    font-weight: 400; margin-bottom: 24px;
+  }
+  .result-heading em { font-style: italic; color: var(--accent); }
+
+  .result-why { font-size: 15px; line-height: 1.7; color: var(--ink); margin-bottom: 32px; max-width: 560px; }
+
+  .result-cards { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 32px; }
+  @media (min-width: 560px) { .result-cards { grid-template-columns: 1fr 1fr; } }
+
+  .result-card { padding: 24px; border-radius: 6px; border: 1px solid var(--rule); background: var(--card); }
+  .result-card.primary { border-color: var(--ink); background: var(--ink); color: var(--bg); grid-column: 1 / -1; }
+
+  .result-card-label {
+    font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.12em;
+    text-transform: uppercase; opacity: 0.6; margin-bottom: 8px;
+  }
+
+  .result-card-title {
+    font-family: 'DM Serif Display', serif; font-size: 20px;
+    font-weight: 400; margin-bottom: 8px; line-height: 1.3;
+  }
+  .result-card.primary .result-card-title { font-size: 24px; }
+  .result-card-note { font-size: 13px; line-height: 1.6; opacity: 0.8; }
+
+  .callout { padding: 16px 20px; border-radius: 6px; margin-bottom: 12px; border-left: 3px solid; font-size: 14px; line-height: 1.6; }
+  .callout.green { background: var(--green-soft); border-color: var(--green); color: #1A3D2E; }
+  .callout.yellow { background: var(--yellow-soft); border-color: var(--yellow); color: #5C420A; }
+  .callout-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 6px; opacity: 0.7; }
+
+  .cta-block { margin-top: 32px; padding: 28px; background: var(--accent-soft); border-radius: 8px; border: 1px solid #E8C4B0; }
+  .cta-block.alt { background: #F0EDE8; border-color: var(--rule); }
+  .cta-block-title { font-family: 'DM Serif Display', serif; font-size: 20px; font-weight: 400; margin-bottom: 8px; line-height: 1.3; }
+  .cta-block-body { font-size: 14px; line-height: 1.65; color: var(--muted); margin-bottom: 20px; }
+  .cta-btns { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+
+  .btn-primary {
+    background: var(--accent); color: white; border: none; padding: 12px 22px;
+    font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 0.08em;
+    border-radius: 3px; cursor: pointer; transition: background 0.2s;
+    text-decoration: none; display: inline-block;
+  }
+  .btn-primary:hover { background: #A33708; }
+
+  .btn-ghost {
+    background: none; color: var(--ink); border: 1px solid var(--ink); padding: 12px 22px;
+    font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 0.08em;
+    border-radius: 3px; cursor: pointer; transition: background 0.2s;
+    text-decoration: none; display: inline-block;
+  }
+  .btn-ghost:hover { background: var(--ink); color: var(--bg); }
+
+  /* ── LEAD FORM ── */
+  .lead-form { margin-top: 32px; padding-top: 32px; border-top: 1px solid var(--rule); }
+  .lead-form-title { font-family: 'DM Serif Display', serif; font-size: 22px; font-weight: 400; margin-bottom: 6px; }
+  .lead-form-sub { font-size: 14px; color: var(--muted); margin-bottom: 20px; line-height: 1.5; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  @media (max-width: 480px) { .form-row { grid-template-columns: 1fr; } }
+  .form-field { display: flex; flex-direction: column; gap: 6px; }
+  .form-field label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+  .form-field input, .form-field textarea {
+    background: var(--card); border: 1px solid var(--rule); border-radius: 4px;
+    padding: 10px 14px; font-family: 'DM Sans', sans-serif; font-size: 14px;
+    color: var(--ink); transition: border-color 0.2s; width: 100%;
+  }
+  .form-field input:focus, .form-field textarea:focus { outline: none; border-color: var(--ink); }
+  .form-field textarea { min-height: 80px; resize: vertical; }
+  .form-submit { margin-top: 16px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .form-note { font-size: 12px; color: var(--muted); }
+
+  .restart-link {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted);
+    text-decoration: none; cursor: pointer; background: none; border: none;
+    padding: 0; margin-top: 40px; margin-bottom: 20px;
+    letter-spacing: 0.06em; transition: color 0.2s;
+  }
+  .restart-link:hover { color: var(--ink); }
+
+  /* ── SEE ALL TOGGLE ── */
+  .see-all-wrap {
+    max-width: 1100px; margin: 40px auto 0; width: 100%; padding: 0 32px;
+  }
+
+  .see-all-btn {
+    width: 100%; display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 24px; background: var(--card); border: 1px solid var(--rule);
+    border-radius: 6px; cursor: pointer; font-family: inherit;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .see-all-btn:hover { border-color: var(--ink); background: var(--card-hover); }
+
+  .see-all-eyebrow { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 4px; }
+  .see-all-label { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--ink); }
+
+  .see-all-chevron {
+    width: 32px; height: 32px; border: 1px solid var(--rule); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    transition: transform 0.3s, border-color 0.2s, background 0.2s;
+  }
+  .see-all-btn.open .see-all-chevron { transform: rotate(180deg); border-color: var(--ink); background: var(--ink); }
+  .see-all-btn.open .see-all-chevron svg { stroke: var(--bg); }
+
+  /* ── COMPARISON SECTION ── */
+  #comparison-section {
+    max-width: 1200px; margin: 0 auto; padding: 0 24px 80px;
+    overflow: hidden; max-height: 0;
+    transition: max-height 0.7s cubic-bezier(0.4,0,0.2,1), opacity 0.5s ease;
+    opacity: 0;
+  }
+  #comparison-section.open { max-height: 4000px; opacity: 1; }
+
+  .comparison-header { padding: 48px 0 32px; border-bottom: 1px solid var(--rule); margin-bottom: 32px; }
+  .comparison-eyebrow { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); margin-bottom: 12px; }
+  .comparison-heading { font-family: 'DM Serif Display', serif; font-size: clamp(24px, 3.5vw, 36px); line-height: 1.15; font-weight: 400; margin-bottom: 12px; }
+  .comparison-heading em { font-style: italic; color: var(--accent); }
+  .comparison-sub { color: var(--muted); font-size: 14px; line-height: 1.6; max-width: 520px; }
+
+  /* ── TABLE ── */
+  .table-wrap {
+    overflow-x: auto; border-radius: 8px;
+    border: 1px solid var(--rule);
+    box-shadow: 0 2px 24px rgba(0,0,0,0.06);
+  }
+
+  table {
+    width: 100%; border-collapse: collapse;
+    background: var(--card); min-width: 700px;
+  }
+
+  thead tr:first-child th {
+    background: var(--ink); color: var(--bg);
+    padding: 20px 18px 16px; text-align: left;
+    font-weight: 400; vertical-align: top;
+  }
+
+  thead tr:first-child th:first-child {
+    width: 160px; font-family: 'DM Mono', monospace;
+    font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: rgba(245,240,232,0.5);
+  }
+
+  thead tr:first-child th.recommended-col {
+    background: #2A2118; border-top: 3px solid var(--accent);
+  }
+
+  .col-letter { font-family: 'DM Serif Display', serif; font-size: 32px; line-height: 1; color: var(--accent); display: block; margin-bottom: 6px; }
+  .col-title { font-size: 13px; font-weight: 500; line-height: 1.4; color: var(--bg); display: block; margin-bottom: 4px; }
+
+  .recommended-pill {
+    display: inline-block; background: var(--accent); color: white;
+    font-family: 'DM Mono', monospace; font-size: 9px; padding: 2px 7px;
+    border-radius: 100px; letter-spacing: 0.06em; margin-top: 5px;
+  }
+
+  tbody tr th {
+    background: var(--bg); padding: 14px 18px; text-align: left;
+    font-weight: 400; border-bottom: 1px solid var(--rule);
+    border-right: 1px solid var(--rule); vertical-align: middle;
+  }
+
+  .row-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink); display: block; margin-bottom: 2px; }
+
+  tbody tr td {
+    padding: 14px 18px; border-bottom: 1px solid var(--rule);
+    border-right: 1px solid var(--rule); vertical-align: top; min-width: 170px;
+  }
+
+  tbody tr td.recommended-col { background: rgba(196,68,10,0.03); }
+  tbody tr:hover td, tbody tr:hover th { background: rgba(196,68,10,0.03); }
+  tbody tr td:last-child, tbody tr th:last-child { border-right: none; }
+  tbody tr:last-child td, tbody tr:last-child th { border-bottom: none; }
+
+  .dots { display: flex; gap: 3px; margin-bottom: 5px; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--rule); flex-shrink: 0; }
+  .dot.filled { background: var(--ink); }
+  .dot.accent { background: var(--accent); }
+  .cell-note { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  /* Prereqs row */
+  .prereqs-row th { background: var(--yellow-soft); }
+  .prereqs-row td { background: var(--yellow-soft); }
+  .prereqs-row td.recommended-col { background: #F0E5C0; }
+  .prereqs-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--yellow); display: block; margin-bottom: 2px; }
+  .prereqs-text { font-size: 12px; line-height: 1.6; color: var(--ink); }
+
+  /* Thermal Dawn row */
+  .td-row th { background: var(--td-row); border-top: 2px solid var(--td-border); border-bottom: 2px solid var(--td-border); }
+  .td-row td { background: var(--td-row); border-top: 2px solid var(--td-border); border-bottom: 2px solid var(--td-border); vertical-align: top; }
+  .td-row-eyebrow { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); display: block; margin-bottom: 5px; }
+  .td-row-heading { font-family: 'DM Serif Display', serif; font-size: 15px; color: var(--ink); display: block; margin-bottom: 8px; line-height: 1.3; }
+  .td-include { font-size: 11.5px; color: var(--ink); line-height: 1.8; list-style: none; margin-bottom: 4px; }
+  .td-include li { padding-left: 14px; position: relative; }
+  .td-include li::before { content: '→'; position: absolute; left: 0; color: var(--accent); font-size: 10px; top: 2px; }
+  .td-include li.td-divider { padding-left: 0; margin: 7px 0 3px; font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); border-top: 1px solid var(--rule); padding-top: 7px; }
+  .td-include li.td-divider::before { display: none; }
+
+  .btn-quote { display: inline-block; margin-top: 12px; background: var(--accent); color: white; font-family: 'DM Mono', monospace; font-size: 10px; padding: 6px 14px; border-radius: 100px; letter-spacing: 0.06em; text-decoration: none; cursor: pointer; border: none; }
+  .btn-quote:hover { background: #a33708; }
+  .btn-interest { display: inline-block; margin-top: 12px; background: transparent; color: var(--accent); font-family: 'DM Mono', monospace; font-size: 10px; padding: 5px 13px; border-radius: 100px; letter-spacing: 0.06em; text-decoration: none; cursor: pointer; border: 1.5px solid var(--accent); }
+  .btn-interest:hover { background: var(--accent-soft); }
+
+  .table-legend { margin: 20px 0 0; display: flex; gap: 24px; flex-wrap: wrap; font-size: 12px; color: var(--muted); align-items: center; }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+
+  .scroll-hint { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); letter-spacing: 0.06em; margin-bottom: 8px; display: none; }
+  @media (max-width: 768px) { .scroll-hint { display: block; } }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  .step.active .step-eyebrow { animation: fadeUp 0.4s 0.05s both; }
+  .step.active .step-q { animation: fadeUp 0.4s 0.12s both; }
+  .step.active .step-hint { animation: fadeUp 0.4s 0.18s both; }
+  .step.active .options-list { animation: fadeUp 0.4s 0.24s both; }
+  .step.active .step-nav { animation: fadeUp 0.4s 0.30s both; }
+
+  @media (max-width: 600px) {
+    .topbar { padding: 16px 20px; }
+    .step { padding: 40px 20px 100px; }
+    .progress-track { width: 80px; }
+    #step-result { padding: 40px 20px 80px; }
+    .cta-block { padding: 20px; }
+    .see-all-wrap { padding: 0 20px; }
+    #comparison-section { padding: 0 16px 60px; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <nav class="topbar">
+    <a href="/" class="logo">Thermal Dawn</a>
+    <div class="progress-wrap">
+      <span class="progress-label" id="stepLabel">Step 1 of 6</span>
+      <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:16%"></div></div>
+    </div>
+  </nav>
+
+  <div id="quiz-section">
+    <div class="steps-viewport">
+
+      <!-- STEP 1 -->
+      <div class="step active" id="step-1">
+        <div class="step-inner">
+          <div class="step-eyebrow">Question 1 of 6</div>
+          <h2 class="step-q">What do you <em>currently</em> have?</h2>
+          <p class="step-hint">This shapes which upgrades are actually available to you.</p>
+          <div class="options-list" id="opts-1">
+            <button class="opt" data-val="ducted" onclick="pickOption(1,'ducted',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>Gas ducted heating — central system with vents in the floor or ceiling</button>
+            <button class="opt" data-val="hydronic" onclick="pickOption(1,'hydronic',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>Gas hydronic heating — radiators or underfloor water pipes</button>
+            <button class="opt" data-val="ducted_splits" onclick="pickOption(1,'ducted_splits',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>Gas ducted + some split systems already in</button>
+            <button class="opt" data-val="other" onclick="pickOption(1,'other',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>Something else, or not sure</button>
+          </div>
+          <div class="step-nav"><span></span><button class="btn-next" id="next-1" disabled onclick="advance(1)">Continue →</button></div>
+        </div>
+      </div>
+
+      <!-- STEP 2 -->
+      <div class="step" id="step-2">
+        <div class="step-inner">
+          <div class="step-eyebrow">Question 2 of 6</div>
+          <h2 class="step-q">What's happening <em>with your home</em>?</h2>
+          <p class="step-hint">Renovations change what's practical — and what's worth doing while you're at it.</p>
+          <div class="options-list" id="opts-2">
+            <button class="opt" data-val="nothing" onclick="pickOption(2,'nothing',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>Nothing — just want to replace the heating</button>
+            <button class="opt" data-val="minor" onclick="pickOption(2,'minor',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>Minor works or cosmetic renovation</button>
+            <button class="opt" data-val="major" onclick="pickOption(2,'major',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>Major renovation — floors, walls, or ceilings being opened up</button>
+            <button class="opt" data-val="new_build" onclick="pickOption(2,'new_build',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>New build or major extension</button>
+          </div>
+          <div class="step-nav"><button class="btn-back" onclick="back(2)">← Back</button><button class="btn-next" id="next-2" disabled onclick="advance(2)">Continue →</button></div>
+        </div>
+      </div>
+
+      <!-- STEP 3 -->
+      <div class="step" id="step-3">
+        <div class="step-inner">
+          <div class="step-eyebrow">Question 3 of 6</div>
+          <h2 class="step-q">Do you have <em>solar panels</em>?</h2>
+          <p class="step-hint">Solar changes the economics significantly — especially with thermal storage.</p>
+          <div class="options-list" id="opts-3">
+            <button class="opt" data-val="solar_yes_want" onclick="pickOption(3,'solar_yes_want',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>Yes, and I want to use them for heating</button>
+            <button class="opt" data-val="solar_yes_nofuss" onclick="pickOption(3,'solar_yes_nofuss',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>Yes, but I'm not fussed about integrating them</button>
+            <button class="opt" data-val="solar_planning" onclick="pickOption(3,'solar_planning',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>No, but I'm planning to install solar</button>
+            <button class="opt" data-val="solar_no" onclick="pickOption(3,'solar_no',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>No solar and not planning it</button>
+          </div>
+          <div class="step-nav"><button class="btn-back" onclick="back(3)">← Back</button><button class="btn-next" id="next-3" disabled onclick="advance(3)">Continue →</button></div>
+        </div>
+      </div>
+
+      <!-- STEP 4 -->
+      <div class="step" id="step-4">
+        <div class="step-inner">
+          <div class="step-eyebrow">Question 4 of 6</div>
+          <h2 class="step-q">What matters <em>most to you</em>?</h2>
+          <p class="step-hint">Pick up to three — these shape which path we'd suggest.</p>
+          <div class="options-list multi" id="opts-4">
+            <button class="opt" data-val="low_upfront" onclick="pickMulti(4,'low_upfront',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>Lowest upfront cost</button>
+            <button class="opt" data-val="low_running" onclick="pickMulti(4,'low_running',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>Lowest running costs / bills</button>
+            <button class="opt" data-val="best_comfort" onclick="pickMulti(4,'best_comfort',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>Best heating comfort — even warmth, no cold drafts</button>
+            <button class="opt" data-val="use_solar" onclick="pickMulti(4,'use_solar',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>Using my solar during the day</button>
+            <button class="opt" data-val="off_gas" onclick="pickMulti(4,'off_gas',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>Getting off gas entirely</button>
+            <button class="opt" data-val="cooling" onclick="pickMulti(4,'cooling',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>Cooling as well as heating</button>
+            <button class="opt" data-val="minimal_disruption" onclick="pickMulti(4,'minimal_disruption',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>Minimal disruption to my home</button>
+            <button class="opt" data-val="clean_aesthetic" onclick="pickMulti(4,'clean_aesthetic',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>Clean aesthetic — no wall heads, no visible equipment</button>
+            <button class="opt" data-val="resilience" onclick="pickMulti(4,'resilience',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>Resilience — blackout backup, fire safety</button>
+          </div>
+          <div class="step-nav"><button class="btn-back" onclick="back(4)">← Back</button><button class="btn-next" id="next-4" disabled onclick="advance(4)">Continue →</button></div>
+        </div>
+      </div>
+
+      <!-- STEP 5 -->
+      <div class="step" id="step-5">
+        <div class="step-inner">
+          <div class="step-eyebrow">Question 5 of 6</div>
+          <h2 class="step-q">What's your rough <em>budget</em>?</h2>
+          <p class="step-hint">For the heating system itself — not ductwork or electrical upgrades.</p>
+          <div class="options-list" id="opts-5">
+            <button class="opt" data-val="under8" onclick="pickOption(5,'under8',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>Under $8K</button>
+            <button class="opt" data-val="8to15" onclick="pickOption(5,'8to15',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>$8K–$15K</button>
+            <button class="opt" data-val="15to20" onclick="pickOption(5,'15to20',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>$15K–$20K</button>
+            <button class="opt" data-val="20plus" onclick="pickOption(5,'20plus',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>$20K+ if the outcome is right</button>
+          </div>
+          <div class="step-nav"><button class="btn-back" onclick="back(5)">← Back</button><button class="btn-next" id="next-5" disabled onclick="advance(5)">Continue →</button></div>
+        </div>
+      </div>
+
+      <!-- STEP 6 -->
+      <div class="step" id="step-6">
+        <div class="step-inner">
+          <div class="step-eyebrow">Question 6 of 6 — Optional</div>
+          <h2 class="step-q">Where are <em>you based</em>?</h2>
+          <p class="step-hint">Used to tailor rebate information — the VEU program is Victoria-specific.</p>
+          <div class="options-list" id="opts-6">
+            <button class="opt" data-val="vic" onclick="pickOption(6,'vic',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>Melbourne / Victoria</button>
+            <button class="opt" data-val="nsw" onclick="pickOption(6,'nsw',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>Sydney / NSW</button>
+            <button class="opt" data-val="other" onclick="pickOption(6,'other',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>Other state or territory</button>
+          </div>
+          <div class="step-nav">
+            <button class="btn-back" onclick="back(6)">← Back</button>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+              <button class="btn-next" id="next-6" disabled onclick="showResult()">See my recommendation →</button>
+              <button class="btn-skip" onclick="showResult()">Skip this question</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RESULT -->
+      <div class="step" id="step-result">
+        <div class="result-inner" id="resultContent"></div>
+      </div>
+
+    </div><!-- /steps-viewport -->
+
+    <!-- PERSISTENT SKIP FOOTER -->
+    <div class="skip-footer" id="skipFooter">
+      <button class="skip-footer-btn" onclick="skipToComparison()">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 2l5 5-5 5M2 7h10"/></svg>
+        Skip questions — show me all options
+      </button>
+    </div>
+
+  </div><!-- /quiz-section -->
+
+  <!-- SEE ALL TOGGLE -->
+  <div class="see-all-wrap" id="seeAllWrap" style="display:none">
+    <button class="see-all-btn" id="seeAllBtn" onclick="toggleComparison()">
+      <div>
+        <div class="see-all-eyebrow">Full breakdown</div>
+        <div class="see-all-label">See all four options side by side →</div>
+      </div>
+      <div class="see-all-chevron">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 5l5 5 5-5"/></svg>
+      </div>
+    </button>
+  </div>
+
+  <!-- COMPARISON SECTION -->
+  <div id="comparison-section">
+    <div class="comparison-header">
+      <div class="comparison-eyebrow">All options compared</div>
+      <h2 class="comparison-heading">Every path, side by side.<br><em>Make the call yourself.</em></h2>
+      <p class="comparison-sub">A plain-English breakdown of all four heating upgrade paths — scores, trade-offs, and what Thermal Dawn offers for each.</p>
+    </div>
+    <div class="scroll-hint">← Scroll to compare all options →</div>
+    <div class="table-wrap">
+      <table id="comparisonTable"></table>
+    </div>
+    <div class="table-legend">
+      <span>Scores out of 5:</span>
+      <span class="legend-item"><span class="dot filled"></span><span class="dot filled"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span> Low</span>
+      <span class="legend-item"><span class="dot filled"></span><span class="dot filled"></span><span class="dot filled"></span><span class="dot filled"></span><span class="dot filled"></span> Best in class</span>
+      <span class="legend-item"><span class="dot accent"></span> Thermal Dawn option</span>
+    </div>
+  </div>
+
+</div><!-- /shell -->
+
+<script>
+// ── STATE ──
+const answers = { 1: null, 2: null, 3: null, 4: [], 5: null, 6: null };
+let currentStep = 1;
+const totalSteps = 6;
+let recommendedOption = null;
+
+// ── QUIZ ──
+function pickOption(step, val, el) {
+  answers[step] = val;
+  document.querySelectorAll(`#opts-${step} .opt`).forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById(`next-${step}`).disabled = false;
+}
+
+function pickMulti(step, val, el) {
+  if (el.classList.contains('selected')) {
+    el.classList.remove('selected');
+    answers[step] = answers[step].filter(v => v !== val);
+  } else {
+    if (answers[step].length >= 3) {
+      const first = answers[step].shift();
+      document.querySelector(`#opts-${step} .opt[data-val="${first}"]`).classList.remove('selected');
+    }
+    el.classList.add('selected');
+    answers[step].push(val);
+  }
+  document.getElementById(`next-${step}`).disabled = answers[step].length === 0;
+}
+
+function advance(from) { goToStep(from + 1); }
+function back(from) { goToStep(from - 1); }
+
+function goToStep(to) {
+  const fromEl = document.querySelector('.step.active');
+  fromEl.classList.add('exiting');
+  setTimeout(() => fromEl.classList.remove('active', 'exiting'), 450);
+  currentStep = to;
+  const toEl = document.getElementById(`step-${to}`);
+  toEl.classList.add('active');
+  updateProgress(to);
+  toEl.scrollTop = 0;
+}
+
+function updateProgress(step) {
+  const isResult = step === 'result';
+  document.getElementById('progressFill').style.width = (isResult ? 100 : (step / totalSteps) * 100) + '%';
+  document.getElementById('stepLabel').textContent = isResult ? 'Your result' : `Step ${step} of ${totalSteps}`;
+}
+
+// ── SKIP ──
+function skipToComparison() {
+  document.getElementById('quiz-section').style.display = 'none';
+  showComparisonSection(null);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── SCORING ──
+function scoreOptions() {
+  const a = answers, pri = a[4];
+  const s = { A: 0, B: 0, C: 0, D: 0 };
+
+  if (a[1]==='ducted'||a[1]==='ducted_splits') s.A+=3;
+  if (a[2]==='nothing'||a[2]==='minor') s.A+=2;
+  if (a[2]==='major'||a[2]==='new_build') s.A-=2;
+  if (a[5]==='under8'||a[5]==='8to15') s.A+=2;
+  if (pri.includes('low_upfront')) s.A+=2;
+  if (pri.includes('minimal_disruption')) s.A+=2;
+  if (pri.includes('best_comfort')) s.A-=1;
+  if (pri.includes('clean_aesthetic')) s.A-=1;
+
+  if (a[1]==='ducted'||a[1]==='ducted_splits') s.B+=2;
+  if (a[2]==='major'||a[2]==='new_build') s.B+=3;
+  if (a[2]==='nothing') s.B-=2;
+  if (a[5]==='15to20'||a[5]==='20plus') s.B+=2;
+  if (a[5]==='under8') s.B-=3;
+  if (pri.includes('clean_aesthetic')) s.B-=1;
+  if (pri.includes('cooling')) s.B+=1;
+  if (pri.includes('minimal_disruption')) s.B-=2;
+
+  if (a[1]==='hydronic') s.C+=4;
+  if (a[1]==='ducted') s.C+=1;
+  if (a[2]==='major'||a[2]==='new_build') s.C+=3;
+  if (a[2]==='nothing'&&a[1]!=='hydronic') s.C-=2;
+  if (a[3]==='solar_yes_want'||a[3]==='solar_planning') s.C+=2;
+  if (a[5]==='15to20'||a[5]==='20plus') s.C+=2;
+  if (a[5]==='under8') s.C-=3;
+  if (pri.includes('best_comfort')) s.C+=3;
+  if (pri.includes('clean_aesthetic')) s.C+=3;
+  if (pri.includes('off_gas')) s.C+=2;
+  if (pri.includes('use_solar')) s.C+=2;
+  if (pri.includes('resilience')) s.C+=2;
+  if (pri.includes('low_running')) s.C+=1;
+  if (pri.includes('cooling')) s.C-=1;
+  if (pri.includes('minimal_disruption')&&a[1]!=='hydronic') s.C-=1;
+
+  if (a[5]==='under8') s.D+=3;
+  if (a[5]==='8to15') s.D+=1;
+  if (pri.includes('cooling')) s.D+=3;
+  if (pri.includes('low_upfront')) s.D+=2;
+  if (pri.includes('minimal_disruption')) s.D+=2;
+  if (pri.includes('clean_aesthetic')) s.D-=3;
+  if (pri.includes('best_comfort')) s.D-=2;
+  if (pri.includes('off_gas')) s.D+=1;
+
+  return s;
+}
+
+function getRanked(s) { return Object.entries(s).sort((a,b)=>b[1]-a[1]).map(e=>e[0]); }
+
+// ── OPTION META ──
+const optionMeta = {
+  A: { title:'Keep your ducting, add a heat pump', short:"The lowest-disruption path — your existing ductwork stays, a new heat pump unit replaces the gas." },
+  B: { title:"Replace ducting and install a new system", short:"If your ductwork is old or undersized, replacing it alongside the heat pump gives you a properly sized, efficient system." },
+  C: { title:"Hydronic — underfloor or radiator panels", short:"The gold standard for heating comfort. Silent, even, no blowing air. Pairs exceptionally well with solar and thermal storage." },
+  D: { title:'Split systems in main living areas', short:'The most cost-effective path, especially if cooling is important. Targeted comfort without major works.' },
+};
+
+// ── RESULT ──
+function showResult() {
+  const scores = scoreOptions();
+  const ranked = getRanked(scores);
+  const primary = ranked[0], secondary = ranked[1];
+  recommendedOption = primary;
+
+  const pri = optionMeta[primary], sec = optionMeta[secondary];
+  const hasSolar = ['solar_yes_want','solar_planning'].includes(answers[3]);
+  const isVic = answers[6]==='vic';
+  const wantsSolar = answers[4].includes('use_solar') || hasSolar;
+  const showVEU = isVic && (primary==='A'||primary==='B'||secondary==='A'||secondary==='B');
+  const showSolarCallout = wantsSolar && (primary==='C'||secondary==='C');
+
+  const whyFns = { A:buildWhy_A, B:buildWhy_B, C:buildWhy_C, D:buildWhy_D };
+
+  document.getElementById('resultContent').innerHTML = `
+    <div class="result-eyebrow">Your recommendation</div>
+    <h1 class="result-heading">For your home, we'd suggest<br><em>${pri.title.toLowerCase()}.</em></h1>
+    <p class="result-why">${whyFns[primary]()}</p>
+    <div class="result-cards">
+      <div class="result-card primary">
+        <div class="result-card-label">Primary recommendation</div>
+        <div class="result-card-title">${pri.title}</div>
+        <div class="result-card-note">${pri.short}</div>
+      </div>
+      <div class="result-card">
+        <div class="result-card-label">Also worth considering</div>
+        <div class="result-card-title">${sec.title}</div>
+        <div class="result-card-note">${sec.short}</div>
+      </div>
+    </div>
+    ${showVEU?`<div class="callout yellow"><div class="callout-label">VEU Rebate</div>You may be eligible for VEU rebates on this upgrade — a Victorian program that can meaningfully reduce your upfront cost.</div>`:''}
+    ${showSolarCallout?`<div class="callout green"><div class="callout-label">Solar + Thermal Storage</div>Thermal storage pairs well with solar — charges during the day, delivers heat when you need it in the evening.</div>`:''}
+    <div class="cta-block">
+      <div class="cta-block-title">Thermal Dawn offers pilot pricing for early customers.</div>
+      <div class="cta-block-body">Free site assessment, fixed quote, no hard sell. A small number of early installations available now.</div>
+      <div class="cta-btns">
+        <a href="/contact" class="btn-primary">Get in touch →</a>
+        <a href="/hydronic" class="btn-ghost">Learn more →</a>
+      </div>
+    </div>
+    <div class="lead-form">
+      <div class="lead-form-title">Want a personalised recommendation?</div>
+      <div class="lead-form-sub">Drop your details and we'll follow up — no hard sell, just honest advice.</div>
+      <div class="form-row">
+        <div class="form-field"><label>Name</label><input type="text" placeholder="Your name"></div>
+        <div class="form-field"><label>Email</label><input type="email" placeholder="you@example.com"></div>
+      </div>
+      <div class="form-row"><div class="form-field"><label>Postcode</label><input type="text" placeholder="e.g. 3000" maxlength="4"></div></div>
+      <div class="form-field"><label>Anything else? (optional)</label><textarea placeholder="Brief description of your home…"></textarea></div>
+      <div class="form-submit">
+        <button class="btn-primary" onclick="submitLead(this)">Send →</button>
+        <span class="form-note">No hard sell. We'll respond within a working day.</span>
+      </div>
+    </div>
+    <button class="restart-link" onclick="restart()">← Start again</button>
+  `;
+
+  const fromEl = document.querySelector('.step.active');
+  fromEl.classList.add('exiting');
+  setTimeout(() => fromEl.classList.remove('active','exiting'), 450);
+  document.getElementById('step-result').classList.add('active');
+  updateProgress('result');
+  document.getElementById('skipFooter').classList.add('hidden');
+  showComparisonSection(primary);
+}
+
+// ── COMPARISON ──
+function showComparisonSection(highlight) {
+  recommendedOption = highlight;
+  buildTable(highlight);
+  document.getElementById('seeAllWrap').style.display = 'block';
+}
+
+function toggleComparison() {
+  const section = document.getElementById('comparison-section');
+  const btn = document.getElementById('seeAllBtn');
+  const isOpen = section.classList.contains('open');
+  section.classList.toggle('open', !isOpen);
+  btn.classList.toggle('open', !isOpen);
+  if (!isOpen) setTimeout(() => section.scrollIntoView({ behavior:'smooth', block:'start' }), 100);
+}
+
+// ── TABLE DATA ──
+const tableOptions = [
+  {
+    letter:'A', title:'Keep ducting + new heat pump', thermalDawn:true, tdType:'interest',
+    tdContent:{ heading:'Thermal Dawn Ducted', sections:[
+      { label:null, items:['High-efficiency outdoor heat pump','35kWh Australian-made thermal storage tank','Solar forecast & off-peak tariff optimisation','Connection to your existing ductwork','Removal & disposal of gas boiler','Electrical connection & switchboard check','Full commissioning & Thermal Dawn app setup'] },
+      { label:'Optional add-on', items:['Multi-head splits connected to our unit — extend to rooms outside ducting reach'] }
+    ]},
+    criteria:[
+      {label:'Upfront cost',score:5,note:'Lowest cost — no ductwork replacement'},
+      {label:'Install complexity',score:4,note:'Straightforward if ducting is in good condition'},
+      {label:'Home disruption',score:4,note:'Minimal — no floors or walls opened up'},
+      {label:'Heating comfort',score:3,note:'Heat pump runs cooler air than gas — insulation improvements help'},
+      {label:'Cooling performance',score:3,note:'Ducted cooling works, but underfloor vents are less effective'},
+      {label:'Indoor noise',score:3,note:'Ducted systems move a lot of air — some fan noise expected'},
+      {label:'Aesthetics',score:4,note:'No visible changes — ducts stay hidden'},
+      {label:'Solar integration',score:4,note:'Thermal storage charges from solar during the day — strong off-peak synergy'},
+    ],
+    prereqs:'Ducting must be in good condition and correctly sized for heat pump flow rates. Thermal envelope assessment recommended first.',
+  },
+  {
+    letter:'B', title:'Replace ducting + new heat pump', thermalDawn:true, tdType:'interest',
+    tdContent:{ heading:'Thermal Dawn Ducted (New Duct)', sections:[
+      { label:null, items:['High-efficiency outdoor heat pump','35kWh Australian-made thermal storage tank','Solar forecast & off-peak tariff optimisation','New ductwork design & installation','Removal & disposal of gas boiler','Electrical connection & switchboard check','Full commissioning & Thermal Dawn app setup'] },
+      { label:'Optional add-on', items:['Multi-head splits connected to our unit — extend to rooms outside ducting reach'] }
+    ]},
+    criteria:[
+      {label:'Upfront cost',score:2,note:'Ductwork replacement adds significant cost'},
+      {label:'Install complexity',score:2,note:'More trades involved, longer timeline'},
+      {label:'Home disruption',score:2,note:'Floors or ceiling cavities may need to be accessed'},
+      {label:'Heating comfort',score:3,note:'Correctly sized new ducting improves performance'},
+      {label:'Cooling performance',score:3,note:'Better than old ducting but underfloor vents still limited'},
+      {label:'Indoor noise',score:3,note:'Modern systems quieter but still fan-driven'},
+      {label:'Aesthetics',score:4,note:'Clean slate — no visible heads'},
+      {label:'Solar integration',score:4,note:'Thermal storage charges from solar — strong off-peak synergy'},
+    ],
+    prereqs:'Requires access to run new ductwork — far easier during a renovation when floors or ceilings are already open.',
+  },
+  {
+    letter:'C', title:'Hydronic — underfloor or radiators', thermalDawn:true, tdType:'quote',
+    tdContent:{ heading:'Thermal Dawn Hydronic', sections:[
+      { label:null, items:['High-efficiency outdoor heat pump','35kWh Australian-made thermal storage tank','Reverse-cycle cooling capability','Solar forecast & off-peak tariff optimisation (AI)','Ideal for existing hydronic homes — connects to existing pipework, zones & thermostats','Retrofit possible where space & pipework access allows','Removal & disposal of gas boiler','Full commissioning & Thermal Dawn app setup (1–2 days)'] },
+      { label:'Optional add-ons', items:['Domestic hot water from the same thermal store','Pool heating from stored solar','Fan coil units for cooling in radiator-only homes'] }
+    ]},
+    criteria:[
+      {label:'Upfront cost',score:2,note:'Higher upfront — most competitive when floors are already open'},
+      {label:'Install complexity',score:2,note:'Piping, radiators or UFH, heat pump, thermal storage unit'},
+      {label:'Home disruption',score:3,note:'Best during a reno with floors up — retrofit possible with access'},
+      {label:'Heating comfort',score:5,note:'Radiant heat is the gold standard — even, quiet, no drafts'},
+      {label:'Cooling performance',score:2,note:"Hydronic doesn't cool natively — add fan coil units or keep splits"},
+      {label:'Indoor noise',score:5,note:'Near silent — no fans, just radiant warmth'},
+      {label:'Aesthetics',score:5,note:'No wall heads. WPC-clad storage unit. Radiators can be architectural.'},
+      {label:'Solar integration',score:5,note:'Thermal storage charges from solar — strongest off-peak and solar synergy of all four options'},
+    ],
+    prereqs:'Ideally suited to homes already on hydronic. Retrofit possible where sufficient space and pipework access exists — confirmed at site assessment.',
+  },
+  {
+    letter:'D', title:'Splits in main areas', thermalDawn:true, tdType:'interest',
+    tdContent:{ heading:'Thermal Dawn Multi-Head Split', sections:[
+      { label:null, items:['High-efficiency outdoor heat pump unit','35kWh Australian-made thermal storage tank','Solar forecast & off-peak tariff optimisation','Multiple indoor heads connected to our outdoor unit','Independent room-by-room control','Removal & disposal of gas heating system','Electrical connection & switchboard check','Full commissioning & Thermal Dawn app setup'] }
+    ]},
+    criteria:[
+      {label:'Upfront cost',score:4,note:'Cost-efficient, especially with some splits already in place'},
+      {label:'Install complexity',score:5,note:'Simple — each unit independent, no whole-system design'},
+      {label:'Home disruption',score:4,note:'Minimal — each unit installed independently'},
+      {label:'Heating comfort',score:3,note:'Effective but uneven — warm near the unit. High voids are tricky.'},
+      {label:'Cooling performance',score:4,note:'Excellent for targeted room cooling — best of the four options'},
+      {label:'Indoor noise',score:3,note:'Indoor head units produce fan noise on high settings'},
+      {label:'Aesthetics',score:2,note:'Wall-mounted heads in every room — pragmatic but not pretty'},
+      {label:'Solar integration',score:3,note:'Each unit runs from solar via our unit — thermal storage smooths peak demand'},
+    ],
+    prereqs:'Works in any home. High voids (stairwells) are difficult — heat pools at ceiling rather than where you need it.',
+  },
+];
+
+function dots(score, isTD) {
+  let h = '<div class="dots">';
+  for (let i = 0; i < 5; i++) {
+    h += `<span class="${i < score ? (isTD ? 'dot accent' : 'dot filled') : 'dot'}"></span>`;
+  }
+  return h + '</div>';
+}
+
+function buildTable(highlight) {
+  const table = document.getElementById('comparisonTable');
+  table.innerHTML = '';
+
+  const thead = document.createElement('thead');
+  let hr = '<tr><th>Criteria</th>';
+  tableOptions.forEach(o => {
+    const isRec = o.letter === highlight;
+    const pill = isRec ? `<span class="recommended-pill">↑ Recommended</span><br>` : '';
+    hr += `<th class="${isRec ? 'recommended-col' : ''}">
+      ${pill}<span class="col-letter">${o.letter}</span>
+      <span class="col-title">${o.title}</span>
+    </th>`;
+  });
+  thead.innerHTML = hr + '</tr>';
+  table.appendChild(thead);
+
+  const tbody = document.createElement('tbody');
+
+  tableOptions[0].criteria.forEach((_, i) => {
+    const tr = document.createElement('tr');
+    let row = `<th><span class="row-label">${tableOptions[0].criteria[i].label}</span></th>`;
+    tableOptions.forEach(o => {
+      const c = o.criteria[i];
+      const isRec = o.letter === highlight;
+      row += `<td class="${isRec ? 'recommended-col' : ''}">${dots(c.score, o.thermalDawn)}<div class="cell-note">${c.note}</div></td>`;
+    });
+    tr.innerHTML = row;
+    tbody.appendChild(tr);
+  });
+
+  const prereqRow = document.createElement('tr');
+  prereqRow.className = 'prereqs-row';
+  let prow = `<th><span class="prereqs-label">What needs to be true</span></th>`;
+  tableOptions.forEach(o => {
+    const isRec = o.letter === highlight;
+    prow += `<td class="${isRec ? 'recommended-col' : ''}"><div class="prereqs-text">${o.prereqs}</div></td>`;
+  });
+  prereqRow.innerHTML = prow;
+  tbody.appendChild(prereqRow);
+
+  const tdRow = document.createElement('tr');
+  tdRow.className = 'td-row';
+  let trow = `<th><span class="td-row-eyebrow">Thermal Dawn</span><span class="row-label" style="color:var(--muted);margin-top:2px;font-size:9px;">What you get</span></th>`;
+  tableOptions.forEach(o => {
+    const c = o.tdContent;
+    let items = '';
+    c.sections.forEach((sec, idx) => {
+      if (idx > 0 && sec.label) items += `<li class="td-divider">${sec.label}</li>`;
+      sec.items.forEach(item => { items += `<li>${item}</li>`; });
+    });
+    const btnLabel = o.tdType === 'quote' ? 'Get a quote →' : 'Register interest →';
+    const btnClass = o.tdType === 'quote' ? 'btn-quote' : 'btn-interest';
+    const btnHref = o.tdType === 'quote' ? '#' : 'https://www.thermaldawn.com/register';
+    trow += `<td><span class="td-row-eyebrow">Thermal Dawn option</span><span class="td-row-heading">${c.heading}</span><ul class="td-include">${items}</ul><a class="${btnClass}" href="${btnHref}">${btnLabel}</a></td>`;
+  });
+  tdRow.innerHTML = trow;
+  tbody.appendChild(tdRow);
+
+  table.appendChild(tbody);
+}
+
+// ── WHY TEXT ──
+function buildWhy_A() {
+  const p = [];
+  if (answers[1]==='ducted'||answers[1]==='ducted_splits') p.push("You already have ducting in place");
+  if (answers[2]==='nothing'||answers[2]==='minor') p.push("you're not planning major works");
+  if (answers[4].includes('low_upfront')) p.push("keeping upfront cost down is a priority");
+  if (answers[4].includes('minimal_disruption')) p.push("you want minimal disruption");
+  return (p.length ? p.join(', ') + '. ' : '') + "Retrofitting a heat pump to your existing ductwork is the fastest and least disruptive path to electrifying your heating — and if the ducting is in reasonable condition, the performance will be solid.";
+}
+function buildWhy_B() {
+  const p = [];
+  if (answers[2]==='major'||answers[2]==='new_build') p.push("you have works underway");
+  if (answers[5]==='15to20'||answers[5]==='20plus') p.push("your budget allows for a full replacement");
+  return (p.length ? p.join(' and ') + '. ' : '') + "Replacing old or undersized ductwork alongside the heat pump gives you a system designed from the ground up for electric performance. If access is already open during a renovation, the incremental cost to do this properly is worth it.";
+}
+function buildWhy_C() {
+  const p = [];
+  if (answers[1]==='hydronic') p.push("You already have hydronic pipework");
+  if (answers[2]==='major'||answers[2]==='new_build') p.push("your floors are being opened up anyway");
+  if (answers[4].includes('best_comfort')) p.push("comfort is a priority");
+  if (answers[4].includes('clean_aesthetic')) p.push("you want a clean aesthetic");
+  if (answers[4].includes('use_solar')||['solar_yes_want','solar_planning'].includes(answers[3])) p.push("you want to use your solar");
+  return (p.length ? p.join(', ') + '. ' : '') + "Hydronic is the gold standard for heating comfort — silent, even, no blowing air. With thermal storage, it also pairs exceptionally well with solar: the system charges during the day when your panels are running, so you're not buying peak-rate grid power to stay warm in the morning.";
+}
+function buildWhy_D() {
+  const p = [];
+  if (answers[4].includes('cooling')) p.push("cooling is important");
+  if (answers[4].includes('low_upfront')) p.push("keeping cost down is a priority");
+  if (answers[5]==='under8') p.push("your budget is under $8K");
+  return (p.length ? p.join(', ') + '. ' : '') + "Splits are the most practical path at your budget and priorities. They're excellent for cooling, straightforward to install, and don't require any major works.";
+}
+
+// ── MISC ──
+function submitLead(btn) { btn.textContent = 'Sent ✓'; btn.style.background = 'var(--green)'; btn.disabled = true; }
+
+function restart() {
+  answers[1]=null; answers[2]=null; answers[3]=null; answers[4]=[]; answers[5]=null; answers[6]=null;
+  recommendedOption = null;
+  document.querySelectorAll('.opt').forEach(o => o.classList.remove('selected'));
+  for (let i = 1; i <= 6; i++) { const n = document.getElementById(`next-${i}`); if (n) n.disabled = true; }
+  const resultEl = document.getElementById('step-result');
+  resultEl.classList.add('exiting');
+  setTimeout(() => resultEl.classList.remove('active','exiting'), 450);
+  document.getElementById('seeAllWrap').style.display = 'none';
+  document.getElementById('comparison-section').classList.remove('open');
+  document.getElementById('seeAllBtn').classList.remove('open');
+  document.getElementById('skipFooter').classList.remove('hidden');
+  document.getElementById('step-1').classList.add('active');
+  currentStep = 1;
+  updateProgress(1);
+}
+</script>
+</body>
+</html>

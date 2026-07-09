@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Heating Upgrade Options — Thermal Dawn</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F5F0E8; --ink: #1A1612; --muted: #6B6259; --rule: #D4C9B8;
+    --accent: #C4440A; --accent-soft: #F5EAE0;
+    --yellow: #B8860B; --yellow-soft: #F5EDD4;
+    --card: #FDFAF5; --td-row: #FDF3EC; --td-border: #E8C9B4;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--ink); font-family: 'DM Sans', sans-serif; font-weight: 300; padding: 48px 24px 80px; }
+  .wrap { max-width: 1100px; margin: 0 auto; }
+  .scroll-hint { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); letter-spacing: 0.06em; margin-bottom: 8px; display: none; }
+  @media (max-width: 768px) { .scroll-hint { display: block; } }
+  .table-outer { overflow-x: auto; border-radius: 8px; border: 1px solid var(--rule); box-shadow: 0 2px 24px rgba(0,0,0,0.06); }
+  table { width: 100%; border-collapse: collapse; background: var(--card); min-width: 700px; }
+  thead tr:first-child th { background: var(--ink); color: var(--bg); padding: 20px 18px 16px; text-align: left; font-weight: 400; vertical-align: top; }
+  thead tr:first-child th:first-child { width: 160px; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(245,240,232,0.5); }
+  .col-letter { font-family: 'DM Serif Display', serif; font-size: 32px; line-height: 1; color: var(--accent); display: block; margin-bottom: 6px; }
+  .col-title { font-size: 13px; font-weight: 500; line-height: 1.4; color: var(--bg); display: block; margin-bottom: 4px; }
+  tbody tr th { background: var(--bg); padding: 14px 18px; text-align: left; font-weight: 400; border-bottom: 1px solid var(--rule); border-right: 1px solid var(--rule); vertical-align: middle; }
+  .row-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink); display: block; margin-bottom: 2px; }
+  tbody tr td { padding: 14px 18px; border-bottom: 1px solid var(--rule); border-right: 1px solid var(--rule); vertical-align: top; min-width: 170px; }
+  tbody tr td:last-child, tbody tr th:last-child { border-right: none; }
+  tbody tr:last-child td, tbody tr:last-child th { border-bottom: none; }
+  tbody tr:hover td, tbody tr:hover th { background: rgba(196,68,10,0.03); }
+  .dots { display: flex; gap: 3px; margin-bottom: 5px; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--rule); flex-shrink: 0; }
+  .dot.filled { background: var(--ink); }
+  .dot.accent { background: var(--accent); }
+  .cell-note { font-size: 12px; color: var(--muted); line-height: 1.5; }
+  .prereqs-row th { background: var(--yellow-soft); }
+  .prereqs-row td { background: var(--yellow-soft); }
+  .prereqs-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--yellow); display: block; margin-bottom: 2px; }
+  .prereqs-text { font-size: 12px; line-height: 1.6; color: var(--ink); }
+  .td-row th { background: var(--td-row); border-top: 2px solid var(--td-border); border-bottom: 2px solid var(--td-border); }
+  .td-row td { background: var(--td-row); border-top: 2px solid var(--td-border); border-bottom: 2px solid var(--td-border); vertical-align: top; }
+  .td-row-eyebrow { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); display: block; margin-bottom: 5px; }
+  .td-row-heading { font-family: 'DM Serif Display', serif; font-size: 15px; color: var(--ink); display: block; margin-bottom: 8px; line-height: 1.3; }
+  .td-include { font-size: 11.5px; color: var(--ink); line-height: 1.8; list-style: none; margin-bottom: 4px; }
+  .td-include li { padding-left: 14px; position: relative; }
+  .td-include li::before { content: '→'; position: absolute; left: 0; color: var(--accent); font-size: 10px; top: 2px; }
+  .td-include li.td-divider { padding-left: 0; margin: 7px 0 3px; font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); border-top: 1px solid var(--rule); padding-top: 7px; }
+  .td-include li.td-divider::before { display: none; }
+  .btn-quote { display: inline-block; margin-top: 12px; background: var(--accent); color: white; font-family: 'DM Mono', monospace; font-size: 10px; padding: 6px 14px; border-radius: 100px; letter-spacing: 0.06em; text-decoration: none; }
+  .btn-quote:hover { background: #a33708; }
+  .btn-interest { display: inline-block; margin-top: 12px; background: transparent; color: var(--accent); font-family: 'DM Mono', monospace; font-size: 10px; padding: 5px 13px; border-radius: 100px; letter-spacing: 0.06em; text-decoration: none; border: 1.5px solid var(--accent); }
+  .btn-interest:hover { background: var(--accent-soft); }
+  .legend { margin: 20px 0 0; display: flex; gap: 24px; flex-wrap: wrap; font-size: 12px; color: var(--muted); align-items: center; }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="scroll-hint">← Scroll to compare all options →</div>
+  <div class="table-outer"><table id="t"></table></div>
+  <div class="legend">
+    <span>Scores out of 5:</span>
+    <span class="legend-item"><span class="dot filled"></span><span class="dot filled"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span> Low</span>
+    <span class="legend-item"><span class="dot filled"></span><span class="dot filled"></span><span class="dot filled"></span><span class="dot filled"></span><span class="dot filled"></span> Best in class</span>
+    <span class="legend-item"><span class="dot accent"></span> Thermal Dawn option</span>
+  </div>
+</div>
+<script>
+const options = [
+  {
+    letter:'A', title:'Keep ducting + new heat pump', thermalDawn:true, tdType:'interest',
+    tdContent:{ heading:'Thermal Dawn Ducted', sections:[
+      { label:null, items:['High-efficiency outdoor heat pump','35kWh Australian-made thermal storage tank','Solar forecast & off-peak tariff optimisation','Connection to your existing ductwork','Removal & disposal of gas boiler','Electrical connection & switchboard check','Full commissioning & Thermal Dawn app setup'] },
+      { label:'Optional add-on', items:['Multi-head splits connected to our unit — extend to rooms outside ducting reach'] }
+    ]},
+    criteria:[
+      {label:'Upfront cost',score:5,note:'Lowest cost — no ductwork replacement'},
+      {label:'Install complexity',score:4,note:'Straightforward if ducting is in good condition'},
+      {label:'Home disruption',score:4,note:'Minimal — no floors or walls opened up'},
+      {label:'Heating comfort',score:3,note:'Heat pump runs cooler air than gas — insulation improvements help'},
+      {label:'Cooling performance',score:3,note:'Ducted cooling works, but underfloor vents are less effective'},
+      {label:'Indoor noise',score:3,note:'Ducted systems move a lot of air — some fan noise expected'},
+      {label:'Aesthetics',score:4,note:'No visible changes — ducts stay hidden'},
+      {label:'Solar integration',score:4,note:'Thermal storage charges from solar during the day — strong off-peak synergy'},
+    ],
+    prereqs:'Ducting must be in good condition and correctly sized for heat pump flow rates. Thermal envelope assessment recommended first.',
+  },
+  {
+    letter:'B', title:'Replace ducting + new heat pump', thermalDawn:true, tdType:'interest',
+    tdContent:{ heading:'Thermal Dawn Ducted (New Duct)', sections:[
+      { label:null, items:['High-efficiency outdoor heat pump','35kWh Australian-made thermal storage tank','Solar forecast & off-peak tariff optimisation','New ductwork design & installation','Removal & disposal of gas boiler','Electrical connection & switchboard check','Full commissioning & Thermal Dawn app setup'] },
+      { label:'Optional add-on', items:['Multi-head splits connected to our unit — extend to rooms outside ducting reach'] }
+    ]},
+    criteria:[
+      {label:'Upfront cost',score:2,note:'Ductwork replacement adds significant cost'},
+      {label:'Install complexity',score:2,note:'More trades involved, longer timeline'},
+      {label:'Home disruption',score:2,note:'Floors or ceiling cavities may need to be accessed'},
+      {label:'Heating comfort',score:3,note:'Correctly sized new ducting improves performance'},
+      {label:'Cooling performance',score:3,note:'Better than old ducting but underfloor vents still limited'},
+      {label:'Indoor noise',score:3,note:'Modern systems quieter but still fan-driven'},
+      {label:'Aesthetics',score:4,note:'Clean slate — no visible heads'},
+      {label:'Solar integration',score:4,note:'Thermal storage charges from solar — strong off-peak synergy'},
+    ],
+    prereqs:'Requires access to run new ductwork — far easier during a renovation when floors or ceilings are already open.',
+  },
+  {
+    letter:'C', title:'Hydronic — underfloor or radiators', thermalDawn:true, tdType:'quote',
+    tdContent:{ heading:'Thermal Dawn Hydronic', sections:[
+      { label:null, items:['High-efficiency outdoor heat pump','35kWh Australian-made thermal storage tank','Reverse-cycle cooling capability','Solar forecast & off-peak tariff optimisation (AI)','Ideal for existing hydronic homes — connects to existing pipework, zones & thermostats','Retrofit possible where space & pipework access allows','Removal & disposal of gas boiler','Full commissioning & Thermal Dawn app setup (1–2 days)'] },
+      { label:'Optional add-ons', items:['Domestic hot water from the same thermal store','Pool heating from stored solar','Fan coil units for cooling in radiator-only homes'] }
+    ]},
+    criteria:[
+      {label:'Upfront cost',score:2,note:'Higher upfront — most competitive when floors are already open'},
+      {label:'Install complexity',score:2,note:'Piping, radiators or UFH, heat pump, thermal storage unit'},
+      {label:'Home disruption',score:3,note:'Best during a reno with floors up — retrofit possible with access'},
+      {label:'Heating comfort',score:5,note:'Radiant heat is the gold standard — even, quiet, no drafts'},
+      {label:'Cooling performance',score:2,note:"Hydronic doesn't cool natively — add fan coil units or keep splits"},
+      {label:'Indoor noise',score:5,note:'Near silent — no fans, just radiant warmth'},
+      {label:'Aesthetics',score:5,note:'No wall heads. WPC-clad storage unit. Radiators can be architectural.'},
+      {label:'Solar integration',score:5,note:'Thermal storage charges from solar — strongest off-peak and solar synergy of all four options'},
+    ],
+    prereqs:'Ideally suited to homes already on hydronic. Retrofit possible where sufficient space and pipework access exists — confirmed at site assessment.',
+  },
+  {
+    letter:'D', title:'Splits in main areas', thermalDawn:true, tdType:'interest',
+    tdContent:{ heading:'Thermal Dawn Multi-Head Split', sections:[
+      { label:null, items:['High-efficiency outdoor heat pump unit','35kWh Australian-made thermal storage tank','Solar forecast & off-peak tariff optimisation','Multiple indoor heads connected to our outdoor unit','Independent room-by-room control','Removal & disposal of gas heating system','Electrical connection & switchboard check','Full commissioning & Thermal Dawn app setup'] }
+    ]},
+    criteria:[
+      {label:'Upfront cost',score:4,note:'Cost-efficient, especially with some splits already in place'},
+      {label:'Install complexity',score:5,note:'Simple — each unit independent, no whole-system design'},
+      {label:'Home disruption',score:4,note:'Minimal — each unit installed independently'},
+      {label:'Heating comfort',score:3,note:'Effective but uneven — warm near the unit. High voids are tricky.'},
+      {label:'Cooling performance',score:4,note:'Excellent for targeted room cooling — best of the four options'},
+      {label:'Indoor noise',score:3,note:'Indoor head units produce fan noise on high settings'},
+      {label:'Aesthetics',score:2,note:'Wall-mounted heads in every room — pragmatic but not pretty'},
+      {label:'Solar integration',score:3,note:'Each unit runs from solar via our unit — thermal storage smooths peak demand'},
+    ],
+    prereqs:'Works in any home. High voids (stairwells) are difficult — heat pools at ceiling rather than where you need it.',
+  },
+];
+
+function dots(score, isTD) {
+  let h = '<div class="dots">';
+  for (let i = 0; i < 5; i++) h += `<span class="${i < score ? (isTD ? 'dot accent' : 'dot filled') : 'dot'}"></span>`;
+  return h + '</div>';
+}
+
+const table = document.getElementById('t');
+const thead = document.createElement('thead');
+let hr = '<tr><th>Criteria</th>';
+options.forEach(o => { hr += `<th><span class="col-letter">${o.letter}</span><span class="col-title">${o.title}</span></th>`; });
+thead.innerHTML = hr + '</tr>';
+table.appendChild(thead);
+
+const tbody = document.createElement('tbody');
+options[0].criteria.forEach((_, i) => {
+  const tr = document.createElement('tr');
+  let row = `<th><span class="row-label">${options[0].criteria[i].label}</span></th>`;
+  options.forEach(o => {
+    const c = o.criteria[i];
+    row += `<td>${dots(c.score, o.thermalDawn)}<div class="cell-note">${c.note}</div></td>`;
+  });
+  tr.innerHTML = row;
+  tbody.appendChild(tr);
+});
+
+const prereqRow = document.createElement('tr');
+prereqRow.className = 'prereqs-row';
+let prow = `<th><span class="prereqs-label">What needs to be true</span></th>`;
+options.forEach(o => { prow += `<td><div class="prereqs-text">${o.prereqs}</div></td>`; });
+prereqRow.innerHTML = prow;
+tbody.appendChild(prereqRow);
+
+const tdRow = document.createElement('tr');
+tdRow.className = 'td-row';
+let trow = `<th><span class="td-row-eyebrow">Thermal Dawn</span><span class="row-label" style="color:var(--muted);margin-top:2px;font-size:9px;">What you get</span></th>`;
+options.forEach(o => {
+  const c = o.tdContent;
+  let items = '';
+  c.sections.forEach((sec, si) => {
+    if (si > 0 && sec.label) items += `<li class="td-divider">${sec.label}</li>`;
+    sec.items.forEach(item => { items += `<li>${item}</li>`; });
+  });
+  const btnLabel = o.tdType === 'quote' ? 'Get a quote →' : 'Register interest →';
+  const btnClass = o.tdType === 'quote' ? 'btn-quote' : 'btn-interest';
+  trow += `<td><span class="td-row-eyebrow">Thermal Dawn option</span><span class="td-row-heading">${c.heading}</span><ul class="td-include">${items}</ul><a class="${btnClass}" href="/pre-order/" target="_top">${btnLabel}</a></td>`;
+});
+tdRow.innerHTML = trow;
+tbody.appendChild(tdRow);
+
+table.appendChild(tbody);
+</script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Thermal Dawn">
+  <defs>
+    <linearGradient id="s" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#fec800"/>
+      <stop offset="0.55" stop-color="#f4921d"/>
+      <stop offset="1" stop-color="#ea5b13"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="#1d1e1c"/>
+  <path d="M12 42a20 20 0 0 1 40 0z" fill="url(#s)"/>
+  <rect x="10" y="46" width="44" height="3.4" rx="1.7" fill="url(#s)"/>
+  <g stroke="url(#s)" stroke-width="2.6" stroke-linecap="round">
+    <line x1="32" y1="8" x2="32" y2="15"/>
+    <line x1="14" y1="15" x2="18" y2="19"/>
+    <line x1="50" y1="15" x2="46" y2="19"/>
+  </g>
+</svg>

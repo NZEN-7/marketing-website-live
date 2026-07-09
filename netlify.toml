@@ -1,0 +1,105 @@
+# Thermal Dawn — Netlify deploy config
+# Drag-and-drop this whole site-v2 folder into Netlify, or `netlify deploy`.
+
+[build]
+  publish = "."
+
+# Nice caching for static assets (fonts/images/css/js are content-addressed by path)
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000"
+
+[[headers]]
+  for = "/assets/fonts/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Basic security headers
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "SAMEORIGIN"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+# ---------------------------------------------------------------------------
+# Redirects: preserve the old Wix URL scheme so existing links / SEO survive.
+# (Netlify _redirects equivalent, kept here in one place.)
+# ---------------------------------------------------------------------------
+[[redirects]]
+  from = "/hydronic-overview"
+  to = "/hydronic/"
+  status = 301
+[[redirects]]
+  from = "/product"
+  to = "/hydronic/"
+  status = 301
+[[redirects]]
+  from = "/how-it-works"
+  to = "/hydronic/how-it-works/"
+  status = 301
+[[redirects]]
+  from = "/pricing"
+  to = "/hydronic/pricing/"
+  status = 301
+[[redirects]]
+  from = "/pre-order-form"
+  to = "/pre-order/"
+  status = 301
+[[redirects]]
+  from = "/pre-order-form/basic-reserve"
+  to = "/pre-order/basic-reserve/"
+  status = 301
+[[redirects]]
+  from = "/pre-order-form/founder-premium"
+  to = "/pre-order/founder-premium/"
+  status = 301
+[[redirects]]
+  from = "/register"
+  to = "/pre-order/register-interest/"
+  status = 301
+[[redirects]]
+  from = "/contact-form"
+  to = "/contact/"
+  status = 301
+# Old Wix blog scheme  /post/<slug>  ->  /blog/<slug>/
+[[redirects]]
+  from = "/post/hawthorn-first-install"
+  to = "/blog/hawthorn-first-install/"
+  status = 301
+[[redirects]]
+  from = "/post/heat-pump-replace-gas-hydronic-boiler"
+  to = "/blog/heat-pump-replace-gas-hydronic-boiler/"
+  status = 301
+[[redirects]]
+  from = "/post/thermal-storage-vs-lithium-battery"
+  to = "/blog/thermal-storage-vs-lithium-battery/"
+  status = 301
+[[redirects]]
+  from = "/post/heat-pump-pipe-diameter-myth"
+  to = "/blog/heat-pump-pipe-diameter-myth/"
+  status = 301
+[[redirects]]
+  from = "/post/old-gas-boiler-removal-electrification"
+  to = "/blog/old-gas-boiler-removal-electrification/"
+  status = 301
+[[redirects]]
+  from = "/post/hydronic-heat-pump-installation"
+  to = "/blog/hydronic-heat-pump-installation/"
+  status = 301
+[[redirects]]
+  from = "/post/heat-pump-radiator-compatibility-australia"
+  to = "/blog/heat-pump-radiator-compatibility-australia/"
+  status = 301
+[[redirects]]
+  from = "/post/hydronic-cooling-fan-coil-units-australia"
+  to = "/blog/hydronic-cooling-fan-coil-units-australia/"
+  status = 301
+[[redirects]]
+  from = "/post/victorian-gas-boiler-replacement-timing-should-you-replace-now-or-wait"
+  to = "/blog/victorian-gas-boiler-replacement-timing/"
+  status = 301
+
+# SPA-style fallback is NOT wanted (this is a multipage static site).
+# 404s are served by /404.html automatically.
