@@ -107,7 +107,9 @@ li{margin:.35em 0;}
   text-align:center;
 }
 .btn:hover{text-decoration:none;transform:translateY(-2px);}
-.btn--primary{background:var(--td-sunrise);color:#1c1514;box-shadow:0 8px 22px rgba(234,91,19,.32);}
+/* border-box keeps the gradient from tiling into the transparent border
+   (which showed as inverted-colour slivers at the pill's rounded ends) */
+.btn--primary{background:var(--td-sunrise) border-box;color:#1c1514;box-shadow:0 8px 22px rgba(234,91,19,.32);}
 .btn--primary:hover{box-shadow:0 12px 30px rgba(234,91,19,.42);color:#1c1514;}
 .btn--dark{background:var(--td-black);color:#fff;}
 .btn--dark:hover{background:#000;color:#fff;}
@@ -178,7 +180,10 @@ li{margin:.35em 0;}
 .section--dark .card{background:#26251f;border-color:#37342c;color:#e9e4df;}
 .card h3{margin-top:0;}
 .card--pad-lg{padding:32px;}
-.card__accent{border-top:5px solid transparent;border-image:var(--td-sunrise) 1;}
+/* gradient top strip via pseudo-element; border-image ignored border-radius
+   and squared the card corners */
+.card__accent{position:relative;overflow:hidden;}
+.card__accent::before{content:"";position:absolute;top:0;left:0;right:0;height:5px;background:var(--td-sunrise);}
 .card--flag{border:2px solid var(--td-orange);position:relative;}
 .tag{display:inline-block;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.09em;padding:5px 11px;border-radius:999px;background:var(--td-sunrise);color:#1c1514;}
 
