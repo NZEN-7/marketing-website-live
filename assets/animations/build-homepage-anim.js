@@ -207,6 +207,8 @@ ${v2Svg}
     var flowCol    = (!isDay && !isSto) ? RED : (isDay ? ORANGE : GREEN);
 
     show('g-flow-hp', chargeFlow || (!isDay && !isSto));
+    // Solar leaving the property: only when there is nowhere to store it.
+    show('g-flow-export', isDay && !isSto);
     ['g-flow-home', 'g-flow-home-2'].forEach(function (id) {
       var g = el(id); if (!g) return;
       g.style.opacity = homeFlow ? '1' : '0';
@@ -330,6 +332,7 @@ ${v2Svg}
   ["scene svg", /<svg[\s\S]*<\/svg>/],
   ["g-store", /id="g-store"/],
   ["g-flow-hp", /id="g-flow-hp"/],
+  ["g-flow-export", /id="g-flow-export"/],
   ["lbl-mode-chip", /id="lbl-mode-chip"/],
 ].forEach(([what, re]) => {
   if (!re.test(out)) throw new Error("output is missing " + what);

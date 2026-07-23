@@ -256,7 +256,7 @@ table.data td:first-child{font-weight:600;}
 .embed--home iframe{height:1060px;}
 .embed--daynight iframe{height:950px;}
 .embed--flow iframe{height:820px;}
-/* flow-v2 with its control bar (?controls=1) */
+/* flow-v2 standalone (scene only; add ?controls=1 for the control bar) */
 .embed--flow2 iframe{height:750px;}
 @media(max-width:640px){
   .embed--home iframe{height:980px;}

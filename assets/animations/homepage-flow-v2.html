@@ -667,6 +667,18 @@ svg { display: block; width: 100%; height: auto; overflow: hidden; }
   </g>
 
   <!-- Outdoor readout — top-right sky pocket, just above the garage roof -->
+  <!-- ══ FLOW: SOLAR EXPORTED TO THE GRID ══════════════════════════════
+       Root-level (not inside scene-scale) so the label keeps its type size.
+       Only shown in the no-storage daytime scenario: the panels generate,
+       there is nowhere to put it, so it leaves at near-zero feed-in. ══ -->
+  <g id="g-flow-export" style="opacity:0">
+    <path class="flow-line" style="stroke:var(--flow-export,#E87C2A)" d="M415,262 L350,222 L297,190"/>
+    <path class="flow-line flow-delay-2" style="stroke:rgba(232,124,42,0.5)" d="M417,268 L353,229 L300,197"/>
+    <path d="M297,190 l10.5,2.5 M297,190 l2.5,10.5" fill="none" stroke="#E87C2A" stroke-width="1.8" stroke-linecap="round" opacity="0.9"/>
+    <text x="299" y="180" text-anchor="middle" class="tag">To grid</text>
+    <text x="299" y="168" text-anchor="middle" class="temp" style="font-size:10px">near-zero FiT</text>
+  </g>
+
   <g id="outdoor-readout">
     <text x="593" y="112" class="tag" text-anchor="end">Outdoor</text>
     <text id="lbl-outdoor-temp" x="593" y="131" class="val" text-anchor="end">14.0°C</text>
@@ -819,6 +831,8 @@ svg { display: block; width: 100%; height: auto; overflow: hidden; }
     var flowCol    = (!isDay && !isSto) ? RED : (isDay ? ORANGE : GREEN);
 
     show('g-flow-hp', chargeFlow || (!isDay && !isSto));
+    // Solar leaving the property: only when there is nowhere to store it.
+    show('g-flow-export', isDay && !isSto);
     ['g-flow-home', 'g-flow-home-2'].forEach(function (id) {
       var g = el(id); if (!g) return;
       g.style.opacity = homeFlow ? '1' : '0';
