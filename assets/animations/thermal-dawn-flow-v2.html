@@ -30,16 +30,18 @@ body.show-controls .controls { display: flex; }
 body.standalone .svg-wrap { max-width: 540px; margin: 0 auto; }
 .ctl-row { display: flex; flex-wrap: wrap; gap: 7px; justify-content: center; align-items: center; }
 .ctl-label { font-family: 'DM Mono', ui-monospace, monospace; font-size: 10px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: rgba(255,255,255,.38); margin-right: 2px; }
+/* matches .tod-btn in homepage_web_animation_new.html so the two embeds
+   read as the same control system */
 .ctl-btn {
-  padding: 7px 14px; border-radius: 6px; border: 1px solid rgba(255,255,255,.12);
-  background: transparent; color: rgba(255,255,255,.6);
-  font-family: 'DM Mono', ui-monospace, monospace; font-size: 10.5px; font-weight: 600;
+  padding: 8px 18px; border-radius: 6px; border: 1px solid rgba(255,255,255,.1);
+  background: transparent; color: rgba(255,255,255,.55);
+  font-family: 'DM Mono', ui-monospace, monospace; font-size: 11px; font-weight: 600;
   letter-spacing: .08em; text-transform: uppercase; cursor: pointer; transition: all .2s;
 }
 .ctl-btn:hover { border-color: rgba(255,255,255,.3); color: rgba(255,255,255,.9); }
 .ctl-btn:focus-visible { outline: 2px solid var(--orange); outline-offset: 2px; }
-.ctl-btn[aria-pressed="true"] { border-color: rgba(232,124,42,.55); background: rgba(232,124,42,.15); color: var(--orange); }
-.ctl-btn[aria-pressed="true"].is-green { border-color: rgba(46,198,138,.55); background: rgba(46,198,138,.15); color: var(--green); }
+.ctl-btn[aria-pressed="true"] { border-color: #E87C2A55; background: #E87C2A18; color: var(--orange); }
+.ctl-btn[aria-pressed="true"].is-green { border-color: #2EC68A55; background: #2EC68A18; color: var(--green); }
 @media (max-width: 560px) {
   .ctl-label { display: none; }
   .ctl-btn { padding: 6px 10px; font-size: 9.5px; }
