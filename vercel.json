@@ -1,5 +1,4 @@
 {
-  "$comment": "Vercel twin of netlify.toml — keep the two in sync. Static site, no build. Forms note: Netlify Forms do NOT work on Vercel; the 5 forms need a backend before this hosts production traffic.",
   "trailingSlash": true,
   "headers": [
     {
