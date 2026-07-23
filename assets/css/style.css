@@ -256,13 +256,13 @@ table.data td:first-child{font-weight:600;}
 .embed--home iframe{height:1060px;}
 .embed--daynight iframe{height:950px;}
 .embed--flow iframe{height:820px;}
-/* flow-v2 carries its own control bar above the scene */
-.embed--flow2 iframe{height:750px;}
+/* flow-v2: scene only (controls are opt-in via ?controls=1) */
+.embed--flow2 iframe{height:660px;}
 @media(max-width:640px){
   .embed--home iframe{height:900px;}
   .embed--daynight iframe{height:850px;}
   .embed--flow iframe{height:720px;}
-  .embed--flow2 iframe{height:580px;}
+  .embed--flow2 iframe{height:520px;}
 }
 
 /* ---------- Callout / notes ---------- */

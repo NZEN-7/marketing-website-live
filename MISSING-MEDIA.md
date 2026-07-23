@@ -13,6 +13,8 @@ Wherever a suitable local photo existed, it's already used instead of a placehol
   - *Optional:* **Hydronic** §8 and **Mission** §7 proof sections are still text-only — `install-unit.webp` could be added there too if you want.
 - [x] **Startmate Demo Day talk (video) — DONE.** Embedded as a privacy-mode YouTube iframe (`youtube-nocookie.com/embed/gVW44H996eA`, "Nick Zeniou, Thermal Dawn | Summer '26 Demo Day") in a responsive 16:9 `.video` frame.
   - Appears on: **Home** ("Why we're building this") and **Mission** (§9). Same embed on both.
+- [x] **Explainer video — DONE.** "Thermal Dawn Battery Explained | Using Solar To Heat &amp; Cool Your Home (Australia)" (`youtube-nocookie.com/embed/oE2prWw3BMU`), same `.video` component.
+  - Appears on: **How It Works**, directly under the hero.
 
 ## Priority 2 — product / app
 

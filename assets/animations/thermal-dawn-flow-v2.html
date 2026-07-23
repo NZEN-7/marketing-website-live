@@ -22,8 +22,9 @@ svg { display: block; width: 100%; height: auto; overflow: hidden; }
    In the Home Assistant dashboard this file is driven by postMessage from
    branding.js and these controls stay hidden. On the website there is no
    bridge, so they drive the same state machine directly. */
+/* Controls are opt-in (`?controls=1`). By default the scene just cycles. */
 .controls { display: none; width: 100%; padding: 14px 16px 4px; flex-direction: column; gap: 10px; align-items: center; }
-body.standalone .controls { display: flex; }
+body.show-controls .controls { display: flex; }
 /* The viewBox is portrait (363×430), tuned for a narrow HA dashboard card.
    Left to fill a wide marketing embed it grows absurdly tall, so cap it. */
 body.standalone .svg-wrap { max-width: 540px; margin: 0 auto; }
@@ -864,12 +865,14 @@ body.standalone .svg-wrap { max-width: 540px; margin: 0 auto; }
 
   if (standalone) {
     document.body.classList.add('standalone');
+    // Controls are opt-in; the default embed is a hands-off cycle.
+    if (params.get('controls') === '1') document.body.classList.add('show-controls');
 
     document.getElementById('controls').addEventListener('click', function (e) {
       var b = e.target.closest('.ctl-btn');
       if (!b) return;
       userDrove = true;
-      stopDemo();                       // visitor takes the wheel
+      stopDemo();                       // visitor takes the wheel (controls mode only)
       if (b.dataset.mode) { state.mode = b.dataset.mode; applyMode(); }
       if (b.dataset.tod)  { state.tod = b.dataset.tod; state.sunManual = null; applyTOD(); }
       if (b.dataset.wx)   { state.wx = b.dataset.wx; applyWX(); }
