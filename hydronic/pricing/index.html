@@ -19,21 +19,21 @@
 <link rel="preload" href="/assets/fonts/Montserrat-Regular.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/assets/css/style.css">
 </head>
-<body>
+<body class="dark">
 <header id="site-header"></header>
 <main>
 
   <!-- 1. HERO -->
-  <section class="hero">
+  <section class="hero hero--center">
     <div class="hero__bg">
       <img src="/assets/img/hero-sunrise-1920.webp" alt="Sunrise over the Australian landscape" fetchpriority="high" width="1920" height="844">
     </div>
     <div class="hero__inner">
       <div class="wrap">
-        <h1>Everything Your Home Needs.<br>Nothing You Don't.</h1>
+        <h1>Everything Your Home Needs.<span class="accent">Nothing You Don't.</span></h1>
         <p class="subhead">A complete hydronic heat pump replacement, thermal storage, intelligent controls, and professional installation, for significantly less than a traditional hydronic upgrade. Here's exactly what you get.</p>
         <div class="btn-row">
-          <a class="btn btn--primary" href="/pre-order/">Reserve Your System <span class="arrow"></span></a>
+          <a class="btn btn--primary btn--rect" href="/pre-order/">Reserve Your System <span class="arrow"></span></a>
           <a class="btn btn--ghost" href="/pre-order/register-interest/">Book Free Site Assessment <span class="arrow"></span></a>
         </div>
       </div>
@@ -136,15 +136,15 @@
       <p class="quote-attr">Mike &amp; Kay, Hawthorn <span class="micro">(our first install)</span></p>
 
       <div class="grid grid-3" style="margin-top:26px">
-        <div class="card">
+        <div class="card card--orange">
           <h3>$20,000–$40,000</h3>
           <p class="mb0">Typical traditional hydronic heat pump replacement, imported unit, basic controls, no thermal storage, no cooling.</p>
         </div>
-        <div class="card card__accent">
-          <h3>Thermal Dawn</h3>
+        <div class="card card--orange">
+          <h3>Thermal Dawn target</h3>
           <p class="mb0">Well below traditional market rate, thermal storage, reverse-cycle cooling, AI optimisation, and Australian-made components included.</p>
         </div>
-        <div class="card">
+        <div class="card card--orange">
           <h3>$0 until you approve</h3>
           <p class="mb0">No cost until you approve your fixed quote after your site assessment. Fully refundable $190 reservation. No obligation.</p>
         </div>
@@ -186,22 +186,23 @@
     <div class="wrap">
       <h2>Our Best Pricing and Extended Warranty. For Our First Homes.</h2>
       <p>The first install is done and the next homes are going in now. Early customers get our best available pricing and an extended warranty, our commitment that we stand behind every early installation, and that you're not carrying the risk of being first.</p>
-      <div class="grid grid-2" style="margin-top:20px">
-        <div class="card">
+      <p class="figures__v" style="margin-top:26px">Four pilot benefits:</p>
+      <div class="benefits">
+        <div class="benefits__item">
           <h3>Priority Pricing</h3>
-          <p class="mb0">Lock in our best available rate, confirmed before you approve installation. No obligation until then.</p>
+          <p>Lock in our best available rate, confirmed before you approve installation. No obligation until then.</p>
         </div>
-        <div class="card">
+        <div class="benefits__item">
           <h3>Extended Warranty</h3>
-          <p class="mb0">Coverage beyond our standard terms.</p>
+          <p>Coverage beyond our standard terms.</p>
         </div>
-        <div class="card">
+        <div class="benefits__item">
           <h3>Direct Engineering Access</h3>
-          <p class="mb0">Work directly with our engineering team during commissioning. If anything needs attention in those first months, we're there, not a call centre.</p>
+          <p>Work directly with our engineering team during commissioning. If anything needs attention in those first months, we're there, not a call centre.</p>
         </div>
-        <div class="card">
+        <div class="benefits__item">
           <h3>Founding Member Status</h3>
-          <p class="mb0">Among the first homes in Australia running solar-powered hydronic heating with thermal storage. Your feedback shapes the product roadmap directly.</p>
+          <p>Among the first homes in Australia running solar-powered hydronic heating with thermal storage. Your feedback shapes the product roadmap directly.</p>
         </div>
       </div>
     </div>
@@ -251,7 +252,7 @@
       <h2>Get a Fixed Quote for Your Home.</h2>
       <p>Every home is different. A free site assessment gives you a compatibility check, rebate assessment, placement plan, and a fixed installed price, no obligation until you approve it.</p>
       <div class="btn-row center" style="margin-top:8px">
-        <a class="btn btn--primary" href="/pre-order/register-interest/">Book Free Site Assessment <span class="arrow"></span></a>
+        <a class="btn btn--primary btn--rect" href="/pre-order/register-interest/">Book Free Site Assessment <span class="arrow"></span></a>
       </div>
       <p class="micro" style="margin-top:14px">Fully refundable $190 reservation. Australian-made, Australian-installed.</p>
     </div>

@@ -19,23 +19,23 @@
 <link rel="preload" href="/assets/fonts/Montserrat-Regular.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/assets/css/style.css">
 </head>
-<body>
+<body class="dark">
 <header id="site-header"></header>
 <main>
 
   <!-- 1. HERO -->
-  <section class="hero">
+  <section class="hero hero--center">
     <div class="hero__bg">
       <img src="/assets/img/hero-sunrise-1920.webp" alt="Sunrise over the Australian landscape" fetchpriority="high" width="1920" height="844">
     </div>
     <div class="hero__inner">
       <div class="wrap">
-        <h1>Your Home Generates Solar All Day.<br>Your Gas Boiler Ignores Every Bit of It.</h1>
+        <h1>Your Home Generates Solar All Day.<span class="accent">Your Gas Boiler Ignores Every Bit of It.</span></h1>
         <p class="subhead">Thermal Dawn connects the two, storing your daytime solar as heat and delivering it through your existing radiators and underfloor heating, all evening, for free.</p>
         <div class="btn-row">
-          <a class="btn btn--primary" href="/pre-order/register-interest/">Book a Free Site Assessment <span class="arrow"></span></a>
+          <a class="btn btn--primary btn--rect" href="/pre-order/register-interest/">Book a Free Site Assessment <span class="arrow"></span></a>
         </div>
-        <p class="supporting">Works with your existing radiators and underfloor heating. Australian-made. No gas, no peak-rate pain. <strong>Our first home is now live in Melbourne.</strong></p>
+        <p class="hero__note">Works with your existing radiators and underfloor heating. Australian-made. No gas, no peak-rate pain.<br><strong>Our first home is now live in Melbourne.</strong></p>
       </div>
     </div>
   </section>
@@ -61,12 +61,12 @@
   <section class="section section--paper2">
     <div class="wrap">
       <h2>What This Actually Means for Your Bills</h2>
-      <div class="stats" style="margin:28px 0">
-        <div class="stat"><b><span class="draft">$800–$1,500/yr</span></b><span>Typical annual savings vs. gas hydronic + grid electricity</span></div>
-        <div class="stat"><b>3–5 years</b><span>Typical payback period with existing solar</span></div>
-        <div class="stat"><b>15+ years</b><span>System lifespan, no degradation, no replacement cycle</span></div>
+      <div class="figures">
+        <p><span class="figures__v"><span class="draft">$800–$1,500/yr</span></span><span class="figures__l">Typical annual savings vs. gas hydronic + grid electricity</span></p>
+        <p><span class="figures__v">3–5 years</span><span class="figures__l">Typical payback period with existing solar</span></p>
+        <p><span class="figures__v">15+ years</span><span class="figures__l">System lifespan, no degradation, no replacement cycle</span></p>
       </div>
-      <div class="narrow" style="margin-left:0">
+      <div class="narrow">
         <p>Gas prices have risen over <a href="https://www.aer.gov.au/documents/state-energy-market-2025-full-report" rel="noopener">40% in five years</a> and aren't coming back down. Every year you stay on gas is another year paying for an energy source with nowhere to go but up. A Thermal Dawn system locks in your heating costs at near-zero marginal rate, your morning solar, for the next two decades.</p>
         <p class="micro"><em>Savings estimates based on modelling of a typical 3–4 bedroom home with existing rooftop solar replacing a gas hydronic system, actual savings depend on your home size, climate zone, solar capacity, and tariff structure.</em></p>
         <p class="draft-note">Figures are draft — verify before publishing.</p>
@@ -140,39 +140,59 @@
       <div class="embed embed--flow" style="margin-top:26px">
         <iframe src="/assets/animations/thermal-dawn-flow-cycle.html" title="Interactive daily cycle: charging on solar and discharging stored heat to the home" loading="lazy" scrolling="no"></iframe>
       </div>
-      <div class="grid grid-3" style="margin-top:30px">
-        <div class="card">
-          <h3>Step 1: Charge on solar</h3>
-          <p class="mb0">During the day, your solar panels power the Thermal Dawn heat pump, storing heat in our Australian-made thermal tank. No waste, no export at near-zero rates.</p>
+      <div class="steps narrow">
+        <div class="step">
+          <span class="step__n">Step 1</span>
+          <div>
+            <h3>Charge on solar</h3>
+            <p>During the day, your solar panels power the Thermal Dawn heat pump, storing heat in our Australian-made thermal tank. No waste, no export at near-zero rates.</p>
+          </div>
         </div>
-        <div class="card">
-          <h3>Step 2: Heat your home for free at night</h3>
-          <p class="mb0">When the sun sets and your family comes home, stored thermal energy circulates through your existing radiators and underfloor heating, keeping every room at the right temperature without drawing from the grid.</p>
+        <div class="step">
+          <span class="step__n">Step 2</span>
+          <div>
+            <h3>Heat your home for free at night</h3>
+            <p>When the sun sets and your family comes home, stored thermal energy circulates through your existing radiators and underfloor heating, keeping every room at the right temperature without drawing from the grid.</p>
+          </div>
         </div>
-        <div class="card">
-          <h3>Step 3: The system learns your home</h3>
-          <p class="mb0">Our AI optimises charging times based on your solar forecast, local weather, and your tariff schedule, so you're always comfortable and always on the cheapest possible energy.</p>
+        <div class="step">
+          <span class="step__n">Step 3</span>
+          <div>
+            <h3>The system learns your home</h3>
+            <p>Our AI optimises charging times based on your solar forecast, local weather, and your tariff schedule, so you're always comfortable and always on the cheapest possible energy.</p>
+          </div>
         </div>
       </div>
     </div>
   </section>
 
   <!-- 6. KEEP EVERYTHING YOU LOVE -->
-  <section class="section">
+  <section class="section section--photo" style="--img:url('/assets/img/product-unit.webp')">
     <div class="wrap">
-      <div class="split">
-        <div>
-          <h2>Keep Everything You Love. Replace Everything That Costs You.</h2>
-          <p><strong>What Stays:</strong> Your radiators, underfloor heating pipes, zoned controls, comfort.</p>
-          <p><strong>What Goes:</strong> Your gas boiler, gas connection, gas bills, peak-rate electricity costs.</p>
-          <p>For most homes, the retrofit is straightforward, Thermal Dawn connects to your existing hydronic pipework in place of your gas boiler. No new radiators, no major plumbing, no mess. A free site assessment confirms compatibility and gives you a fixed quote with no surprises.</p>
-          <p><strong>Worried your radiators won't work with a heat pump?</strong> That's the most common concern we hear, and the answer is usually yes, they will. <a href="/blog/heat-pump-radiator-compatibility-australia/">Here's the flow-temperature question, answered →</a></p>
+      <h2>Keep Everything You Love.<span class="h-accent">Replace Everything That Costs You.</span></h2>
+      <div class="stays">
+        <div class="stays--keep">
+          <h3>What Stays</h3>
+          <ul>
+            <li>Your radiators</li>
+            <li>Your underfloor heating pipes</li>
+            <li>Your zoned controls</li>
+            <li>Your comfort</li>
+          </ul>
         </div>
-        <div class="media">
-          <div class="figure">
-            <img src="/assets/img/product-unit.webp" alt="Wall-mounted Thermal Dawn unit beside a home at golden hour" width="1200" height="900" loading="lazy">
-          </div>
+        <div class="stays--drop">
+          <h3>What Goes</h3>
+          <ul>
+            <li>Your gas boiler</li>
+            <li>Your gas connection</li>
+            <li>Your gas bills</li>
+            <li>Peak-rate electricity costs</li>
+          </ul>
         </div>
+      </div>
+      <div class="narrow" style="margin-top:30px">
+        <p>For most homes, the retrofit is straightforward, Thermal Dawn connects to your existing hydronic pipework in place of your gas boiler. No new radiators, no major plumbing, no mess. A free site assessment confirms compatibility and gives you a fixed quote with no surprises.</p>
+        <p class="mb0"><strong>Worried your radiators won't work with a heat pump?</strong> That's the most common concern we hear, and the answer is usually yes, they will. <a href="/blog/heat-pump-radiator-compatibility-australia/">Here's the flow-temperature question, answered →</a></p>
       </div>
     </div>
   </section>
@@ -180,14 +200,14 @@
   <!-- 7. STRAIGHTFORWARD RETROFIT -->
   <section class="section section--paper2">
     <div class="wrap narrow">
-      <h2>Most Hydronic Homes Are a Straightforward Retrofit</h2>
+      <h2>Most Hydronic Homes Are a<br>Straightforward Retrofit</h2>
       <p>If you have an existing gas hydronic system with radiators, underfloor heating, or fan coils, you're already most of the way there. The main questions our site assessment answers:</p>
-      <ul>
-        <li>Is your existing pipework in good condition?</li>
-        <li>What's your heating load, and what is the right capacity?</li>
-        <li>Where does the thermal storage tank go, inside or outside?</li>
-        <li>Does your switchboard need an upgrade?</li>
-      </ul>
+      <div class="qlist">
+        <p>Is your existing pipework in good condition?</p>
+        <p>What's your heating load, and what is the right capacity?</p>
+        <p>Where does the thermal storage tank go, inside or outside?</p>
+        <p>Does your switchboard need an upgrade?</p>
+      </div>
       <p>We flag everything upfront. No surprises on install day.</p>
       <p><strong>What about summer?</strong> The same system runs in reverse to cool your home, through underfloor circuits or fan coil units. (Radiators can't cool; we map this out at assessment.) <a href="/blog/hydronic-cooling-fan-coil-units-australia/">How hydronic cooling works →</a></p>
     </div>
@@ -218,24 +238,31 @@
   </section>
 
   <!-- 10. FAQ -->
-  <section class="section">
-    <div class="wrap narrow">
-      <h2>FAQ</h2>
-
-      <h3>How is thermal storage different from a battery?</h3>
-      <p>Lithium batteries store electricity, then convert it back to heat when you need it, losing efficiency at every step. Thermal Dawn stores heat and cold directly, so your dawn solar becomes evening comfort without the conversion losses, degradation, or fire risk. It's infrastructure that lasts decades, not a battery that fades in 10 years. <em>(See "Why not just a battery?" above for the full comparison.)</em></p>
-
-      <h3>How much does it cost?</h3>
-      <p>Our target is around half the cost of a comparable lithium battery system for heating, cooling, and hot water, with no degradation and no replacement costs in 10 years. Total installed cost depends on your home size, existing pipework, and electrical setup. Book a free, no-obligation site assessment for a fixed quote.</p>
-
-      <h3>How much will I save?</h3>
-      <p>Based on modelling in real Australian homes, typical customers save <span class="draft">$800–$1,500/yr</span> per year by shifting thermal loads away from peak grid prices. Your savings depend on your climate zone, home size, energy tariffs, and solar generation. We'll run a personalised estimate during your site assessment, most systems pay for themselves in 3–5 years.</p>
-
-      <h3>Do I need solar panels already?</h3>
-      <p>No, but you'll maximise savings with solar. Without panels, Thermal Dawn can still charge during off-peak tariff windows and deliver heating, cooling, and hot water during expensive peak times. Adding solar later? The system integrates seamlessly.</p>
-
-      <h3>What's included in the system?</h3>
-      <p>Thermal Dawn Core (thermal store), high-efficiency heat pump (heating, cooling, hot water integration), optional domestic hot water module, smart controls + app, remote monitoring &amp; OTA updates (opt-in). All components backed by comprehensive warranty coverage.</p>
+  <section class="faq-block">
+    <div class="wrap">
+      <div class="faq">
+        <h2>Frequently asked questions</h2>
+        <details open>
+          <summary>How is thermal storage different from a battery?</summary>
+          <p>Lithium batteries store electricity, then convert it back to heat when you need it, losing efficiency at every step. Thermal Dawn stores heat and cold directly, so your dawn solar becomes evening comfort without the conversion losses, degradation, or fire risk. It's infrastructure that lasts decades, not a battery that fades in 10 years. <em>(See "Why not just a battery?" above for the full comparison.)</em></p>
+        </details>
+        <details>
+          <summary>How much does it cost?</summary>
+          <p>Our target is around half the cost of a comparable lithium battery system for heating, cooling, and hot water, with no degradation and no replacement costs in 10 years. Total installed cost depends on your home size, existing pipework, and electrical setup. Book a free, no-obligation site assessment for a fixed quote.</p>
+        </details>
+        <details>
+          <summary>How much will I save?</summary>
+          <p>Based on modelling in real Australian homes, typical customers save <span class="draft">$800–$1,500/yr</span> per year by shifting thermal loads away from peak grid prices. Your savings depend on your climate zone, home size, energy tariffs, and solar generation. We'll run a personalised estimate during your site assessment, most systems pay for themselves in 3–5 years.</p>
+        </details>
+        <details>
+          <summary>Do I need solar panels already?</summary>
+          <p>No, but you'll maximise savings with solar. Without panels, Thermal Dawn can still charge during off-peak tariff windows and deliver heating, cooling, and hot water during expensive peak times. Adding solar later? The system integrates seamlessly.</p>
+        </details>
+        <details>
+          <summary>What's included in the system?</summary>
+          <p>Thermal Dawn Core (thermal store), high-efficiency heat pump (heating, cooling, hot water integration), optional domestic hot water module, smart controls + app, remote monitoring &amp; OTA updates (opt-in). All components backed by comprehensive warranty coverage.</p>
+        </details>
+      </div>
     </div>
   </section>
 

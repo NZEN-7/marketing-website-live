@@ -19,18 +19,18 @@
 <link rel="preload" href="/assets/fonts/Montserrat-Regular.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/assets/css/style.css">
 </head>
-<body>
+<body class="dark">
 <header id="site-header"></header>
 <main>
 
   <!-- 1. HERO -->
-  <section class="hero">
+  <section class="hero hero--center">
     <div class="hero__bg">
       <img src="/assets/img/hero-sunrise-1920.webp" alt="Sunrise over the Australian landscape" fetchpriority="high" width="1920" height="844">
     </div>
     <div class="hero__inner">
       <div class="wrap">
-        <h1>The Same Warm Floors.<br>None of the Gas.</h1>
+        <h1>The Same Warm Floors.<span class="accent">None of the Gas.</span></h1>
         <p class="subhead">Thermal Dawn replaces your gas boiler with a solar-charged hydronic heat pump and thermal storage, heating your home through your existing pipes, radiators, and underfloor circuits, powered by energy you've already generated.</p>
       </div>
     </div>
@@ -89,22 +89,34 @@
       <div class="embed embed--flow" style="margin-top:26px">
         <iframe src="/assets/animations/thermal-dawn-flow-cycle.html" title="Interactive daily cycle: pre-charge, solar charging, fully charged, and stored-energy discharge" loading="lazy" scrolling="no"></iframe>
       </div>
-      <div class="grid grid-4" style="margin-top:30px">
-        <div class="card">
-          <h3>Dawn, Pre-charge begins</h3>
-          <p class="mb0">Before sunrise, Thermal Dawn checks today's solar forecast, your local weather, and your evening heating demand. If it's going to be a cold night, it starts pre-charging from off-peak grid power, the cheapest available energy, to get a head start before your panels come online.</p>
+      <div class="timeline">
+        <div class="tl">
+          <span class="tl__label">Dawn</span>
+          <div class="tl__body">
+            <h3>Pre-charge begins</h3>
+            <p>Before sunrise, Thermal Dawn checks today's solar forecast, your local weather, and your evening heating demand. If it's going to be a cold night, it starts pre-charging from off-peak grid power, the cheapest available energy, to get a head start before your panels come online.</p>
+          </div>
         </div>
-        <div class="card">
-          <h3>Morning, Solar charging</h3>
-          <p class="mb0">As your panels start generating, Thermal Dawn switches fully to solar. The heat pump runs at its most efficient, mild outdoor temperatures, abundant free energy, steadily charging the thermal store. Your existing hydronic system ticks along on minimal draw, maintaining morning comfort.</p>
+        <div class="tl tl--r">
+          <span class="tl__label">Morning</span>
+          <div class="tl__body">
+            <h3>Solar charging</h3>
+            <p>As your panels start generating, Thermal Dawn switches fully to solar. The heat pump runs at its most efficient, mild outdoor temperatures, abundant free energy, steadily charging the thermal store. Your existing hydronic system ticks along on minimal draw, maintaining morning comfort.</p>
+          </div>
         </div>
-        <div class="card">
-          <h3>Afternoon, Store fully charged</h3>
-          <p class="mb0">By mid-afternoon your thermal store is fully charged, enough energy to heat your home through the evening and overnight. Your heat pump reduces output or switches off. Any remaining solar goes to your hot water or back to the grid.</p>
+        <div class="tl">
+          <span class="tl__label">Afternoon</span>
+          <div class="tl__body">
+            <h3>Store fully charged</h3>
+            <p>By mid-afternoon your thermal store is fully charged, enough energy to heat your home through the evening and overnight. Your heat pump reduces output or switches off. Any remaining solar goes to your hot water or back to the grid.</p>
+          </div>
         </div>
-        <div class="card">
-          <h3>Evening &amp; night, Stored energy does the work</h3>
-          <p class="mb0">When the sun sets and grid prices spike, Thermal Dawn steps in seamlessly. Stored thermal energy circulates through your radiators and underfloor circuits, keeping every room at your set temperature without touching the grid. Your home stays comfortable. Your meter barely moves.</p>
+        <div class="tl tl--r">
+          <span class="tl__label">Evening<br>&amp; night</span>
+          <div class="tl__body">
+            <h3>Stored energy does the work</h3>
+            <p>When the sun sets and grid prices spike, Thermal Dawn steps in seamlessly. Stored thermal energy circulates through your radiators and underfloor circuits, keeping every room at your set temperature without touching the grid. Your home stays comfortable. Your meter barely moves.</p>
+          </div>
         </div>
       </div>
     </div>
@@ -112,16 +124,18 @@
 
   <!-- 6. NOT A BATTERY -->
   <section class="section anchor" id="not-a-battery">
-    <div class="wrap narrow">
-      <h2>Not a Battery. Something Better for Heating.</h2>
-      <p>Lithium batteries store electricity, which then gets converted back into heat when you need it, losing efficiency at every step. Thermal Dawn stores heat directly, as hot water in an insulated tank.</p>
-      <p>Water is one of the best thermal storage materials available. It holds a large amount of energy in a compact volume, releases it at a consistent temperature, and doesn't degrade with use. No charge-cycle limit, no capacity loss over time, no fire risk. The same tank that stores your solar energy today will be doing exactly the same job in twenty years.</p>
-    </div>
-    <div class="wrap" style="margin-top:26px">
-      <div class="stats">
-        <div class="stat"><b>35kWh</b><span>Thermal storage capacity, enough for a full evening and overnight in most Australian homes</span></div>
-        <div class="stat"><b>Up to 65°C</b><span>Flow temperature, compatible with most existing radiators and underfloor heating without modification</span></div>
-        <div class="stat"><b>20+ years</b><span>System lifespan, no degradation, no replacement cycle</span></div>
+    <div class="wrap">
+      <div class="split">
+        <div>
+          <h2>Not a Battery.<span class="h-accent">Something Better for Heating.</span></h2>
+          <p>Lithium batteries store electricity, which then gets converted back into heat when you need it, losing efficiency at every step. <strong>Thermal Dawn stores heat directly, as hot water in an insulated tank.</strong></p>
+          <p class="mb0">Water is one of the best thermal storage materials available. It holds a large amount of energy in a compact volume, releases it at a consistent temperature, and doesn't degrade with use. No charge-cycle limit, no capacity loss over time, no fire risk. The same tank that stores your solar energy today will be doing exactly the same job in twenty years.</p>
+        </div>
+        <div class="figures figures--stack">
+          <p><span class="figures__v">35kWh</span><span class="figures__l">Thermal storage capacity — enough for a full evening and overnight in most Australian homes</span></p>
+          <p><span class="figures__v">Up to 65°C</span><span class="figures__l">Flow temperature — compatible with most existing radiators and underfloor heating without modification</span></p>
+          <p><span class="figures__v">20+ years</span><span class="figures__l">System lifespan — no degradation, no replacement cycle</span></p>
+        </div>
       </div>
     </div>
   </section>
@@ -151,14 +165,15 @@
   </section>
 
   <!-- 9. IT LEARNS -->
-  <section class="section section--paper2">
+  <section class="section section--paper2 watermark">
+    <span class="watermark__word" aria-hidden="true">INTELLIGENT</span>
     <div class="wrap narrow">
-      <h2>It Learns. It Optimises. It Just Works.</h2>
+      <h2>It Learns. It Optimises. <span class="hl">It Just Works.</span></h2>
       <p>Thermal Dawn's control system manages all of this automatically, forecasting solar generation, reading your tariff schedule, modelling your home's thermal behaviour, and adjusting charging depth and timing every day without any input from you.</p>
       <p>Over time it builds an increasingly accurate model of your specific home, how quickly it heats up, how well it retains heat overnight, how demand changes with the seasons. Every decision gets better the longer the system runs.</p>
       <p>For those who want deeper control, Thermal Dawn integrates natively with Home Assistant and exposes a full open API. For everyone else, the app shows you what's happening and what you're saving, and the system handles the rest.</p>
       <div class="btn-row">
-        <a class="btn btn--dark" href="/intelligence/">Explore Thermal Dawn Intelligence <span class="arrow"></span></a>
+        <a class="btn btn--primary btn--rect" href="/intelligence/">Explore Thermal Dawn Intelligence <span class="arrow"></span></a>
       </div>
     </div>
   </section>
@@ -186,31 +201,38 @@
       <h2>Ready to See How It Works in Your Home?</h2>
       <p>Every home is different. A free site assessment gives you a complete picture, compatibility, placement, expected savings, and a fixed quote with no surprises.</p>
       <div class="btn-row">
-        <a class="btn btn--primary" href="/pre-order/register-interest/">Book Free Site Assessment <span class="arrow"></span></a>
+        <a class="btn btn--primary btn--rect" href="/pre-order/register-interest/">Book Free Site Assessment <span class="arrow"></span></a>
         <a class="btn btn--dark" href="/hydronic/pricing/">See What's Included in the System <span class="arrow"></span></a>
       </div>
     </div>
   </section>
 
   <!-- 12. FAQ -->
-  <section class="section">
-    <div class="wrap narrow">
-      <h2>FAQ</h2>
-
-      <h3>How long does installation take?</h3>
-      <p>Most homes are installed and commissioned in one to two days. Homes with more complex pipework, extra zones, or a switchboard upgrade may take a day longer, we flag this in your quote after the site assessment, so there are no surprises.</p>
-
-      <h3>What happens to my old gas boiler and gas connection?</h3>
-      <p>We remove and dispose of your old boiler. A qualified, licensed plumber caps the gas line, arranged through us or by your own tradesperson. Disconnecting the gas meter entirely (to cut the daily supply charge) is optional; we'll help you weigh whether it's worth it.</p>
-
-      <h3>Will my switchboard need upgrading?</h3>
-      <p>Some homes need a switchboard or electrical upgrade to run the heat pump; many don't. We check this at the site assessment, and any upgrade is carried out by a licensed electrician and included in your fixed quote, so the price you approve is the price you pay.</p>
-
-      <h3>Do I need three-phase power?</h3>
-      <p>Not necessarily. Many homes run comfortably on single-phase. Larger homes or higher-capacity systems may need three-phase, we confirm this at assessment and tell you the options and any cost upfront.</p>
-
-      <h3>Do my radiators need replacing?</h3>
-      <p>Usually not. Most existing radiators work fine at heat-pump flow temperatures, and for homes that need it we offer a higher-temperature (R290) configuration. We test your specific setup at the assessment. <a href="/blog/heat-pump-radiator-compatibility-australia/">Here's the flow-temperature question in full →</a></p>
+  <section class="faq-block">
+    <div class="wrap">
+      <div class="faq">
+        <h2>Frequently asked questions</h2>
+        <details open>
+          <summary>How long does installation take?</summary>
+          <p>Most homes are installed and commissioned in one to two days. Homes with more complex pipework, extra zones, or a switchboard upgrade may take a day longer, we flag this in your quote after the site assessment, so there are no surprises.</p>
+        </details>
+        <details>
+          <summary>What happens to my old gas boiler and gas connection?</summary>
+          <p>We remove and dispose of your old boiler. A qualified, licensed plumber caps the gas line, arranged through us or by your own tradesperson. Disconnecting the gas meter entirely (to cut the daily supply charge) is optional; we'll help you weigh whether it's worth it.</p>
+        </details>
+        <details>
+          <summary>Will my switchboard need upgrading?</summary>
+          <p>Some homes need a switchboard or electrical upgrade to run the heat pump; many don't. We check this at the site assessment, and any upgrade is carried out by a licensed electrician and included in your fixed quote, so the price you approve is the price you pay.</p>
+        </details>
+        <details>
+          <summary>Do I need three-phase power?</summary>
+          <p>Not necessarily. Many homes run comfortably on single-phase. Larger homes or higher-capacity systems may need three-phase, we confirm this at assessment and tell you the options and any cost upfront.</p>
+        </details>
+        <details>
+          <summary>Do my radiators need replacing?</summary>
+          <p>Usually not. Most existing radiators work fine at heat-pump flow temperatures, and for homes that need it we offer a higher-temperature (R290) configuration. We test your specific setup at the assessment. <a href="/blog/heat-pump-radiator-compatibility-australia/">Here's the flow-temperature question in full →</a></p>
+        </details>
+      </div>
     </div>
   </section>
 
@@ -220,7 +242,7 @@
       <h2>Be There at Dawn</h2>
       <p>The first install is done; the next spots are open now.</p>
       <div class="btn-row center" style="margin-top:8px">
-        <a class="btn btn--primary" href="/pre-order/">Reserve Your System <span class="arrow"></span></a>
+        <a class="btn btn--primary btn--rect" href="/pre-order/">Reserve Your System <span class="arrow"></span></a>
         <a class="btn btn--ghost" href="/pre-order/basic-reserve/">Secure Your Spot <span class="arrow"></span></a>
       </div>
     </div>

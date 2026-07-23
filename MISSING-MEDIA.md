@@ -11,8 +11,8 @@ Wherever a suitable local photo existed, it's already used instead of a placehol
 - [x] **Real install / product photos — DONE.** Now using real photos from `Design/Photos/Build 1/` (per your go-ahead): the finished branded unit outdoors (`install-unit.webp`, IMG_2527), the system arriving at the home (`install-delivery.webp`, IMG_2526), and install pipework (`install-pipework.webp`, IMG_2366). Wired into **Home** §6, the **Hawthorn case study** (two spots), and the **old-gas-boiler post**.
   - *Still nice to have:* a literal "gas meter removed" close-up doesn't exist in Build 1 — the captions describe what the photos actually show rather than claiming the meter shot. Swap in a true gas-meter photo if/when you have one.
   - *Optional:* **Hydronic** §8 and **Mission** §7 proof sections are still text-only — `install-unit.webp` could be added there too if you want.
-- [ ] **Startmate Demo Day talk (video)** — founder pitch, story/credibility, *not* a product demo. Need the video URL (YouTube/Vimeo/Wix video). *(Still a placeholder.)*
-  - Appears on: **Home** (§7 "Why we're building this") and **Mission** (§9). Same embed on both.
+- [x] **Startmate Demo Day talk (video) — DONE.** Embedded as a privacy-mode YouTube iframe (`youtube-nocookie.com/embed/gVW44H996eA`, "Nick Zeniou, Thermal Dawn | Summer '26 Demo Day") in a responsive 16:9 `.video` frame.
+  - Appears on: **Home** ("Why we're building this") and **Mission** (§9). Same embed on both.
 
 ## Priority 2 — product / app
 

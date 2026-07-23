@@ -19,21 +19,21 @@
 <link rel="preload" href="/assets/fonts/Montserrat-Regular.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/assets/css/style.css">
 </head>
-<body>
+<body class="dark">
 <header id="site-header"></header>
 <main>
 
   <!-- 1. HERO -->
-  <section class="hero">
+  <section class="hero hero--center">
     <div class="hero__bg">
       <img src="/assets/img/hero-sunrise-1920.webp" alt="Sunrise over the Australian landscape" fetchpriority="high" width="1920" height="844">
     </div>
     <div class="hero__inner">
       <div class="wrap">
-        <h1>Most Smart Home Systems Tell You What They Did.<br>Thermal Dawn Thinks Ahead.</h1>
+        <h1>Most Smart Home Systems Tell You What They Did.<span class="accent">Thermal Dawn Thinks Ahead.</span></h1>
         <p class="subhead">Our AI learns your home, your solar, your weather, and your tariffs, optimising comfort and cost automatically, around the clock. And because we built it open, it works with the tools you already use.</p>
         <div class="btn-row">
-          <a class="btn btn--primary" href="/hydronic/how-it-works/">See How It Works <span class="arrow"></span></a>
+          <a class="btn btn--primary btn--rect" href="/hydronic/how-it-works/">See How It Works <span class="arrow"></span></a>
         </div>
       </div>
     </div>
@@ -105,14 +105,15 @@
   </section>
 
   <!-- 6. APP IS LIVE -->
-  <section class="section section--paper2">
+  <section class="band-orange">
     <div class="wrap">
-      <h2>You Don't Have to Be Technical to Get the Most Out of It.</h2>
+      <h2>You Don't Have to Be Technical to<span class="h-accent" style="color:#fff">Get the Most Out of It.</span></h2>
       <div class="split" style="margin-top:26px">
         <div>
           <p>The open API and Home Assistant integration are there for people who want them. But Thermal Dawn's own app is built for the household that just wants to be comfortable and see their savings, without configuring anything.</p>
           <p><strong>This isn't a mockup.</strong> The app is live and running in our first home today, and we ship updates constantly, 8 firmware and 50+ app updates in May 2026 alone.</p>
-          <ul>
+          <p class="figures__v" style="color:#1c1514;margin-bottom:8px">App Features:</p>
+          <ul class="applist">
             <li><strong>Comfort Scheduling:</strong> Set preferred temperatures by time and zone. The system handles the rest.</li>
             <li><strong>Real-Time Energy Dashboard:</strong> Solar input, thermal store level, grid draw, and estimated savings, live.</li>
             <li><strong>Savings Tracker:</strong> Running total of what you've saved versus grid energy costs.</li>
@@ -159,33 +160,42 @@
   </section>
 
   <!-- 9. PRIVACY -->
-  <section class="section">
+  <section class="section watermark">
+    <span class="watermark__word" aria-hidden="true">PRIVACY</span>
     <div class="wrap narrow">
-      <h2>Your Data, Handled Properly.</h2>
+      <h2>Your Home's Data Stays<span class="h-accent">in Your Home.</span></h2>
       <p>We take a straightforward position on your data: the system works for you, not the other way around.</p>
       <p>You have full access to your own data through the open API and Home Assistant, read it, export it, automate against it. We collect anonymised, aggregated performance data, with your permission, to improve forecasting across the Thermal Dawn fleet, and you can opt out. No selling your data, no third-party advertising, no subscription required to use the system you paid for.</p>
     </div>
   </section>
 
   <!-- 11. FAQ -->
-  <section class="section section--paper2">
-    <div class="wrap narrow">
-      <h2>FAQ</h2>
-      <h3>Does it work with Home Assistant?</h3>
-      <p>Yes, natively, out of the box. Full local control, full sensor visibility, and full automation, with no community workarounds or Modbus adapters. There's also a complete open API for everything else.</p>
-
-      <h3>Do I have to use your app?</h3>
-      <p>No. The app is there for households that just want comfort and savings without configuring anything, but the open API and Home Assistant integration mean you can run and monitor the system however you like.</p>
-
-      <h3>What data do you collect, and can I opt out?</h3>
-      <p>You have full access to your own data. We collect anonymised, aggregated performance data, with your permission, to improve forecasting across the fleet, and you can opt out entirely. We don't sell your data, run third-party ads, or require a subscription to use the system you paid for.</p>
-
-      <h3>What happens to my system if Thermal Dawn's servers go down?</h3>
-      <p><span class="draft">Your system keeps heating and cooling on its existing schedule; the cloud layer handles optimisation and updates, and Home Assistant gives you local control either way.</span></p>
+  <section class="faq-block">
+    <div class="wrap">
+      <div class="faq">
+        <h2>Frequently asked questions</h2>
+        <details open>
+          <summary>Does it work with Home Assistant?</summary>
+          <p>Yes, natively, out of the box. Full local control, full sensor visibility, and full automation, with no community workarounds or Modbus adapters. There's also a complete open API for everything else.</p>
+        </details>
+        <details>
+          <summary>Do I have to use your app?</summary>
+          <p>No. The app is there for households that just want comfort and savings without configuring anything, but the open API and Home Assistant integration mean you can run and monitor the system however you like.</p>
+        </details>
+        <details>
+          <summary>What data do you collect, and can I opt out?</summary>
+          <p>You have full access to your own data. We collect anonymised, aggregated performance data, with your permission, to improve forecasting across the fleet, and you can opt out entirely. We don't sell your data, run third-party ads, or require a subscription to use the system you paid for.</p>
+        </details>
+        <details>
+          <summary>What happens to my system if Thermal Dawn's servers go down?</summary>
+          <p><span class="draft">Your system keeps heating and cooling on its existing schedule; the cloud layer handles optimisation and updates, and Home Assistant gives you local control either way.</span></p>
       <p class="draft-note">Answer pending engineering confirmation.</p>
-
-      <h3>Can it join a VPP and earn me credits?</h3>
-      <p>It's built for it. As Virtual Power Plant programs become available in your area (Victoria's VEU scheme opens hydronic participation from 2027), your stored thermal energy can help balance the grid and earn credits. You opt in when you're ready and can opt out any time.</p>
+        </details>
+        <details>
+          <summary>Can it join a VPP and earn me credits?</summary>
+          <p>It's built for it. As Virtual Power Plant programs become available in your area (Victoria's VEU scheme opens hydronic participation from 2027), your stored thermal energy can help balance the grid and earn credits. You opt in when you're ready and can opt out any time.</p>
+        </details>
+      </div>
     </div>
   </section>
 
@@ -195,7 +205,7 @@
       <h2>Comfort That Thinks for Itself.</h2>
       <p class="lead">Book a free site assessment and see how Thermal Dawn Intelligence works in a home like yours.</p>
       <div class="btn-row center" style="margin-top:8px">
-        <a class="btn btn--primary" href="/pre-order/register-interest/">Book Free Site Assessment <span class="arrow"></span></a>
+        <a class="btn btn--primary btn--rect" href="/pre-order/register-interest/">Book Free Site Assessment <span class="arrow"></span></a>
         <a class="btn btn--ghost" href="/hydronic/">Explore the Hydronic System <span class="arrow"></span></a>
       </div>
     </div>
