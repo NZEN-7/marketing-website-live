@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Thermal Dawn — System Flow</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@500;600&family=Inter:wght@500;600&display=swap" rel="stylesheet"/>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0a0a0a; --orange: #E87C2A; --green: #2EC68A; --blue: #4A9CE8;
+  --tag: rgba(255,255,255,0.45); --val: rgba(255,255,255,0.85); --rule: rgba(255,255,255,0.18);
+}
+html, body { background: var(--bg); margin: 0; padding: 0; overflow-x: hidden; }
+body { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; min-height: 100%; }
+/* Fill the frame width; the viewBox is tuned to the card's aspect so overflow is
+   clipped (crops the sides) rather than letterboxed. */
+.svg-wrap { width: 100%; }
+svg { display: block; width: 100%; height: auto; overflow: hidden; }
+
+/* ── standalone controls (marketing embed only) ───────────────────────
+   In the Home Assistant dashboard this file is driven by postMessage from
+   branding.js and these controls stay hidden. On the website there is no
+   bridge, so they drive the same state machine directly. */
+.controls { display: none; width: 100%; padding: 14px 16px 4px; flex-direction: column; gap: 10px; align-items: center; }
+body.standalone .controls { display: flex; }
+/* The viewBox is portrait (363×430), tuned for a narrow HA dashboard card.
+   Left to fill a wide marketing embed it grows absurdly tall, so cap it. */
+body.standalone .svg-wrap { max-width: 540px; margin: 0 auto; }
+.ctl-row { display: flex; flex-wrap: wrap; gap: 7px; justify-content: center; align-items: center; }
+.ctl-label { font-family: 'DM Mono', ui-monospace, monospace; font-size: 10px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: rgba(255,255,255,.38); margin-right: 2px; }
+.ctl-btn {
+  padding: 7px 14px; border-radius: 6px; border: 1px solid rgba(255,255,255,.12);
+  background: transparent; color: rgba(255,255,255,.6);
+  font-family: 'DM Mono', ui-monospace, monospace; font-size: 10.5px; font-weight: 600;
+  letter-spacing: .08em; text-transform: uppercase; cursor: pointer; transition: all .2s;
+}
+.ctl-btn:hover { border-color: rgba(255,255,255,.3); color: rgba(255,255,255,.9); }
+.ctl-btn:focus-visible { outline: 2px solid var(--orange); outline-offset: 2px; }
+.ctl-btn[aria-pressed="true"] { border-color: rgba(232,124,42,.55); background: rgba(232,124,42,.15); color: var(--orange); }
+.ctl-btn[aria-pressed="true"].is-green { border-color: rgba(46,198,138,.55); background: rgba(46,198,138,.15); color: var(--green); }
+@media (max-width: 560px) {
+  .ctl-label { display: none; }
+  .ctl-btn { padding: 6px 10px; font-size: 9.5px; }
+}
+
+/* ── system flow / scene (unchanged from production) ──────────────── */
+@keyframes pulse-flow {
+  0%   { stroke-dashoffset: 200; opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { stroke-dashoffset: 0; opacity: 0; }
+}
+@keyframes glow-pulse  { 0%,100%{opacity:0.4} 50%{opacity:1} }
+@keyframes window-glow { 0%,100%{fill:rgba(232,124,42,0.08)} 50%{fill:rgba(232,124,42,0.28)} }
+@keyframes fan-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+.flow-line { fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2.5; stroke-dasharray: 8 6; animation: pulse-flow 2.2s ease-in-out infinite; }
+.flow-delay-1 { animation-delay: 0.4s; }
+.flow-delay-2 { animation-delay: 0.8s; }
+.flow-delay-3 { animation-delay: 1.2s; }
+.flow-delay-4 { animation-delay: 1.6s; }
+.glow-dot { animation: glow-pulse 1.8s ease-in-out infinite; }
+.window    { animation: window-glow 3s ease-in-out infinite; }
+.fan-blades { animation: fan-spin 1.6s linear infinite; transform-box: fill-box; transform-origin: center; }
+.fan-blades.off { animation: none; }
+
+.tag  { font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.16em; fill: var(--tag); text-transform: uppercase; }
+.val  { font-family: 'Inter', sans-serif; font-size: 18px; font-weight: 600; fill: var(--val); }
+.temp { font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; fill: rgba(255,255,255,0.55); }
+.temp.muted { fill: rgba(255,255,255,0.2); }
+.rule { stroke: var(--rule); stroke-width: 1; fill: none; }
+.dot  { fill: rgba(255,255,255,0.5); }
+
+/* ── weather / sky layers (NEW — under test) ─────────────────────── */
+/* Sky layers crossfade; stars / moon / sun / clouds fade rather than pop. */
+.sky-fade { transition: opacity 1.2s ease; }
+/* Drift: outer <g> positions the cloud, inner <g.cloud-move> drifts it. */
+@keyframes cloud-drift { from { transform: translateX(-16px); } to { transform: translateX(16px); } }
+.cloud-move { animation: cloud-drift 46s ease-in-out infinite alternate; }
+.cloud-move.c2 { animation-duration: 62s; animation-delay: -10s; }
+.cloud-move.c3 { animation-duration: 54s; animation-delay: -26s; }
+/* gentle wobble (nested so it composes with the horizontal drift) */
+@keyframes cloud-wobble { 0%,100%{ transform: translateY(0) rotate(0deg); } 50%{ transform: translateY(3.5px) rotate(0.5deg); } }
+.cloud-wobble { transform-box: fill-box; transform-origin: 50% 50%; animation: cloud-wobble 8s ease-in-out infinite; }
+.cloud-wobble.w2 { animation-duration: 11s; animation-delay: -3.5s; }
+
+/* Rain: two depth layers of slanted streaks; per-drop stroke-opacity sets
+   brightness (keyframes animate opacity 0→1→0, the two multiply) and inline
+   duration/delay vary the fall speed so it never reads as a repeating sheet. */
+@keyframes rain-fall {
+  0%   { transform: translateY(-40px); opacity: 0; }
+  8%   { opacity: 1; }
+  82%  { opacity: 1; }
+  100% { transform: translateY(420px); opacity: 0; }
+}
+.raindrop { animation: rain-fall 0.9s linear infinite; }
+
+@keyframes twinkle { 0%,100%{opacity:0.25} 50%{opacity:0.95} }
+.star { animation: twinkle 3.6s ease-in-out infinite; }
+
+/* Storm flash — brief, occasional double-strike across the sky. */
+@keyframes lightning { 0%,92%,100%{opacity:0} 93%{opacity:0.8} 94%{opacity:0.05} 95%{opacity:0.55} 96%{opacity:0} }
+.lightning-flash { animation: lightning 9s linear infinite; }
+
+.hide { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="controls" id="controls">
+  <div class="ctl-row" role="group" aria-label="System mode">
+    <span class="ctl-label">System</span>
+    <button class="ctl-btn" type="button" data-mode="charging" aria-pressed="false">☀ Charging</button>
+    <button class="ctl-btn is-green" type="button" data-mode="discharging" aria-pressed="false">🏠 Discharging</button>
+    <button class="ctl-btn" type="button" data-mode="direct" aria-pressed="false">Direct heat</button>
+    <button class="ctl-btn" type="button" data-mode="idle" aria-pressed="false">Idle</button>
+  </div>
+  <div class="ctl-row" role="group" aria-label="Time of day and weather">
+    <span class="ctl-label">Sky</span>
+    <button class="ctl-btn" type="button" data-tod="dawn" aria-pressed="false">Dawn</button>
+    <button class="ctl-btn" type="button" data-tod="day" aria-pressed="false">Day</button>
+    <button class="ctl-btn" type="button" data-tod="dusk" aria-pressed="false">Dusk</button>
+    <button class="ctl-btn" type="button" data-tod="night" aria-pressed="false">Night</button>
+    <button class="ctl-btn" type="button" data-wx="clear" aria-pressed="false">Clear</button>
+    <button class="ctl-btn" type="button" data-wx="overcast" aria-pressed="false">Overcast</button>
+    <button class="ctl-btn" type="button" data-wx="rain" aria-pressed="false">Rain</button>
+  </div>
+</div>
+
+<div class="svg-wrap">
+<svg viewBox="235 18 363 430" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="glow-orange" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="cloud-blur" x="-30%" y="-120%" width="160%" height="340%"><feGaussianBlur stdDeviation="4"/></filter>
+    <filter id="moon-soft" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="1.4"/></filter>
+
+    <!-- Sky gradients per time-of-day (swapped on the sky rect by JS) -->
+    <linearGradient id="sky-day"   x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#27537a"/><stop offset="30%" stop-color="#16344c"/><stop offset="54%" stop-color="#0a0a0a"/></linearGradient>
+    <linearGradient id="sky-dusk"  x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#9c5526"/><stop offset="28%" stop-color="#4f2f26"/><stop offset="50%" stop-color="#0c0a12"/></linearGradient>
+    <linearGradient id="sky-night" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#05070e"/><stop offset="100%" stop-color="#0a0a0a"/></linearGradient>
+
+    <radialGradient id="sun-core" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ffd9a0"/><stop offset="45%" stop-color="#E87C2A"/><stop offset="100%" stop-color="#E87C2A" stop-opacity="0"/></radialGradient>
+    <radialGradient id="moon-core" cx="42%" cy="40%" r="60%"><stop offset="0%" stop-color="#eef2f7"/><stop offset="100%" stop-color="#aeb6c2"/></radialGradient>
+
+    <!-- existing scene gradients -->
+    <linearGradient id="wall-grad" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#2c2c30"/><stop offset="100%" stop-color="#26262a"/></linearGradient>
+    <linearGradient id="roof-grad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#28282c"/><stop offset="100%" stop-color="#232328"/></linearGradient>
+    <linearGradient id="roof-grad-back" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1c1c20"/><stop offset="100%" stop-color="#18181c"/></linearGradient>
+    <linearGradient id="steel-grad"    x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#8a8d94"/><stop offset="50%" stop-color="#65686e"/><stop offset="100%" stop-color="#4a4d52"/></linearGradient>
+    <linearGradient id="steel-side"    x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4a4d52"/><stop offset="100%" stop-color="#34373c"/></linearGradient>
+    <linearGradient id="steel-top"     x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#9a9da4"/><stop offset="100%" stop-color="#70737a"/></linearGradient>
+    <linearGradient id="slat-grad"     x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#0c0c0e"/><stop offset="100%" stop-color="#1a1a1c"/></linearGradient>
+    <linearGradient id="slat-side-grad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#202022"/><stop offset="100%" stop-color="#141416"/></linearGradient>
+    <linearGradient id="hp-front-grad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#2a2a2c"/><stop offset="100%" stop-color="#171719"/></linearGradient>
+    <linearGradient id="hp-side-grad"  x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1f1f21"/><stop offset="100%" stop-color="#141416"/></linearGradient>
+    <linearGradient id="hp-top-grad"   x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#2c2c2e"/><stop offset="100%" stop-color="#1d1d1f"/></linearGradient>
+    <linearGradient id="pad-grad"      x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#36363c"/><stop offset="100%" stop-color="#2c2c34"/></linearGradient>
+    <linearGradient id="panel-grad"    x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#0a1118"/><stop offset="100%" stop-color="#070b10"/></linearGradient>
+    <!-- lithium battery (cool slate, distinct from the warm thermal store) -->
+    <linearGradient id="batt-front"  x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7f858e"/><stop offset="100%" stop-color="#636972"/></linearGradient>
+    <linearGradient id="batt-side"   x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#666c75"/><stop offset="100%" stop-color="#4e545d"/></linearGradient>
+    <linearGradient id="batt-top"    x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#90969e"/><stop offset="100%" stop-color="#767c84"/></linearGradient>
+    <!-- ground pool — faint cool sheen the buildings sit on (dark bg, so grounding
+         comes from light behind the silhouette, not a dark shadow) -->
+    <radialGradient id="ground-glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#35485c" stop-opacity="0.55"/>
+      <stop offset="55%" stop-color="#243342" stop-opacity="0.24"/>
+      <stop offset="100%" stop-color="#1a2530" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="store-glow-o" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#E87C2A" stop-opacity="0.5"/><stop offset="100%" stop-color="#E87C2A" stop-opacity="0"/></radialGradient>
+    <radialGradient id="store-glow-g" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#2EC68A" stop-opacity="0.55"/><stop offset="100%" stop-color="#2EC68A" stop-opacity="0"/></radialGradient>
+  </defs>
+
+  <!-- ══ SKY — three stacked layers crossfaded by JS (day base; dusk amount ramps
+       continuously with the sun's distance from the horizon; night on top) ══ -->
+  <rect x="235" y="0" width="363" height="548" fill="url(#sky-day)"/>
+  <rect id="sky-dusk-rect" class="sky-fade" x="235" y="0" width="363" height="548" fill="url(#sky-dusk)" style="opacity:0"/>
+  <rect id="sky-night-rect" class="sky-fade" x="235" y="0" width="363" height="548" fill="url(#sky-night)" style="opacity:0"/>
+
+  <!-- ══ STARS (night) — a gentle "star river" wave. Varied dot sizes give a
+       hand-placed, dot-painting feel; the few faint concentric-halo dots are a
+       quiet nod to that style, kept abstract + subtle (not any specific motif). ══ -->
+  <g id="sky-stars" class="sky-fade" style="opacity:0" fill="#e2e8f0">
+    <circle class="star" cx="246" cy="66" r="0.8" style="animation-delay:-0.3s"/>
+    <circle class="star" cx="272" cy="56" r="1.3" style="animation-delay:-1.5s"/>
+    <circle class="star" cx="298" cy="50" r="0.7" style="animation-delay:-2.7s"/>
+    <circle class="star" cx="350" cy="52" r="0.8" style="animation-delay:-0.9s"/>
+    <circle class="star" cx="376" cy="58" r="1.0" style="animation-delay:-3.2s"/>
+    <circle class="star" cx="402" cy="54" r="0.7" style="animation-delay:-1.9s"/>
+    <circle class="star" cx="430" cy="46" r="1.2" style="animation-delay:-0.6s"/>
+    <circle class="star" cx="486" cy="48" r="0.8" style="animation-delay:-2.3s"/>
+    <circle class="star" cx="514" cy="56" r="1.0" style="animation-delay:-1.2s"/>
+    <circle class="star" cx="542" cy="62" r="0.7" style="animation-delay:-3.0s"/>
+    <circle class="star" cx="568" cy="56" r="1.3" style="animation-delay:-0.5s"/>
+    <circle class="star" cx="591" cy="52" r="0.8" style="animation-delay:-2.6s"/>
+    <circle class="star" cx="594" cy="64" r="0.9" style="animation-delay:-1.7s"/>
+    <!-- tiny fillers for texture -->
+    <circle class="star" cx="288" cy="72" r="0.5" style="animation-delay:-1.1s"/>
+    <circle class="star" cx="414" cy="40" r="0.5" style="animation-delay:-2.8s"/>
+    <circle class="star" cx="530" cy="70" r="0.5" style="animation-delay:-0.4s"/>
+    <circle class="star" cx="582" cy="40" r="0.5" style="animation-delay:-2.1s"/>
+    <!-- subtle halo accents (faint concentric ring) -->
+    <g class="star" style="animation-delay:-0.8s">
+      <circle cx="324" cy="46" r="1.4"/>
+      <circle cx="324" cy="46" r="4.0" fill="none" stroke="#e2e8f0" stroke-width="0.4" opacity="0.3"/>
+    </g>
+    <g class="star" style="animation-delay:-2.4s">
+      <circle cx="458" cy="42" r="1.5"/>
+      <circle cx="458" cy="42" r="4.4" fill="none" stroke="#e2e8f0" stroke-width="0.4" opacity="0.3"/>
+    </g>
+    <g class="star" style="animation-delay:-1.4s">
+      <circle cx="586" cy="48" r="1.4"/>
+      <circle cx="586" cy="48" r="4.0" fill="none" stroke="#e2e8f0" stroke-width="0.4" opacity="0.3"/>
+    </g>
+  </g>
+
+  <!-- ══ SUN (day / dusk) — soft abstract concentric glow, top-right ══ -->
+  <g id="sky-sun" class="sky-fade">
+    <circle cx="570" cy="40" r="42" fill="#E87C2A" opacity="0.05"/>
+    <circle cx="570" cy="40" r="29" fill="#E87C2A" opacity="0.10"/>
+    <circle cx="570" cy="40" r="17" fill="#E87C2A" opacity="0.20"/>
+    <circle id="sun-disk" cx="570" cy="40" r="8.5" fill="#E87C2A" opacity="0.65"/>
+  </g>
+
+  <!-- ══ MOON (night) ══ -->
+  <g id="sky-moon" class="sky-fade" style="opacity:0">
+    <circle cx="570" cy="40" r="22" fill="#cdd5e0" opacity="0.12" filter="url(#moon-soft)"/>
+    <circle cx="570" cy="40" r="12" fill="url(#moon-core)"/>
+    <circle cx="576" cy="36" r="11" fill="#0a0a0a" opacity="0.92"/>
+    <circle cx="565" cy="44" r="1.4" fill="#9aa3b0" opacity="0.5"/>
+    <circle cx="568" cy="38" r="1.0" fill="#9aa3b0" opacity="0.5"/>
+  </g>
+
+  <!-- ══ CLOUDS (partly / overcast / rain / storm) — soft blurred stratus wisps:
+       flat ellipse clusters at low opacity, drifting slowly. data-op is the base
+       opacity; applyWX() darkens + densifies with heavier cover. The extra wrap
+       is a wide full-width layer that fades in for overcast / rain / storm. ══ -->
+  <g id="sky-clouds" class="sky-fade" style="opacity:0">
+    <g class="cloud-move"><g class="cloud-wobble">
+      <g class="cloud" data-op="0.16" filter="url(#cloud-blur)" fill="#aab2bd" opacity="0.16">
+        <ellipse cx="330" cy="70" rx="58" ry="8"/>
+        <ellipse cx="362" cy="61" rx="36" ry="6.5"/>
+        <ellipse cx="300" cy="63" rx="28" ry="5.5"/>
+      </g>
+    </g></g>
+    <g class="cloud-move c2"><g class="cloud-wobble w2">
+      <g class="cloud" data-op="0.13" filter="url(#cloud-blur)" fill="#aab2bd" opacity="0.13">
+        <ellipse cx="490" cy="94" rx="62" ry="9"/>
+        <ellipse cx="528" cy="85" rx="38" ry="6.5"/>
+        <ellipse cx="456" cy="87" rx="30" ry="5.5"/>
+      </g>
+    </g></g>
+    <g id="cloud-extra-wrap" class="sky-fade" style="opacity:0">
+      <g class="cloud-move c3"><g class="cloud-wobble">
+        <g class="cloud" data-op="0.22" filter="url(#cloud-blur)" fill="#959dab" opacity="0.22">
+          <ellipse cx="420" cy="46" rx="150" ry="11"/>
+          <ellipse cx="300" cy="38" rx="90" ry="9"/>
+          <ellipse cx="540" cy="40" rx="90" ry="9"/>
+          <ellipse cx="430" cy="62" rx="100" ry="8"/>
+        </g>
+      </g></g>
+    </g>
+  </g>
+
+  <!-- Whole foreground scene scaled to 0.8 about the frame centre (444.5,274), so the
+       house / store / heat pump / battery (and their callouts + flow) sit 20% smaller
+       within the window. Sky, sun, clouds and rain stay full-frame (outside this group). -->
+  <g id="scene-scale" transform="translate(444.5,274) scale(0.8) translate(-444.5,-274)">
+
+  <!-- ground pool under the whole footprint; buildings draw on top of it -->
+  <ellipse id="ground-pool" cx="420" cy="380" rx="320" ry="70" fill="url(#ground-glow)"/>
+
+  <!-- ══ Two-storey house BEHIND the garage (taller; peeks above the garage's left
+       roofline, left side runs off the frame). Drawn first so the garage sits in
+       front of it. Rough first massing — refine after screenshot. ══ -->
+  <g transform="translate(345,360) scale(0.85) translate(-345,-360)">
+    <!-- right side wall (mostly hidden behind the garage) -->
+    <polygon points="345,360 575,231 575,91 345,220" fill="#25252a" stroke="#3a3a3e" stroke-width="0.5"/>
+    <!-- gable end wall (front-facing, two storey; left edge off-frame) -->
+    <polygon points="345,360 140,245 140,105 242.5,92.5 345,220" fill="url(#wall-grad)" stroke="#2a2a2c" stroke-width="0.5"/>
+    <!-- rake/eave shadows on the walls — deeper now the roof overhangs; the top
+         of each band hides behind the slab + fascia -->
+    <polygon points="140,105 242.5,92.5 242.5,104.5 140,117" fill="#000" opacity="0.35"/>
+    <polygon points="242.5,92.5 345,220 345,238 242.5,110.5" fill="#000" opacity="0.35"/>
+    <polygon points="345,220 575,91 575,108 345,237" fill="#000" opacity="0.35"/>
+    <!-- roof slabs, overhanging the walls: front rake by 5 along -v, eaves by 6
+         down-slope. Right roof slope, then left. -->
+    <polygon points="238.1,95 344.4,227.2 578.8,95.7 472.5,-36.5" fill="url(#roof-grad)" stroke="#2a2a2c" stroke-width="0.5"/>
+    <polygon points="129.6,108.2 238.1,95 472.5,-36.5 364,-23.3" fill="url(#roof-grad-back)" stroke="#2a2a2c" stroke-width="0.5"/>
+    <!-- fascia (slab thickness 4.5): front rakes face -v, right eave faces -u (darker) -->
+    <polygon points="129.6,108.2 238.1,95 238.1,99.5 129.6,112.7" fill="#1c1c20"/>
+    <polygon points="238.1,95 344.4,227.2 344.4,231.7 238.1,99.5" fill="#1c1c20"/>
+    <polygon points="344.4,227.2 578.8,95.7 578.8,100.2 344.4,231.7" fill="#121215"/>
+    <!-- front door — recessed into the wall: opening quad is the (set-back) panel,
+         left jamb + sill strips give the reveal depth (recess shift = 4.4,-2.4 along
+         the side-wall axis). Seam sits on the recessed panel's centre. -->
+    <polygon points="238.9,300.5 214.3,286.7 214.3,233.5 238.9,247.3" fill="#0c0c10" stroke="#54545c" stroke-width="0.7"/>
+    <polygon points="214.3,286.7 214.3,233.5 218.7,236.0 218.7,284.3" fill="#202026"/>
+    <polygon points="214.3,286.7 238.9,300.5 238.9,295.6 218.7,284.3" fill="#4a4a52"/>
+    <line x1="231" y1="291.2" x2="231" y2="242.9" stroke="#54545c" stroke-width="0.4" opacity="0.7"/>
+    <!-- stoop + step leading up to the door -->
+    <polygon points="238.9,300.5 214.3,286.7 205,291 229.6,304.8" fill="#33333a"/>
+    <polygon points="229.6,304.8 205,291 196,295.5 220.6,309.3" fill="#2a2a30"/>
+    <!-- windows — same recess as the door (shift 4.4,-2.4): lit pane, left jamb +
+         sill reveal, muntin cross on the recessed pane. Ground floor left of the
+         door; first-floor pair above. -->
+    <g>
+      <polygon class="window" points="196,252.4 168,236.7 168,208.7 196,224.4" fill="rgba(232,124,42,0.10)" stroke="#54545c" stroke-width="0.6"/>
+      <polygon points="168,236.7 168,208.7 172.4,211.2 172.4,234.3" fill="#202026"/>
+      <polygon points="168,236.7 196,252.4 196,247.5 172.4,234.3" fill="#4a4a52"/>
+      <g stroke="#54545c" stroke-width="0.4" opacity="0.7">
+        <line x1="184.2" y1="240.9" x2="184.2" y2="217.8"/>
+        <line x1="172.4" y1="222.7" x2="196" y2="236.0"/>
+      </g>
+    </g>
+    <g>
+      <polygon class="window" style="animation-delay:-1s" points="196,186.4 168,170.7 168,142.7 196,158.4" fill="rgba(232,124,42,0.10)" stroke="#54545c" stroke-width="0.6"/>
+      <polygon points="168,170.7 168,142.7 172.4,145.2 172.4,168.3" fill="#202026"/>
+      <polygon points="168,170.7 196,186.4 196,181.5 172.4,168.3" fill="#4a4a52"/>
+      <g stroke="#54545c" stroke-width="0.4" opacity="0.7">
+        <line x1="184.2" y1="174.9" x2="184.2" y2="151.8"/>
+        <line x1="172.4" y1="156.7" x2="196" y2="170.0"/>
+      </g>
+    </g>
+    <g>
+      <polygon class="window" style="animation-delay:-2s" points="240,211.1 212,195.4 212,167.4 240,183.1" fill="rgba(232,124,42,0.10)" stroke="#54545c" stroke-width="0.6"/>
+      <polygon points="212,195.4 212,167.4 216.4,169.9 216.4,193.0" fill="#202026"/>
+      <polygon points="212,195.4 240,211.1 240,206.2 216.4,193.0" fill="#4a4a52"/>
+      <g stroke="#54545c" stroke-width="0.4" opacity="0.7">
+        <line x1="228.2" y1="199.6" x2="228.2" y2="176.5"/>
+        <line x1="216.4" y1="181.4" x2="240" y2="194.7"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- Garage + heat pump + battery + store shrunk a further 0.64 (≈0.51 overall),
+       anchored near ground level (444.5,400) so they stay grounded and shrink
+       up-and-in. The two-storey house above keeps the scene scale. The label
+       block at the end of this group carries a compensating 1.25 wrapper so the
+       callout text renders at the same size as before. -->
+  <g id="equip-scale" transform="translate(444.5,400) scale(0.64) translate(-444.5,-400)">
+  <!-- House — right (side) wall -->
+  <polygon points="390,390 699,217 699,97 390,270" fill="#25252a" stroke="#3a3a3e" stroke-width="0.5"/>
+  <polygon points="390,390 220,295 220,175 390,270" fill="url(#wall-grad)" stroke="#2a2a2c" stroke-width="0.5"/>
+  <!-- Garage door on the front wall (this block is the garage) — recessed like the
+       front door (shift 4.4,-2.4): left jamb + sill reveal, slats on the set-back panel -->
+  <g>
+    <polygon points="373,380.5 237,304.5 237,225.3 373,301.3" fill="#15151a" stroke="#3a3a3e" stroke-width="0.6"/>
+    <g stroke="#2f2f34" stroke-width="0.6" opacity="0.9">
+      <line x1="373" y1="356.4" x2="241.4" y2="282.9"/>
+      <line x1="373" y1="336.0" x2="241.4" y2="262.5"/>
+      <line x1="373" y1="315.6" x2="241.4" y2="242.1"/>
+    </g>
+    <polygon points="237,304.5 237,225.3 241.4,227.8 241.4,302.1" fill="#202026"/>
+    <polygon points="237,304.5 373,380.5 373,375.7 241.4,302.1" fill="#4a4a52"/>
+  </g>
+  <!-- Back window — far end of the right/side wall. Recessed like the front door,
+       but this wall faces the other way so the shift mirrors to (-3.8,-2.2) and
+       the visible reveals are the BACK jamb + sill. -->
+  <g>
+    <polygon class="window" style="animation-delay:-0.5s" points="631,204.6 677.4,178.7 677.4,140.3 631,166.2" fill="rgba(232,124,42,0.10)" stroke="#2a2a2c" stroke-width="0.5"/>
+    <polygon points="677.4,178.7 677.4,140.3 673.6,142.4 673.6,176.5" fill="#3a3a42"/>
+    <polygon points="631,204.6 677.4,178.7 673.6,176.5 631,200.3" fill="#4a4a52"/>
+    <g stroke="#54545c" stroke-width="0.4" opacity="0.7">
+      <line x1="652.3" y1="188.4" x2="652.3" y2="154.3"/>
+      <line x1="631" y1="183.2" x2="673.6" y2="159.5"/>
+    </g>
+  </g>
+
+  <polygon points="220,175 390,270 305,173" fill="url(#wall-grad)" stroke="#2a2a2c" stroke-width="0.5"/>
+  <!-- rake/eave shadows — deeper now the roof overhangs; band tops hide behind the fascia -->
+  <polygon points="220,175 305,173 305,185 220,187" fill="#000" opacity="0.5"/>
+  <polygon points="305,173 390,270 390,288 305,191" fill="#000" opacity="0.5"/>
+  <polygon points="390,270 699,97 699,114 390,287" fill="#000" opacity="0.5"/>
+  <!-- roof slabs, overhanging front rake (5 along -v) + eaves (6 down-slope) -->
+  <polygon points="209.6,177.7 300.6,175.5 614,0 523,2.2" fill="url(#roof-grad-back)" stroke="#2a2a2c" stroke-width="0.5"/>
+  <polygon points="389.6,277 703,101.5 614,0 300.6,175.5" fill="url(#roof-grad)" stroke="#2a2a2c" stroke-width="0.5"/>
+  <line x1="300.6" y1="175.5" x2="614" y2="0" stroke="#2a2a2c" stroke-width="0.5"/>
+  <!-- fascia (thickness 4.5): rakes face -v, long eave faces -u (darker) -->
+  <polygon points="209.6,177.7 300.6,175.5 300.6,180 209.6,182.2" fill="#1c1c20"/>
+  <polygon points="300.6,175.5 389.6,277 389.6,281.5 300.6,180" fill="#1c1c20"/>
+  <polygon points="389.6,277 703,101.5 703,106 389.6,281.5" fill="#121215"/>
+
+  <!-- translate(11,-6) slides the array ~12u back along the roof so its front and
+       back margins are equal (centred on the longer roof). 4×2 individual modules
+       on a dark mounting frame — the gaps between modules give the tiled look. -->
+  <g opacity="0.85" transform="translate(11,-6)">
+    <polygon points="420,239 635,118 571,45 356,166" fill="#06080b" stroke="#1e3a5f" stroke-width="0.5"/>
+    <g fill="url(#panel-grad)" stroke="#2a4a72" stroke-width="0.4">
+      <polygon points="420.7,235.4 469.3,208.0 441.1,175.9 392.5,203.2"/>
+      <polygon points="474.4,205.1 523.0,177.8 494.8,145.6 446.3,173.0"/>
+      <polygon points="528.2,174.9 576.8,147.5 548.6,115.4 500.0,142.7"/>
+      <polygon points="581.9,144.6 630.5,117.3 602.3,85.1 553.8,112.5"/>
+      <polygon points="388.7,198.9 437.3,171.5 409.1,139.4 360.5,166.7"/>
+      <polygon points="442.4,168.6 491.0,141.3 462.8,109.1 414.3,136.5"/>
+      <polygon points="496.2,138.4 544.8,111.0 516.6,78.9 468.0,106.2"/>
+      <polygon points="549.9,108.1 598.5,80.8 570.3,48.6 521.8,76.0"/>
+    </g>
+    <line x1="356" y1="166" x2="571" y2="45" stroke="rgba(74,156,232,0.25)" stroke-width="0.5"/>
+  </g>
+
+
+  <polygon points="390,390 699,217 736,238 427,411" fill="url(#pad-grad)" stroke="#3a3a3e" stroke-width="0.5"/>
+  <polygon points="427,411 736,238 736,240 427,413" fill="#000" opacity="0.55"/>
+  <polygon points="390,390 427,411 427,413 390,392" fill="#000" opacity="0.55"/>
+
+  <g>
+    <!-- home ring main — square circuit at ground level, every leg on the two plan
+         axes. The seam pipe runs where the garage meets the pavement, from the
+         back corner (699,217) to the front corner (390,390), then along the house
+         frontage with a hairpin at the front-left corner. Faint dashes = buried
+         run behind the house + garage. Tank connections live in a separate group
+         drawn after the tank (ports on its left face). -->
+    <path fill="none" stroke="rgba(255,255,255,0.10)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" d="M699,217 L390,390 L25.5,190.6 Q16.75,185.8 25.5,180.9"/>
+    <path fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1" stroke-dasharray="2 4" d="M25.5,180.9 L329.5,10.4 L699,217"/>
+    <!-- junctions: pavement corner + radiator drops on the house frontage -->
+    <circle cx="390" cy="390" r="2.5" fill="#0a0a0a" stroke="rgba(255,255,255,0.35)" stroke-width="1"/>
+    <circle cx="188.9" cy="280" r="2.5" fill="#0a0a0a" stroke="rgba(255,255,255,0.35)" stroke-width="1"/>
+    <circle cx="126.4" cy="245.8" r="2.5" fill="#0a0a0a" stroke="rgba(255,255,255,0.35)" stroke-width="1"/>
+    <circle cx="51.4" cy="204.7" r="2.5" fill="#0a0a0a" stroke="rgba(255,255,255,0.35)" stroke-width="1"/>
+  </g>
+
+  <!-- FLOW: home ring (occluded part) — drawn before the equipment so the seam
+       return hides behind battery / tank / HP; colour via --flow-main set by JS. -->
+  <g id="g-flow-home" style="opacity:0">
+    <path class="flow-line flow-delay-1" style="stroke:var(--flow-main)" d="M390,390 L25.5,190.6 Q16.75,185.8 25.5,180.9"/>
+    <g opacity="0.18">
+      <path class="flow-line flow-delay-2" style="stroke:var(--flow-main)" d="M25.5,180.9 L329.5,10.4 L699,217"/>
+    </g>
+    <path class="flow-line flow-delay-3" style="stroke:var(--flow-main)" d="M699,217 L488,335.1"/>
+  </g>
+
+  <!-- ══ LITHIUM BATTERY (generic home ESS, à la SigenStor) — right of the store.
+       Drawn before the store so the (closer) store occludes it where they meet.
+       translate slides it along the pad, tucking it under the garage window. ══ -->
+  <g transform="translate(42,-23.5)">
+    <!-- left side face (X=min) — bottom-left corner backs onto the house wall -->
+    <polygon points="557,296 574,305 574,257 557,247" fill="url(#batt-side)" stroke="#6f757d" stroke-width="0.5"/>
+    <!-- top face -->
+    <polygon points="557,247 588,230 605,239 574,257" fill="url(#batt-top)" stroke="#79808a" stroke-width="0.5"/>
+    <!-- front face (Z=max) -->
+    <polygon points="574,305 605,288 605,239 574,257" fill="url(#batt-front)" stroke="#72787f" stroke-width="0.5"/>
+    <!-- stacked module seams (the tower look) -->
+    <g stroke="#9aa0a9" stroke-width="0.6" opacity="0.7">
+      <line x1="574" y1="293" x2="605" y2="276"/>
+      <line x1="574" y1="281" x2="605" y2="264"/>
+      <line x1="574" y1="269" x2="605" y2="252"/>
+    </g>
+  </g>
+
+  <!-- THERMAL STORE — translate slides it along the pad so bare wall shows
+       between the heat pump and the store (the pipework ladder lives in that gap) -->
+  <g transform="translate(34,-19)">
+    <ellipse id="store-glow-el" cx="517" cy="310" rx="55" ry="80" fill="url(#store-glow-o)" opacity="0"/>
+    <polygon points="461,269 489,285 489,305 461,289" fill="url(#steel-side)" stroke="#3a3d43" stroke-width="0.3"/>
+    <polygon points="461,289 489,305 489,366 461,350" fill="url(#slat-side-grad)" stroke="#2a2a2c" stroke-width="0.4"/>
+    <g stroke="#050505" stroke-width="0.6" opacity="0.85">
+      <line x1="467" y1="293" x2="467" y2="353"/><line x1="473" y1="296" x2="473" y2="357"/><line x1="479" y1="299" x2="479" y2="360"/><line x1="485" y1="303" x2="485" y2="364"/>
+    </g>
+    <polygon points="461,269 518,238 546,254 489,285" fill="url(#steel-top)" stroke="#3a3d43" stroke-width="0.4"/>
+    <polygon points="489,285 546,254 546,274 489,305" fill="url(#steel-grad)" stroke="#3a3d43" stroke-width="0.4"/>
+    <text x="518" y="280" text-anchor="middle" font-family="DM Mono,monospace" font-size="4.8" font-weight="700" fill="#1a1c20" letter-spacing="0.6" transform="matrix(1,-0.544,0,1,0,281.8)">THERMAL DAWN</text>
+    <polygon points="491,287 545,257 545,259 491,289" fill="#a8acb4" opacity="0.35"/>
+    <polygon points="489,305 546,274 546,335 489,366" fill="url(#slat-grad)" stroke="#000" stroke-width="0.4"/>
+    <g stroke="#000" stroke-width="0.9" opacity="0.85">
+      <line x1="495" y1="302" x2="495" y2="363"/><line x1="500" y1="300" x2="500" y2="361"/><line x1="506" y1="296" x2="506" y2="357"/><line x1="512" y1="293" x2="512" y2="354"/><line x1="518" y1="289" x2="518" y2="350"/><line x1="523" y1="287" x2="523" y2="348"/><line x1="529" y1="283" x2="529" y2="344"/><line x1="535" y1="280" x2="535" y2="341"/><line x1="540" y1="277" x2="540" y2="338"/>
+    </g>
+  </g>
+
+
+  <!-- Tank connection row — four ports in a line on the store's silver top band:
+       [HP supply, HP return, house supply, house return]. Drawn after the tank so
+       the ports + pipe runs sit in front of the face (pipes travel -v, toward the
+       viewer-left). House pair drops perpendicular risers to the seam; the HP
+       pair (in its own group after the HP) drops onto the HP's top face. -->
+  <g>
+    <path fill="none" stroke="rgba(255,255,255,0.10)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" d="M512.5,270 L482,287.1 L482,338.5 L390,390"/>
+    <path fill="none" stroke="rgba(255,255,255,0.10)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" d="M488,335.1 L488,291.7 L519.5,274"/>
+    <circle cx="498.5" cy="262" r="1.8" fill="#0a0a0a" stroke="rgba(255,255,255,0.35)" stroke-width="0.8"/>
+    <circle cx="505.5" cy="266" r="1.8" fill="#0a0a0a" stroke="rgba(255,255,255,0.35)" stroke-width="0.8"/>
+    <circle cx="512.5" cy="270" r="1.8" fill="#0a0a0a" stroke="rgba(255,255,255,0.35)" stroke-width="0.8"/>
+    <circle cx="519.5" cy="274" r="1.8" fill="#0a0a0a" stroke="rgba(255,255,255,0.35)" stroke-width="0.8"/>
+  </g>
+
+  <!-- FLOW: home ring (port side) — house supply out / return in via the risers -->
+  <g id="g-flow-home-2" style="opacity:0">
+    <path class="flow-line" style="stroke:var(--flow-main)" d="M512.5,270 L482,287.1 L482,338.5 L390,390"/>
+    <path class="flow-line flow-delay-3" style="stroke:var(--flow-main)" d="M488,335.1 L488,291.7 L519.5,274"/>
+  </g>
+
+  <!-- HEAT PUMP -->
+  <g>
+    <polygon points="404,382 421,392 421,334 404,324" fill="url(#hp-side-grad)" stroke="#3a3a3c" stroke-width="0.5"/>
+    <g stroke="#0a0a0a" stroke-width="0.5" opacity="0.85">
+      <line x1="408" y1="334" x2="418" y2="340"/><line x1="408" y1="342" x2="418" y2="348"/><line x1="408" y1="350" x2="418" y2="356"/><line x1="408" y1="358" x2="418" y2="364"/><line x1="408" y1="366" x2="418" y2="372"/><line x1="408" y1="374" x2="418" y2="380"/><line x1="408" y1="382" x2="418" y2="388"/>
+    </g>
+    <polygon points="404,324 447,300 464,310 421,334" fill="url(#hp-top-grad)" stroke="#1a1a1a" stroke-width="0.4"/>
+    <polygon points="421,392 464,368 464,310 421,334" fill="url(#hp-front-grad)" stroke="#1a1a1a" stroke-width="0.5"/>
+    <!-- Fans sheared onto the front face's iso plane: vertical shear -0.558 (matches the
+         face's -24/43 slant); ty = 0.558*442 = 246.6 keeps each fan centred at cx=442.
+         Turns the flat circles into correctly-tilted ellipses. -->
+    <g transform="matrix(1,-0.558,0,1,0,246.6)">
+    <g>
+      <circle cx="442" cy="337" r="10" fill="#0a0a0a" stroke="#3a3a3c" stroke-width="0.7"/>
+      <circle cx="442" cy="337" r="9"  fill="#050505"/>
+      <g id="hp-fan-1" class="fan-blades">
+        <path d="M442,329 Q447,332 445,337 Q442,335 442,329 Z" fill="#1a1a1a"/><path d="M442,345 Q437,342 439,337 Q442,339 442,345 Z" fill="#1a1a1a"/><path d="M434,338 Q437,333 442,336 Q439,340 434,338 Z" fill="#1a1a1a"/><path d="M450,336 Q447,341 442,338 Q445,334 450,336 Z" fill="#1a1a1a"/>
+      </g>
+      <circle cx="442" cy="337" r="1.6" fill="#2a2a2a" stroke="#444" stroke-width="0.3"/>
+      <circle id="hp-ring-1" cx="442" cy="337" r="11.5" fill="none" stroke="#E87C2A" stroke-width="1.2" opacity="0.75" style="animation:glow-pulse 1s ease-in-out infinite"/>
+    </g>
+    <g>
+      <circle cx="442" cy="366" r="10" fill="#0a0a0a" stroke="#3a3a3c" stroke-width="0.7"/>
+      <circle cx="442" cy="366" r="9"  fill="#050505"/>
+      <g id="hp-fan-2" class="fan-blades" style="animation-delay:-0.5s">
+        <path d="M442,358 Q447,361 445,366 Q442,364 442,358 Z" fill="#1a1a1a"/><path d="M442,374 Q437,371 439,366 Q442,368 442,374 Z" fill="#1a1a1a"/><path d="M434,367 Q437,362 442,365 Q439,369 434,367 Z" fill="#1a1a1a"/><path d="M450,365 Q447,370 442,367 Q445,363 450,365 Z" fill="#1a1a1a"/>
+      </g>
+      <circle cx="442" cy="366" r="1.6" fill="#2a2a2a" stroke="#444" stroke-width="0.3"/>
+      <circle id="hp-ring-2" cx="442" cy="366" r="11.5" fill="none" stroke="#E87C2A" stroke-width="1.2" opacity="0.75" style="animation:glow-pulse 1s ease-in-out infinite 0.5s"/>
+    </g>
+    </g>
+    <g id="hp-off-overlay" style="opacity:0">
+      <polygon points="421,392 464,368 464,310 421,334" fill="#0a0a0a" opacity="0.72"/>
+    </g>
+  </g>
+
+  <!-- HP supply/return pipework — horizontal entries both ends, with a vertical
+       dogleg in the gap (HP right face ⇄ tank silver-band ports) -->
+  <g>
+    <path fill="none" stroke="rgba(255,255,255,0.10)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" d="M464,316 L470,312.6 L470,278 L498.5,262"/>
+    <path fill="none" stroke="rgba(255,255,255,0.10)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" d="M505.5,266 L476,282.5 L476,317.3 L464,324"/>
+    <circle cx="464" cy="316" r="1.8" fill="#0a0a0a" stroke="rgba(255,255,255,0.35)" stroke-width="0.8"/>
+    <circle cx="464" cy="324" r="1.8" fill="#0a0a0a" stroke="rgba(255,255,255,0.35)" stroke-width="0.8"/>
+  </g>
+  <!-- FLOW: HP→tank supply/return pair — shared by charging and direct -->
+  <g id="g-flow-hp" style="opacity:0">
+    <path class="flow-line" stroke="var(--orange)" d="M464,316 L470,312.6 L470,278 L498.5,262"/>
+    <path class="flow-line flow-delay-2" stroke="rgba(232,124,42,0.7)" d="M505.5,266 L476,282.5 L476,317.3 L464,324"/>
+  </g>
+
+  <!-- Tesla-style labels — wrapped in a 1.25 compensator (1.25 × 0.64 = 0.8) so
+       the text renders at the same size/position system it was authored in;
+       equipment-anchored dots are remapped to the shrunken equipment. -->
+  <g transform="translate(444.5,400) scale(1.25) translate(-444.5,-400)">
+  <g opacity="0.9">
+    <text x="468.1" y="126" class="tag" text-anchor="middle">Solar</text>
+    <line class="rule" x1="468.1" y1="133" x2="468.1" y2="184.2"/>
+    <circle class="dot" cx="468.1" cy="187.2" r="1.8"/>
+  </g>
+
+  <!-- Lithium battery call-out — plain line + label, no live metrics yet -->
+  <g opacity="0.9">
+    <circle class="dot" cx="594.5" cy="299.6" r="1.8"/>
+    <line class="rule" x1="594.5" y1="302.6" x2="594.5" y2="389"/>
+    <text x="599.5" y="398" class="tag">Battery</text>
+  </g>
+
+  <g>
+    <circle class="dot" cx="544.1" cy="337.6" r="1.8"/>
+    <line class="rule" x1="544.1" y1="340.6" x2="544.1" y2="444"/>
+    <text x="549" y="453" class="tag">Thermal Battery</text>
+    <text id="lbl-battery-val" x="549" y="472" class="val">Idle</text>
+    <text id="lbl-battery-temp" x="549" y="490" class="temp muted">—</text>
+  </g>
+  <g>
+    <circle class="dot" cx="442.5" cy="384" r="1.8"/>
+    <line class="rule" x1="442.5" y1="387" x2="442.5" y2="444"/>
+    <text x="447" y="453" class="tag">Heat Pump</text>
+    <text id="lbl-hp-val" x="447" y="472" class="val" style="fill:#E87C2A">On</text>
+    <text id="lbl-hp-temp" x="447" y="490" class="temp muted">—</text>
+  </g>
+  <g opacity="0.9">
+    <circle class="dot" cx="147" cy="231" r="1.8"/>
+    <line class="rule" x1="147" y1="234" x2="147" y2="444"/>
+    <text x="152" y="453" class="tag">Indoor</text>
+    <text id="lbl-radiators-val" x="152" y="472" class="val">Off</text>
+    <text id="lbl-radiators-temp" x="152" y="490" class="temp muted">—</text>
+  </g>
+  </g><!-- /label compensator -->
+  </g><!-- /equip-scale -->
+  </g><!-- /scene-scale -->
+
+  <!-- Title pinned to the top of the frame (outside the scene scale, so full size). -->
+  <g>
+    <text x="253" y="40" text-anchor="start" font-family="Inter,sans-serif" font-size="14" font-weight="600" fill="rgba(255,255,255,0.5)" letter-spacing="0.08em">My Home</text>
+    <text id="lbl-mode-chip" x="253" y="66" text-anchor="start" font-family="Inter,sans-serif" font-size="22" font-weight="600" fill="#2EC68A">Idle</text>
+  </g>
+
+  <!-- Outdoor readout — top-right sky pocket, just above the garage roof -->
+  <g id="outdoor-readout">
+    <text x="593" y="112" class="tag" text-anchor="end">Outdoor</text>
+    <text id="lbl-outdoor-temp" x="593" y="131" class="val" text-anchor="end">14.0°C</text>
+    <text id="lbl-outdoor-cond" x="593" y="149" class="temp" text-anchor="end">Clear</text>
+  </g>
+
+  <!-- ══ RAIN (rain / storm) — drawn last so it falls in front. Near layer:
+       longer, brighter, faster; far layer: thinner, dimmer, slower. ══ -->
+  <g id="sky-rain" class="hide" stroke="#8fa3bd" stroke-linecap="round">
+    <g stroke-width="0.9">
+      <line class="raindrop" x1="262" y1="0" x2="257" y2="16" stroke-opacity="0.42" style="animation-duration:0.78s;animation-delay:-0.12s"/>
+      <line class="raindrop" x1="308" y1="0" x2="303" y2="16" stroke-opacity="0.34" style="animation-duration:0.88s;animation-delay:-0.51s"/>
+      <line class="raindrop" x1="354" y1="0" x2="349" y2="16" stroke-opacity="0.45" style="animation-duration:0.74s;animation-delay:-0.33s"/>
+      <line class="raindrop" x1="401" y1="0" x2="396" y2="16" stroke-opacity="0.36" style="animation-duration:0.92s;animation-delay:-0.70s"/>
+      <line class="raindrop" x1="447" y1="0" x2="442" y2="16" stroke-opacity="0.44" style="animation-duration:0.76s;animation-delay:-0.05s"/>
+      <line class="raindrop" x1="493" y1="0" x2="488" y2="16" stroke-opacity="0.35" style="animation-duration:0.86s;animation-delay:-0.58s"/>
+      <line class="raindrop" x1="539" y1="0" x2="534" y2="16" stroke-opacity="0.43" style="animation-duration:0.80s;animation-delay:-0.26s"/>
+      <line class="raindrop" x1="584" y1="0" x2="579" y2="16" stroke-opacity="0.37" style="animation-duration:0.90s;animation-delay:-0.44s"/>
+    </g>
+    <g stroke-width="0.6">
+      <line class="raindrop" x1="285" y1="0" x2="282" y2="11" stroke-opacity="0.20" style="animation-duration:1.12s;animation-delay:-0.31s"/>
+      <line class="raindrop" x1="331" y1="0" x2="328" y2="11" stroke-opacity="0.16" style="animation-duration:1.22s;animation-delay:-0.77s"/>
+      <line class="raindrop" x1="377" y1="0" x2="374" y2="11" stroke-opacity="0.21" style="animation-duration:1.06s;animation-delay:-0.15s"/>
+      <line class="raindrop" x1="424" y1="0" x2="421" y2="11" stroke-opacity="0.17" style="animation-duration:1.18s;animation-delay:-0.62s"/>
+      <line class="raindrop" x1="470" y1="0" x2="467" y2="11" stroke-opacity="0.20" style="animation-duration:1.08s;animation-delay:-0.92s"/>
+      <line class="raindrop" x1="516" y1="0" x2="513" y2="11" stroke-opacity="0.16" style="animation-duration:1.24s;animation-delay:-0.48s"/>
+      <line class="raindrop" x1="562" y1="0" x2="559" y2="11" stroke-opacity="0.21" style="animation-duration:1.10s;animation-delay:-0.20s"/>
+      <line class="raindrop" x1="592" y1="0" x2="589" y2="11" stroke-opacity="0.15" style="animation-duration:1.20s;animation-delay:-0.85s"/>
+    </g>
+  </g>
+
+  <!-- ══ LIGHTNING (storm) ══ -->
+  <g id="sky-lightning" class="hide">
+    <rect class="lightning-flash" x="235" y="0" width="363" height="548" fill="#cfe0ff" opacity="0"/>
+  </g>
+</svg>
+</div>
+
+<script>
+(function() {
+  var MODES = ['charging','discharging','direct','idle'];
+  var TODS  = ['day','dawn','dusk','night'];
+  var WXS   = ['clear','partly','overcast','rain','storm'];
+  var params = new URLSearchParams(window.location.search);
+  var state = {
+    mode:   MODES.includes(params.get('mode')) ? params.get('mode') : 'idle',
+    tod: 'day', wx: 'clear', outdoor: null, sunManual: null
+  };
+
+  function show(id, on) { var el = document.getElementById(id); if (el) el.style.opacity = on ? '1' : '0'; }
+  function setHidden(id, hidden) { var el = document.getElementById(id); if (el) el.classList.toggle('hide', hidden); }
+
+  // ── system mode (same logic as production) ──
+  var COPY = {
+    charging:    { label: 'Charging',    color: '#E87C2A',               hpOn: true,  battery: 'Charging'  },
+    discharging: { label: 'Discharging', color: '#2EC68A',               hpOn: false, battery: 'Releasing' },
+    direct:      { label: 'Direct Heat', color: '#E87C2A',               hpOn: true,  battery: 'Secondary' },
+    idle:        { label: 'Idle',        color: 'rgba(255,255,255,0.5)', hpOn: false, battery: 'Idle'      }
+  };
+  function applyMode() {
+    var d = COPY[state.mode];
+    var direct = state.mode === 'direct';
+    ['g-flow-home', 'g-flow-home-2'].forEach(function (id) {
+      var g = document.getElementById(id);
+      g.style.opacity = (state.mode === 'discharging' || direct) ? '1' : '0';
+      g.style.setProperty('--flow-main', direct ? 'var(--orange)' : 'var(--green)');
+    });
+    show('g-flow-hp', state.mode === 'charging' || direct);
+    show('hp-ring-1', d.hpOn); show('hp-ring-2', d.hpOn); show('hp-off-overlay', !d.hpOn);
+    ['hp-fan-1','hp-fan-2'].forEach(function (id){ var el=document.getElementById(id); if(el) el.classList.toggle('off', !d.hpOn); });
+    var chip = document.getElementById('lbl-mode-chip'); chip.textContent = d.label; chip.setAttribute('fill', d.color);
+    var hpVal = document.getElementById('lbl-hp-val'); hpVal.textContent = d.hpOn ? 'On' : 'Off';
+    hpVal.setAttribute('style', 'fill:' + (d.hpOn ? '#E87C2A' : 'rgba(255,255,255,0.4)'));
+    var bat = document.getElementById('lbl-battery-val'); bat.textContent = d.battery;
+    bat.setAttribute('style', state.mode==='charging'?'fill:#E87C2A':state.mode==='discharging'?'fill:#2EC68A':'fill:rgba(255,255,255,0.5)');
+    var rad = document.getElementById('lbl-radiators-val');
+    if (state.mode==='discharging'){rad.textContent='On';rad.setAttribute('style','fill:#2EC68A');}
+    else if (state.mode==='direct'){rad.textContent='On';rad.setAttribute('style','fill:#E87C2A');}
+    else {rad.textContent='Off';rad.removeAttribute('style');}
+    var sg = document.getElementById('store-glow-el');
+    if (sg){ sg.setAttribute('fill', state.mode==='charging'?'url(#store-glow-o)':'url(#store-glow-g)');
+      sg.style.opacity = (state.mode==='charging'||state.mode==='discharging')?'0.55':'0'; }
+  }
+
+  // ── sun arc across the sky (moves with time of day) ──
+  // frac 0 = sunrise (left, low) · 0.5 = midday (top) · 1 = sunset (right, low).
+  var SUN_X0 = 250, SUN_X1 = 575;       // horizon x at sunrise / sunset
+  var SUN_Y_TOP = 22, SUN_Y_LOW = 96;   // y at midday / near the horizon
+  function sunFrac() {
+    // Time-of-day slider overrides everything when dragged.
+    if (state.sunManual != null) return state.sunManual;
+    // dawn/dusk buttons preview the ends; 'day' tracks the real clock so the sun
+    // sweeps across the sky through the day (06:00→18:00 daylight window).
+    if (state.tod === 'dawn') return 0.12;
+    if (state.tod === 'dusk') return 0.88;
+    var d = new Date(), h = d.getHours() + d.getMinutes() / 60;
+    return Math.max(0.05, Math.min(0.95, (h - 6) / 12));
+  }
+  function positionSun() {
+    var g = document.getElementById('sky-sun');
+    if (!g) return;
+    var f = sunFrac(), t = 2 * f - 1;
+    var x = SUN_X0 + f * (SUN_X1 - SUN_X0);
+    var y = SUN_Y_TOP + (SUN_Y_LOW - SUN_Y_TOP) * (t * t);   // parabolic arc
+    g.setAttribute('transform', 'translate(' + (x - 570).toFixed(1) + ',' + (y - 40).toFixed(1) + ')');
+  }
+
+  // ── time of day ──
+  function applyTOD() {
+    var night = state.tod === 'night';
+    // Duskiness ramps continuously with the sun's distance from the horizon
+    // (full golden below m=0.10, fading out by m=0.25) — no hard hue steps.
+    var f = sunFrac(), m = Math.min(f, 1 - f);
+    var dusk = night ? 0 : Math.max(0, Math.min(1, 1 - (m - 0.10) / 0.15));
+    document.getElementById('sky-dusk-rect').style.opacity = dusk.toFixed(2);
+    document.getElementById('sky-night-rect').style.opacity = night ? '1' : '0';
+    document.getElementById('sky-stars').style.opacity = night ? '1' : '0';
+    document.getElementById('sky-moon').style.opacity = night ? '1' : '0';
+    if (!night) positionSun();
+    // Warmer sun near the horizon.
+    var disk = document.getElementById('sun-disk');
+    if (disk) disk.setAttribute('fill', dusk > 0.5 ? '#E8662A' : '#E87C2A');
+    applyWX(); // sun visibility depends on tod too
+  }
+
+  // ── weather ──
+  function applyWX() {
+    var w = state.wx;
+    var cloudy   = (w === 'partly' || w === 'overcast' || w === 'rain' || w === 'storm');
+    var raining  = (w === 'rain' || w === 'storm');
+    var storm    = (w === 'storm');
+    var overcast = (w === 'overcast' || raining);
+
+    document.getElementById('sky-clouds').style.opacity = cloudy ? '1' : '0';
+    setHidden('sky-rain', !raining);
+    setHidden('sky-lightning', !storm);
+
+    // wide extra layer fades in for heavier cover
+    document.getElementById('cloud-extra-wrap').style.opacity = overcast ? '1' : '0';
+
+    // darken + densify the cloud banks with cover
+    document.querySelectorAll('#sky-clouds .cloud').forEach(function(c){
+      c.setAttribute('fill', storm ? '#6f7782' : overcast ? '#838b96' : '#aab2bd');
+      c.setAttribute('opacity', (parseFloat(c.dataset.op) * (storm ? 2.2 : overcast ? 1.8 : 1)).toFixed(2));
+    });
+
+    // sun fades out at night and dims behind cover
+    var sun = document.getElementById('sky-sun');
+    if (sun) sun.style.opacity = state.tod === 'night' ? '0' : overcast ? '0.35' : '1';
+
+    var cond = document.getElementById('lbl-outdoor-cond');
+    if (cond) cond.textContent = {clear:'Clear',partly:'Partly cloudy',overcast:'Overcast',rain:'Rain',storm:'Storm'}[w];
+  }
+
+  function applyOutdoor() {
+    var el = document.getElementById('lbl-outdoor-temp');
+    if (el) el.textContent = (state.outdoor == null) ? '—' : state.outdoor.toFixed(1) + '°C';
+  }
+
+  // ── live system temps (next to the labels) ──
+  function setTemp(id, val, forceMuted) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    var n = (val == null) ? NaN : parseFloat(val);
+    if (forceMuted || isNaN(n)) { el.textContent = '—'; el.classList.add('muted'); }
+    else { el.textContent = n.toFixed(1) + '°C'; el.classList.remove('muted'); }
+  }
+
+  // ── live data from the dashboard bridge (branding.js) ──
+  window.addEventListener('message', function(e) {
+    if (!e.data) return;
+    if (e.data.type === 'setMode' && MODES.includes(e.data.mode)) {
+      state.mode = e.data.mode; applyMode();
+    }
+    if (e.data.type === 'setTemps') {
+      setTemp('lbl-battery-temp', e.data.tank, false);
+      setTemp('lbl-hp-temp',      e.data.supply, e.data.supply == null);
+      setTemp('lbl-radiators-temp', e.data.living, false);
+    }
+    if (e.data.type === 'setEnv') {
+      if (TODS.includes(e.data.tod)) state.tod = e.data.tod;
+      if (WXS.includes(e.data.wx))   state.wx  = e.data.wx;
+      if ('outdoor' in e.data) state.outdoor = (e.data.outdoor == null ? null : parseFloat(e.data.outdoor));
+      applyTOD();      // also runs applyWX()
+      applyOutdoor();
+    }
+  });
+
+  // Tell the bridge we're ready so it pushes current state immediately.
+  if (window.parent !== window) {
+    try { window.parent.postMessage({ type: 'thermalDawnReady' }, '*'); } catch (e) {}
+  }
+
+  applyMode(); applyTOD(); applyWX(); applyOutdoor();
+  // Keep the sun creeping across the sky through the day without a reload.
+  setInterval(function(){ if (state.tod !== 'night') positionSun(); }, 60000);
+
+  /* ── standalone mode (marketing embed) ──────────────────────────────
+     Inside the HA dashboard the parent bridge drives everything, so we
+     leave well alone. Embedded on the website there is no bridge, so the
+     scene would sit frozen on 'idle'. Detect that and take over: expose
+     the control bar, run a narrated demo loop, and hand control to the
+     visitor the moment they press anything.
+     `?standalone=0` forces the bridged behaviour; `?standalone=1` forces
+     the controls (useful for testing inside HA).                      */
+  // Being inside an iframe proves nothing — the HA dashboard is an iframe
+  // too. So assume standalone and stand down the moment a real bridge
+  // speaks (the listener below clears the controls and the demo loop).
+  var forced = params.get('standalone');
+  var standalone = forced !== '0';
+
+  var heardFromBridge = false;
+  window.addEventListener('message', function (e) {
+    if (e.data && (e.data.type === 'setMode' || e.data.type === 'setEnv' || e.data.type === 'setTemps')) {
+      heardFromBridge = true;
+      if (demoTimer) { clearInterval(demoTimer); demoTimer = null; }
+      document.body.classList.remove('standalone');
+    }
+  });
+
+  var demoTimer = null;
+  // A day in the life: charge on the morning sun, coast, then release
+  // stored heat through the evening and overnight.
+  var STORY = [
+    { mode: 'idle',        tod: 'dawn',  wx: 'clear',    outdoor: 6.5,  tank: 41, supply: null, living: 17.5 },
+    { mode: 'charging',    tod: 'day',   wx: 'clear',    outdoor: 14.0, tank: 52, supply: 48,   living: 19.5 },
+    { mode: 'charging',    tod: 'day',   wx: 'overcast', outdoor: 12.5, tank: 61, supply: 47,   living: 20.5 },
+    { mode: 'idle',        tod: 'dusk',  wx: 'clear',    outdoor: 10.0, tank: 68, supply: null, living: 21.0 },
+    { mode: 'discharging', tod: 'night', wx: 'clear',    outdoor: 5.0,  tank: 63, supply: null, living: 21.5 },
+    { mode: 'discharging', tod: 'night', wx: 'rain',     outdoor: 3.5,  tank: 55, supply: null, living: 21.0 }
+  ];
+
+  function paint(step) {
+    state.mode = step.mode;
+    state.tod = step.tod;
+    state.wx = step.wx;
+    state.outdoor = step.outdoor;
+    state.sunManual = null;
+    applyMode(); applyTOD(); applyOutdoor();
+    setTemp('lbl-battery-temp', step.tank, false);
+    setTemp('lbl-hp-temp', step.supply, step.supply == null);
+    setTemp('lbl-radiators-temp', step.living, false);
+    syncButtons();
+  }
+
+  function syncButtons() {
+    document.querySelectorAll('[data-mode]').forEach(function (b) {
+      b.setAttribute('aria-pressed', String(b.dataset.mode === state.mode));
+    });
+    document.querySelectorAll('[data-tod]').forEach(function (b) {
+      b.setAttribute('aria-pressed', String(b.dataset.tod === state.tod));
+    });
+    document.querySelectorAll('[data-wx]').forEach(function (b) {
+      b.setAttribute('aria-pressed', String(b.dataset.wx === state.wx));
+    });
+  }
+
+  function stopDemo() {
+    if (demoTimer) { clearInterval(demoTimer); demoTimer = null; }
+  }
+
+  function startDemo() {
+    var i = 0;
+    paint(STORY[0]);
+    demoTimer = setInterval(function () {
+      i = (i + 1) % STORY.length;
+      paint(STORY[i]);
+    }, 5000);
+  }
+
+  var userDrove = false;
+
+  if (standalone) {
+    document.body.classList.add('standalone');
+
+    document.getElementById('controls').addEventListener('click', function (e) {
+      var b = e.target.closest('.ctl-btn');
+      if (!b) return;
+      userDrove = true;
+      stopDemo();                       // visitor takes the wheel
+      if (b.dataset.mode) { state.mode = b.dataset.mode; applyMode(); }
+      if (b.dataset.tod)  { state.tod = b.dataset.tod; state.sunManual = null; applyTOD(); }
+      if (b.dataset.wx)   { state.wx = b.dataset.wx; applyWX(); }
+      syncButtons();
+    });
+
+    // Pause the loop while the frame is off-screen — no point animating
+    // a scene nobody is looking at.
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) {
+          if (!en.isIntersecting) { stopDemo(); }
+          else if (!demoTimer && !heardFromBridge && !userDrove) { startDemo(); }
+        });
+      }, { threshold: 0.15 }).observe(document.querySelector('.svg-wrap'));
+    }
+
+    // Respect a visitor who prefers less motion: show a representative
+    // frame instead of looping.
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      paint(STORY[1]);
+    } else {
+      startDemo();
+    }
+  }
+})();
+</script>
+</body>
+</html>

@@ -167,29 +167,30 @@
         <figcaption class="center" style="font-weight:800;color:#fff;margin-bottom:14px">Typical Solar Energy Consumption Mismatch</figcaption>
         <p class="center micro" style="display:flex;flex-wrap:wrap;gap:8px 20px;justify-content:center;margin-bottom:12px">
           <span><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#fff;margin-right:6px"></span>Solar generation</span>
-          <span><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#4f8b86;margin-right:6px"></span>Water heating</span>
-          <span><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#e2703a;margin-right:6px"></span>Heating</span>
-          <span><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#7a5343;margin-right:6px"></span>Appliances &amp; lighting</span>
+          <span><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#4f8b86;margin-right:6px"></span>Water heating <span style="opacity:.65">~20%</span></span>
+          <span><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#e2703a;margin-right:6px"></span>Heating &amp; cooling <span style="opacity:.65">~40%</span></span>
+          <span><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#8a6250;margin-right:6px"></span>Appliances &amp; lighting <span style="opacity:.65">~40%</span></span>
         </p>
-        <svg viewBox="0 0 700 300" role="img" aria-label="Chart: household heating, hot water and appliance demand peaks at dawn and dusk while solar generation peaks in the middle of the day" style="width:100%;height:auto">
+        <!-- Stacked areas are scaled so daily energy splits 40% appliances &
+             lighting / 40% heating & cooling / 20% water heating. -->
+        <svg viewBox="0 0 700 300" role="img" aria-label="Chart: household heating, hot water and appliance demand peaks at dawn and dusk while solar generation peaks in the middle of the day. Of daily energy use, appliances and lighting are about 40 percent, heating and cooling about 40 percent, and water heating about 20 percent." style="width:100%;height:auto">
           <g stroke="rgba(255,255,255,.14)">
-            <line x1="50" y1="40" x2="680" y2="40"/><line x1="50" y1="100" x2="680" y2="100"/>
-            <line x1="50" y1="160" x2="680" y2="160"/><line x1="50" y1="220" x2="680" y2="220"/>
+            <line x1="50" y1="34" x2="680" y2="34"/><line x1="50" y1="88" x2="680" y2="88"/>
+            <line x1="50" y1="142" x2="680" y2="142"/><line x1="50" y1="196" x2="680" y2="196"/>
           </g>
           <line x1="50" y1="250" x2="680" y2="250" stroke="rgba(255,255,255,.4)"/>
           <line x1="50" y1="30" x2="50" y2="250" stroke="rgba(255,255,255,.4)"/>
-          <text x="26" y="145" text-anchor="middle" font-size="12" fill="#c8b8aa" transform="rotate(-90 26 145)">Energy</text>
-          <!-- appliances baseline -->
-          <path d="M50 250 L50 232 C 140 228, 220 236, 300 230 C 400 224, 500 214, 600 206 L680 210 L680 250 Z" fill="#7a5343" opacity=".85"/>
-          <!-- heating: dawn + dusk peaks -->
-          <path d="M50 232 C 90 190, 120 132, 160 138 C 205 145, 235 214, 300 228 C 400 222, 470 176, 520 118 C 560 76, 600 84, 640 140 C 660 172, 670 198, 680 210 L680 250 L50 250 Z" fill="#e2703a" opacity=".82"/>
-          <!-- water heating -->
-          <path d="M50 246 C 95 214, 125 158, 165 164 C 210 172, 240 232, 300 240 C 400 236, 475 196, 525 146 C 565 108, 605 116, 645 168 C 663 194, 672 216, 680 226 L680 250 L50 250 Z" fill="#4f8b86" opacity=".8"/>
-          <!-- solar generation curve -->
-          <path d="M50 250 C 140 250, 190 208, 240 150 C 290 92, 330 66, 365 66 C 400 66, 440 92, 490 150 C 540 208, 590 250, 680 250" fill="none" stroke="#fff" stroke-width="2.4"/>
+          <text x="26" y="142" text-anchor="middle" font-size="12" fill="#c8b8aa" transform="rotate(-90 26 142)">Energy</text>
+          <!-- painted tallest-first so the stack reads bottom-up:
+               appliances → heating → water heating -->
+          <path fill="#4f8b86" opacity=".85" d="M50.0 201.6 C54.6 202.8 68.3 206.9 77.4 208.6 C86.5 210.3 95.7 211.5 104.8 211.8 C113.9 212.1 123.0 212.8 132.2 210.5 C141.3 208.2 150.4 206.9 159.6 197.9 C168.7 188.9 177.8 174.7 187.0 156.5 C196.1 138.2 205.2 107.5 214.3 88.4 C223.5 69.4 232.6 41.6 241.7 42.0 C250.9 42.4 260.0 71.3 269.1 91.0 C278.3 110.7 287.4 144.2 296.5 160.2 C305.7 176.3 314.8 181.4 323.9 187.4 C333.0 193.4 342.2 194.9 351.3 196.3 C360.4 197.8 369.6 196.3 378.7 196.3 C387.8 196.3 397.0 197.7 406.1 196.3 C415.2 195.0 424.3 192.7 433.5 188.3 C442.6 183.9 451.7 179.8 460.9 169.8 C470.0 159.7 479.1 144.6 488.3 128.2 C497.4 111.8 506.5 87.0 515.7 71.3 C524.8 55.6 533.9 38.4 543.0 34.0 C552.2 29.6 561.3 36.9 570.4 44.8 C579.6 52.7 588.7 68.5 597.8 81.4 C607.0 94.3 616.1 108.9 625.2 122.1 C634.3 135.4 643.5 150.3 652.6 161.1 C661.7 171.8 675.4 182.4 680.0 186.7 L680 250 L50 250 Z"/>
+          <path fill="#e2703a" opacity=".88" d="M50.0 206.6 C54.6 207.6 68.3 211.2 77.4 212.6 C86.5 214.1 95.7 215.1 104.8 215.3 C113.9 215.5 123.0 216.1 132.2 214.0 C141.3 212.0 150.4 210.0 159.6 203.0 C168.7 195.9 177.8 183.6 187.0 171.6 C196.1 159.6 205.2 141.9 214.3 131.2 C223.5 120.6 232.6 106.2 241.7 107.5 C250.9 108.8 260.0 126.3 269.1 138.8 C278.3 151.4 287.4 172.3 296.5 182.9 C305.7 193.5 314.8 198.1 323.9 202.5 C333.0 206.8 342.2 207.9 351.3 208.9 C360.4 210.0 369.6 208.8 378.7 208.8 C387.8 208.8 397.0 210.0 406.1 208.9 C415.2 207.9 424.3 206.2 433.5 202.4 C442.6 198.5 451.7 194.5 460.9 185.9 C470.0 177.3 479.1 164.0 488.3 150.8 C497.4 137.6 506.5 118.9 515.7 106.6 C524.8 94.2 533.9 81.2 543.0 76.8 C552.2 72.4 561.3 75.1 570.4 80.0 C579.6 85.0 588.7 96.6 597.8 106.6 C607.0 116.5 616.1 129.0 625.2 139.8 C634.3 150.5 643.5 162.2 652.6 171.1 C661.7 180.0 675.4 189.6 680.0 193.3 L680 250 L50 250 Z"/>
+          <path fill="#8a6250" opacity=".95" d="M50.0 229.2 C54.6 229.7 68.3 231.3 77.4 232.0 C86.5 232.7 95.7 233.2 104.8 233.4 C113.9 233.6 123.0 233.6 132.2 233.4 C141.3 233.2 150.4 233.2 159.6 232.0 C168.7 230.9 177.8 229.8 187.0 226.5 C196.1 223.1 205.2 217.2 214.3 211.9 C223.5 206.6 232.6 196.6 241.7 194.6 C250.9 192.7 260.0 197.3 269.1 200.2 C278.3 203.0 287.4 209.4 296.5 211.9 C305.7 214.5 314.8 214.8 323.9 215.4 C333.0 216.0 342.2 215.6 351.3 215.4 C360.4 215.2 369.6 214.0 378.7 214.0 C387.8 214.0 397.0 215.4 406.1 215.4 C415.2 215.4 424.3 215.2 433.5 214.0 C442.6 212.9 451.7 211.5 460.9 208.5 C470.0 205.5 479.1 200.6 488.3 196.0 C497.4 191.4 506.5 185.1 515.7 180.8 C524.8 176.5 533.9 172.1 543.0 170.4 C552.2 168.7 561.3 168.7 570.4 170.4 C579.6 172.1 588.7 176.7 597.8 180.8 C607.0 184.8 616.1 189.8 625.2 194.6 C634.3 199.5 643.5 205.2 652.6 209.9 C661.7 214.5 675.4 220.2 680.0 222.3 L680 250 L50 250 Z"/>
+          <!-- solar generation (own scale — shape, not magnitude) -->
+          <path fill="none" stroke="#fff" stroke-width="2.4" stroke-linejoin="round" d="M50.0 250.0 C54.6 250.0 68.3 250.0 77.4 250.0 C86.5 250.0 95.7 250.0 104.8 250.0 C113.9 250.0 123.0 250.0 132.2 250.0 C141.3 250.0 150.4 250.0 159.6 250.0 C168.7 250.0 177.8 250.0 187.0 250.0 C196.1 249.2 205.2 249.7 214.3 245.3 C223.5 240.9 232.6 233.2 241.7 223.6 C250.9 214.0 260.0 201.0 269.1 187.9 C278.3 174.8 287.4 159.2 296.5 145.1 C305.7 130.9 314.8 115.6 323.9 103.0 C333.0 90.5 342.2 78.3 351.3 69.7 C360.4 61.1 369.6 54.3 378.7 51.3 C387.8 48.2 397.0 48.2 406.1 51.3 C415.2 54.3 424.3 61.1 433.5 69.7 C442.6 78.3 451.7 90.5 460.9 103.0 C470.0 115.6 479.1 130.9 488.3 145.1 C497.4 159.2 506.5 174.8 515.7 187.9 C524.8 201.0 533.9 214.0 543.0 223.6 C552.2 233.2 561.3 240.9 570.4 245.3 C579.6 249.7 588.7 249.2 597.8 250.0 C607.0 250.0 616.1 250.0 625.2 250.0 C634.3 250.0 643.5 250.0 652.6 250.0 C661.7 250.0 675.4 250.0 680.0 250.0"/>
           <g font-size="12" fill="#c8b8aa" text-anchor="middle">
-            <text x="50" y="272">00:00</text><text x="207" y="272">04:00</text><text x="365" y="272">12:00</text>
-            <text x="522" y="272">16:00</text><text x="680" y="272">20:00</text>
+            <text x="50" y="272">00:00</text><text x="215" y="272">06:00</text><text x="379" y="272">12:00</text>
+            <text x="543" y="272">18:00</text><text x="680" y="272">23:00</text>
           </g>
           <text x="365" y="294" text-anchor="middle" font-size="12" fill="#c8b8aa">Time of Day</text>
         </svg>

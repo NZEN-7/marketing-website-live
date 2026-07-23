@@ -78,7 +78,7 @@ Search the source for `class="draft"` to find them all.
 
 ## Decisions the copy left open (for you — not blocking)
 These are flagged in the source markdown's "Open items" and carried here so they don't get lost:
-- Confirm public contact address (**Lane Cove West** vs **Hornsby**) — currently rendered as written (Lane Cove West).
+- Public contact address is now **Hornsby, NSW 2077** (footer + Contact page), per Nick. Still needs the **unit/street number** — currently suburb-level only; both spots carry a `TODO`.
 - Confirm Mike & Kay can be named + quote reproduced publicly.
 - Confirm the legal entity name for the footer (currently "© Thermal Dawn, ABN 47 682 866 913").
 - Confirm canonical booking path: `/register` (→ Register Interest) vs `/contact`. Currently all "Book a site assessment" CTAs point to Register Interest.

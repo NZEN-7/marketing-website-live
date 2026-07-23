@@ -102,7 +102,7 @@ li{margin:.35em 0;}
 .btn{
   display:inline-flex;align-items:center;justify-content:center;gap:.5em;
   font-family:var(--font);font-weight:800;font-size:1rem;line-height:1;
-  padding:15px 26px;border-radius:999px;border:2px solid transparent;cursor:pointer;
+  padding:15px 26px;border-radius:var(--btn-radius);border:2px solid transparent;cursor:pointer;
   text-decoration:none;transition:transform .12s ease,box-shadow .12s ease,background .12s ease;
   text-align:center;
 }
@@ -142,7 +142,7 @@ li{margin:.35em 0;}
 .nav__menu.open .nav__sub{padding-left:14px;}
 .nav__menu.open .nav__sub a{font-size:.98rem;color:var(--td-grey);}
 .nav__menu.open .nav__cta-mob{margin-top:14px;}
-.nav__menu.open .nav__cta-mob a{background:var(--td-sunrise);color:#1c1514;border-radius:999px;text-align:center;font-weight:800;padding:14px;}
+.nav__menu.open .nav__cta-mob a{background:var(--td-sunrise);color:#1c1514;border-radius:var(--btn-radius);text-align:center;font-weight:800;padding:14px;}
 @media(min-width:1000px){
   .nav__toggle{display:none;}
   .nav__cta-mob{display:none;}            /* drawer-only CTA, hidden on desktop */
@@ -256,10 +256,13 @@ table.data td:first-child{font-weight:600;}
 .embed--home iframe{height:1060px;}
 .embed--daynight iframe{height:950px;}
 .embed--flow iframe{height:820px;}
+/* flow-v2 carries its own control bar above the scene */
+.embed--flow2 iframe{height:750px;}
 @media(max-width:640px){
   .embed--home iframe{height:900px;}
   .embed--daynight iframe{height:850px;}
   .embed--flow iframe{height:720px;}
+  .embed--flow2 iframe{height:580px;}
 }
 
 /* ---------- Callout / notes ---------- */
@@ -361,7 +364,7 @@ table.data td:first-child{font-weight:600;}
   --td-shell:#14100d;                 /* header / footer near-black */
   --td-cocoa-grad:linear-gradient(180deg,#3a2312 0%,#25150b 55%,#1a0f08 100%);
   --td-orange-flat:#f5860f;           /* flat orange band */
-  --btn-radius:8px;
+  --btn-radius:8px;                   /* one radius for every button, sitewide */
 }
 
 /* ---------- Header: dark shell + gradient hairline ---------- */
@@ -512,7 +515,9 @@ body.dark .band-orange p,body.dark .band-orange li,body.dark .band-orange strong
 
 /* ---------- Footer: centred lockup ---------- */
 .site-footer{background:var(--td-shell);text-align:center;padding:52px 0 28px;}
-.footer-center__logo img{height:26px;margin:0 auto 20px;}
+/* width:auto is required — the img carries width/height attributes, and
+   without it the 26px height squashes the wordmark to a 240px-wide smear */
+.footer-center__logo img{height:26px;width:auto;margin:0 auto 20px;}
 .footer-social--icons{justify-content:center;gap:14px;margin:0 0 22px;}
 .footer-social--icons a{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:#fff;color:var(--td-shell);}
 .footer-social--icons a:hover{background:var(--td-orange);color:#1c1514;}
@@ -542,17 +547,38 @@ body.dark .section--paper2,body.dark .section--paper3{background:var(--td-cocoa-
 body.dark .section--dark{background:#080605;}
 body.dark .section--cocoa{background:var(--td-cocoa-grad);}
 
-/* centred layout is the house style on these pages */
+/* centred layout is the house style on these pages — headings and short
+   intros centre, but prose and lists stay left-aligned and measure-limited
+   so they're actually readable. */
 body.dark .section>.wrap{text-align:center;}
 body.dark .narrow{margin-left:auto!important;margin-right:auto!important;}
 body.dark .section .card,body.dark .section .table-wrap,body.dark .section .form,
 body.dark .section .tier,body.dark .section .path-card,body.dark .section .article,
 body.dark .section .split,body.dark .section .altrow,body.dark .section .faq{text-align:left;}
-body.dark .section ul{list-style:none;padding-left:0;}
-body.dark .section .article ul,body.dark .section .article ol{list-style:disc;padding-left:1.3em;text-align:left;}
+/* lists never centre — ragged bullets are hard to scan */
+body.dark .section ul,body.dark .section ol{text-align:left;max-width:66ch;margin-left:auto;margin-right:auto;}
+body.dark .section ol{padding-left:1.5em;}
+body.dark .section li{margin:.6em 0;padding-left:.2em;}
+body.dark .section ol li::marker{color:var(--td-orange);font-weight:800;}
+body.dark .section ul:not(.applist):not(.stays ul):not(.footer-col ul){list-style:none;padding-left:0;}
+body.dark .section ul:not(.applist):not(.stays ul)>li{position:relative;padding-left:1.4em;}
+body.dark .section ul:not(.applist):not(.stays ul)>li::before{content:"";position:absolute;left:0;top:.62em;width:6px;height:6px;border-radius:50%;background:var(--td-orange);}
+body.dark .section .article ul,body.dark .section .article ol{list-style:disc;padding-left:1.3em;text-align:left;max-width:none;}
+body.dark .section .article ul>li{padding-left:0;}
+body.dark .section .article ul>li::before{display:none;}
 body.dark .section .card ul,body.dark .section .tier ul{text-align:left;}
+body.dark .section .tier ul>li::before{display:none;}
+/* body prose gets a comfortable measure even inside a centred wrap */
+body.dark .section>.wrap>p,body.dark .section>.wrap>.narrow>p{max-width:70ch;margin-left:auto;margin-right:auto;}
 body.dark .section .btn-row{justify-content:center;}
 body.dark .section .quote{border-left:0;border-top:2px solid var(--td-orange);padding:16px 0 0;display:inline-block;}
+/* .quote defaults to near-black — invisible on a dark page */
+body.dark .quote{color:#fff;}
+body.dark .quote-attr{color:var(--td-orange);}
+body.dark blockquote{color:#fff;}
+/* draft markers: the light-page blue is ~2.5:1 on near-black */
+body.dark .draft{color:#bfe6f7;background:rgba(61,175,229,.18);}
+body.dark .draft-note{color:#bfe6f7;}
 
 /* cards: dark fill, orange keyline, orange heading */
 body.dark .card{background:#15100c;border:1px solid rgba(244,146,29,.42);box-shadow:none;color:#cfc5bc;}
@@ -591,9 +617,21 @@ body.dark .btn--ghost:hover{background:#fff;color:#1c1514;}
 body.dark .post-card{background:#15100c;border-color:rgba(244,146,29,.3);box-shadow:none;}
 body.dark .post-card p{color:#a2968c;}
 
-/* buttons that were designed for light backgrounds */
-body.dark .btn--dark{background:var(--td-sunrise) border-box;color:#1c1514;}
-body.dark .btn--dark:hover{background:var(--td-sunrise) border-box;color:#1c1514;}
+/* Buttons on dark pages.
+   `body.dark a` (0-1-2) outranks `.btn--primary` (0-1-0), which rendered
+   button labels orange-on-orange. These restate the label colours at a
+   specificity that wins. */
+body.dark .btn--primary,body.dark .btn--primary:hover,
+body.dark .btn--dark,body.dark .btn--dark:hover,
+body.dark .btn--flat,body.dark .btn--flat:hover,
+body.dark .btn--light,body.dark .btn--light:hover,
+body.dark .nav__menu.open .nav__cta-mob a{color:#1c1514;}
+body.dark .btn--outline-light,body.dark .btn--ghost{color:#fff;}
+body.dark .btn--outline-light:hover,body.dark .btn--ghost:hover{color:#1c1514;}
+body.dark .btn--blue,body.dark .btn--blue:hover{color:#0d2b3a;}
+/* btn--dark has no meaning on a dark page — render it as the sunrise CTA */
+body.dark .btn--dark{background:var(--td-sunrise) border-box;}
+body.dark .btn--dark:hover{background:var(--td-sunrise) border-box;}
 
 /* hero on dark pages */
 body.dark .hero--plain{background:#0d0908;}

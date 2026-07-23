@@ -57,7 +57,8 @@
         '<a href="/pre-order/">Reserve</a>' +
         '<a href="/contact/">Contact</a>' +
       '</nav>' +
-      '<address class="footer-address">Thermal Dawn, 3 Apollo Place, Lane Cove West, NSW 2066 &middot; Made in Hornsby, NSW</address>' +
+      // TODO: add the unit/street number once confirmed — currently suburb-level only.
+      '<address class="footer-address">Thermal Dawn, Hornsby, NSW 2077</address>' +
       '<p class="footer-legal">&copy; ' + YEAR + ' Thermal Dawn Pty Ltd. ABN 47 682 866 913. All Rights Reserved.</p>' +
     '</div>';
 
