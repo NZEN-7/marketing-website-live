@@ -1,0 +1,42 @@
+{
+  "$comment": "Vercel twin of netlify.toml — keep the two in sync. Static site, no build. Forms note: Netlify Forms do NOT work on Vercel; the 5 forms need a backend before this hosts production traffic.",
+  "trailingSlash": true,
+  "headers": [
+    {
+      "source": "/assets/(.*)",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000" }]
+    },
+    {
+      "source": "/assets/fonts/(.*)",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+      ]
+    }
+  ],
+  "redirects": [
+    { "source": "/hydronic-overview", "destination": "/hydronic/", "permanent": true },
+    { "source": "/product", "destination": "/hydronic/", "permanent": true },
+    { "source": "/how-it-works", "destination": "/hydronic/how-it-works/", "permanent": true },
+    { "source": "/pricing", "destination": "/hydronic/pricing/", "permanent": true },
+    { "source": "/pre-order-form", "destination": "/pre-order/", "permanent": true },
+    { "source": "/pre-order-form/basic-reserve", "destination": "/pre-order/basic-reserve/", "permanent": true },
+    { "source": "/pre-order-form/founder-premium", "destination": "/pre-order/founder-premium/", "permanent": true },
+    { "source": "/register", "destination": "/pre-order/register-interest/", "permanent": true },
+    { "source": "/contact-form", "destination": "/contact/", "permanent": true },
+    { "source": "/post/hawthorn-first-install", "destination": "/blog/hawthorn-first-install/", "permanent": true },
+    { "source": "/post/heat-pump-replace-gas-hydronic-boiler", "destination": "/blog/heat-pump-replace-gas-hydronic-boiler/", "permanent": true },
+    { "source": "/post/thermal-storage-vs-lithium-battery", "destination": "/blog/thermal-storage-vs-lithium-battery/", "permanent": true },
+    { "source": "/post/heat-pump-pipe-diameter-myth", "destination": "/blog/heat-pump-pipe-diameter-myth/", "permanent": true },
+    { "source": "/post/old-gas-boiler-removal-electrification", "destination": "/blog/old-gas-boiler-removal-electrification/", "permanent": true },
+    { "source": "/post/hydronic-heat-pump-installation", "destination": "/blog/hydronic-heat-pump-installation/", "permanent": true },
+    { "source": "/post/heat-pump-radiator-compatibility-australia", "destination": "/blog/heat-pump-radiator-compatibility-australia/", "permanent": true },
+    { "source": "/post/hydronic-cooling-fan-coil-units-australia", "destination": "/blog/hydronic-cooling-fan-coil-units-australia/", "permanent": true },
+    { "source": "/post/victorian-gas-boiler-replacement-timing-should-you-replace-now-or-wait", "destination": "/blog/victorian-gas-boiler-replacement-timing/", "permanent": true }
+  ]
+}
