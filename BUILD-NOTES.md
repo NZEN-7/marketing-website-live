@@ -41,6 +41,9 @@ cd site-v2
 python3 -m http.server 8080      # then open http://localhost:8080
 ```
 
+## Deploy to Vercel (current path)
+`vercel.json` twins `netlify.toml` (same caching, security headers, and 301 map) — **keep the two in sync** when editing either. Deploys go via `npm run deploy:live`, which re-stamps HEAD as NZEN-7 and force-pushes to `NZEN-7/marketing-website-live` (Vercel Hobby committer-gate workaround, same as TD-Platform). ⚠ **Netlify Forms do NOT run on Vercel** — the 5 forms (`newsletter`, `contact`, `register-interest`, `basic-reserve`, `founder-premium`) submit into a 404 there. Fine for staging; a form backend is required before production traffic moves to Vercel.
+
 ## Deploy to Netlify
 - **Drag-and-drop:** drop the whole `site-v2` folder onto the Netlify dashboard.
 - **CLI:** `netlify deploy --dir=site-v2 --prod`
