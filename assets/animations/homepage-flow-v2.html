@@ -3,9 +3,74 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Thermal Dawn — System Flow</title>
+<title>Thermal Dawn — Energy Flow</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@500;600&family=Inter:wght@500;600&display=swap" rel="stylesheet"/>
 <style>
+/* ─────────────────────────────────────────────────────────────────────
+   GENERATED FILE — do not hand-edit.
+   Built by scratchpad/build-homepage-anim.js from:
+     · thermal-dawn-flow-v2.html      (the scene graphic, from TD-Platform)
+     · homepage_web_animation_new.html (the shell: toggle, buttons, cards)
+   Re-run the builder after changing either source.
+   ───────────────────────────────────────────────────────────────────── */
+
+/* ── shell chrome (controls / cards / layout) ── */
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0a0a0a; --orange: #E87C2A; --green: #2EC68A; --red: #E84A2A;
+  --white: rgba(255,255,255,0.88); --dim: rgba(255,255,255,0.3);
+}
+html, body { background: var(--bg); min-height: 100vh; font-family: 'DM Sans', sans-serif; color: var(--white); overflow-x: hidden; }
+.scene { display: flex; flex-direction: column; align-items: center; padding: 32px 20px 60px; max-width: 900px; margin: 0 auto; }
+.label-row { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--orange); margin-bottom: 10px; }
+.controls { display: flex; flex-direction: column; align-items: center; gap: 14px; margin-bottom: 28px; width: 100%; }
+.storage-toggle-wrap { display: flex; align-items: center; gap: 12px; }
+.storage-label { font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--dim); transition: color 0.3s; }
+.storage-label.active { color: var(--white); }
+.toggle-track { width: 52px; height: 28px; border-radius: 14px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); position: relative; cursor: pointer; transition: all 0.3s; }
+.toggle-track.on { background: rgba(46,198,138,0.2); border-color: rgba(46,198,138,0.5); }
+.toggle-knob { width: 22px; height: 22px; border-radius: 11px; background: rgba(255,255,255,0.25); position: absolute; top: 2px; left: 2px; transition: all 0.3s cubic-bezier(0.4,0,0.2,1); }
+.toggle-track.on .toggle-knob { left: 26px; background: var(--green); box-shadow: 0 0 10px rgba(46,198,138,0.6); }
+.tod-wrap { display: flex; gap: 8px; }
+.tod-btn { padding: 8px 20px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); background: transparent; color: var(--dim); font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; transition: all 0.2s; }
+.tod-btn.active-day   { border-color: #E87C2A55; background: #E87C2A18; color: var(--orange); }
+.tod-btn.active-night-s { border-color: #2EC68A55; background: #2EC68A18; color: var(--green); }
+.tod-btn.active-night-n { border-color: #E84A2A55; background: #E84A2A18; color: var(--red); }
+.timer-bar-wrap { width: 100%; max-width: 400px; height: 3px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden; }
+.timer-bar { height: 100%; background: var(--orange); width: 0%; border-radius: 2px; transition: background 0.4s; }
+.scene-title { text-align: center; margin-bottom: 24px; }
+.scene-title h2 { font-size: clamp(18px,3.5vw,28px); font-weight: 600; letter-spacing: -0.02em; margin-bottom: 6px; }
+.scene-title p  { font-size: 13px; color: var(--dim); }
+.svg-wrap { width: 100%; max-width: 780px; }
+
+  0%   { stroke-dashoffset: 200; opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { stroke-dashoffset: 0; opacity: 0; }
+}
+@keyframes float-label { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-3px)} }
+@keyframes sun-spin    { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+
+.flow-delay-1 { animation-delay: 0.4s; }
+.flow-delay-2 { animation-delay: 0.8s; }
+.flow-delay-3 { animation-delay: 1.2s; }
+.flow-delay-4 { animation-delay: 1.6s; }
+.sun-rays  { transform-origin: 615px 38px; animation: sun-spin 14s linear infinite; }
+
+.info-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-top: 28px; width: 100%; max-width: 780px; }
+@media (max-width:560px){ .info-row { grid-template-columns:1fr; gap:10px; } }
+.info-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; padding: 16px; transition: all 0.4s; }
+.info-card.hl-o { border-color: var(--orange); background: rgba(232,124,42,0.06); }
+.info-card.hl-g { border-color: var(--green);  background: rgba(46,198,138,0.06); }
+.info-card.hl-r { border-color: var(--red);    background: rgba(232,74,42,0.06); }
+.ic-icon  { font-size: 18px; margin-bottom: 8px; }
+.ic-title { font-size: 12px; font-weight: 600; margin-bottom: 4px; }
+.ic-body  { font-size: 11px; color: var(--dim); line-height: 1.5; }
+
+
+/* ── v2 scene ── */
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
   --bg: #0a0a0a; --orange: #E87C2A; --green: #2EC68A; --blue: #4A9CE8;
@@ -107,31 +172,40 @@ body.standalone .svg-wrap { max-width: 540px; margin: 0 auto; }
 .lightning-flash { animation: lightning 9s linear infinite; }
 
 .hide { display: none !important; }
+
+
+/* the shell lays this out; the scene must not force full-viewport height */
+html, body { height: auto; overflow-x: hidden; overflow-y: visible; }
+body { display: block; background: var(--bg); }
+.svg-wrap { width: 100%; max-width: 560px; margin: 0 auto; }
+svg { display: block; width: 100%; height: auto; overflow: hidden; }
 </style>
 </head>
 <body>
+<div class="scene">
+  <div class="label-row">Thermal Dawn — Energy Flow</div>
 
-<div class="controls" id="controls">
-  <div class="ctl-row" role="group" aria-label="System mode">
-    <span class="ctl-label">System</span>
-    <button class="ctl-btn" type="button" data-mode="charging" aria-pressed="false">☀ Charging</button>
-    <button class="ctl-btn is-green" type="button" data-mode="discharging" aria-pressed="false">🏠 Discharging</button>
-    <button class="ctl-btn" type="button" data-mode="direct" aria-pressed="false">Direct heat</button>
-    <button class="ctl-btn" type="button" data-mode="idle" aria-pressed="false">Idle</button>
+  <div class="controls">
+    <div class="storage-toggle-wrap">
+      <span class="storage-label" id="lbl-no">Without Storage</span>
+      <div class="toggle-track on" id="storage-toggle">
+        <div class="toggle-knob"></div>
+      </div>
+      <span class="storage-label active" id="lbl-yes">With Storage</span>
+    </div>
+    <div class="tod-wrap">
+      <button class="tod-btn active-day" id="btn-day">☀ Daytime charging</button>
+      <button class="tod-btn" id="btn-night">🌙 Evening comfort</button>
+    </div>
+    <div class="timer-bar-wrap"><div class="timer-bar" id="timer-bar"></div></div>
   </div>
-  <div class="ctl-row" role="group" aria-label="Time of day and weather">
-    <span class="ctl-label">Sky</span>
-    <button class="ctl-btn" type="button" data-tod="dawn" aria-pressed="false">Dawn</button>
-    <button class="ctl-btn" type="button" data-tod="day" aria-pressed="false">Day</button>
-    <button class="ctl-btn" type="button" data-tod="dusk" aria-pressed="false">Dusk</button>
-    <button class="ctl-btn" type="button" data-tod="night" aria-pressed="false">Night</button>
-    <button class="ctl-btn" type="button" data-wx="clear" aria-pressed="false">Clear</button>
-    <button class="ctl-btn" type="button" data-wx="overcast" aria-pressed="false">Overcast</button>
-    <button class="ctl-btn" type="button" data-wx="rain" aria-pressed="false">Rain</button>
-  </div>
-</div>
 
-<div class="svg-wrap">
+  <div class="scene-title">
+    <h2 id="scene-heading">With Thermal Storage: Your Solar. All Night Long.</h2>
+    <p  id="scene-sub">See how Thermal Dawn captures daytime solar and delivers it as comfort after dark.</p>
+  </div>
+
+  <div class="svg-wrap">
 <svg viewBox="235 18 363 430" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <filter id="glow-orange" x="-50%" y="-50%" width="200%" height="200%">
@@ -629,277 +703,227 @@ body.standalone .svg-wrap { max-width: 540px; margin: 0 auto; }
     <rect class="lightning-flash" x="235" y="0" width="363" height="548" fill="#cfe0ff" opacity="0"/>
   </g>
 </svg>
+  </div>
+
+  <!-- INFO CARDS -->
+  <div class="info-row">
+    <div class="info-card hl-o" id="card-0"><div class="ic-icon">☀️</div><div class="ic-title" id="c0-title">Daytime Charging</div><div class="ic-body" id="c0-body">Solar panels power the heat pump during the day, charging the thermal store while electricity is free.</div></div>
+    <div class="info-card"     id="card-1"><div class="ic-icon" id="c1-icon">◉</div><div class="ic-title" id="c1-title">35 kWh Stored</div><div class="ic-body" id="c1-body">Enough heat for an entire evening and overnight — without touching the grid.</div></div>
+    <div class="info-card"     id="card-2"><div class="ic-icon" id="c2-icon">♨️</div><div class="ic-title" id="c2-title">Evening Comfort</div><div class="ic-body" id="c2-body">Heat pump switches off at sunset. Stored heat flows through radiators and underfloor all evening — no grid needed.</div></div>
+  </div>
 </div>
 
 <script>
-(function() {
-  var MODES = ['charging','discharging','direct','idle'];
-  var TODS  = ['day','dawn','dusk','night'];
-  var WXS   = ['clear','partly','overcast','rain','storm'];
-  var params = new URLSearchParams(window.location.search);
-  var state = {
-    mode:   MODES.includes(params.get('mode')) ? params.get('mode') : 'idle',
-    tod: 'day', wx: 'clear', outdoor: null, sunManual: null
-  };
+(function () {
+  "use strict";
 
-  function show(id, on) { var el = document.getElementById(id); if (el) el.style.opacity = on ? '1' : '0'; }
-  function setHidden(id, hidden) { var el = document.getElementById(id); if (el) el.classList.toggle('hide', hidden); }
+  var mode = 'day';          // 'day' | 'night'
+  var hasStorage = true;
+  var timerProgress = 0, timerInterval = null;
+  var CYCLE_MS = 6000;
 
-  // ── system mode (same logic as production) ──
+  var ORANGE = '#E87C2A', GREEN = '#2EC68A', RED = '#E84A2A', DIM = 'rgba(255,255,255,0.5)';
+
+  // Four scenarios: {storage} x {day,night}. Copy is the shell's, kept as-is.
   var COPY = {
-    charging:    { label: 'Charging',    color: '#E87C2A',               hpOn: true,  battery: 'Charging'  },
-    discharging: { label: 'Discharging', color: '#2EC68A',               hpOn: false, battery: 'Releasing' },
-    direct:      { label: 'Direct Heat', color: '#E87C2A',               hpOn: true,  battery: 'Secondary' },
-    idle:        { label: 'Idle',        color: 'rgba(255,255,255,0.5)', hpOn: false, battery: 'Idle'      }
+    s: {
+      day: {
+        h: 'With Thermal Storage: Your Solar. All Night Long.',
+        s: 'See how Thermal Dawn captures daytime solar and delivers it as comfort after dark.',
+        btnDay: '\u2600 Daytime charging', btnNight: '\ud83c\udf19 Evening comfort',
+        cards: [
+          { title:'Daytime Charging', icon:'\u2600\ufe0f', body:'Solar panels power the heat pump during the day, charging the thermal store while electricity is free.', hl:'hl-o' },
+          { title:'35 kWh Stored',    icon:'\u25c9',        body:'Enough heat for an entire evening and overnight \u2014 without touching the grid.', hl:'' },
+          { title:'Evening Comfort',  icon:'\u2668\ufe0f', body:'Heat pump switches off at sunset. Stored heat flows through radiators and underfloor all evening \u2014 no grid needed.', hl:'' }
+        ]
+      },
+      night: {
+        h: 'With Thermal Storage: Your Solar. All Night Long.',
+        s: 'See how Thermal Dawn captures daytime solar and delivers it as comfort after dark.',
+        btnDay: '\u2600 Daytime charging', btnNight: '\ud83c\udf19 Evening comfort',
+        cards: [
+          { title:'Daytime Charging', icon:'\u2600\ufe0f', body:'Solar panels power the heat pump during the day, charging the thermal store while electricity is free.', hl:'' },
+          { title:'35 kWh Stored',    icon:'\u25c9',        body:'Enough heat for an entire evening and overnight \u2014 without touching the grid.', hl:'' },
+          { title:'Evening Comfort',  icon:'\u2668\ufe0f', body:'Heat pump switches off at sunset. Stored heat flows through radiators and underfloor all evening \u2014 no grid needed.', hl:'hl-g' }
+        ]
+      }
+    },
+    n: {
+      day: {
+        h: 'Without Storage: Buy High, Sell Low.',
+        s: 'Without thermal storage, you sell cheap solar during the day \u2014 then buy expensive peak-rate grid power all evening.',
+        btnDay: '\u2600 Cheap exports', btnNight: '\ud83c\udf19 Evening cost',
+        cards: [
+          { title:'Daytime Export',    icon:'\u2600\ufe0f', body:'Your solar generates power during the day \u2014 but with nowhere to store it, it\'s exported to the grid at near-zero feed-in rates.', hl:'hl-o' },
+          { title:'No Storage',        icon:'\u25c9',        body:'Without thermal storage there\'s nowhere to keep your solar energy for later use.', hl:'' },
+          { title:'Evening Grid Cost', icon:'\u2668\ufe0f', body:'When the sun sets, the heat pump switches on \u2014 drawing expensive peak-rate electricity from the grid all evening.', hl:'' }
+        ]
+      },
+      night: {
+        h: 'Without Storage: Buy High, Sell Low.',
+        s: 'Without thermal storage, you sell cheap solar during the day \u2014 then buy expensive peak-rate grid power all evening.',
+        btnDay: '\u2600 Cheap exports', btnNight: '\ud83c\udf19 Evening cost',
+        cards: [
+          { title:'Daytime Export',    icon:'\u2600\ufe0f', body:'Your solar generates power during the day \u2014 but with nowhere to store it, it\'s exported to the grid at near-zero feed-in rates.', hl:'' },
+          { title:'No Storage',        icon:'\u25c9',        body:'Without thermal storage there\'s nowhere to keep your solar energy for later use.', hl:'' },
+          { title:'Evening Grid Cost', icon:'\u2668\ufe0f', body:'When the sun sets, the heat pump switches on \u2014 drawing expensive peak-rate electricity from the grid all evening.', hl:'hl-r' }
+        ]
+      }
+    }
   };
-  function applyMode() {
-    var d = COPY[state.mode];
-    var direct = state.mode === 'direct';
-    ['g-flow-home', 'g-flow-home-2'].forEach(function (id) {
-      var g = document.getElementById(id);
-      g.style.opacity = (state.mode === 'discharging' || direct) ? '1' : '0';
-      g.style.setProperty('--flow-main', direct ? 'var(--orange)' : 'var(--green)');
-    });
-    show('g-flow-hp', state.mode === 'charging' || direct);
-    show('hp-ring-1', d.hpOn); show('hp-ring-2', d.hpOn); show('hp-off-overlay', !d.hpOn);
-    ['hp-fan-1','hp-fan-2'].forEach(function (id){ var el=document.getElementById(id); if(el) el.classList.toggle('off', !d.hpOn); });
-    var chip = document.getElementById('lbl-mode-chip'); chip.textContent = d.label; chip.setAttribute('fill', d.color);
-    var hpVal = document.getElementById('lbl-hp-val'); hpVal.textContent = d.hpOn ? 'On' : 'Off';
-    hpVal.setAttribute('style', 'fill:' + (d.hpOn ? '#E87C2A' : 'rgba(255,255,255,0.4)'));
-    var bat = document.getElementById('lbl-battery-val'); bat.textContent = d.battery;
-    bat.setAttribute('style', state.mode==='charging'?'fill:#E87C2A':state.mode==='discharging'?'fill:#2EC68A':'fill:rgba(255,255,255,0.5)');
-    var rad = document.getElementById('lbl-radiators-val');
-    if (state.mode==='discharging'){rad.textContent='On';rad.setAttribute('style','fill:#2EC68A');}
-    else if (state.mode==='direct'){rad.textContent='On';rad.setAttribute('style','fill:#E87C2A');}
-    else {rad.textContent='Off';rad.removeAttribute('style');}
-    var sg = document.getElementById('store-glow-el');
-    if (sg){ sg.setAttribute('fill', state.mode==='charging'?'url(#store-glow-o)':'url(#store-glow-g)');
-      sg.style.opacity = (state.mode==='charging'||state.mode==='discharging')?'0.55':'0'; }
-  }
 
-  // ── sun arc across the sky (moves with time of day) ──
-  // frac 0 = sunrise (left, low) · 0.5 = midday (top) · 1 = sunset (right, low).
-  var SUN_X0 = 250, SUN_X1 = 575;       // horizon x at sunrise / sunset
-  var SUN_Y_TOP = 22, SUN_Y_LOW = 96;   // y at midday / near the horizon
-  function sunFrac() {
-    // Time-of-day slider overrides everything when dragged.
-    if (state.sunManual != null) return state.sunManual;
-    // dawn/dusk buttons preview the ends; 'day' tracks the real clock so the sun
-    // sweeps across the sky through the day (06:00→18:00 daylight window).
-    if (state.tod === 'dawn') return 0.12;
-    if (state.tod === 'dusk') return 0.88;
-    var d = new Date(), h = d.getHours() + d.getMinutes() / 60;
-    return Math.max(0.05, Math.min(0.95, (h - 6) / 12));
-  }
-  function positionSun() {
-    var g = document.getElementById('sky-sun');
-    if (!g) return;
-    var f = sunFrac(), t = 2 * f - 1;
-    var x = SUN_X0 + f * (SUN_X1 - SUN_X0);
-    var y = SUN_Y_TOP + (SUN_Y_LOW - SUN_Y_TOP) * (t * t);   // parabolic arc
+  function el(id) { return document.getElementById(id); }
+  function show(id, on) { var e = el(id); if (e) e.style.opacity = on ? '1' : '0'; }
+  function hide(id, hidden) { var e = el(id); if (e) e.classList.toggle('hide', hidden); }
+
+  // Sun tracks a fixed mid-morning / late-afternoon position rather than the
+  // wall clock — this is an explainer, not a live dashboard.
+  function placeSun(frac) {
+    var g = el('sky-sun'); if (!g) return;
+    var X0 = 250, X1 = 575, YT = 22, YL = 96;
+    var t = 2 * frac - 1;
+    var x = X0 + frac * (X1 - X0), y = YT + (YL - YT) * (t * t);
     g.setAttribute('transform', 'translate(' + (x - 570).toFixed(1) + ',' + (y - 40).toFixed(1) + ')');
   }
 
-  // ── time of day ──
-  function applyTOD() {
-    var night = state.tod === 'night';
-    // Duskiness ramps continuously with the sun's distance from the horizon
-    // (full golden below m=0.10, fading out by m=0.25) — no hard hue steps.
-    var f = sunFrac(), m = Math.min(f, 1 - f);
-    var dusk = night ? 0 : Math.max(0, Math.min(1, 1 - (m - 0.10) / 0.15));
-    document.getElementById('sky-dusk-rect').style.opacity = dusk.toFixed(2);
-    document.getElementById('sky-night-rect').style.opacity = night ? '1' : '0';
-    document.getElementById('sky-stars').style.opacity = night ? '1' : '0';
-    document.getElementById('sky-moon').style.opacity = night ? '1' : '0';
-    if (!night) positionSun();
-    // Warmer sun near the horizon.
-    var disk = document.getElementById('sun-disk');
-    if (disk) disk.setAttribute('fill', dusk > 0.5 ? '#E8662A' : '#E87C2A');
-    applyWX(); // sun visibility depends on tod too
-  }
+  function applyState() {
+    var isDay = (mode === 'day'), isSto = hasStorage;
+    var d = COPY[isSto ? 's' : 'n'][mode];
 
-  // ── weather ──
-  function applyWX() {
-    var w = state.wx;
-    var cloudy   = (w === 'partly' || w === 'overcast' || w === 'rain' || w === 'storm');
-    var raining  = (w === 'rain' || w === 'storm');
-    var storm    = (w === 'storm');
-    var overcast = (w === 'overcast' || raining);
+    /* ── sky ── */
+    el('sky-dusk-rect').style.opacity  = isDay ? '0' : '0';
+    el('sky-night-rect').style.opacity = isDay ? '0' : '1';
+    el('sky-stars').style.opacity      = isDay ? '0' : '1';
+    el('sky-moon').style.opacity       = isDay ? '0' : '1';
+    el('sky-sun').style.opacity        = isDay ? '1' : '0';
+    if (isDay) placeSun(0.42);
+    el('sky-clouds').style.opacity = '0';
+    el('cloud-extra-wrap').style.opacity = '0';
+    hide('sky-rain', true); hide('sky-lightning', true);
 
-    document.getElementById('sky-clouds').style.opacity = cloudy ? '1' : '0';
-    setHidden('sky-rain', !raining);
-    setHidden('sky-lightning', !storm);
-
-    // wide extra layer fades in for heavier cover
-    document.getElementById('cloud-extra-wrap').style.opacity = overcast ? '1' : '0';
-
-    // darken + densify the cloud banks with cover
-    document.querySelectorAll('#sky-clouds .cloud').forEach(function(c){
-      c.setAttribute('fill', storm ? '#6f7782' : overcast ? '#838b96' : '#aab2bd');
-      c.setAttribute('opacity', (parseFloat(c.dataset.op) * (storm ? 2.2 : overcast ? 1.8 : 1)).toFixed(2));
-    });
-
-    // sun fades out at night and dims behind cover
-    var sun = document.getElementById('sky-sun');
-    if (sun) sun.style.opacity = state.tod === 'night' ? '0' : overcast ? '0.35' : '1';
-
-    var cond = document.getElementById('lbl-outdoor-cond');
-    if (cond) cond.textContent = {clear:'Clear',partly:'Partly cloudy',overcast:'Overcast',rain:'Rain',storm:'Storm'}[w];
-  }
-
-  function applyOutdoor() {
-    var el = document.getElementById('lbl-outdoor-temp');
-    if (el) el.textContent = (state.outdoor == null) ? '—' : state.outdoor.toFixed(1) + '°C';
-  }
-
-  // ── live system temps (next to the labels) ──
-  function setTemp(id, val, forceMuted) {
-    var el = document.getElementById(id);
-    if (!el) return;
-    var n = (val == null) ? NaN : parseFloat(val);
-    if (forceMuted || isNaN(n)) { el.textContent = '—'; el.classList.add('muted'); }
-    else { el.textContent = n.toFixed(1) + '°C'; el.classList.remove('muted'); }
-  }
-
-  // ── live data from the dashboard bridge (branding.js) ──
-  window.addEventListener('message', function(e) {
-    if (!e.data) return;
-    if (e.data.type === 'setMode' && MODES.includes(e.data.mode)) {
-      state.mode = e.data.mode; applyMode();
-    }
-    if (e.data.type === 'setTemps') {
-      setTemp('lbl-battery-temp', e.data.tank, false);
-      setTemp('lbl-hp-temp',      e.data.supply, e.data.supply == null);
-      setTemp('lbl-radiators-temp', e.data.living, false);
-    }
-    if (e.data.type === 'setEnv') {
-      if (TODS.includes(e.data.tod)) state.tod = e.data.tod;
-      if (WXS.includes(e.data.wx))   state.wx  = e.data.wx;
-      if ('outdoor' in e.data) state.outdoor = (e.data.outdoor == null ? null : parseFloat(e.data.outdoor));
-      applyTOD();      // also runs applyWX()
-      applyOutdoor();
-    }
-  });
-
-  // Tell the bridge we're ready so it pushes current state immediately.
-  if (window.parent !== window) {
-    try { window.parent.postMessage({ type: 'thermalDawnReady' }, '*'); } catch (e) {}
-  }
-
-  applyMode(); applyTOD(); applyWX(); applyOutdoor();
-  // Keep the sun creeping across the sky through the day without a reload.
-  setInterval(function(){ if (state.tod !== 'night') positionSun(); }, 60000);
-
-  /* ── standalone mode (marketing embed) ──────────────────────────────
-     Inside the HA dashboard the parent bridge drives everything, so we
-     leave well alone. Embedded on the website there is no bridge, so the
-     scene would sit frozen on 'idle'. Detect that and take over: expose
-     the control bar, run a narrated demo loop, and hand control to the
-     visitor the moment they press anything.
-     `?standalone=0` forces the bridged behaviour; `?standalone=1` forces
-     the controls (useful for testing inside HA).                      */
-  // Being inside an iframe proves nothing — the HA dashboard is an iframe
-  // too. So assume standalone and stand down the moment a real bridge
-  // speaks (the listener below clears the controls and the demo loop).
-  var forced = params.get('standalone');
-  var standalone = forced !== '0';
-
-  var heardFromBridge = false;
-  window.addEventListener('message', function (e) {
-    if (e.data && (e.data.type === 'setMode' || e.data.type === 'setEnv' || e.data.type === 'setTemps')) {
-      heardFromBridge = true;
-      if (demoTimer) { clearInterval(demoTimer); demoTimer = null; }
-      document.body.classList.remove('standalone');
-    }
-  });
-
-  var demoTimer = null;
-  // A day in the life: charge on the morning sun, coast, then release
-  // stored heat through the evening and overnight.
-  var STORY = [
-    { mode: 'idle',        tod: 'dawn',  wx: 'clear',    outdoor: 6.5,  tank: 41, supply: null, living: 17.5 },
-    { mode: 'charging',    tod: 'day',   wx: 'clear',    outdoor: 14.0, tank: 52, supply: 48,   living: 19.5 },
-    { mode: 'charging',    tod: 'day',   wx: 'overcast', outdoor: 12.5, tank: 61, supply: 47,   living: 20.5 },
-    { mode: 'idle',        tod: 'dusk',  wx: 'clear',    outdoor: 10.0, tank: 68, supply: null, living: 21.0 },
-    { mode: 'discharging', tod: 'night', wx: 'clear',    outdoor: 5.0,  tank: 63, supply: null, living: 21.5 },
-    { mode: 'discharging', tod: 'night', wx: 'rain',     outdoor: 3.5,  tank: 55, supply: null, living: 21.0 }
-  ];
-
-  function paint(step) {
-    state.mode = step.mode;
-    state.tod = step.tod;
-    state.wx = step.wx;
-    state.outdoor = step.outdoor;
-    state.sunManual = null;
-    applyMode(); applyTOD(); applyOutdoor();
-    setTemp('lbl-battery-temp', step.tank, false);
-    setTemp('lbl-hp-temp', step.supply, step.supply == null);
-    setTemp('lbl-radiators-temp', step.living, false);
-    syncButtons();
-  }
-
-  function syncButtons() {
-    document.querySelectorAll('[data-mode]').forEach(function (b) {
-      b.setAttribute('aria-pressed', String(b.dataset.mode === state.mode));
-    });
-    document.querySelectorAll('[data-tod]').forEach(function (b) {
-      b.setAttribute('aria-pressed', String(b.dataset.tod === state.tod));
-    });
-    document.querySelectorAll('[data-wx]').forEach(function (b) {
-      b.setAttribute('aria-pressed', String(b.dataset.wx === state.wx));
-    });
-  }
-
-  function stopDemo() {
-    if (demoTimer) { clearInterval(demoTimer); demoTimer = null; }
-  }
-
-  function startDemo() {
-    var i = 0;
-    paint(STORY[0]);
-    demoTimer = setInterval(function () {
-      i = (i + 1) % STORY.length;
-      paint(STORY[i]);
-    }, 5000);
-  }
-
-  var userDrove = false;
-
-  if (standalone) {
-    document.body.classList.add('standalone');
-    // Controls are opt-in; the default embed is a hands-off cycle.
-    if (params.get('controls') === '1') document.body.classList.add('show-controls');
-
-    document.getElementById('controls').addEventListener('click', function (e) {
-      var b = e.target.closest('.ctl-btn');
-      if (!b) return;
-      userDrove = true;
-      stopDemo();                       // visitor takes the wheel (controls mode only)
-      if (b.dataset.mode) { state.mode = b.dataset.mode; applyMode(); }
-      if (b.dataset.tod)  { state.tod = b.dataset.tod; state.sunManual = null; applyTOD(); }
-      if (b.dataset.wx)   { state.wx = b.dataset.wx; applyWX(); }
-      syncButtons();
-    });
-
-    // Pause the loop while the frame is off-screen — no point animating
-    // a scene nobody is looking at.
-    if ('IntersectionObserver' in window) {
-      new IntersectionObserver(function (entries) {
-        entries.forEach(function (en) {
-          if (!en.isIntersecting) { stopDemo(); }
-          else if (!demoTimer && !heardFromBridge && !userDrove) { startDemo(); }
-        });
-      }, { threshold: 0.15 }).observe(document.querySelector('.svg-wrap'));
+    /* ── the thermal store only exists in the "with storage" world ── */
+    show('g-store', isSto);
+    var glow = el('store-glow-el');
+    if (glow) {
+      glow.setAttribute('fill', isDay ? 'url(#store-glow-o)' : 'url(#store-glow-g)');
+      glow.style.opacity = isSto ? '0.55' : '0';
     }
 
-    // Respect a visitor who prefers less motion: show a representative
-    // frame instead of looping.
-    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      paint(STORY[1]);
+    /* ── flows: exactly one story at a time ──
+       day+storage    solar -> heat pump -> store        (charging, orange)
+       night+storage  store -> home                      (discharging, green)
+       day-no-storage nothing stored; solar is exported  (no flow to draw)
+       night-no-store grid -> heat pump -> home          (buying peak, red) */
+    var chargeFlow = isDay && isSto;
+    var homeFlow   = (!isDay && isSto) || (!isDay && !isSto);
+    var flowCol    = (!isDay && !isSto) ? RED : (isDay ? ORANGE : GREEN);
+
+    show('g-flow-hp', chargeFlow || (!isDay && !isSto));
+    ['g-flow-home', 'g-flow-home-2'].forEach(function (id) {
+      var g = el(id); if (!g) return;
+      g.style.opacity = homeFlow ? '1' : '0';
+      g.style.setProperty('--flow-main', flowCol);
+    });
+
+    /* ── heat pump: runs when charging by day, or heating off-grid at night ── */
+    var hpOn = chargeFlow || (!isDay && !isSto);
+    show('hp-ring-1', hpOn); show('hp-ring-2', hpOn); show('hp-off-overlay', !hpOn);
+    ['hp-fan-1', 'hp-fan-2'].forEach(function (id) {
+      var e = el(id); if (e) e.classList.toggle('off', !hpOn);
+    });
+    var ringCol = (!isDay && !isSto) ? RED : ORANGE;
+    ['hp-ring-1', 'hp-ring-2'].forEach(function (id) {
+      var e = el(id); if (e) e.setAttribute('stroke', ringCol);
+    });
+
+    /* ── readouts ── */
+    var chip = el('lbl-mode-chip');
+    if (isSto) {
+      chip.textContent = isDay ? 'Charging' : 'Discharging';
+      chip.setAttribute('fill', isDay ? ORANGE : GREEN);
     } else {
-      startDemo();
+      chip.textContent = isDay ? 'Exporting' : 'Grid heating';
+      chip.setAttribute('fill', isDay ? DIM : RED);
     }
+
+    var bat = el('lbl-battery-val');
+    bat.textContent = !isSto ? 'None' : (isDay ? 'Charging' : 'Releasing');
+    bat.setAttribute('style', 'fill:' + (!isSto ? DIM : (isDay ? ORANGE : GREEN)));
+
+    var hp = el('lbl-hp-val');
+    hp.textContent = hpOn ? 'On' : 'Off';
+    hp.setAttribute('style', 'fill:' + (hpOn ? ringCol : 'rgba(255,255,255,0.4)'));
+
+    var rad = el('lbl-radiators-val');
+    rad.textContent = isDay ? 'Off' : 'On';
+    rad.setAttribute('style', 'fill:' + (isDay ? 'rgba(255,255,255,0.5)' : (isSto ? GREEN : RED)));
+
+    // Temperatures are illustrative here (no live feed on the website).
+    setTemp('lbl-battery-temp', isSto ? (isDay ? 58 : 49) : null);
+    setTemp('lbl-hp-temp', hpOn ? 47 : null);
+    setTemp('lbl-radiators-temp', isDay ? 19.5 : 21.5);
+    el('lbl-outdoor-temp').textContent = isDay ? '14.0\u00b0C' : '5.0\u00b0C';
+    el('lbl-outdoor-cond').textContent = 'Clear';
+
+    /* ── shell chrome ── */
+    var bDay = el('btn-day'), bNight = el('btn-night');
+    bDay.className = isDay ? 'tod-btn active-day' : 'tod-btn';
+    bNight.className = isDay ? 'tod-btn' : (isSto ? 'tod-btn active-night-s' : 'tod-btn active-night-n');
+    bDay.textContent = d.btnDay; bNight.textContent = d.btnNight;
+
+    el('storage-toggle').classList.toggle('on', isSto);
+    el('lbl-no').classList.toggle('active', !isSto);
+    el('lbl-yes').classList.toggle('active', isSto);
+
+    el('timer-bar').style.background = isDay ? 'var(--orange)' : (isSto ? 'var(--green)' : 'var(--red)');
+    el('scene-heading').textContent = d.h;
+    el('scene-sub').textContent = d.s;
+
+    var hls = ['hl-o', 'hl-g', 'hl-r'];
+    d.cards.forEach(function (c, i) {
+      var card = el('card-' + i); if (!card) return;
+      hls.forEach(function (h) { card.classList.remove(h); });
+      if (c.hl) card.classList.add(c.hl);
+      card.children[0].textContent = c.icon;
+      card.children[1].textContent = c.title;
+      card.children[2].textContent = c.body;
+    });
   }
+
+  function setTemp(id, v) {
+    var e = el(id); if (!e) return;
+    if (v == null) { e.textContent = '\u2014'; e.classList.add('muted'); }
+    else { e.textContent = v.toFixed(1) + '\u00b0C'; e.classList.remove('muted'); }
+  }
+
+  function startTimer() {
+    clearInterval(timerInterval);
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    timerInterval = setInterval(function () {
+      timerProgress += 100 / (CYCLE_MS / 100);
+      if (timerProgress >= 100) {
+        timerProgress = 0;
+        mode = (mode === 'day') ? 'night' : 'day';
+        applyState();
+      }
+      el('timer-bar').style.width = timerProgress + '%';
+    }, 100);
+  }
+
+  function pick(m) {
+    mode = m; timerProgress = 0;
+    el('timer-bar').style.width = '0%';
+    applyState();
+  }
+
+  el('btn-day').addEventListener('click', function () { pick('day'); });
+  el('btn-night').addEventListener('click', function () { pick('night'); });
+  el('storage-toggle').addEventListener('click', function () {
+    hasStorage = !hasStorage; applyState();
+  });
+
+  applyState();
+  startTimer();
 })();
 </script>
 </body>

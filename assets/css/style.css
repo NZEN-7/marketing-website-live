@@ -259,7 +259,7 @@ table.data td:first-child{font-weight:600;}
 /* flow-v2 with its control bar (?controls=1) */
 .embed--flow2 iframe{height:750px;}
 @media(max-width:640px){
-  .embed--home iframe{height:900px;}
+  .embed--home iframe{height:980px;}
   .embed--daynight iframe{height:850px;}
   .embed--flow iframe{height:720px;}
   .embed--flow2 iframe{height:640px;}
