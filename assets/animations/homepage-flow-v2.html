@@ -766,6 +766,13 @@ body, .scene-title h2, .scene-title p, .ic-title, .ic-body {
 
   var ORANGE = '#E87C2A', GREEN = '#2EC68A', RED = '#E84A2A', DIM = 'rgba(255,255,255,0.5)';
 
+  // The night + no-storage "grid heating" flow reuses the store-to-home
+  // pipework recoloured red, which reads badly — the energy appears to come
+  // out of a tank that isn't there. Disabled until that path is drawn
+  // properly (grid -> heat pump -> home, with its own geometry).
+  // The scenario still tells its story through the heading, chip and cards.
+  var SHOW_GRID_HEATING_FLOW = false;
+
   // Four scenarios: {storage} x {day,night}. Copy is the shell's, kept as-is.
   var COPY = {
     s: {
@@ -856,11 +863,12 @@ body, .scene-title h2, .scene-title p, .ic-title, .ic-body {
        night+storage  store -> home                      (discharging, green)
        day-no-storage nothing stored; solar is exported  (no flow to draw)
        night-no-store grid -> heat pump -> home          (buying peak, red) */
+    var gridHeat   = (!isDay && !isSto) && SHOW_GRID_HEATING_FLOW;
     var chargeFlow = isDay && isSto;
-    var homeFlow   = (!isDay && isSto) || (!isDay && !isSto);
-    var flowCol    = (!isDay && !isSto) ? RED : (isDay ? ORANGE : GREEN);
+    var homeFlow   = (!isDay && isSto) || gridHeat;
+    var flowCol    = gridHeat ? RED : (isDay ? ORANGE : GREEN);
 
-    show('g-flow-hp', chargeFlow || (!isDay && !isSto));
+    show('g-flow-hp', chargeFlow || gridHeat);
     // Solar leaving the property: only when there is nowhere to store it.
     show('g-flow-export', isDay && !isSto);
     ['g-flow-home', 'g-flow-home-2'].forEach(function (id) {
@@ -870,7 +878,7 @@ body, .scene-title h2, .scene-title p, .ic-title, .ic-body {
     });
 
     /* ── heat pump: runs when charging by day, or heating off-grid at night ── */
-    var hpOn = chargeFlow || (!isDay && !isSto);
+    var hpOn = chargeFlow || (!isDay && !isSto);   // runs regardless of the flow flag
     show('hp-ring-1', hpOn); show('hp-ring-2', hpOn); show('hp-off-overlay', !hpOn);
     ['hp-fan-1', 'hp-fan-2'].forEach(function (id) {
       var e = el(id); if (e) e.classList.toggle('off', !hpOn);

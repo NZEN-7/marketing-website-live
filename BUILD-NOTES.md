@@ -87,13 +87,30 @@ These are flagged in the source markdown's "Open items" and carried here so they
 
 ## Animations
 Embedded via `<iframe>` (kept as standalone HTML so their JS still runs):
-- `homepage_web_animation_new.html` → Home §5 (with/without storage)
-- `day-night-storage-animation.html` → Hydronic §2
-- `thermal-storage-interactive-flow.html` → Hydronic §5 + How It Works §3
-- `gas-replacement-interactive.html` → How It Works §2
-- `thermal-dawn-flow-cycle.html` → How It Works §5
+- **`homepage-flow-v2.html`** → Home, Hydronic, How It Works. This is a
+  **generated** file: `build-homepage-anim.js` splices the v2 scene out of
+  `thermal-dawn-flow-v2.html` (from TD-Platform) into the shell from
+  `homepage_web_animation_new.html` (With/Without Storage toggle, day/night
+  buttons, timer bar, three explainer cards). Don't hand-edit it — change a
+  source and re-run:
+  `node assets/animations/build-homepage-anim.js assets/animations`
+- `thermal-dawn-flow-v2.html` → the scene on its own. Still works unmodified
+  inside Home Assistant (the postMessage bridge is untouched); on the web it
+  self-drives, and `?controls=1` exposes a mode/time/weather control bar.
+- `day-night-storage-animation.html` → Hydronic §2 + How It Works §3
 - `heating-comparison-table.html` → Pricing §10
 - **`heating-tool.html` is available but not embedded** — it's an interactive savings tool; drop it onto Pricing or Hydronic if you want it.
+
+### Outstanding — grid-heating flow is switched off
+In the homepage animation, the **night + without-storage** scenario draws no
+flow lines. It reused the store-to-home pipework recoloured red, which read
+badly: the energy appeared to pour out of a thermal store that isn't there in
+that scenario. It needs its own geometry (grid → heat pump → home) drawn into
+the v2 scene. The scenario still reads correctly via the heading, the "Grid
+heating" chip, the red heat-pump ring and the highlighted card — only the
+animated line is missing.
+Re-enable with one line once the path exists:
+`SHOW_GRID_HEATING_FLOW = true` in `build-homepage-anim.js`, then rebuild.
 - Fixed **50kWh → 35kWh** in the two animations that displayed the old capacity label (`heating-comparison-table.html`, `heating-tool.html`) to match the locked spec. `web_animation_old.html` was ignored per brief.
 
 ## Housekeeping
