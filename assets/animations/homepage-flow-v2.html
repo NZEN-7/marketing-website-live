@@ -174,11 +174,41 @@ body.standalone .svg-wrap { max-width: 540px; margin: 0 auto; }
 .hide { display: none !important; }
 
 
+/* ── overrides: these must come last ─────────────────────────────────── */
+
 /* the shell lays this out; the scene must not force full-viewport height */
 html, body { height: auto; overflow-x: hidden; overflow-y: visible; }
 body { display: block; background: var(--bg); }
 .svg-wrap { width: 100%; max-width: 560px; margin: 0 auto; }
 svg { display: block; width: 100%; height: auto; overflow: hidden; }
+
+/* The v2 scene ships its own standalone control bar as `.controls`, hidden
+   by default. That rule lands after the shell's and would hide the shell's
+   real controls — toggle included — so restate the shell's layout here. */
+.controls {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 14px; margin-bottom: 28px; width: 100%; padding: 0;
+}
+
+/* Brand type. The shell asked for 'DM Sans', which was never actually
+   loaded (the webfont link only fetches DM Mono + Inter), so all the
+   chrome fell back to generic sans-serif. Use the site's self-hosted
+   Montserrat instead; the in-SVG technical readouts stay mono. */
+@font-face{font-family:"Montserrat";src:url("/assets/fonts/Montserrat-Regular.woff2") format("woff2");font-weight:400;font-display:swap;}
+@font-face{font-family:"Montserrat";src:url("/assets/fonts/Montserrat-SemiBold.woff2") format("woff2");font-weight:600;font-display:swap;}
+@font-face{font-family:"Montserrat";src:url("/assets/fonts/Montserrat-Bold.woff2") format("woff2");font-weight:700;font-display:swap;}
+@font-face{font-family:"Montserrat";src:url("/assets/fonts/Montserrat-ExtraBold.woff2") format("woff2");font-weight:800;font-display:swap;}
+
+body, .scene-title h2, .scene-title p, .ic-title, .ic-body {
+  font-family: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+.scene-title h2 { font-weight: 800; letter-spacing: -0.02em; }
+.scene-title p  { font-size: 14px; line-height: 1.55; max-width: 62ch; margin: 0 auto; }
+.ic-title { font-size: 13px; font-weight: 800; letter-spacing: -0.01em; margin-bottom: 5px; }
+.ic-body  { font-size: 12.5px; line-height: 1.55; color: rgba(255,255,255,0.62); }
+.info-card { padding: 18px; }
+/* the small caps labels stay mono — they read as instrument type */
+.label-row, .storage-label, .tod-btn { font-family: 'DM Mono', ui-monospace, monospace; }
 </style>
 </head>
 <body>

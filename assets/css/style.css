@@ -253,13 +253,13 @@ table.data td:first-child{font-weight:600;}
 .embed{position:relative;width:100%;max-width:920px;margin-left:auto;margin-right:auto;background:#0a0a0a;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-lg);border:1px solid #2a2822;}
 .embed iframe{width:100%;border:0;display:block;height:820px;}
 .embed__cap{font-size:.85rem;color:var(--td-grey);margin-top:10px;text-align:center;}
-.embed--home iframe{height:1060px;}
+.embed--home iframe{height:1240px;}
 .embed--daynight iframe{height:950px;}
 .embed--flow iframe{height:820px;}
 /* flow-v2 standalone (scene only; add ?controls=1 for the control bar) */
 .embed--flow2 iframe{height:750px;}
 @media(max-width:640px){
-  .embed--home iframe{height:980px;}
+  .embed--home iframe{height:1270px;}
   .embed--daynight iframe{height:850px;}
   .embed--flow iframe{height:720px;}
   .embed--flow2 iframe{height:640px;}
