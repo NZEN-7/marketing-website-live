@@ -210,26 +210,26 @@
         <div>
           <h2><span class="lede">It's no longer an idea.</span>It's on a home in Melbourne.</h2>
           <div class="metric-card">
-            <p class="metric-card__intro">Our first home is live in Hawthorn: gas boiler gone, gas meter off the house, heating now running on stored solar. Here's week one, straight from the customer's own app.</p>
+            <p class="metric-card__intro">Our first home went live in Hawthorn this May: gas boiler gone, gas meter off the house, heating now running on stored solar. Running totals across our first installs, measured by the systems themselves. <span class="live-dot" hidden>live</span></p>
             <dl style="margin:0">
               <div class="metric">
-                <dt>To date savings</dt>
-                <dd><span class="draft">~$60</span></dd>
+                <dt>Saved so far</dt>
+                <dd>$<span data-live-stat="totalSavedAud">948</span></dd>
               </div>
               <div class="metric">
                 <dt>CO₂ avoided</dt>
-                <dd><span class="draft">~55&nbsp;kg</span></dd>
+                <dd><span data-live-stat="co2AvoidedKg">987</span>&nbsp;kg</dd>
               </div>
               <div class="metric">
                 <dt>Gas avoided</dt>
-                <dd><span class="draft">~1,000&nbsp;MJ</span></dd>
+                <dd><span data-live-stat="gasAvoidedMj">19,246</span>&nbsp;MJ</dd>
               </div>
             </dl>
           </div>
           <div class="btn-row">
             <a class="btn btn--flat btn--rect" href="/blog/hawthorn-first-install/">Take a Closer Look at the System <span class="arrow"></span></a>
           </div>
-          <p class="micro" style="margin-top:14px;max-width:60ch">Early single-week readings from the customer's own app while we're still tuning the system. Sustained, that pace is around <span class="draft">~$3,000</span> and <span class="draft">~2.9&nbsp;tonnes CO₂</span> a year. Your home's number is confirmed at your free site assessment, not a brochure figure. <span class="draft-note">Figures are draft — verify against latest telemetry before publishing.</span></p>
+          <p class="micro" style="margin-top:14px;max-width:60ch">Measured against the gas heating it replaced, from the system's own counters — not a brochure figure. Your home's number is confirmed at your free site assessment.</p>
         </div>
       </div>
     </div>
@@ -339,5 +339,6 @@
 <footer id="site-footer" class="site-footer"></footer>
 <script src="/assets/js/config.js" defer></script>
 <script src="/assets/js/site.js" defer></script>
+<script src="/assets/js/live-stats.js" defer></script>
 </body>
 </html>

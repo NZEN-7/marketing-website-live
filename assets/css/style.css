@@ -207,6 +207,12 @@ li{margin:.35em 0;}
 }
 .section--dark .draft{color:#bfe6f7;background:rgba(61,175,229,.18);}
 .draft-note{font-size:.85rem;color:#0b6a92;font-weight:600;display:inline-flex;align-items:center;gap:.4em;}
+/* Live savings counter indicator — unhidden by live-stats.js when the
+   platform endpoint answers. Green pulse = numbers on screen are live. */
+.live-dot{display:inline-flex;align-items:center;gap:6px;font-size:.68rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#1f8f63;vertical-align:middle;}
+.live-dot::before{content:"";width:7px;height:7px;border-radius:50%;background:#2ec68a;animation:td-livepulse 2s ease-in-out infinite;}
+.band-orange .live-dot,.section--dark .live-dot{color:#8ff0c8;}
+@keyframes td-livepulse{0%,100%{opacity:1;}50%{opacity:.3;}}
 .draft-note::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--td-blue);display:inline-block;flex:none;}
 .section--dark .draft-note{color:#bfe6f7;}
 
