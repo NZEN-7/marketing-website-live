@@ -780,6 +780,24 @@ h4{font-weight:700;}
    dropped to ~2.6:1 */
 body:not(.dark) .figures__l{color:var(--td-grey);}
 
+/* .btn--flat is the flat-orange CTA, which is exactly the colour of the
+   orange bands — on them it rendered at 1.00:1 with no border or shadow, so
+   it read as bold text rather than a button. Go dark inside those bands. */
+.band-orange .btn--flat,.next-orange .btn--flat,
+.band-orange .btn--primary,.next-orange .btn--primary{
+  background:var(--td-black);color:#fff;box-shadow:0 8px 22px rgba(60,26,4,.28);
+}
+.band-orange .btn--flat:hover,.next-orange .btn--flat:hover,
+.band-orange .btn--primary:hover,.next-orange .btn--primary:hover{background:#000;color:#fff;}
+body.dark .band-orange .btn--flat,body.dark .next-orange .btn--flat,
+body.dark .band-orange .btn--primary,body.dark .next-orange .btn--primary{color:#fff;}
+
+/* Flat orange on the white credibility strip gave the button shape only
+   2.53:1 against the page (WCAG 1.4.11 wants 3:1 for a control's boundary).
+   The deeper sunrise orange clears it and stays on-brand. */
+.credstrip .btn--flat{background:var(--td-deep);}
+.credstrip .btn--flat:hover{background:#d24f0c;color:#1c1514;}
+
 /* ---------- Partner / backer logos ----------
    Renders the organisation name as text until a real logo file exists at
    /assets/img/partners/<name>.svg (or -white.svg on dark sections), then
