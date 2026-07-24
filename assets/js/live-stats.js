@@ -46,7 +46,7 @@
     var t0 = performance.now();
     function frame(t) {
       var k = Math.min(1, (t - t0) / dur);
-      k = 1 - Math.pow(1 - k, 4); /* flips fast, lands slow */
+      k = k === 1 ? 1 : 1 - Math.pow(2, -10 * k); /* ease-out expo: flips fast, long slow crawl into the final value */
       var v = from + (to - from) * k;
       el.textContent = fmt(v);
       el.__val = v;
@@ -65,7 +65,7 @@
           var el = en.target;
           io.unobserve(el);
           el.__seen = true;
-          tick(el, 0, targetFor(el), 2400);
+          tick(el, 0, targetFor(el), 3400);
         });
       },
       { threshold: 0.4 },
