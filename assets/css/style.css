@@ -756,6 +756,30 @@ body.dark .section--photo,body.dark .section--photo>.wrap{color:#e2d7cd;}
 }
 @media(max-width:900px){.watermark__word{display:none;}}
 
+/* =========================================================================
+   v4 — typographic hierarchy
+   Nearly everything sat at 800–900, so nothing led and the proof figures
+   didn't pop. Step the chrome down and reserve the heaviest weight for the
+   numbers and the hero. Load-bearing figures keep 900 deliberately.
+   ========================================================================= */
+h2{font-weight:800;}
+h3{font-weight:700;}
+h4{font-weight:700;}
+.btn{font-weight:700;}
+.eyebrow{font-weight:700;}
+.credstrip__title{font-weight:700;}
+.quote-hero blockquote{font-weight:600;}
+.card h3,body.dark .card h3,body.dark .card h4{font-weight:700;}
+.metric dt{font-weight:700;}
+.step h3,.tl h3,.benefits__item h3,.stays h3{font-weight:700;}
+.ic-title{font-weight:700;}
+/* these are the numbers — they keep the weight */
+.figures__v,.stat b,.metric dd,.tier__price,.tl__label,.step__n,h1{font-weight:900;}
+
+/* .figures was tuned for dark sections; on a light one the caption grey
+   dropped to ~2.6:1 */
+body:not(.dark) .figures__l{color:var(--td-grey);}
+
 /* ---------- Utility ---------- */
 .hide{display:none!important;}
 .pill{display:inline-block;background:var(--td-paper-3);border-radius:999px;padding:5px 13px;font-size:.82rem;font-weight:700;color:var(--td-black);}

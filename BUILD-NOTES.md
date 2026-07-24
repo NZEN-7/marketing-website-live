@@ -82,6 +82,41 @@ Search the source for `class="draft"` to find them all.
 - **"How did you hear about FreeVolt?"** → **"How did you hear about us?"** on the Register Interest form (the copy explicitly flagged this rebrand fix).
 - No other copy was altered. All internal editorial notes, section tags, and "Open items" checklists were omitted from the rendered pages (they're guidance, not website copy).
 
+## Conversion review — actioned, and what still needs you
+
+Actioned:
+- **Hero leads on gas, not lithium.** "Your Gas Boiler Is the Problem. Your Roof
+  Is the Answer." Title/description/OG updated to match. The lithium comparison
+  now lives in the economics sections rather than the headline.
+- **CTA hierarchy flipped sitewide.** *Book a Free Site Assessment* is primary;
+  *Reserve Your System* is the secondary fast-lane for the convinced. Deep
+  bottom-of-page CTAs still lead with Reserve, which is the right moment for it.
+- **Price anchor added** to the homepage, above the fold-ish, built only from
+  figures already in the repo.
+- **Chart source lines** added under both price charts.
+- **Type hierarchy.** Almost everything sat at 800–900. Chrome steps down to
+  700–800; the proof figures keep 900 so they actually pop.
+- **Background rhythm calmed.** The founder video moved up to sit right after
+  the proof band and is now on white, so proof → founder → quote/photos is a
+  quiet stretch and the orange bands read as accents.
+- **Tier naming.** "Tier 1, Basic Reserve" → "Basic Reserve"; the Founder
+  Premium maths moved out of a mid-bullet into a side-by-side compare table.
+
+Still needs you:
+- **A real price.** The anchor says "well below both" because there is no signed-off
+  number. Analytical buyers want "from $X installed" — swap it in and delete the
+  `draft` note on that line.
+- **Verify the chart figures.** The source lines credit AER / Solar Victoria, but
+  the −$0.01 FiT and $0.35/kWh values are still the originals and are marked
+  `draft`. Confirm against the actual publications before indexing.
+- **Partner logos** (Startmate, Cicada, NSW OCSE, Investment NSW) — still plain
+  text spans. Needs permission from each. See MISSING-MEDIA.md.
+- **A human face higher up.** The founder video is now mid-page, but the About
+  portrait is still a placeholder and there is no face above the fold.
+- **A/B testing the hero** was suggested; there is no experiment tooling on this
+  static site, so the gas-led hero shipped as the single variant. Needs a tool
+  decision (e.g. Vercel edge middleware) if you want a real split test.
+
 ## Decisions the copy left open (for you — not blocking)
 These are flagged in the source markdown's "Open items" and carried here so they don't get lost:
 - Public contact address is now **Hornsby, NSW 2077** (footer + Contact page), per Nick. Still needs the **unit/street number** — currently suburb-level only; both spots carry a `TODO`.

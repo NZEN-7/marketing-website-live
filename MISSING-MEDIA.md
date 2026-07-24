@@ -16,6 +16,10 @@ Wherever a suitable local photo existed, it's already used instead of a placehol
 - [x] **Explainer video — DONE.** "Thermal Dawn Battery Explained | Using Solar To Heat &amp; Cool Your Home (Australia)" (`youtube-nocookie.com/embed/oE2prWw3BMU`), same `.video` component.
   - Appears on: **How It Works**, directly under the hero.
 
+- [ ] **Partner / backer logos (SVG or PNG)** — Startmate, Cicada Innovations, NSW Office of the Chief Scientist & Engineer, Investment NSW. The homepage credibility strip and the About logo row currently render these as **plain text spans**, which read as unverified claims rather than endorsements. Real marks roughly double that section's weight.
+  - **Needs permission** from each organisation before use — check their brand guidelines / partner kits.
+  - Appears on: **Home** (credibility strip + About), **Mission**.
+
 ## Priority 2 — product / app
 
 - [ ] **Real app screenshots** — the **Savings Tracker** screen and the **Forecast View** screen from the live app. (The **energy-dashboard** screenshot we *do* have is already in use on Home, Intelligence, and the case study.)
