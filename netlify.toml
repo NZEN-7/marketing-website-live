@@ -4,9 +4,12 @@
 [build]
   publish = "."
 
-# Nice caching for static assets (fonts/images/css/js are content-addressed by path)
+# Caching: images/fonts are long-lived; css/js/animations are NOT hashed
+# filenames, so they get a short cache (a year-long cache on style.css
+# once served users a stale stylesheet for a day). Bump ?v= on references
+# when editing css/js as a belt-and-braces cache buster.
 [[headers]]
-  for = "/assets/*"
+  for = "/assets/img/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000"
 
@@ -14,6 +17,21 @@
   for = "/assets/fonts/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/assets/css/*"
+  [headers.values]
+    Cache-Control = "public, max-age=300, must-revalidate"
+
+[[headers]]
+  for = "/assets/js/*"
+  [headers.values]
+    Cache-Control = "public, max-age=300, must-revalidate"
+
+[[headers]]
+  for = "/assets/animations/*"
+  [headers.values]
+    Cache-Control = "public, max-age=300, must-revalidate"
 
 # Basic security headers
 [[headers]]
