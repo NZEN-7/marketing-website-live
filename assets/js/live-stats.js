@@ -17,7 +17,7 @@
   var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   var url =
     (window.TD_CONFIG && window.TD_CONFIG.statsUrl) ||
-    'https://td-platform.vercel.app/api/public/stats';
+    'https://thermal-dawn-platform.vercel.app/api/public/stats';
   var live = null;
 
   function parseVal(el) {
