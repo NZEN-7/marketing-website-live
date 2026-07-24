@@ -62,6 +62,30 @@
       '<p class="footer-legal">&copy; ' + YEAR + ' Thermal Dawn Pty Ltd. ABN 47 682 866 913. All Rights Reserved.</p>' +
     '</div>';
 
+  /* Partner logos degrade to the organisation's name until a real file
+     exists. Each .plogo carries data-logo="<basename>"; we try
+     /assets/img/partners/<basename>.svg (or -white.svg on a dark surface)
+     and only swap the text out once the image actually decodes. */
+  function upgradePartnerLogos() {
+    document.querySelectorAll(".plogo[data-logo]").forEach(function (el) {
+      var name = el.getAttribute("data-logo");
+      var txt = el.querySelector(".plogo__txt");
+      if (!name || !txt) return;
+      var onDark = !!el.closest(".section--dark, .section--cocoa, .band-dark") ||
+                   document.body.classList.contains("dark");
+      var src = "/assets/img/partners/" + name + (onDark ? "-white" : "") + ".svg";
+      var img = new Image();
+      img.onload = function () {
+        img.alt = txt.textContent;
+        img.loading = "lazy";
+        el.insertBefore(img, txt);
+        txt.hidden = true;
+      };
+      img.onerror = function () { /* no file yet — leave the text in place */ };
+      img.src = src;
+    });
+  }
+
   function inject() {
     var h = document.getElementById("site-header");
     if (h) h.innerHTML = HEADER;
@@ -85,6 +109,8 @@
         btn.setAttribute("aria-expanded", open ? "true" : "false");
       });
     }
+
+    upgradePartnerLogos();
   }
 
   if (document.readyState === "loading") {

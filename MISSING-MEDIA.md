@@ -16,9 +16,10 @@ Wherever a suitable local photo existed, it's already used instead of a placehol
 - [x] **Explainer video — DONE.** "Thermal Dawn Battery Explained | Using Solar To Heat &amp; Cool Your Home (Australia)" (`youtube-nocookie.com/embed/oE2prWw3BMU`), same `.video` component.
   - Appears on: **How It Works**, directly under the hero.
 
-- [ ] **Partner / backer logos (SVG or PNG)** — Startmate, Cicada Innovations, NSW Office of the Chief Scientist & Engineer, Investment NSW. The homepage credibility strip and the About logo row currently render these as **plain text spans**, which read as unverified claims rather than endorsements. Real marks roughly double that section's weight.
-  - **Needs permission** from each organisation before use — check their brand guidelines / partner kits.
-  - Appears on: **Home** (credibility strip + About), **Mission**.
+- [ ] **Partner / backer logo files** — **cleared for use: Cicada Innovations, NSW Office of the Chief Scientist & Engineer, EnergyLab** (Nick, Jul 2026). Startmate and Investment NSW are not yet confirmed.
+  - **We don't have the files.** Nothing in the repo or the Design folders. Grab the official SVGs from each organisation's brand kit / partner pack and drop them into `assets/img/partners/` — the markup and JS are already in place, so they appear with **no code change**. Filenames and the light/dark variants are listed in `assets/img/partners/README.md`.
+  - Until then each one renders as a bordered text label, so nothing looks broken.
+  - Appears on: **Home** (credibility strip + About us row).
 
 ## Priority 2 — product / app
 
