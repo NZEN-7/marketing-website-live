@@ -37,8 +37,9 @@ The homepage credibility strip sits on white, so it uses the plain file.
 
 ## Permission
 
-Cicada Innovations, NSW Office of the Chief Scientist & Engineer, and
-EnergyLab are confirmed cleared for use (Nick, Jul 2026). Startmate and
-Investment NSW have **not** been confirmed — they currently render as text.
-Check each organisation's brand guidelines for spacing/colour rules before
-publishing.
+All five are cleared for use (Nick, Jul 2026): Cicada Innovations, NSW Office
+of the Chief Scientist & Engineer, EnergyLab, Investment NSW, Startmate.
+
+Still check each organisation's brand guidelines for clear-space, minimum-size
+and colour rules before publishing — permission to use the mark usually comes
+with conditions on how it's shown.
