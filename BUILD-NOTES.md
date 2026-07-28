@@ -129,8 +129,6 @@ Still needs you:
   orgs supply them.
 - **Em dashes removed sitewide** (copy, meta, animations, docs), contextual
   commas/colons/periods, not blind replacement.
-- **Andrew Bell forum quote** added to Hydronic proof (draft-note until his
-  permission is confirmed).
 - **noindex staging guard** added (see launch checklist below).
 - Cache-buster now `?v=6`.
 
@@ -138,7 +136,6 @@ Still needs you:
 These are flagged in the source markdown's "Open items" and carried here so they don't get lost:
 - Public contact address is now **Hornsby, NSW 2077** (footer + Contact page), per Nick. Still needs the **unit/street number**, currently suburb-level only; both spots carry a `TODO`.
 - Confirm Mike & Kay can be named + quote reproduced publicly.
-- Confirm Andrew Bell's permission to reproduce his forum comment (quoted on Hydronic §8, carries a draft-note until confirmed).
 - **Site now serves `X-Robots-Tag: noindex` on every page** (vercel.json + netlify.toml twins), per the "keep noindex until launch" staging plan. **Remove both at launch** or the real domain will never index.
 - Confirm the legal entity name for the footer (currently "© Thermal Dawn, ABN 47 682 866 913").
 - Confirm canonical booking path: `/register` (→ Register Interest) vs `/contact`. Currently all "Book a site assessment" CTAs point to Register Interest.
