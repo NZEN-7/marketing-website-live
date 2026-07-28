@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Thermal Dawn — Cycle Demo</title>
+<title>Thermal Dawn, Cycle Demo</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@500;600&family=Inter:wght@500;600&display=swap" rel="stylesheet"/>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -263,7 +263,7 @@ svg { width: 100%; height: auto; overflow: visible; display: block; }
     <line class="rule" x1="442" y1="383" x2="442" y2="458"/>
     <text x="447" y="467" class="tag">Heat Pump</text>
     <text id="lbl-hp-val" x="447" y="486" class="val" style="fill:#E87C2A">On</text>
-    <text id="lbl-hp-temp" x="447" y="504" class="temp muted">—</text>
+    <text id="lbl-hp-temp" x="447" y="504" class="temp muted">-</text>
   </g>
 
   <g opacity="0.9">
@@ -331,7 +331,7 @@ svg { width: 100%; height: auto; overflow: visible; display: block; }
         hpTemp.textContent = '57.8°C';
         hpTemp.classList.remove('muted');
       } else {
-        hpTemp.textContent = '—';
+        hpTemp.textContent = '-';
         hpTemp.classList.add('muted');
       }
     }

@@ -62,11 +62,11 @@ const out = `<!DOCTYPE html>
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Thermal Dawn — Energy Flow</title>
+<title>Thermal Dawn, Energy Flow</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@500;600&family=Inter:wght@500;600&display=swap" rel="stylesheet"/>
 <style>
 /* ─────────────────────────────────────────────────────────────────────
-   GENERATED FILE — do not hand-edit.
+   GENERATED FILE, do not hand-edit.
    Built by scratchpad/build-homepage-anim.js from:
      · thermal-dawn-flow-v2.html      (the scene graphic, from TD-Platform)
      · homepage_web_animation_new.html (the shell: toggle, buttons, cards)
@@ -89,7 +89,7 @@ svg { display: block; width: 100%; height: auto; overflow: hidden; }
 
 /* The v2 scene ships its own standalone control bar as \`.controls\`, hidden
    by default. That rule lands after the shell's and would hide the shell's
-   real controls — toggle included — so restate the shell's layout here. */
+   real controls, toggle included, so restate the shell's layout here. */
 .controls {
   display: flex; flex-direction: column; align-items: center;
   gap: 14px; margin-bottom: 28px; width: 100%; padding: 0;
@@ -112,13 +112,13 @@ body, .scene-title h2, .scene-title p, .ic-title, .ic-body {
 .ic-title { font-size: 13px; font-weight: 800; letter-spacing: -0.01em; margin-bottom: 5px; }
 .ic-body  { font-size: 12.5px; line-height: 1.55; color: rgba(255,255,255,0.62); }
 .info-card { padding: 18px; }
-/* the small caps labels stay mono — they read as instrument type */
+/* the small caps labels stay mono, they read as instrument type */
 .label-row, .storage-label, .tod-btn { font-family: 'DM Mono', ui-monospace, monospace; }
 </style>
 </head>
 <body>
 <div class="scene">
-  <div class="label-row">Thermal Dawn — Energy Flow</div>
+  <div class="label-row">Thermal Dawn, Energy Flow</div>
 
   ${controls}
 
@@ -143,7 +143,7 @@ ${v2Svg}
   var ORANGE = '#E87C2A', GREEN = '#2EC68A', RED = '#E84A2A', DIM = 'rgba(255,255,255,0.5)';
 
   // The night + no-storage "grid heating" flow reuses the store-to-home
-  // pipework recoloured red, which reads badly — the energy appears to come
+  // pipework recoloured red, which reads badly, the energy appears to come
   // out of a tank that isn't there. Disabled until that path is drawn
   // properly (grid -> heat pump -> home, with its own geometry).
   // The scenario still tells its story through the heading, chip and cards.
@@ -158,8 +158,8 @@ ${v2Svg}
         btnDay: '\\u2600 Daytime charging', btnNight: '\\ud83c\\udf19 Evening comfort',
         cards: [
           { title:'Daytime Charging', icon:'\\u2600\\ufe0f', body:'Solar panels power the heat pump during the day, charging the thermal store while electricity is free.', hl:'hl-o' },
-          { title:'35 kWh Stored',    icon:'\\u25c9',        body:'Enough heat for an entire evening and overnight \\u2014 without touching the grid.', hl:'' },
-          { title:'Evening Comfort',  icon:'\\u2668\\ufe0f', body:'Heat pump switches off at sunset. Stored heat flows through radiators and underfloor all evening \\u2014 no grid needed.', hl:'' }
+          { title:'35 kWh Stored',    icon:'\\u25c9',        body:'Enough heat for an entire evening and overnight, without touching the grid.', hl:'' },
+          { title:'Evening Comfort',  icon:'\\u2668\\ufe0f', body:'Heat pump switches off at sunset. Stored heat flows through radiators and underfloor all evening, no grid needed.', hl:'' }
         ]
       },
       night: {
@@ -168,30 +168,30 @@ ${v2Svg}
         btnDay: '\\u2600 Daytime charging', btnNight: '\\ud83c\\udf19 Evening comfort',
         cards: [
           { title:'Daytime Charging', icon:'\\u2600\\ufe0f', body:'Solar panels power the heat pump during the day, charging the thermal store while electricity is free.', hl:'' },
-          { title:'35 kWh Stored',    icon:'\\u25c9',        body:'Enough heat for an entire evening and overnight \\u2014 without touching the grid.', hl:'' },
-          { title:'Evening Comfort',  icon:'\\u2668\\ufe0f', body:'Heat pump switches off at sunset. Stored heat flows through radiators and underfloor all evening \\u2014 no grid needed.', hl:'hl-g' }
+          { title:'35 kWh Stored',    icon:'\\u25c9',        body:'Enough heat for an entire evening and overnight, without touching the grid.', hl:'' },
+          { title:'Evening Comfort',  icon:'\\u2668\\ufe0f', body:'Heat pump switches off at sunset. Stored heat flows through radiators and underfloor all evening, no grid needed.', hl:'hl-g' }
         ]
       }
     },
     n: {
       day: {
         h: 'Without Storage: Buy High, Sell Low.',
-        s: 'Without thermal storage, you sell cheap solar during the day \\u2014 then buy expensive peak-rate grid power all evening.',
+        s: 'Without thermal storage, you sell cheap solar during the day, then buy expensive peak-rate grid power all evening.',
         btnDay: '\\u2600 Cheap exports', btnNight: '\\ud83c\\udf19 Evening cost',
         cards: [
-          { title:'Daytime Export',    icon:'\\u2600\\ufe0f', body:'Your solar generates power during the day \\u2014 but with nowhere to store it, it\\'s exported to the grid at near-zero feed-in rates.', hl:'hl-o' },
+          { title:'Daytime Export',    icon:'\\u2600\\ufe0f', body:'Your solar generates power during the day, but with nowhere to store it, it\\'s exported to the grid at near-zero feed-in rates.', hl:'hl-o' },
           { title:'No Storage',        icon:'\\u25c9',        body:'Without thermal storage there\\'s nowhere to keep your solar energy for later use.', hl:'' },
-          { title:'Evening Grid Cost', icon:'\\u2668\\ufe0f', body:'When the sun sets, the heat pump switches on \\u2014 drawing expensive peak-rate electricity from the grid all evening.', hl:'' }
+          { title:'Evening Grid Cost', icon:'\\u2668\\ufe0f', body:'When the sun sets, the heat pump switches on, drawing expensive peak-rate electricity from the grid all evening.', hl:'' }
         ]
       },
       night: {
         h: 'Without Storage: Buy High, Sell Low.',
-        s: 'Without thermal storage, you sell cheap solar during the day \\u2014 then buy expensive peak-rate grid power all evening.',
+        s: 'Without thermal storage, you sell cheap solar during the day, then buy expensive peak-rate grid power all evening.',
         btnDay: '\\u2600 Cheap exports', btnNight: '\\ud83c\\udf19 Evening cost',
         cards: [
-          { title:'Daytime Export',    icon:'\\u2600\\ufe0f', body:'Your solar generates power during the day \\u2014 but with nowhere to store it, it\\'s exported to the grid at near-zero feed-in rates.', hl:'' },
+          { title:'Daytime Export',    icon:'\\u2600\\ufe0f', body:'Your solar generates power during the day, but with nowhere to store it, it\\'s exported to the grid at near-zero feed-in rates.', hl:'' },
           { title:'No Storage',        icon:'\\u25c9',        body:'Without thermal storage there\\'s nowhere to keep your solar energy for later use.', hl:'' },
-          { title:'Evening Grid Cost', icon:'\\u2668\\ufe0f', body:'When the sun sets, the heat pump switches on \\u2014 drawing expensive peak-rate electricity from the grid all evening.', hl:'hl-r' }
+          { title:'Evening Grid Cost', icon:'\\u2668\\ufe0f', body:'When the sun sets, the heat pump switches on, drawing expensive peak-rate electricity from the grid all evening.', hl:'hl-r' }
         ]
       }
     }
@@ -202,7 +202,7 @@ ${v2Svg}
   function hide(id, hidden) { var e = el(id); if (e) e.classList.toggle('hide', hidden); }
 
   // Sun tracks a fixed mid-morning / late-afternoon position rather than the
-  // wall clock — this is an explainer, not a live dashboard.
+  // wall clock, this is an explainer, not a live dashboard.
   function placeSun(frac) {
     var g = el('sky-sun'); if (!g) return;
     var X0 = 250, X1 = 575, YT = 22, YL = 96;
@@ -320,7 +320,7 @@ ${v2Svg}
 
   function setTemp(id, v) {
     var e = el(id); if (!e) return;
-    if (v == null) { e.textContent = '\\u2014'; e.classList.add('muted'); }
+    if (v == null) { e.textContent = '--'; e.classList.add('muted'); }
     else { e.textContent = v.toFixed(1) + '\\u00b0C'; e.classList.remove('muted'); }
   }
 
@@ -358,7 +358,7 @@ ${v2Svg}
 </html>
 `;
 
-// Cheap structural assertions — silent truncation is the failure mode here.
+// Cheap structural assertions, silent truncation is the failure mode here.
 [
   ["storage-toggle", /id="storage-toggle"/],
   ["btn-day", /id="btn-day"/],
@@ -381,4 +381,4 @@ ${v2Svg}
 
 const dest = path.join(DIR, "homepage-flow-v2.html");
 fs.writeFileSync(dest, out);
-console.log("wrote " + dest + " (" + out.length + " bytes) — all blocks present");
+console.log("wrote " + dest + " (" + out.length + " bytes), all blocks present");

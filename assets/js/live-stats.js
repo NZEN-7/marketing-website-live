@@ -1,8 +1,8 @@
-/* Live savings ticker — progressive enhancement.
+/* Live savings ticker, progressive enhancement.
  *
  * Elements with data-live-stat="<key>" hold audited static figures in the
  * HTML (the no-JS / endpoint-down truth). On first scroll into view each
- * one tickers up from 0 — digits flip fast, then decelerate into the final
+ * one tickers up from 0, digits flip fast, then decelerate into the final
  * value (ease-out quartic). If the platform's public stats endpoint
  * answers (GET /api/public/stats, aggregates only, edge-cached), targets
  * switch to the live values and any already-landed counter glides to the

@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Thermal Dawn — Energy Flow</title>
+<title>Thermal Dawn, Energy Flow</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@500;600&family=Inter:wght@500;600&display=swap" rel="stylesheet"/>
 <style>
 /* ─────────────────────────────────────────────────────────────────────
-   GENERATED FILE — do not hand-edit.
+   GENERATED FILE, do not hand-edit.
    Built by scratchpad/build-homepage-anim.js from:
      · thermal-dawn-flow-v2.html      (the scene graphic, from TD-Platform)
      · homepage_web_animation_new.html (the shell: toggle, buttons, cards)
@@ -140,7 +140,7 @@ body.standalone .svg-wrap { max-width: 540px; margin: 0 auto; }
 .rule { stroke: var(--rule); stroke-width: 1; fill: none; }
 .dot  { fill: rgba(255,255,255,0.5); }
 
-/* ── weather / sky layers (NEW — under test) ─────────────────────── */
+/* ── weather / sky layers (NEW, under test) ─────────────────────── */
 /* Sky layers crossfade; stars / moon / sun / clouds fade rather than pop. */
 .sky-fade { transition: opacity 1.2s ease; }
 /* Drift: outer <g> positions the cloud, inner <g.cloud-move> drifts it. */
@@ -167,7 +167,7 @@ body.standalone .svg-wrap { max-width: 540px; margin: 0 auto; }
 @keyframes twinkle { 0%,100%{opacity:0.25} 50%{opacity:0.95} }
 .star { animation: twinkle 3.6s ease-in-out infinite; }
 
-/* Storm flash — brief, occasional double-strike across the sky. */
+/* Storm flash, brief, occasional double-strike across the sky. */
 @keyframes lightning { 0%,92%,100%{opacity:0} 93%{opacity:0.8} 94%{opacity:0.05} 95%{opacity:0.55} 96%{opacity:0} }
 .lightning-flash { animation: lightning 9s linear infinite; }
 
@@ -184,7 +184,7 @@ svg { display: block; width: 100%; height: auto; overflow: hidden; }
 
 /* The v2 scene ships its own standalone control bar as `.controls`, hidden
    by default. That rule lands after the shell's and would hide the shell's
-   real controls — toggle included — so restate the shell's layout here. */
+   real controls, toggle included, so restate the shell's layout here. */
 .controls {
   display: flex; flex-direction: column; align-items: center;
   gap: 14px; margin-bottom: 28px; width: 100%; padding: 0;
@@ -207,13 +207,13 @@ body, .scene-title h2, .scene-title p, .ic-title, .ic-body {
 .ic-title { font-size: 13px; font-weight: 800; letter-spacing: -0.01em; margin-bottom: 5px; }
 .ic-body  { font-size: 12.5px; line-height: 1.55; color: rgba(255,255,255,0.62); }
 .info-card { padding: 18px; }
-/* the small caps labels stay mono — they read as instrument type */
+/* the small caps labels stay mono, they read as instrument type */
 .label-row, .storage-label, .tod-btn { font-family: 'DM Mono', ui-monospace, monospace; }
 </style>
 </head>
 <body>
 <div class="scene">
-  <div class="label-row">Thermal Dawn — Energy Flow</div>
+  <div class="label-row">Thermal Dawn, Energy Flow</div>
 
   <div class="controls">
     <div class="storage-toggle-wrap">
@@ -270,7 +270,7 @@ body, .scene-title h2, .scene-title p, .ic-title, .ic-body {
     <linearGradient id="batt-front"  x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7f858e"/><stop offset="100%" stop-color="#636972"/></linearGradient>
     <linearGradient id="batt-side"   x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#666c75"/><stop offset="100%" stop-color="#4e545d"/></linearGradient>
     <linearGradient id="batt-top"    x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#90969e"/><stop offset="100%" stop-color="#767c84"/></linearGradient>
-    <!-- ground pool — faint cool sheen the buildings sit on (dark bg, so grounding
+    <!-- ground pool, faint cool sheen the buildings sit on (dark bg, so grounding
          comes from light behind the silhouette, not a dark shadow) -->
     <radialGradient id="ground-glow" cx="50%" cy="50%" r="50%">
       <stop offset="0%" stop-color="#35485c" stop-opacity="0.55"/>
@@ -281,13 +281,13 @@ body, .scene-title h2, .scene-title p, .ic-title, .ic-body {
     <radialGradient id="store-glow-g" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#2EC68A" stop-opacity="0.55"/><stop offset="100%" stop-color="#2EC68A" stop-opacity="0"/></radialGradient>
   </defs>
 
-  <!-- ══ SKY — three stacked layers crossfaded by JS (day base; dusk amount ramps
+  <!-- ══ SKY, three stacked layers crossfaded by JS (day base; dusk amount ramps
        continuously with the sun's distance from the horizon; night on top) ══ -->
   <rect x="235" y="0" width="363" height="548" fill="url(#sky-day)"/>
   <rect id="sky-dusk-rect" class="sky-fade" x="235" y="0" width="363" height="548" fill="url(#sky-dusk)" style="opacity:0"/>
   <rect id="sky-night-rect" class="sky-fade" x="235" y="0" width="363" height="548" fill="url(#sky-night)" style="opacity:0"/>
 
-  <!-- ══ STARS (night) — a gentle "star river" wave. Varied dot sizes give a
+  <!-- ══ STARS (night), a gentle "star river" wave. Varied dot sizes give a
        hand-placed, dot-painting feel; the few faint concentric-halo dots are a
        quiet nod to that style, kept abstract + subtle (not any specific motif). ══ -->
   <g id="sky-stars" class="sky-fade" style="opacity:0" fill="#e2e8f0">
@@ -324,7 +324,7 @@ body, .scene-title h2, .scene-title p, .ic-title, .ic-body {
     </g>
   </g>
 
-  <!-- ══ SUN (day / dusk) — soft abstract concentric glow, top-right ══ -->
+  <!-- ══ SUN (day / dusk), soft abstract concentric glow, top-right ══ -->
   <g id="sky-sun" class="sky-fade">
     <circle cx="570" cy="40" r="42" fill="#E87C2A" opacity="0.05"/>
     <circle cx="570" cy="40" r="29" fill="#E87C2A" opacity="0.10"/>
@@ -341,7 +341,7 @@ body, .scene-title h2, .scene-title p, .ic-title, .ic-body {
     <circle cx="568" cy="38" r="1.0" fill="#9aa3b0" opacity="0.5"/>
   </g>
 
-  <!-- ══ CLOUDS (partly / overcast / rain / storm) — soft blurred stratus wisps:
+  <!-- ══ CLOUDS (partly / overcast / rain / storm), soft blurred stratus wisps:
        flat ellipse clusters at low opacity, drifting slowly. data-op is the base
        opacity; applyWX() darkens + densifies with heavier cover. The extra wrap
        is a wide full-width layer that fades in for overcast / rain / storm. ══ -->
@@ -382,13 +382,13 @@ body, .scene-title h2, .scene-title p, .ic-title, .ic-body {
 
   <!-- ══ Two-storey house BEHIND the garage (taller; peeks above the garage's left
        roofline, left side runs off the frame). Drawn first so the garage sits in
-       front of it. Rough first massing — refine after screenshot. ══ -->
+       front of it. Rough first massing, refine after screenshot. ══ -->
   <g transform="translate(345,360) scale(0.85) translate(-345,-360)">
     <!-- right side wall (mostly hidden behind the garage) -->
     <polygon points="345,360 575,231 575,91 345,220" fill="#25252a" stroke="#3a3a3e" stroke-width="0.5"/>
     <!-- gable end wall (front-facing, two storey; left edge off-frame) -->
     <polygon points="345,360 140,245 140,105 242.5,92.5 345,220" fill="url(#wall-grad)" stroke="#2a2a2c" stroke-width="0.5"/>
-    <!-- rake/eave shadows on the walls — deeper now the roof overhangs; the top
+    <!-- rake/eave shadows on the walls, deeper now the roof overhangs; the top
          of each band hides behind the slab + fascia -->
     <polygon points="140,105 242.5,92.5 242.5,104.5 140,117" fill="#000" opacity="0.35"/>
     <polygon points="242.5,92.5 345,220 345,238 242.5,110.5" fill="#000" opacity="0.35"/>
@@ -401,7 +401,7 @@ body, .scene-title h2, .scene-title p, .ic-title, .ic-body {
     <polygon points="129.6,108.2 238.1,95 238.1,99.5 129.6,112.7" fill="#1c1c20"/>
     <polygon points="238.1,95 344.4,227.2 344.4,231.7 238.1,99.5" fill="#1c1c20"/>
     <polygon points="344.4,227.2 578.8,95.7 578.8,100.2 344.4,231.7" fill="#121215"/>
-    <!-- front door — recessed into the wall: opening quad is the (set-back) panel,
+    <!-- front door, recessed into the wall: opening quad is the (set-back) panel,
          left jamb + sill strips give the reveal depth (recess shift = 4.4,-2.4 along
          the side-wall axis). Seam sits on the recessed panel's centre. -->
     <polygon points="238.9,300.5 214.3,286.7 214.3,233.5 238.9,247.3" fill="#0c0c10" stroke="#54545c" stroke-width="0.7"/>
@@ -411,7 +411,7 @@ body, .scene-title h2, .scene-title p, .ic-title, .ic-body {
     <!-- stoop + step leading up to the door -->
     <polygon points="238.9,300.5 214.3,286.7 205,291 229.6,304.8" fill="#33333a"/>
     <polygon points="229.6,304.8 205,291 196,295.5 220.6,309.3" fill="#2a2a30"/>
-    <!-- windows — same recess as the door (shift 4.4,-2.4): lit pane, left jamb +
+    <!-- windows, same recess as the door (shift 4.4,-2.4): lit pane, left jamb +
          sill reveal, muntin cross on the recessed pane. Ground floor left of the
          door; first-floor pair above. -->
     <g>
@@ -449,10 +449,10 @@ body, .scene-title h2, .scene-title p, .ic-title, .ic-body {
        block at the end of this group carries a compensating 1.25 wrapper so the
        callout text renders at the same size as before. -->
   <g id="equip-scale" transform="translate(444.5,400) scale(0.64) translate(-444.5,-400)">
-  <!-- House — right (side) wall -->
+  <!-- House, right (side) wall -->
   <polygon points="390,390 699,217 699,97 390,270" fill="#25252a" stroke="#3a3a3e" stroke-width="0.5"/>
   <polygon points="390,390 220,295 220,175 390,270" fill="url(#wall-grad)" stroke="#2a2a2c" stroke-width="0.5"/>
-  <!-- Garage door on the front wall (this block is the garage) — recessed like the
+  <!-- Garage door on the front wall (this block is the garage), recessed like the
        front door (shift 4.4,-2.4): left jamb + sill reveal, slats on the set-back panel -->
   <g>
     <polygon points="373,380.5 237,304.5 237,225.3 373,301.3" fill="#15151a" stroke="#3a3a3e" stroke-width="0.6"/>
@@ -464,7 +464,7 @@ body, .scene-title h2, .scene-title p, .ic-title, .ic-body {
     <polygon points="237,304.5 237,225.3 241.4,227.8 241.4,302.1" fill="#202026"/>
     <polygon points="237,304.5 373,380.5 373,375.7 241.4,302.1" fill="#4a4a52"/>
   </g>
-  <!-- Back window — far end of the right/side wall. Recessed like the front door,
+  <!-- Back window, far end of the right/side wall. Recessed like the front door,
        but this wall faces the other way so the shift mirrors to (-3.8,-2.2) and
        the visible reveals are the BACK jamb + sill. -->
   <g>
@@ -478,7 +478,7 @@ body, .scene-title h2, .scene-title p, .ic-title, .ic-body {
   </g>
 
   <polygon points="220,175 390,270 305,173" fill="url(#wall-grad)" stroke="#2a2a2c" stroke-width="0.5"/>
-  <!-- rake/eave shadows — deeper now the roof overhangs; band tops hide behind the fascia -->
+  <!-- rake/eave shadows, deeper now the roof overhangs; band tops hide behind the fascia -->
   <polygon points="220,175 305,173 305,185 220,187" fill="#000" opacity="0.5"/>
   <polygon points="305,173 390,270 390,288 305,191" fill="#000" opacity="0.5"/>
   <polygon points="390,270 699,97 699,114 390,287" fill="#000" opacity="0.5"/>
@@ -493,7 +493,7 @@ body, .scene-title h2, .scene-title p, .ic-title, .ic-body {
 
   <!-- translate(11,-6) slides the array ~12u back along the roof so its front and
        back margins are equal (centred on the longer roof). 4×2 individual modules
-       on a dark mounting frame — the gaps between modules give the tiled look. -->
+       on a dark mounting frame, the gaps between modules give the tiled look. -->
   <g opacity="0.85" transform="translate(11,-6)">
     <polygon points="420,239 635,118 571,45 356,166" fill="#06080b" stroke="#1e3a5f" stroke-width="0.5"/>
     <g fill="url(#panel-grad)" stroke="#2a4a72" stroke-width="0.4">
@@ -515,7 +515,7 @@ body, .scene-title h2, .scene-title p, .ic-title, .ic-body {
   <polygon points="390,390 427,411 427,413 390,392" fill="#000" opacity="0.55"/>
 
   <g>
-    <!-- home ring main — square circuit at ground level, every leg on the two plan
+    <!-- home ring main, square circuit at ground level, every leg on the two plan
          axes. The seam pipe runs where the garage meets the pavement, from the
          back corner (699,217) to the front corner (390,390), then along the house
          frontage with a hairpin at the front-left corner. Faint dashes = buried
@@ -530,7 +530,7 @@ body, .scene-title h2, .scene-title p, .ic-title, .ic-body {
     <circle cx="51.4" cy="204.7" r="2.5" fill="#0a0a0a" stroke="rgba(255,255,255,0.35)" stroke-width="1"/>
   </g>
 
-  <!-- FLOW: home ring (occluded part) — drawn before the equipment so the seam
+  <!-- FLOW: home ring (occluded part), drawn before the equipment so the seam
        return hides behind battery / tank / HP; colour via --flow-main set by JS. -->
   <g id="g-flow-home" style="opacity:0">
     <path class="flow-line flow-delay-1" style="stroke:var(--flow-main)" d="M390,390 L25.5,190.6 Q16.75,185.8 25.5,180.9"/>
@@ -540,11 +540,11 @@ body, .scene-title h2, .scene-title p, .ic-title, .ic-body {
     <path class="flow-line flow-delay-3" style="stroke:var(--flow-main)" d="M699,217 L488,335.1"/>
   </g>
 
-  <!-- ══ LITHIUM BATTERY (generic home ESS, à la SigenStor) — right of the store.
+  <!-- ══ LITHIUM BATTERY (generic home ESS, à la SigenStor), right of the store.
        Drawn before the store so the (closer) store occludes it where they meet.
        translate slides it along the pad, tucking it under the garage window. ══ -->
   <g id="g-lithium" transform="translate(42,-23.5)">
-    <!-- left side face (X=min) — bottom-left corner backs onto the house wall -->
+    <!-- left side face (X=min), bottom-left corner backs onto the house wall -->
     <polygon points="557,296 574,305 574,257 557,247" fill="url(#batt-side)" stroke="#6f757d" stroke-width="0.5"/>
     <!-- top face -->
     <polygon points="557,247 588,230 605,239 574,257" fill="url(#batt-top)" stroke="#79808a" stroke-width="0.5"/>
@@ -558,7 +558,7 @@ body, .scene-title h2, .scene-title p, .ic-title, .ic-body {
     </g>
   </g>
 
-  <!-- THERMAL STORE — translate slides it along the pad so bare wall shows
+  <!-- THERMAL STORE, translate slides it along the pad so bare wall shows
        between the heat pump and the store (the pipework ladder lives in that gap) -->
   <g id="g-store" transform="translate(34,-19)">
     <ellipse id="store-glow-el" cx="517" cy="310" rx="55" ry="80" fill="url(#store-glow-o)" opacity="0"/>
@@ -578,7 +578,7 @@ body, .scene-title h2, .scene-title p, .ic-title, .ic-body {
   </g>
 
 
-  <!-- Tank connection row — four ports in a line on the store's silver top band:
+  <!-- Tank connection row, four ports in a line on the store's silver top band:
        [HP supply, HP return, house supply, house return]. Drawn after the tank so
        the ports + pipe runs sit in front of the face (pipes travel -v, toward the
        viewer-left). House pair drops perpendicular risers to the seam; the HP
@@ -592,7 +592,7 @@ body, .scene-title h2, .scene-title p, .ic-title, .ic-body {
     <circle cx="519.5" cy="274" r="1.8" fill="#0a0a0a" stroke="rgba(255,255,255,0.35)" stroke-width="0.8"/>
   </g>
 
-  <!-- FLOW: home ring (port side) — house supply out / return in via the risers -->
+  <!-- FLOW: home ring (port side), house supply out / return in via the risers -->
   <g id="g-flow-home-2" style="opacity:0">
     <path class="flow-line" style="stroke:var(--flow-main)" d="M512.5,270 L482,287.1 L482,338.5 L390,390"/>
     <path class="flow-line flow-delay-3" style="stroke:var(--flow-main)" d="M488,335.1 L488,291.7 L519.5,274"/>
@@ -634,7 +634,7 @@ body, .scene-title h2, .scene-title p, .ic-title, .ic-body {
     </g>
   </g>
 
-  <!-- HP supply/return pipework — horizontal entries both ends, with a vertical
+  <!-- HP supply/return pipework, horizontal entries both ends, with a vertical
        dogleg in the gap (HP right face ⇄ tank silver-band ports) -->
   <g>
     <path fill="none" stroke="rgba(255,255,255,0.10)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" d="M464,316 L470,312.6 L470,278 L498.5,262"/>
@@ -642,13 +642,13 @@ body, .scene-title h2, .scene-title p, .ic-title, .ic-body {
     <circle cx="464" cy="316" r="1.8" fill="#0a0a0a" stroke="rgba(255,255,255,0.35)" stroke-width="0.8"/>
     <circle cx="464" cy="324" r="1.8" fill="#0a0a0a" stroke="rgba(255,255,255,0.35)" stroke-width="0.8"/>
   </g>
-  <!-- FLOW: HP→tank supply/return pair — shared by charging and direct -->
+  <!-- FLOW: HP→tank supply/return pair, shared by charging and direct -->
   <g id="g-flow-hp" style="opacity:0">
     <path class="flow-line" stroke="var(--orange)" d="M464,316 L470,312.6 L470,278 L498.5,262"/>
     <path class="flow-line flow-delay-2" stroke="rgba(232,124,42,0.7)" d="M505.5,266 L476,282.5 L476,317.3 L464,324"/>
   </g>
 
-  <!-- Tesla-style labels — wrapped in a 1.25 compensator (1.25 × 0.64 = 0.8) so
+  <!-- Tesla-style labels, wrapped in a 1.25 compensator (1.25 × 0.64 = 0.8) so
        the text renders at the same size/position system it was authored in;
        equipment-anchored dots are remapped to the shrunken equipment. -->
   <g transform="translate(444.5,400) scale(1.25) translate(-444.5,-400)">
@@ -658,7 +658,7 @@ body, .scene-title h2, .scene-title p, .ic-title, .ic-body {
     <circle class="dot" cx="468.1" cy="187.2" r="1.8"/>
   </g>
 
-  <!-- Lithium battery call-out — plain line + label, no live metrics yet -->
+  <!-- Lithium battery call-out, plain line + label, no live metrics yet -->
   <g opacity="0.9">
     <circle class="dot" cx="594.5" cy="299.6" r="1.8"/>
     <line class="rule" x1="594.5" y1="302.6" x2="594.5" y2="389"/>
@@ -670,21 +670,21 @@ body, .scene-title h2, .scene-title p, .ic-title, .ic-body {
     <line class="rule" x1="544.1" y1="340.6" x2="544.1" y2="444"/>
     <text x="549" y="453" class="tag">Thermal Battery</text>
     <text id="lbl-battery-val" x="549" y="472" class="val">Idle</text>
-    <text id="lbl-battery-temp" x="549" y="490" class="temp muted">—</text>
+    <text id="lbl-battery-temp" x="549" y="490" class="temp muted">-</text>
   </g>
   <g>
     <circle class="dot" cx="442.5" cy="384" r="1.8"/>
     <line class="rule" x1="442.5" y1="387" x2="442.5" y2="444"/>
     <text x="447" y="453" class="tag">Heat Pump</text>
     <text id="lbl-hp-val" x="447" y="472" class="val" style="fill:#E87C2A">On</text>
-    <text id="lbl-hp-temp" x="447" y="490" class="temp muted">—</text>
+    <text id="lbl-hp-temp" x="447" y="490" class="temp muted">-</text>
   </g>
   <g opacity="0.9">
     <circle class="dot" cx="147" cy="231" r="1.8"/>
     <line class="rule" x1="147" y1="234" x2="147" y2="444"/>
     <text x="152" y="453" class="tag">Indoor</text>
     <text id="lbl-radiators-val" x="152" y="472" class="val">Off</text>
-    <text id="lbl-radiators-temp" x="152" y="490" class="temp muted">—</text>
+    <text id="lbl-radiators-temp" x="152" y="490" class="temp muted">-</text>
   </g>
   </g><!-- /label compensator -->
   </g><!-- /equip-scale -->
@@ -696,7 +696,7 @@ body, .scene-title h2, .scene-title p, .ic-title, .ic-body {
     <text id="lbl-mode-chip" x="253" y="66" text-anchor="start" font-family="Inter,sans-serif" font-size="22" font-weight="600" fill="#2EC68A">Idle</text>
   </g>
 
-  <!-- Outdoor readout — top-right sky pocket, just above the garage roof -->
+  <!-- Outdoor readout, top-right sky pocket, just above the garage roof -->
   <!-- ══ FLOW: SOLAR EXPORTED TO THE GRID ══════════════════════════════
        Root-level (not inside scene-scale) so the label keeps its type size.
        Only shown in the no-storage daytime scenario: the panels generate,
@@ -715,7 +715,7 @@ body, .scene-title h2, .scene-title p, .ic-title, .ic-body {
     <text id="lbl-outdoor-cond" x="593" y="149" class="temp" text-anchor="end">Clear</text>
   </g>
 
-  <!-- ══ RAIN (rain / storm) — drawn last so it falls in front. Near layer:
+  <!-- ══ RAIN (rain / storm), drawn last so it falls in front. Near layer:
        longer, brighter, faster; far layer: thinner, dimmer, slower. ══ -->
   <g id="sky-rain" class="hide" stroke="#8fa3bd" stroke-linecap="round">
     <g stroke-width="0.9">
@@ -750,8 +750,8 @@ body, .scene-title h2, .scene-title p, .ic-title, .ic-body {
   <!-- INFO CARDS -->
   <div class="info-row">
     <div class="info-card hl-o" id="card-0"><div class="ic-icon">☀️</div><div class="ic-title" id="c0-title">Daytime Charging</div><div class="ic-body" id="c0-body">Solar panels power the heat pump during the day, charging the thermal store while electricity is free.</div></div>
-    <div class="info-card"     id="card-1"><div class="ic-icon" id="c1-icon">◉</div><div class="ic-title" id="c1-title">35 kWh Stored</div><div class="ic-body" id="c1-body">Enough heat for an entire evening and overnight — without touching the grid.</div></div>
-    <div class="info-card"     id="card-2"><div class="ic-icon" id="c2-icon">♨️</div><div class="ic-title" id="c2-title">Evening Comfort</div><div class="ic-body" id="c2-body">Heat pump switches off at sunset. Stored heat flows through radiators and underfloor all evening — no grid needed.</div></div>
+    <div class="info-card"     id="card-1"><div class="ic-icon" id="c1-icon">◉</div><div class="ic-title" id="c1-title">35 kWh Stored</div><div class="ic-body" id="c1-body">Enough heat for an entire evening and overnight, without touching the grid.</div></div>
+    <div class="info-card"     id="card-2"><div class="ic-icon" id="c2-icon">♨️</div><div class="ic-title" id="c2-title">Evening Comfort</div><div class="ic-body" id="c2-body">Heat pump switches off at sunset. Stored heat flows through radiators and underfloor all evening, no grid needed.</div></div>
   </div>
 </div>
 
@@ -767,7 +767,7 @@ body, .scene-title h2, .scene-title p, .ic-title, .ic-body {
   var ORANGE = '#E87C2A', GREEN = '#2EC68A', RED = '#E84A2A', DIM = 'rgba(255,255,255,0.5)';
 
   // The night + no-storage "grid heating" flow reuses the store-to-home
-  // pipework recoloured red, which reads badly — the energy appears to come
+  // pipework recoloured red, which reads badly, the energy appears to come
   // out of a tank that isn't there. Disabled until that path is drawn
   // properly (grid -> heat pump -> home, with its own geometry).
   // The scenario still tells its story through the heading, chip and cards.
@@ -782,8 +782,8 @@ body, .scene-title h2, .scene-title p, .ic-title, .ic-body {
         btnDay: '\u2600 Daytime charging', btnNight: '\ud83c\udf19 Evening comfort',
         cards: [
           { title:'Daytime Charging', icon:'\u2600\ufe0f', body:'Solar panels power the heat pump during the day, charging the thermal store while electricity is free.', hl:'hl-o' },
-          { title:'35 kWh Stored',    icon:'\u25c9',        body:'Enough heat for an entire evening and overnight \u2014 without touching the grid.', hl:'' },
-          { title:'Evening Comfort',  icon:'\u2668\ufe0f', body:'Heat pump switches off at sunset. Stored heat flows through radiators and underfloor all evening \u2014 no grid needed.', hl:'' }
+          { title:'35 kWh Stored',    icon:'\u25c9',        body:'Enough heat for an entire evening and overnight, without touching the grid.', hl:'' },
+          { title:'Evening Comfort',  icon:'\u2668\ufe0f', body:'Heat pump switches off at sunset. Stored heat flows through radiators and underfloor all evening, no grid needed.', hl:'' }
         ]
       },
       night: {
@@ -792,30 +792,30 @@ body, .scene-title h2, .scene-title p, .ic-title, .ic-body {
         btnDay: '\u2600 Daytime charging', btnNight: '\ud83c\udf19 Evening comfort',
         cards: [
           { title:'Daytime Charging', icon:'\u2600\ufe0f', body:'Solar panels power the heat pump during the day, charging the thermal store while electricity is free.', hl:'' },
-          { title:'35 kWh Stored',    icon:'\u25c9',        body:'Enough heat for an entire evening and overnight \u2014 without touching the grid.', hl:'' },
-          { title:'Evening Comfort',  icon:'\u2668\ufe0f', body:'Heat pump switches off at sunset. Stored heat flows through radiators and underfloor all evening \u2014 no grid needed.', hl:'hl-g' }
+          { title:'35 kWh Stored',    icon:'\u25c9',        body:'Enough heat for an entire evening and overnight, without touching the grid.', hl:'' },
+          { title:'Evening Comfort',  icon:'\u2668\ufe0f', body:'Heat pump switches off at sunset. Stored heat flows through radiators and underfloor all evening, no grid needed.', hl:'hl-g' }
         ]
       }
     },
     n: {
       day: {
         h: 'Without Storage: Buy High, Sell Low.',
-        s: 'Without thermal storage, you sell cheap solar during the day \u2014 then buy expensive peak-rate grid power all evening.',
+        s: 'Without thermal storage, you sell cheap solar during the day, then buy expensive peak-rate grid power all evening.',
         btnDay: '\u2600 Cheap exports', btnNight: '\ud83c\udf19 Evening cost',
         cards: [
-          { title:'Daytime Export',    icon:'\u2600\ufe0f', body:'Your solar generates power during the day \u2014 but with nowhere to store it, it\'s exported to the grid at near-zero feed-in rates.', hl:'hl-o' },
+          { title:'Daytime Export',    icon:'\u2600\ufe0f', body:'Your solar generates power during the day, but with nowhere to store it, it\'s exported to the grid at near-zero feed-in rates.', hl:'hl-o' },
           { title:'No Storage',        icon:'\u25c9',        body:'Without thermal storage there\'s nowhere to keep your solar energy for later use.', hl:'' },
-          { title:'Evening Grid Cost', icon:'\u2668\ufe0f', body:'When the sun sets, the heat pump switches on \u2014 drawing expensive peak-rate electricity from the grid all evening.', hl:'' }
+          { title:'Evening Grid Cost', icon:'\u2668\ufe0f', body:'When the sun sets, the heat pump switches on, drawing expensive peak-rate electricity from the grid all evening.', hl:'' }
         ]
       },
       night: {
         h: 'Without Storage: Buy High, Sell Low.',
-        s: 'Without thermal storage, you sell cheap solar during the day \u2014 then buy expensive peak-rate grid power all evening.',
+        s: 'Without thermal storage, you sell cheap solar during the day, then buy expensive peak-rate grid power all evening.',
         btnDay: '\u2600 Cheap exports', btnNight: '\ud83c\udf19 Evening cost',
         cards: [
-          { title:'Daytime Export',    icon:'\u2600\ufe0f', body:'Your solar generates power during the day \u2014 but with nowhere to store it, it\'s exported to the grid at near-zero feed-in rates.', hl:'' },
+          { title:'Daytime Export',    icon:'\u2600\ufe0f', body:'Your solar generates power during the day, but with nowhere to store it, it\'s exported to the grid at near-zero feed-in rates.', hl:'' },
           { title:'No Storage',        icon:'\u25c9',        body:'Without thermal storage there\'s nowhere to keep your solar energy for later use.', hl:'' },
-          { title:'Evening Grid Cost', icon:'\u2668\ufe0f', body:'When the sun sets, the heat pump switches on \u2014 drawing expensive peak-rate electricity from the grid all evening.', hl:'hl-r' }
+          { title:'Evening Grid Cost', icon:'\u2668\ufe0f', body:'When the sun sets, the heat pump switches on, drawing expensive peak-rate electricity from the grid all evening.', hl:'hl-r' }
         ]
       }
     }
@@ -826,7 +826,7 @@ body, .scene-title h2, .scene-title p, .ic-title, .ic-body {
   function hide(id, hidden) { var e = el(id); if (e) e.classList.toggle('hide', hidden); }
 
   // Sun tracks a fixed mid-morning / late-afternoon position rather than the
-  // wall clock — this is an explainer, not a live dashboard.
+  // wall clock, this is an explainer, not a live dashboard.
   function placeSun(frac) {
     var g = el('sky-sun'); if (!g) return;
     var X0 = 250, X1 = 575, YT = 22, YL = 96;
@@ -944,7 +944,7 @@ body, .scene-title h2, .scene-title p, .ic-title, .ic-body {
 
   function setTemp(id, v) {
     var e = el(id); if (!e) return;
-    if (v == null) { e.textContent = '\u2014'; e.classList.add('muted'); }
+    if (v == null) { e.textContent = '--'; e.classList.add('muted'); }
     else { e.textContent = v.toFixed(1) + '\u00b0C'; e.classList.remove('muted'); }
   }
 

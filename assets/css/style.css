@@ -1,5 +1,5 @@
 /* =========================================================================
-   Thermal Dawn — site v2 stylesheet
+   Thermal Dawn, site v2 stylesheet
    Brand tokens follow Thermal-Dawn-CI-Guide-17122025-V1.
    Montserrat (self-hosted woff2). Mobile-first.
    ========================================================================= */
@@ -207,7 +207,7 @@ li{margin:.35em 0;}
 }
 .section--dark .draft{color:#bfe6f7;background:rgba(61,175,229,.18);}
 .draft-note{font-size:.85rem;color:#0b6a92;font-weight:600;display:inline-flex;align-items:center;gap:.4em;}
-/* Live savings counter indicator — unhidden by live-stats.js when the
+/* Live savings counter indicator, unhidden by live-stats.js when the
    platform endpoint answers. Green pulse = numbers on screen are live. */
 [data-live-stat]{font-variant-numeric:tabular-nums;}
 .live-dot{display:inline-flex;align-items:center;gap:6px;font-size:.68rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#1f8f63;vertical-align:middle;}
@@ -361,7 +361,7 @@ table.data td:first-child{font-weight:600;}
 .footer-social a{font-weight:600;}
 
 /* =========================================================================
-   v3 — live-site look (dark header, cocoa sections, orange proof band)
+   v3, live-site look (dark header, cocoa sections, orange proof band)
    Matches the design of the current thermaldawn.com.au homepage.
    ========================================================================= */
 
@@ -522,7 +522,7 @@ body.dark .band-orange p,body.dark .band-orange li,body.dark .band-orange strong
 
 /* ---------- Footer: centred lockup ---------- */
 .site-footer{background:var(--td-shell);text-align:center;padding:52px 0 28px;}
-/* width:auto is required — the img carries width/height attributes, and
+/* width:auto is required, the img carries width/height attributes, and
    without it the 26px height squashes the wordmark to a 240px-wide smear */
 .footer-center__logo img{height:26px;width:auto;margin:0 auto 20px;}
 .footer-social--icons{justify-content:center;gap:14px;margin:0 0 22px;}
@@ -534,7 +534,7 @@ body.dark .band-orange p,body.dark .band-orange li,body.dark .band-orange strong
 .footer-legal{font-size:.78rem;color:#8d857e;}
 
 /* =========================================================================
-   Dark theme (body class="dark") — the look of the live interior pages:
+   Dark theme (body class="dark"), the look of the live interior pages:
    near-black page, cocoa alternates, centred type, orange accents.
    ========================================================================= */
 
@@ -554,7 +554,7 @@ body.dark .section--paper2,body.dark .section--paper3{background:var(--td-cocoa-
 body.dark .section--dark{background:#080605;}
 body.dark .section--cocoa{background:var(--td-cocoa-grad);}
 
-/* centred layout is the house style on these pages — headings and short
+/* centred layout is the house style on these pages, headings and short
    intros centre, but prose and lists stay left-aligned and measure-limited
    so they're actually readable. */
 body.dark .section>.wrap{text-align:center;}
@@ -562,7 +562,7 @@ body.dark .narrow{margin-left:auto!important;margin-right:auto!important;}
 body.dark .section .card,body.dark .section .table-wrap,body.dark .section .form,
 body.dark .section .tier,body.dark .section .path-card,body.dark .section .article,
 body.dark .section .split,body.dark .section .altrow,body.dark .section .faq{text-align:left;}
-/* lists never centre — ragged bullets are hard to scan */
+/* lists never centre, ragged bullets are hard to scan */
 body.dark .section ul,body.dark .section ol{text-align:left;max-width:66ch;margin-left:auto;margin-right:auto;}
 body.dark .section ol{padding-left:1.5em;}
 body.dark .section li{margin:.6em 0;padding-left:.2em;}
@@ -579,7 +579,7 @@ body.dark .section .tier ul>li::before{display:none;}
 body.dark .section>.wrap>p,body.dark .section>.wrap>.narrow>p{max-width:70ch;margin-left:auto;margin-right:auto;}
 body.dark .section .btn-row{justify-content:center;}
 body.dark .section .quote{border-left:0;border-top:2px solid var(--td-orange);padding:16px 0 0;display:inline-block;}
-/* .quote defaults to near-black — invisible on a dark page */
+/* .quote defaults to near-black, invisible on a dark page */
 body.dark .quote{color:#fff;}
 body.dark .quote-attr{color:var(--td-orange);}
 body.dark blockquote{color:#fff;}
@@ -636,7 +636,7 @@ body.dark .nav__menu.open .nav__cta-mob a{color:#1c1514;}
 body.dark .btn--outline-light,body.dark .btn--ghost{color:#fff;}
 body.dark .btn--outline-light:hover,body.dark .btn--ghost:hover{color:#1c1514;}
 body.dark .btn--blue,body.dark .btn--blue:hover{color:#0d2b3a;}
-/* btn--dark has no meaning on a dark page — render it as the sunrise CTA */
+/* btn--dark has no meaning on a dark page, render it as the sunrise CTA */
 body.dark .btn--dark{background:var(--td-sunrise) border-box;}
 body.dark .btn--dark:hover{background:var(--td-sunrise) border-box;}
 
@@ -736,7 +736,7 @@ body.dark .video__cap,.section--cocoa .video__cap,.section--dark .video__cap{col
   .tl--r .tl__body{grid-column:1;grid-row:1;text-align:right;padding:0 30px 0 0;}
 }
 
-/* photo-backed dark section — set --img inline:  style="--img:url(/assets/img/x.webp)" */
+/* photo-backed dark section, set --img inline:  style="--img:url(/assets/img/x.webp)" */
 .section--photo{position:relative;background:#0d0908;color:#e2d7cd;overflow:hidden;}
 .section--photo::before{
   content:"";position:absolute;inset:0;background-image:var(--img);background-size:cover;background-position:center;
@@ -757,7 +757,7 @@ body.dark .section--photo,body.dark .section--photo>.wrap{color:#e2d7cd;}
 @media(max-width:900px){.watermark__word{display:none;}}
 
 /* =========================================================================
-   v4 — typographic hierarchy
+   v4, typographic hierarchy
    Nearly everything sat at 800–900, so nothing led and the proof figures
    didn't pop. Step the chrome down and reserve the heaviest weight for the
    numbers and the hero. Load-bearing figures keep 900 deliberately.
@@ -773,7 +773,7 @@ h4{font-weight:700;}
 .metric dt{font-weight:700;}
 .step h3,.tl h3,.benefits__item h3,.stays h3{font-weight:700;}
 .ic-title{font-weight:700;}
-/* these are the numbers — they keep the weight */
+/* these are the numbers, they keep the weight */
 .figures__v,.stat b,.metric dd,.tier__price,.tl__label,.step__n,h1{font-weight:900;}
 
 /* .figures was tuned for dark sections; on a light one the caption grey
@@ -781,7 +781,7 @@ h4{font-weight:700;}
 body:not(.dark) .figures__l{color:var(--td-grey);}
 
 /* .btn--flat is the flat-orange CTA, which is exactly the colour of the
-   orange bands — on them it rendered at 1.00:1 with no border or shadow, so
+   orange bands, on them it rendered at 1.00:1 with no border or shadow, so
    it read as bold text rather than a button. Go dark inside those bands. */
 .band-orange .btn--flat,.next-orange .btn--flat,
 .band-orange .btn--primary,.next-orange .btn--primary{

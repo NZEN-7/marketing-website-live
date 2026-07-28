@@ -1,5 +1,5 @@
 /* =========================================================================
-   Thermal Dawn — shared header/footer include + nav behaviour
+   Thermal Dawn: shared header/footer include + nav behaviour
    No server-side includes: header & footer markup live here and are injected
    into every page's <header id="site-header"> and <footer id="site-footer">.
    Root-relative links (/hydronic/ etc.) so it works at any URL depth on Netlify.
@@ -57,7 +57,7 @@
         '<a href="/pre-order/">Reserve</a>' +
         '<a href="/contact/">Contact</a>' +
       '</nav>' +
-      // TODO: add the unit/street number once confirmed — currently suburb-level only.
+      // TODO: add the unit/street number once confirmed (currently suburb-level only).
       '<address class="footer-address">Thermal Dawn, Hornsby, NSW 2077</address>' +
       '<p class="footer-legal">&copy; ' + YEAR + ' Thermal Dawn Pty Ltd. ABN 47 682 866 913. All Rights Reserved.</p>' +
     '</div>';
@@ -81,7 +81,7 @@
         el.insertBefore(img, txt);
         txt.hidden = true;
       };
-      img.onerror = function () { /* no file yet — leave the text in place */ };
+      img.onerror = function () { /* no file yet: leave the text in place */ };
       img.src = src;
     });
   }

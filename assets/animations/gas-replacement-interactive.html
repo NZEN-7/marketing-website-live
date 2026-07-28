@@ -77,7 +77,7 @@ var lft = function lft(c) {
 };
 
 // ─── SHARED positions (same in both views) ───────────────────────────────────
-// Right column outputs — identical coords in before AND after
+// Right column outputs, identical coords in before AND after
 var SHARED = {
   radiator: {
     x: 385,
@@ -103,7 +103,7 @@ var SHARED = {
     w: 115,
     h: 60
   },
-  // Solar and battery — bottom left, same in both views
+  // Solar and battery, bottom left, same in both views
   solar: {
     x: 20,
     y: 390,
@@ -123,7 +123,7 @@ var TRUNK_X = 330;
 
 // ─── BEFORE ──────────────────────────────────────────────────────────────────
 // Left side: Gas Connection + Gas Boiler
-// Right side: Radiators, Underfloor (no FCU/HotWater in before — gas doesn't do those)
+// Right side: Radiators, Underfloor (no FCU/HotWater in before, gas doesn't do those)
 // Bottom: Solar + Battery (dimmed/unused)
 
 var B = {
@@ -138,7 +138,7 @@ var B = {
     h: 60,
     color: C.red,
     tag: "REMOVED",
-    info: "Gas prices have risen 40%+ in five years. This connection — and its ongoing cost — is eliminated entirely when you switch to Thermal Dawn."
+    info: "Gas prices have risen 40%+ in five years. This connection, and its ongoing cost, is eliminated entirely when you switch to Thermal Dawn."
   },
   boiler: {
     id: "boiler",
@@ -151,7 +151,7 @@ var B = {
     h: 68,
     color: C.red,
     tag: "REPLACED",
-    info: "Your gas boiler heats water by burning gas — expensive, polluting, and getting more expensive every year. This is the only part of your system Thermal Dawn replaces."
+    info: "Your gas boiler heats water by burning gas, expensive, polluting, and getting more expensive every year. This is the only part of your system Thermal Dawn replaces."
   },
   radiator: _objectSpread(_objectSpread({
     id: "radiator",
@@ -161,7 +161,7 @@ var B = {
   }, SHARED.radiator), {}, {
     color: C.grey,
     tag: "STAYS",
-    info: "Your radiators stay exactly as they are. Thermal Dawn connects to your existing hydronic pipework — no radiator replacement needed."
+    info: "Your radiators stay exactly as they are. Thermal Dawn connects to your existing hydronic pipework, no radiator replacement needed."
   }),
   underfloor: _objectSpread(_objectSpread({
     id: "underfloor",
@@ -181,7 +181,7 @@ var B = {
   }, SHARED.solar), {}, {
     color: C.grey,
     tag: "UNUSED",
-    info: "You have solar panels generating clean energy during the day — but none of that is going to your heating. Your boiler burns gas regardless. All that daytime solar gets exported for near-zero feed-in rates."
+    info: "You have solar panels generating clean energy during the day, but none of that is going to your heating. Your boiler burns gas regardless. All that daytime solar gets exported for near-zero feed-in rates."
   }),
   battery: _objectSpread(_objectSpread({
     id: "battery_b",
@@ -191,7 +191,7 @@ var B = {
   }, SHARED.battery), {}, {
     color: C.grey,
     tag: "UNUSED",
-    info: "Even with a home battery, your heating still runs on gas. The battery stores electricity for lights and appliances — but your biggest energy load is still burning fossil fuels every time it runs."
+    info: "Even with a home battery, your heating still runs on gas. The battery stores electricity for lights and appliances, but your biggest energy load is still burning fossil fuels every time it runs."
   })
 };
 var beforeList = Object.values(B);
@@ -268,7 +268,7 @@ var A = {
     h: 68,
     color: C.green,
     tag: "NEW",
-    info: "The thermal store is the heart of the system. It holds 35 kWh of heat energy — enough to power your heating, cooling, and hot water through the evening and overnight without touching the grid."
+    info: "The thermal store is the heart of the system. It holds 35 kWh of heat energy, enough to power your heating, cooling, and hot water through the evening and overnight without touching the grid."
   },
   heatpump: {
     id: "heatpump",
@@ -281,7 +281,7 @@ var A = {
     h: 60,
     color: C.green,
     tag: "NEW",
-    info: "An efficient reverse-cycle heat pump replaces your gas boiler. It runs during the day using your excess solar — free energy you were previously exporting for almost nothing. Also provides cooling in summer."
+    info: "An efficient reverse-cycle heat pump replaces your gas boiler. It runs during the day using your excess solar, free energy you were previously exporting for almost nothing. Also provides cooling in summer."
   },
   controls: {
     id: "controls",
@@ -294,7 +294,7 @@ var A = {
     h: 60,
     color: C.green,
     tag: "NEW",
-    info: "Thermal Dawn's control system orchestrates your solar, battery, and heat pump — forecasting generation, reading your tariff schedule, and deciding exactly when and how hard to charge the thermal store. Fully automatic, every day."
+    info: "Thermal Dawn's control system orchestrates your solar, battery, and heat pump, forecasting generation, reading your tariff schedule, and deciding exactly when and how hard to charge the thermal store. Fully automatic, every day."
   },
   solar: _objectSpread(_objectSpread({
     id: "solar_a",
@@ -304,7 +304,7 @@ var A = {
   }, SHARED.solar), {}, {
     color: C.green,
     tag: "UNLOCKED",
-    info: "Your existing solar panels now power your heating — your biggest energy load. Instead of exporting surplus solar for near-zero feed-in rates, you store it as heat for the evening. Finally, your panels are doing their best work."
+    info: "Your existing solar panels now power your heating, your biggest energy load. Instead of exporting surplus solar for near-zero feed-in rates, you store it as heat for the evening. Finally, your panels are doing their best work."
   }),
   battery: _objectSpread(_objectSpread({
     id: "battery_a",
@@ -314,27 +314,27 @@ var A = {
   }, SHARED.battery), {}, {
     color: C.green,
     tag: "UNLOCKED",
-    info: "Your home battery now works as part of a complete energy system. Smart Controls coordinates battery and thermal store together — battery for appliances, thermal store for heating and cooling. Nothing wasted."
+    info: "Your home battery now works as part of a complete energy system. Smart Controls coordinates battery and thermal store together, battery for appliances, thermal store for heating and cooling. Nothing wasted."
   }),
   radiator: _objectSpread(_objectSpread({
     id: "radiator2",
     label: "Radiators",
-    sub: "Unchanged — stay as-is",
+    sub: "Unchanged, stay as-is",
     icon: "♨"
   }, SHARED.radiator), {}, {
     color: C.grey,
     tag: "STAYS",
-    info: "Your radiators stay exactly as they are. Thermal Dawn connects to your existing hydronic pipework — no radiator replacement, no mess, no disruption."
+    info: "Your radiators stay exactly as they are. Thermal Dawn connects to your existing hydronic pipework, no radiator replacement, no mess, no disruption."
   }),
   underfloor: _objectSpread(_objectSpread({
     id: "underfloor2",
     label: "Underfloor",
-    sub: "Unchanged — stay as-is",
+    sub: "Unchanged, stay as-is",
     icon: "▦"
   }, SHARED.underfloor), {}, {
     color: C.grey,
     tag: "STAYS",
-    info: "Underfloor circuits stay exactly as they are. Same radiant comfort — just powered by stored solar instead of burning gas."
+    info: "Underfloor circuits stay exactly as they are. Same radiant comfort, just powered by stored solar instead of burning gas."
   }),
   fcu: _objectSpread(_objectSpread({
     id: "fcu",
@@ -354,7 +354,7 @@ var A = {
   }, SHARED.hotwater), {}, {
     color: C.orange,
     tag: "OPTIONAL",
-    info: "The same thermal store can supply domestic hot water — eliminating your gas hot water system in the same installation. Ask about this during your site assessment."
+    info: "The same thermal store can supply domestic hot water, eliminating your gas hot water system in the same installation. Ask about this during your site assessment."
   })
 };
 var afterList = Object.values(A);
@@ -578,7 +578,7 @@ function App() {
     return c.id === active;
   });
 
-  // Both views use same viewBox height — after is taller due to FCU+HotWater
+  // Both views use same viewBox height, after is taller due to FCU+HotWater
   // Before: content ends at underfloor bottom = 148+60=208, solar bottom = 405+65=470
   // After:  content ends at hotwater bottom   = 388+60=448, solar bottom = 470
   // Use 500 for both so layout is stable on switch
@@ -731,7 +731,7 @@ function App() {
       color: C.dim,
       lineHeight: 1.65
     }
-  }, view === "before" ? "A standard gas hydronic system — even with solar and a battery. Your biggest energy load is still running on gas, completely disconnected from the clean energy you're generating." : "Thermal Dawn replaces only the heat source. Your pipes, radiators, and underfloor circuits stay exactly as they are. Fan coil units and hot water are optional add-ons.")));
+  }, view === "before" ? "A standard gas hydronic system, even with solar and a battery. Your biggest energy load is still running on gas, completely disconnected from the clean energy you're generating." : "Thermal Dawn replaces only the heat source. Your pipes, radiators, and underfloor circuits stay exactly as they are. Fan coil units and hot water are optional add-ons.")));
 }
 ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App, null));
 </script>

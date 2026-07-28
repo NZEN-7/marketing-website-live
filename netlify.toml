@@ -1,4 +1,4 @@
-# Thermal Dawn — Netlify deploy config
+# Thermal Dawn, Netlify deploy config
 # Drag-and-drop this whole site-v2 folder into Netlify, or `netlify deploy`.
 
 [build]
@@ -40,6 +40,8 @@
     X-Content-Type-Options = "nosniff"
     X-Frame-Options = "SAMEORIGIN"
     Referrer-Policy = "strict-origin-when-cross-origin"
+    # Staging guard: strip this (and the vercel.json twin) at launch, before indexing.
+    X-Robots-Tag = "noindex"
 
 # ---------------------------------------------------------------------------
 # Redirects: preserve the old Wix URL scheme so existing links / SEO survive.

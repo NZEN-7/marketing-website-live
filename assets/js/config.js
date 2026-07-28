@@ -1,5 +1,5 @@
 /* =========================================================================
-   Thermal Dawn — central config
+   Thermal Dawn, central config
    -------------------------------------------------------------------------
    STRIPE PAYMENT LINKS
    We do NOT have Stripe Payment Links yet. The reserve buttons currently point
@@ -13,9 +13,9 @@
    ========================================================================= */
 window.TD_CONFIG = {
   stripe: {
-    // Basic Reserve — $190 refundable deposit
+    // Basic Reserve, $190 refundable deposit
     basicReserve: "#STRIPE-BASIC-RESERVE",
-    // Founder Premium — $990 refundable deposit
+    // Founder Premium, $990 refundable deposit
     founderPremium: "#STRIPE-FOUNDER-PREMIUM"
   }
 };

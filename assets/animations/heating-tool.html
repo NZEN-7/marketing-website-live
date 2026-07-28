@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Find Your Heating Upgrade Path — Thermal Dawn</title>
+<title>Find Your Heating Upgrade Path, Thermal Dawn</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -450,8 +450,8 @@
           <h2 class="step-q">What do you <em>currently</em> have?</h2>
           <p class="step-hint">This shapes which upgrades are actually available to you.</p>
           <div class="options-list" id="opts-1">
-            <button class="opt" data-val="ducted" onclick="pickOption(1,'ducted',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>Gas ducted heating — central system with vents in the floor or ceiling</button>
-            <button class="opt" data-val="hydronic" onclick="pickOption(1,'hydronic',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>Gas hydronic heating — radiators or underfloor water pipes</button>
+            <button class="opt" data-val="ducted" onclick="pickOption(1,'ducted',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>Gas ducted heating, central system with vents in the floor or ceiling</button>
+            <button class="opt" data-val="hydronic" onclick="pickOption(1,'hydronic',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>Gas hydronic heating, radiators or underfloor water pipes</button>
             <button class="opt" data-val="ducted_splits" onclick="pickOption(1,'ducted_splits',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>Gas ducted + some split systems already in</button>
             <button class="opt" data-val="other" onclick="pickOption(1,'other',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>Something else, or not sure</button>
           </div>
@@ -464,11 +464,11 @@
         <div class="step-inner">
           <div class="step-eyebrow">Question 2 of 6</div>
           <h2 class="step-q">What's happening <em>with your home</em>?</h2>
-          <p class="step-hint">Renovations change what's practical — and what's worth doing while you're at it.</p>
+          <p class="step-hint">Renovations change what's practical, and what's worth doing while you're at it.</p>
           <div class="options-list" id="opts-2">
-            <button class="opt" data-val="nothing" onclick="pickOption(2,'nothing',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>Nothing — just want to replace the heating</button>
+            <button class="opt" data-val="nothing" onclick="pickOption(2,'nothing',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>Nothing, just want to replace the heating</button>
             <button class="opt" data-val="minor" onclick="pickOption(2,'minor',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>Minor works or cosmetic renovation</button>
-            <button class="opt" data-val="major" onclick="pickOption(2,'major',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>Major renovation — floors, walls, or ceilings being opened up</button>
+            <button class="opt" data-val="major" onclick="pickOption(2,'major',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>Major renovation, floors, walls, or ceilings being opened up</button>
             <button class="opt" data-val="new_build" onclick="pickOption(2,'new_build',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>New build or major extension</button>
           </div>
           <div class="step-nav"><button class="btn-back" onclick="back(2)">← Back</button><button class="btn-next" id="next-2" disabled onclick="advance(2)">Continue →</button></div>
@@ -480,7 +480,7 @@
         <div class="step-inner">
           <div class="step-eyebrow">Question 3 of 6</div>
           <h2 class="step-q">Do you have <em>solar panels</em>?</h2>
-          <p class="step-hint">Solar changes the economics significantly — especially with thermal storage.</p>
+          <p class="step-hint">Solar changes the economics significantly, especially with thermal storage.</p>
           <div class="options-list" id="opts-3">
             <button class="opt" data-val="solar_yes_want" onclick="pickOption(3,'solar_yes_want',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>Yes, and I want to use them for heating</button>
             <button class="opt" data-val="solar_yes_nofuss" onclick="pickOption(3,'solar_yes_nofuss',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>Yes, but I'm not fussed about integrating them</button>
@@ -496,17 +496,17 @@
         <div class="step-inner">
           <div class="step-eyebrow">Question 4 of 6</div>
           <h2 class="step-q">What matters <em>most to you</em>?</h2>
-          <p class="step-hint">Pick up to three — these shape which path we'd suggest.</p>
+          <p class="step-hint">Pick up to three, these shape which path we'd suggest.</p>
           <div class="options-list multi" id="opts-4">
             <button class="opt" data-val="low_upfront" onclick="pickMulti(4,'low_upfront',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>Lowest upfront cost</button>
             <button class="opt" data-val="low_running" onclick="pickMulti(4,'low_running',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>Lowest running costs / bills</button>
-            <button class="opt" data-val="best_comfort" onclick="pickMulti(4,'best_comfort',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>Best heating comfort — even warmth, no cold drafts</button>
+            <button class="opt" data-val="best_comfort" onclick="pickMulti(4,'best_comfort',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>Best heating comfort, even warmth, no cold drafts</button>
             <button class="opt" data-val="use_solar" onclick="pickMulti(4,'use_solar',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>Using my solar during the day</button>
             <button class="opt" data-val="off_gas" onclick="pickMulti(4,'off_gas',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>Getting off gas entirely</button>
             <button class="opt" data-val="cooling" onclick="pickMulti(4,'cooling',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>Cooling as well as heating</button>
             <button class="opt" data-val="minimal_disruption" onclick="pickMulti(4,'minimal_disruption',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>Minimal disruption to my home</button>
-            <button class="opt" data-val="clean_aesthetic" onclick="pickMulti(4,'clean_aesthetic',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>Clean aesthetic — no wall heads, no visible equipment</button>
-            <button class="opt" data-val="resilience" onclick="pickMulti(4,'resilience',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>Resilience — blackout backup, fire safety</button>
+            <button class="opt" data-val="clean_aesthetic" onclick="pickMulti(4,'clean_aesthetic',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>Clean aesthetic, no wall heads, no visible equipment</button>
+            <button class="opt" data-val="resilience" onclick="pickMulti(4,'resilience',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>Resilience, blackout backup, fire safety</button>
           </div>
           <div class="step-nav"><button class="btn-back" onclick="back(4)">← Back</button><button class="btn-next" id="next-4" disabled onclick="advance(4)">Continue →</button></div>
         </div>
@@ -517,7 +517,7 @@
         <div class="step-inner">
           <div class="step-eyebrow">Question 5 of 6</div>
           <h2 class="step-q">What's your rough <em>budget</em>?</h2>
-          <p class="step-hint">For the heating system itself — not ductwork or electrical upgrades.</p>
+          <p class="step-hint">For the heating system itself, not ductwork or electrical upgrades.</p>
           <div class="options-list" id="opts-5">
             <button class="opt" data-val="under8" onclick="pickOption(5,'under8',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>Under $8K</button>
             <button class="opt" data-val="8to15" onclick="pickOption(5,'8to15',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>$8K–$15K</button>
@@ -531,9 +531,9 @@
       <!-- STEP 6 -->
       <div class="step" id="step-6">
         <div class="step-inner">
-          <div class="step-eyebrow">Question 6 of 6 — Optional</div>
+          <div class="step-eyebrow">Question 6 of 6, Optional</div>
           <h2 class="step-q">Where are <em>you based</em>?</h2>
-          <p class="step-hint">Used to tailor rebate information — the VEU program is Victoria-specific.</p>
+          <p class="step-hint">Used to tailor rebate information, the VEU program is Victoria-specific.</p>
           <div class="options-list" id="opts-6">
             <button class="opt" data-val="vic" onclick="pickOption(6,'vic',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>Melbourne / Victoria</button>
             <button class="opt" data-val="nsw" onclick="pickOption(6,'nsw',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>Sydney / NSW</button>
@@ -560,7 +560,7 @@
     <div class="skip-footer" id="skipFooter">
       <button class="skip-footer-btn" onclick="skipToComparison()">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 2l5 5-5 5M2 7h10"/></svg>
-        Skip questions — show me all options
+        Skip questions, show me all options
       </button>
     </div>
 
@@ -584,7 +584,7 @@
     <div class="comparison-header">
       <div class="comparison-eyebrow">All options compared</div>
       <h2 class="comparison-heading">Every path, side by side.<br><em>Make the call yourself.</em></h2>
-      <p class="comparison-sub">A plain-English breakdown of all four heating upgrade paths — scores, trade-offs, and what Thermal Dawn offers for each.</p>
+      <p class="comparison-sub">A plain-English breakdown of all four heating upgrade paths, scores, trade-offs, and what Thermal Dawn offers for each.</p>
     </div>
     <div class="scroll-hint">← Scroll to compare all options →</div>
     <div class="table-wrap">
@@ -712,9 +712,9 @@ function getRanked(s) { return Object.entries(s).sort((a,b)=>b[1]-a[1]).map(e=>e
 
 // ── OPTION META ──
 const optionMeta = {
-  A: { title:'Keep your ducting, add a heat pump', short:"The lowest-disruption path — your existing ductwork stays, a new heat pump unit replaces the gas." },
+  A: { title:'Keep your ducting, add a heat pump', short:"The lowest-disruption path, your existing ductwork stays, a new heat pump unit replaces the gas." },
   B: { title:"Replace ducting and install a new system", short:"If your ductwork is old or undersized, replacing it alongside the heat pump gives you a properly sized, efficient system." },
-  C: { title:"Hydronic — underfloor or radiator panels", short:"The gold standard for heating comfort. Silent, even, no blowing air. Pairs exceptionally well with solar and thermal storage." },
+  C: { title:"Hydronic, underfloor or radiator panels", short:"The gold standard for heating comfort. Silent, even, no blowing air. Pairs exceptionally well with solar and thermal storage." },
   D: { title:'Split systems in main living areas', short:'The most cost-effective path, especially if cooling is important. Targeted comfort without major works.' },
 };
 
@@ -750,8 +750,8 @@ function showResult() {
         <div class="result-card-note">${sec.short}</div>
       </div>
     </div>
-    ${showVEU?`<div class="callout yellow"><div class="callout-label">VEU Rebate</div>You may be eligible for VEU rebates on this upgrade — a Victorian program that can meaningfully reduce your upfront cost.</div>`:''}
-    ${showSolarCallout?`<div class="callout green"><div class="callout-label">Solar + Thermal Storage</div>Thermal storage pairs well with solar — charges during the day, delivers heat when you need it in the evening.</div>`:''}
+    ${showVEU?`<div class="callout yellow"><div class="callout-label">VEU Rebate</div>You may be eligible for VEU rebates on this upgrade, a Victorian program that can meaningfully reduce your upfront cost.</div>`:''}
+    ${showSolarCallout?`<div class="callout green"><div class="callout-label">Solar + Thermal Storage</div>Thermal storage pairs well with solar, charges during the day, delivers heat when you need it in the evening.</div>`:''}
     <div class="cta-block">
       <div class="cta-block-title">Thermal Dawn offers pilot pricing for early customers.</div>
       <div class="cta-block-body">Free site assessment, fixed quote, no hard sell. A small number of early installations available now.</div>
@@ -762,7 +762,7 @@ function showResult() {
     </div>
     <div class="lead-form">
       <div class="lead-form-title">Want a personalised recommendation?</div>
-      <div class="lead-form-sub">Drop your details and we'll follow up — no hard sell, just honest advice.</div>
+      <div class="lead-form-sub">Drop your details and we'll follow up, no hard sell, just honest advice.</div>
       <div class="form-row">
         <div class="form-field"><label>Name</label><input type="text" placeholder="Your name"></div>
         <div class="form-field"><label>Email</label><input type="email" placeholder="you@example.com"></div>
@@ -808,17 +808,17 @@ const tableOptions = [
     letter:'A', title:'Keep ducting + new heat pump', thermalDawn:true, tdType:'interest',
     tdContent:{ heading:'Thermal Dawn Ducted', sections:[
       { label:null, items:['High-efficiency outdoor heat pump','35kWh Australian-made thermal storage tank','Solar forecast & off-peak tariff optimisation','Connection to your existing ductwork','Removal & disposal of gas boiler','Electrical connection & switchboard check','Full commissioning & Thermal Dawn app setup'] },
-      { label:'Optional add-on', items:['Multi-head splits connected to our unit — extend to rooms outside ducting reach'] }
+      { label:'Optional add-on', items:['Multi-head splits connected to our unit, extend to rooms outside ducting reach'] }
     ]},
     criteria:[
-      {label:'Upfront cost',score:5,note:'Lowest cost — no ductwork replacement'},
+      {label:'Upfront cost',score:5,note:'Lowest cost, no ductwork replacement'},
       {label:'Install complexity',score:4,note:'Straightforward if ducting is in good condition'},
-      {label:'Home disruption',score:4,note:'Minimal — no floors or walls opened up'},
-      {label:'Heating comfort',score:3,note:'Heat pump runs cooler air than gas — insulation improvements help'},
+      {label:'Home disruption',score:4,note:'Minimal, no floors or walls opened up'},
+      {label:'Heating comfort',score:3,note:'Heat pump runs cooler air than gas, insulation improvements help'},
       {label:'Cooling performance',score:3,note:'Ducted cooling works, but underfloor vents are less effective'},
-      {label:'Indoor noise',score:3,note:'Ducted systems move a lot of air — some fan noise expected'},
-      {label:'Aesthetics',score:4,note:'No visible changes — ducts stay hidden'},
-      {label:'Solar integration',score:4,note:'Thermal storage charges from solar during the day — strong off-peak synergy'},
+      {label:'Indoor noise',score:3,note:'Ducted systems move a lot of air, some fan noise expected'},
+      {label:'Aesthetics',score:4,note:'No visible changes, ducts stay hidden'},
+      {label:'Solar integration',score:4,note:'Thermal storage charges from solar during the day, strong off-peak synergy'},
     ],
     prereqs:'Ducting must be in good condition and correctly sized for heat pump flow rates. Thermal envelope assessment recommended first.',
   },
@@ -826,7 +826,7 @@ const tableOptions = [
     letter:'B', title:'Replace ducting + new heat pump', thermalDawn:true, tdType:'interest',
     tdContent:{ heading:'Thermal Dawn Ducted (New Duct)', sections:[
       { label:null, items:['High-efficiency outdoor heat pump','35kWh Australian-made thermal storage tank','Solar forecast & off-peak tariff optimisation','New ductwork design & installation','Removal & disposal of gas boiler','Electrical connection & switchboard check','Full commissioning & Thermal Dawn app setup'] },
-      { label:'Optional add-on', items:['Multi-head splits connected to our unit — extend to rooms outside ducting reach'] }
+      { label:'Optional add-on', items:['Multi-head splits connected to our unit, extend to rooms outside ducting reach'] }
     ]},
     criteria:[
       {label:'Upfront cost',score:2,note:'Ductwork replacement adds significant cost'},
@@ -835,28 +835,28 @@ const tableOptions = [
       {label:'Heating comfort',score:3,note:'Correctly sized new ducting improves performance'},
       {label:'Cooling performance',score:3,note:'Better than old ducting but underfloor vents still limited'},
       {label:'Indoor noise',score:3,note:'Modern systems quieter but still fan-driven'},
-      {label:'Aesthetics',score:4,note:'Clean slate — no visible heads'},
-      {label:'Solar integration',score:4,note:'Thermal storage charges from solar — strong off-peak synergy'},
+      {label:'Aesthetics',score:4,note:'Clean slate, no visible heads'},
+      {label:'Solar integration',score:4,note:'Thermal storage charges from solar, strong off-peak synergy'},
     ],
-    prereqs:'Requires access to run new ductwork — far easier during a renovation when floors or ceilings are already open.',
+    prereqs:'Requires access to run new ductwork, far easier during a renovation when floors or ceilings are already open.',
   },
   {
-    letter:'C', title:'Hydronic — underfloor or radiators', thermalDawn:true, tdType:'quote',
+    letter:'C', title:'Hydronic, underfloor or radiators', thermalDawn:true, tdType:'quote',
     tdContent:{ heading:'Thermal Dawn Hydronic', sections:[
-      { label:null, items:['High-efficiency outdoor heat pump','35kWh Australian-made thermal storage tank','Reverse-cycle cooling capability','Solar forecast & off-peak tariff optimisation (AI)','Ideal for existing hydronic homes — connects to existing pipework, zones & thermostats','Retrofit possible where space & pipework access allows','Removal & disposal of gas boiler','Full commissioning & Thermal Dawn app setup (1–2 days)'] },
+      { label:null, items:['High-efficiency outdoor heat pump','35kWh Australian-made thermal storage tank','Reverse-cycle cooling capability','Solar forecast & off-peak tariff optimisation (AI)','Ideal for existing hydronic homes, connects to existing pipework, zones & thermostats','Retrofit possible where space & pipework access allows','Removal & disposal of gas boiler','Full commissioning & Thermal Dawn app setup (1–2 days)'] },
       { label:'Optional add-ons', items:['Domestic hot water from the same thermal store','Pool heating from stored solar','Fan coil units for cooling in radiator-only homes'] }
     ]},
     criteria:[
-      {label:'Upfront cost',score:2,note:'Higher upfront — most competitive when floors are already open'},
+      {label:'Upfront cost',score:2,note:'Higher upfront, most competitive when floors are already open'},
       {label:'Install complexity',score:2,note:'Piping, radiators or UFH, heat pump, thermal storage unit'},
-      {label:'Home disruption',score:3,note:'Best during a reno with floors up — retrofit possible with access'},
-      {label:'Heating comfort',score:5,note:'Radiant heat is the gold standard — even, quiet, no drafts'},
-      {label:'Cooling performance',score:2,note:"Hydronic doesn't cool natively — add fan coil units or keep splits"},
-      {label:'Indoor noise',score:5,note:'Near silent — no fans, just radiant warmth'},
+      {label:'Home disruption',score:3,note:'Best during a reno with floors up, retrofit possible with access'},
+      {label:'Heating comfort',score:5,note:'Radiant heat is the gold standard, even, quiet, no drafts'},
+      {label:'Cooling performance',score:2,note:"Hydronic doesn't cool natively, add fan coil units or keep splits"},
+      {label:'Indoor noise',score:5,note:'Near silent, no fans, just radiant warmth'},
       {label:'Aesthetics',score:5,note:'No wall heads. WPC-clad storage unit. Radiators can be architectural.'},
-      {label:'Solar integration',score:5,note:'Thermal storage charges from solar — strongest off-peak and solar synergy of all four options'},
+      {label:'Solar integration',score:5,note:'Thermal storage charges from solar, strongest off-peak and solar synergy of all four options'},
     ],
-    prereqs:'Ideally suited to homes already on hydronic. Retrofit possible where sufficient space and pipework access exists — confirmed at site assessment.',
+    prereqs:'Ideally suited to homes already on hydronic. Retrofit possible where sufficient space and pipework access exists, confirmed at site assessment.',
   },
   {
     letter:'D', title:'Splits in main areas', thermalDawn:true, tdType:'interest',
@@ -865,15 +865,15 @@ const tableOptions = [
     ]},
     criteria:[
       {label:'Upfront cost',score:4,note:'Cost-efficient, especially with some splits already in place'},
-      {label:'Install complexity',score:5,note:'Simple — each unit independent, no whole-system design'},
-      {label:'Home disruption',score:4,note:'Minimal — each unit installed independently'},
-      {label:'Heating comfort',score:3,note:'Effective but uneven — warm near the unit. High voids are tricky.'},
-      {label:'Cooling performance',score:4,note:'Excellent for targeted room cooling — best of the four options'},
+      {label:'Install complexity',score:5,note:'Simple, each unit independent, no whole-system design'},
+      {label:'Home disruption',score:4,note:'Minimal, each unit installed independently'},
+      {label:'Heating comfort',score:3,note:'Effective but uneven, warm near the unit. High voids are tricky.'},
+      {label:'Cooling performance',score:4,note:'Excellent for targeted room cooling, best of the four options'},
       {label:'Indoor noise',score:3,note:'Indoor head units produce fan noise on high settings'},
-      {label:'Aesthetics',score:2,note:'Wall-mounted heads in every room — pragmatic but not pretty'},
-      {label:'Solar integration',score:3,note:'Each unit runs from solar via our unit — thermal storage smooths peak demand'},
+      {label:'Aesthetics',score:2,note:'Wall-mounted heads in every room, pragmatic but not pretty'},
+      {label:'Solar integration',score:3,note:'Each unit runs from solar via our unit, thermal storage smooths peak demand'},
     ],
-    prereqs:'Works in any home. High voids (stairwells) are difficult — heat pools at ceiling rather than where you need it.',
+    prereqs:'Works in any home. High voids (stairwells) are difficult, heat pools at ceiling rather than where you need it.',
   },
 ];
 
@@ -954,7 +954,7 @@ function buildWhy_A() {
   if (answers[2]==='nothing'||answers[2]==='minor') p.push("you're not planning major works");
   if (answers[4].includes('low_upfront')) p.push("keeping upfront cost down is a priority");
   if (answers[4].includes('minimal_disruption')) p.push("you want minimal disruption");
-  return (p.length ? p.join(', ') + '. ' : '') + "Retrofitting a heat pump to your existing ductwork is the fastest and least disruptive path to electrifying your heating — and if the ducting is in reasonable condition, the performance will be solid.";
+  return (p.length ? p.join(', ') + '. ' : '') + "Retrofitting a heat pump to your existing ductwork is the fastest and least disruptive path to electrifying your heating, and if the ducting is in reasonable condition, the performance will be solid.";
 }
 function buildWhy_B() {
   const p = [];
@@ -969,7 +969,7 @@ function buildWhy_C() {
   if (answers[4].includes('best_comfort')) p.push("comfort is a priority");
   if (answers[4].includes('clean_aesthetic')) p.push("you want a clean aesthetic");
   if (answers[4].includes('use_solar')||['solar_yes_want','solar_planning'].includes(answers[3])) p.push("you want to use your solar");
-  return (p.length ? p.join(', ') + '. ' : '') + "Hydronic is the gold standard for heating comfort — silent, even, no blowing air. With thermal storage, it also pairs exceptionally well with solar: the system charges during the day when your panels are running, so you're not buying peak-rate grid power to stay warm in the morning.";
+  return (p.length ? p.join(', ') + '. ' : '') + "Hydronic is the gold standard for heating comfort, silent, even, no blowing air. With thermal storage, it also pairs exceptionally well with solar: the system charges during the day when your panels are running, so you're not buying peak-rate grid power to stay warm in the morning.";
 }
 function buildWhy_D() {
   const p = [];
