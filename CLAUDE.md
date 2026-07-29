@@ -39,7 +39,7 @@ images still to be exported.
 
 ## Domains (state as of 24 Jul 2026)
 - Live Wix site: thermaldawn.com (untouched until launch).
-- This site's Vercel URL: marketing-website-live-*.vercel.app; staging domain
+- This site's Vercel URL: https://marketing-website-live-seven.vercel.app; staging domain
   plan: freevolt.com.au (A 76.76.21.21 apex + www CNAME cname.vercel-dns.com,
   leave MX alone; keep noindex until launch).
 - Canonicals/sitemap currently say www.thermaldawn.com.au, domain decision
