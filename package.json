@@ -1,4 +1,4 @@
-{
+﻿{
   "name": "td-marketing-website",
   "version": "1.0.0",
   "private": true,
@@ -6,7 +6,8 @@
   "scripts": {
     "serve": "node .claude/serve.js 8080",
     "deploy:live": "node tools/deploy-live.mjs",
-    "test:email": "node scripts/test-email-format.js"
+    "test:email": "node scripts/test-email-format.js",
+    "copy:dump": "node scripts/dump-copy.js"
   },
   "dependencies": {
     "nodemailer": "^6.9.15"

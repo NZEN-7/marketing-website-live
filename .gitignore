@@ -1,4 +1,8 @@
-# Local dev tooling
+# Local dev tooling: specs, the copy-review skill, and the generated
+# copy-dump.txt. Shared with other sessions by sharing the folder, not through
+# git. Keeping it untracked also keeps it out of the deploy, which matters
+# because this is a static site served from the repo root: anything committed
+# here would be publicly fetchable at /.claude/...
 .claude/
 
 # Installed by Vercel at build time from package-lock.json; never committed.
