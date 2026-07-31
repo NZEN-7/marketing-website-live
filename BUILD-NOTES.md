@@ -46,6 +46,119 @@ python3 -m http.server 8080      # then open http://localhost:8080
 
 Images/fonts keep the **year-long** cache. Either rename the file when you replace one, or version its references: the favicons are replaced in place and carry `?v=` on all three `<link rel="icon">` refs for exactly this reason. **Bump that query whenever the favicon artwork changes** or returning visitors keep the old icon for a year.
 
+## OPEN DECISIONS REGISTER (Nick only) — as at 1 Aug 2026
+
+Everything here needs a commercial, legal or engineering call, so it is
+deliberately NOT actioned. Mechanical fixes from the same reviews are already
+applied. Ordered by risk.
+
+### A. Claims a regulator or competitor could challenge
+
+**A1. "Australian-made" scope.** The thermal store is built in Hornsby; the
+heat pump is an imported OEM unit. These read as whole-system origin claims
+and are ACCC country-of-origin territory:
+`hydronic/index.html` comparison row "Made in: Australia"; `index.html`
+"designed, built, and assembled in Australia... from Australian materials";
+`hydronic/pricing/index.html` "Australian-made components included";
+`hydronic/index.html` hero note "Australian-made."; `hydronic/how-it-works/`
+"This isn't imported technology we're reselling."
+Suggested pattern: scope the claim to the store and controls, e.g. table row
+"Thermal store: made in Australia", and "designed and assembled in Australia,
+with the thermal store built here from Australian materials".
+
+**A2. "Up to $5,000/yr" does not reconcile with our own pricing page.**
+Set by Nick 1 Aug. But `hydronic/pricing/` 15-year table implies ~$1,400-1,600/yr
+(gas ~$1,800/yr vs TD ~$200-400/yr), and it prices gas heating at
+$1,657-$1,814/yr *in total*, so a reader cannot make $5,000 work. The
+"3-5 years typical payback" figure only reconciles with the higher number.
+Independent review proposes ~$3,000/yr (the modelled figure in the investor
+room, with install #1 tracking ahead of it). ACL requires substantiation on
+request. Either number is defensible; the site currently tells two stories.
+
+**A3. Homepage cost anchoring implies a sub-$8K installed price.**
+`index.html` hero and meta say "around half the cost of a home battery" while
+the same page prices batteries at "$8,000-$15,000" and says "Well below both".
+Read together that implies TD installs under ~$8K, contradicting the pricing
+page's "well below $20-40K traditional" position. NOTE: the obvious fix
+(per-kWh framing) is blocked, Nick removed per-kWh figures 1 Aug as too
+exposing. Needs a wording that anchors without publishing unit economics.
+
+**A4. "45°C summers" design spec** (`hydronic/how-it-works/`) reads as a
+tested rating. Confirm it traces to something.
+
+### B. Product facts to confirm
+
+**B1. Lead time "6-10 weeks"** (`hydronic/how-it-works/`) is now unmarked
+after the 1 Aug draft sign-off. Operational, so it will drift. Owner needed.
+
+**B2. R290 max flow temp** was 70°C (Nick, 1 Aug) and the two blog posts
+saying 75°C have been corrected to match. Confirm 70°C is the spec sheet
+number, since the blogs previously said otherwise.
+
+**B3. Tank dimensions** are published as 250L cylindrical 600mm dia x ~2m
+tall, and 500L rectangular 500 x 1300 x 1600. Outdoor unit is 450mm deep,
+~150mm off the wall. Width of the outdoor unit is still unpublished because
+it was never supplied.
+
+### C. Terms page (legal copy, changes come from Nick only)
+
+- Effective date is US-format and reads "March 7, 2025".
+- Contact is `nick@thermaldawn.com.au`; other materials use
+  `nick@thermaldawn.com`. Tied to the domain decision.
+- (Resolved 1 Aug: $199 corrected to $190; the $8,000-$18,000 price range
+  removed.)
+
+### D. Dataroom material the site does not yet use
+
+Proposed by review, needs sign-off on the measured claims (1-3) before use:
+
+1. **Zero-compressor peak days (install #2).** Three consecutive days in
+   week one with zero compressor minutes through the 4-9pm peak, charged
+   free at midday. The sharpest consumer proof available. Measured figure,
+   so it must come from the audit verbatim, not paraphrased.
+2. **The poured-in slab battery.** "If you have a heated slab, your home
+   already contains a thermal battery, poured into the floor. We're the
+   charger and the scheduler for it." Pairs with the existing "already have
+   underfloor, you're the easy case" line. ~11 kWh/degC can back it.
+3. **Two homes, two architectures, one brain.** Radiator home in Hawthorn,
+   slab home in Gippsland, same system configured per house. Turns "every
+   home is different" from a pricing hedge into a capability claim.
+4. "Send us the quote you already have" made operational, we run heat-load
+   calcs off their existing quote. Feeds the existing "Already got a quote?"
+   and "Handy to have" sections.
+5. Cost-structure line: parts alone start at ~$17-18K before installation,
+   so the $23K market floor is structural rather than gouging. Keep generic,
+   do not publish supplier trade pricing.
+6. Per-kWh storage contrast WITH a public source (~$143-223/kWh-equivalent
+   vs ~$1,100/kWh installed, Solar Choice May 2026). Would also fix A3.
+   Conflicts with Nick's 1 Aug decision to remove per-kWh figures, so this
+   is a reversal to make consciously or not at all.
+7. Solar Sharer is a mandate, not a trend: retailers **must** offer it from
+   1 Jul 2026, reaching Victoria 2027. One word plus a date makes the
+   tailwind inevitable rather than promotional.
+8. Standardise the thermal share on a citable split: ~41% heating/cooling
+   plus ~23% hot water, about two thirds, per yourhome.gov.au. The site is
+   currently on "60 to 70%" everywhere, which is consistent but uncited.
+
+**Deliberately held back** (per review): tiered warranty detail, VEU incentive
+dollar ranges (draft regulation), the ~6-hour install target (that is the plan
+for #3, not a record), and anything COGS-flavoured.
+
+**Deliberately absent** (Nick, 1 Aug): pre-certification pilot status is not
+explained anywhere on the site.
+
+### E. Non-copy items still open
+
+- Stripe checkout still shows "FreeVolt" as the business name.
+- Stripe after-payment redirects still point at the vercel.app domain.
+- One real end-to-end payment test not yet run.
+- Wix: disconnect freevolt.com.au, export ~154 submissions, downgrade plan.
+- thermaldawn.com launch prep, see the section above.
+- `assets/animations/heating-tool.html` contains "just honest advice" and a
+  hardcoded `thermaldawn.com/register` link. Not reached by the copy dump
+  (animations are skipped) and not linked from any page, but it will need a
+  pass if that tool is ever embedded.
+
 ## Design system (v5-v7 layers, sitewide 31 Jul 2026)
 
 Three passes, each appended as its own commented block at the foot of
