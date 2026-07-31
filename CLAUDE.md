@@ -20,9 +20,12 @@ images still to be exported.
 - **Cache busting:** css/js/animations are plain filenames on a 5-min server
   cache, but browsers may hold them, when you edit `style.css` or any js,
   bump the `?v=` query on every reference (see BUILD-NOTES).
-- **Netlify Forms don't run on Vercel.** The 5 forms (newsletter, contact,
-  register-interest, basic-reserve, founder-premium) 404 on submit until a
-  form backend is chosen. Don't launch production traffic here before that.
+- **Forms post to `api/lead.js`** (Vercel function, Google Workspace SMTP,
+  `GMAIL_USER`/`GMAIL_APP_PASSWORD` env vars). Newsletter, contact and
+  register-interest are live and verified. The email layout is a contract, the
+  sales agent parses it, see BUILD-NOTES before editing. The two deposit forms
+  (basic-reserve, founder-premium) still post to Wix and stay there until
+  Stripe Payment Links exist.
 - **Live savings counter:** elements with `data-live-stat` tick up on scroll
   (`assets/js/live-stats.js`) and pull live fleet totals from the platform:
   `https://thermal-dawn-platform.vercel.app/api/public/stats` (public,

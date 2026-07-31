@@ -46,6 +46,53 @@ python3 -m http.server 8080      # then open http://localhost:8080
 
 Images/fonts keep the **year-long** cache. Either rename the file when you replace one, or version its references: the favicons are replaced in place and carry `?v=` on all three `<link rel="icon">` refs for exactly this reason. **Bump that query whenever the favicon artwork changes** or returning visitors keep the old icon for a year.
 
+## Forms (W1, live 31 Jul 2026)
+
+The three site forms now post to **`api/lead.js`** on Vercel. Wix is no longer
+in the path for them. Spec and decision record: `.claude/W1-forms-spec.md`.
+
+- **Transport is Nick's own Google Workspace over SMTP**, deliberately not a
+  form/email SaaS: the notification's only recipient is Nick, so customer PII
+  never passes through a third-party processor. Needs `GMAIL_USER` and
+  `GMAIL_APP_PASSWORD` (a Google **app password**, marked Sensitive) in the
+  Vercel env. Revoke from the Google account security page if ever leaked.
+- Every submission emails **nickz@thermaldawn.com** in plain text, Reply-To set
+  to the customer. Gmail is the intake system of record and the sales agent
+  parses these, so **the section headings and field labels in
+  `formatNotification()` are a contract**. Don't reword them casually.
+- Register Interest also fires the customer autoresponder (Calendly link,
+  no Tally). Sent best effort: a failure there is logged, not surfaced, so it
+  can't cost a lead.
+- Fields were ported verbatim from the live Wix schemas (Forms API), including
+  the June revision that added the home-battery question and dropped home-size.
+- `npm run test:email` prints all four emails plus rejection cases with no
+  credentials and no network. Run it after touching the formatters.
+- Spam: honeypot (`website`) plus a 3-second submit-speed trap. Both return a
+  success shape so a bot learns nothing.
+- **Still on Wix:** the two deposit forms (`basic-reserve`, `founder-premium`),
+  because they take payment. They move when Stripe Payment Links fill the
+  placeholders in `assets/js/config.js`. **That, not the forms, is what blocks
+  full Wix retirement.**
+
+### Wix retirement checklist (do NOT do these until all boxes tick)
+1. [x] Form-to-Gmail round trip verified on the Vercel URL (31 Jul 2026).
+2. [ ] Round trip re-verified on a production domain (freevolt.com.au, below).
+3. [ ] Deposit path moved to Stripe.
+4. [ ] Export all Wix form submissions (~154 across 6 forms) to Drive
+       `Sales +/Consumer/CRM/Archive/`, then **delete them from Wix** so
+       customer PII doesn't linger in a dormant account.
+5. [ ] Downgrade/close the Wix plan.
+
+### freevolt.com.au cutover (next step, Nick does the DNS)
+1. Vercel → marketing-website-live → Settings → Domains → add
+   `freevolt.com.au` and `www.freevolt.com.au`.
+2. GoDaddy DNS: remove the existing forwarding to thermaldawn.com, then set
+   `A @ 76.76.21.21` and `CNAME www cname.vercel-dns.com`.
+   **Leave MX alone** (there's a nick@freevolt.com.au mailbox).
+3. Keep the `X-Robots-Tag: noindex` header until launch.
+4. Re-run one submission per form on the freevolt.com.au domain. That closes
+   item 2 above.
+
 ## Deploy to Vercel (current path)
 `vercel.json` twins `netlify.toml` (same caching, security headers, and 301 map), **keep the two in sync** when editing either. Deploys go via `npm run deploy:live`, which re-stamps HEAD as NZEN-7 and force-pushes to `NZEN-7/marketing-website-live` (Vercel Hobby committer-gate workaround, same as TD-Platform). ⚠ **Netlify Forms do NOT run on Vercel**, the 5 forms (`newsletter`, `contact`, `register-interest`, `basic-reserve`, `founder-premium`) submit into a 404 there. Fine for staging; a form backend is required before production traffic moves to Vercel.
 
