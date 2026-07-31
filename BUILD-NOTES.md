@@ -188,6 +188,30 @@ Rollback: point nameservers back to `ns2.wixdns.net` / `ns3.wixdns.net` and
 the old zone (still held by Wix) applies again. thermaldawn.com is untouched
 throughout.
 
+### thermaldawn.com launch prep (decided 31 Jul 2026: final domain is thermaldawn.com)
+
+Two launch-gating items beyond the obvious find-replace of canonicals/
+sitemap/robots/og:url and removing the noindex header (both tracked in the
+Coda Product Backlog, Sales & Web):
+
+1. **Verify the Wix redirect map against the live index before launch.**
+   The 18 legacy 301s in `vercel.json`/`netlify.toml` were written from the
+   old sitemap, not from what Google actually has. Before indexing turns on,
+   diff them against `site:thermaldawn.com` results and Search Console's
+   page list; any indexed Wix URL missing from the map 404s and loses its
+   equity. Same-domain launch means no site-move processing, so redirect
+   coverage is the whole ballgame.
+2. **thermaldawn.com is REGISTERED through Wix** (renews 3 Nov 2026), unlike
+   freevolt (GoDaddy). Transfer the registration to a normal registrar well
+   before the Wix plan is cancelled, or the primary domain ends up living in
+   a wound-down account. The launch DNS cutover is the same MX-preserving
+   dance as freevolt's (inventory zone first; Google MX for
+   nickz@thermaldawn.com lives in Wix DNS).
+
+Also at launch: pick www vs apex to match whatever form Google has indexed,
+301 the other to it, and 301 freevolt.com.au across rather than leaving it
+serving content.
+
 ## Deploy to Vercel (current path)
 `vercel.json` twins `netlify.toml` (same caching, security headers, and 301 map), **keep the two in sync** when editing either. Deploys go via `npm run deploy:live`, which re-stamps HEAD as NZEN-7 and force-pushes to `NZEN-7/marketing-website-live` (Vercel Hobby committer-gate workaround, same as TD-Platform). ⚠ **Netlify Forms do NOT run on Vercel**, the 5 forms (`newsletter`, `contact`, `register-interest`, `basic-reserve`, `founder-premium`) submit into a 404 there. Fine for staging; a form backend is required before production traffic moves to Vercel.
 
