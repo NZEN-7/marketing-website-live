@@ -877,3 +877,28 @@ body{font-size:16.5px;}
 .next-block p{color:#4a4642;}
 .next-orange .field input[type=email]{border-color:var(--td-line);}
 .next-orange .form-error{background:rgba(234,91,19,.1);border-color:rgba(234,91,19,.45);color:#a8390a;}
+
+/* =========================================================================
+   v6, accent rationing + two-button system (homepage first)
+   Lessons from the Tesla teardown, kept in Thermal Dawn's voice: the
+   sunrise CTA, hero accent line and proof band stay loud; the orange just
+   stops doing six jobs at once. Two buttons only: primary (sunrise,
+   remapped to dark inside the orange band by the v4 rules) and secondary
+   (ghost/outline, flips per background). Subtitles go small and quiet
+   under the big headings.
+   ========================================================================= */
+
+/* Orange rationing: credstrip titles read fine in ink, the accent belongs
+   to CTAs and proof numbers */
+.credstrip__title{color:var(--td-black);}
+
+/* Quiet subtitles (homepage scope) */
+body.home .hero--center .subhead{font-size:.95rem;font-weight:400;color:#dcd3ca;}
+body.home .hero__note{font-size:.85rem;font-weight:400;color:#b3a89e;}
+body.home .lead{font-size:1.05rem;font-weight:400;}
+body.home .section--cocoa .lead strong.hl{color:#fff;}
+
+/* The next-orange band is paper since v5, so the dark-button remap that
+   protected contrast on flat orange no longer applies there */
+.next-orange .btn--flat,.next-orange .btn--primary{background:var(--td-sunrise) border-box;color:#1c1514;box-shadow:0 8px 22px rgba(234,91,19,.32);}
+.next-orange .btn--flat:hover,.next-orange .btn--primary:hover{background:var(--td-sunrise) border-box;color:#1c1514;}
