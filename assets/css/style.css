@@ -892,11 +892,60 @@ body{font-size:16.5px;}
    to CTAs and proof numbers */
 .credstrip__title{color:var(--td-black);}
 
-/* Quiet subtitles (homepage scope) */
-body.home .hero--center .subhead{font-size:.95rem;font-weight:400;color:#dcd3ca;}
-body.home .hero__note{font-size:.85rem;font-weight:400;color:#b3a89e;}
-body.home .lead{font-size:1.05rem;font-weight:400;}
-body.home .section--cocoa .lead strong.hl{color:#fff;}
+/* -------------------------------------------------------------------------
+   v7, the same rules sitewide (was homepage-scoped in v6)
+
+   Orange keeps four jobs: CTAs, heading accent words, the proof numbers,
+   and the proof band. It gives up body text, list items, eyebrows and
+   sub-headings, where it was competing with itself.
+   ------------------------------------------------------------------------- */
+
+/* Quiet subtitles. Source order matters: .hero .subhead and
+   .hero--center .subhead tie on specificity with the v3 rules above, so
+   these win by coming later, and center wins over plain by coming last. */
+.hero .subhead{font-size:1.05rem;font-weight:400;color:#dcd3ca;}
+.hero--center .subhead{font-size:.95rem;font-weight:400;color:#dcd3ca;}
+.hero__note{font-size:.85rem;font-weight:400;color:#b3a89e;}
+.supporting{font-size:.9rem;font-weight:500;color:#cfc4ba;}
+.hero--sunrise .subhead,.hero--sunrise .supporting{color:#1c1514;}
+.lead{font-size:1.05rem;font-weight:400;}
+
+/* Accent giving up its extra jobs */
+.eyebrow{color:var(--td-grey);}
+.section--dark .eyebrow,.section--cocoa .eyebrow,body.dark .eyebrow{color:#9d928a;}
+.benefits__item h3{color:#fff;}
+body:not(.dark) .benefits__item h3{color:var(--td-black);}
+.stays--keep li{color:#cfc5bc;}
+body:not(.dark) .stays--keep li{color:#4a4642;}
+.section--cocoa .lead strong.hl,.section--dark .lead strong.hl{color:#fff;}
+
+/* -------------------------------------------------------------------------
+   Secondary button follows its SURFACE, not the page.
+
+   `body.dark .btn--ghost` paints it white. That is correct on the dark
+   sections, and correct on .section--paper2/paper3 too, because those are
+   repainted with the cocoa gradient on dark pages (see body.dark rule
+   above). It is WRONG on the surfaces that stay white on every page
+   (.credstrip, .showcase, .faq-block) and on flat orange, where white
+   sits at about 2.2:1. Re-ink only those.
+   Specificity: body.dark .x .btn--ghost (0,3,1) beats body.dark
+   .btn--ghost (0,2,1), so each surface is named on the dark side too.
+   ------------------------------------------------------------------------- */
+body.dark .credstrip .btn--ghost,
+body.dark .showcase .btn--ghost,
+body.dark .faq-block .btn--ghost,
+body.dark .band-orange .btn--ghost,
+body.dark .next-orange .btn--ghost,
+.band-orange .btn--ghost,
+.next-orange .btn--ghost{color:var(--td-black);border-color:var(--td-black);}
+
+body.dark .credstrip .btn--ghost:hover,
+body.dark .showcase .btn--ghost:hover,
+body.dark .faq-block .btn--ghost:hover,
+body.dark .band-orange .btn--ghost:hover,
+body.dark .next-orange .btn--ghost:hover,
+.band-orange .btn--ghost:hover,
+.next-orange .btn--ghost:hover{background:var(--td-black);color:#fff;border-color:var(--td-black);}
 
 /* The next-orange band is paper since v5, so the dark-button remap that
    protected contrast on flat orange no longer applies there */
