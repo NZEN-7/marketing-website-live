@@ -258,6 +258,25 @@ Also at launch: pick www vs apex to match whatever form Google has indexed,
 301 the other to it, and 301 freevolt.com.au across rather than leaving it
 serving content.
 
+### Gotcha: never write repo files with PowerShell's `-Encoding utf8`
+
+Windows PowerShell 5.1 writes a **UTF-8 BOM** with `Set-Content -Encoding utf8`.
+On 1 Aug 2026 that silently corrupted `package.json` and every Vercel build
+failed for ~10 hours with:
+
+```
+Could not read /vercel/path0/package.json: Unexpected token ", "{ "name"... is not valid JSON
+```
+
+The pushes all succeeded, so the mirror looked correct and the failure was
+only visible in the Vercel dashboard. Two deploys (the sitewide design pass
+and the copy-review fixes) sat stranded behind it.
+
+Write files with `[IO.File]::WriteAllText($path, $text, (New-Object System.Text.UTF8Encoding($false)))`,
+or just use the editor tools. The same BOM also leaked into git commit
+messages written with `Set-Content -Encoding utf8`, which is why several
+commit subjects in the log start with a stray `﻿`.
+
 ## Deploy to Vercel (current path)
 `vercel.json` twins `netlify.toml` (same caching, security headers, and 301 map), **keep the two in sync** when editing either. Deploys go via `npm run deploy:live`, which re-stamps HEAD as NZEN-7 and force-pushes to `NZEN-7/marketing-website-live` (Vercel Hobby committer-gate workaround, same as TD-Platform). ⚠ **Netlify Forms do NOT run on Vercel**, the 5 forms (`newsletter`, `contact`, `register-interest`, `basic-reserve`, `founder-premium`) submit into a 404 there. Fine for staging; a form backend is required before production traffic moves to Vercel.
 
