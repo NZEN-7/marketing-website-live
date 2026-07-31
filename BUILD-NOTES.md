@@ -136,9 +136,15 @@ Proposed by review, needs sign-off on the measured claims (1-3) before use:
 7. Solar Sharer is a mandate, not a trend: retailers **must** offer it from
    1 Jul 2026, reaching Victoria 2027. One word plus a date makes the
    tailwind inevitable rather than promotional.
-8. Standardise the thermal share on a citable split: ~41% heating/cooling
-   plus ~23% hot water, about two thirds, per yourhome.gov.au. The site is
-   currently on "60 to 70%" everywhere, which is consistent but uncited.
+8. Standardise the thermal share on a citable split. **Source checked
+   1 Aug 2026 and it holds:** yourhome.gov.au puts heating and cooling at
+   around 40% of household energy (up to 50% in some climate zones) and
+   water heating at 23% (range 15-27%). That is ~63%, about two thirds,
+   and it supports the site's current "60 to 70%" claim on the
+   total-energy basis. So the number does not need changing, only a
+   citation. Verify the exact landing page before linking:
+   yourhome.gov.au/energy/heating-and-cooling and
+   yourhome.gov.au/energy/hot-water-systems.
 
 **Deliberately held back** (per review): tiered warranty detail, VEU incentive
 dollar ranges (draft regulation), the ~6-hour install target (that is the plan
@@ -158,6 +164,14 @@ explained anywhere on the site.
   hardcoded `thermaldawn.com/register` link. Not reached by the copy dump
   (animations are skipped) and not linked from any page, but it will need a
   pass if that tool is ever embedded.
+
+- **Social links are placeholders on every page.** The footer icons rendered
+  by `assets/js/site.js` and the contact page both point at
+  `https://www.facebook.com/` and `https://www.linkedin.com/`, the bare
+  homepages rather than Thermal Dawn's profiles, while the aria-labels say
+  "Thermal Dawn on Facebook" / "on LinkedIn". Needs the real profile URLs.
+  The founder's LinkedIn link on mission was a dead `href="#"` and is now
+  hidden until a URL exists.
 
 ## Design system (v5-v7 layers, sitewide 31 Jul 2026)
 
