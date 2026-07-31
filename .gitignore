@@ -1,2 +1,5 @@
 # Local dev tooling
 .claude/
+
+# Installed by Vercel at build time from package-lock.json; never committed.
+node_modules/

@@ -798,6 +798,27 @@ body.dark .band-orange .btn--primary,body.dark .next-orange .btn--primary{color:
 .credstrip .btn--flat{background:var(--td-deep);}
 .credstrip .btn--flat:hover{background:#d24f0c;color:#1c1514;}
 
+/* ---------- Form controls: radio / checkbox groups ---------- */
+.field--group{border:0;padding:0;margin:0 0 22px;}
+.field--group legend{display:block;font-weight:700;margin-bottom:10px;font-size:.95rem;padding:0;}
+.choice{display:flex;align-items:flex-start;gap:10px;padding:7px 0;font-size:.95rem;line-height:1.45;cursor:pointer;}
+.choice input{width:auto;margin:3px 0 0;flex:none;accent-color:var(--td-deep);}
+.choice__other{margin-top:8px;}
+body.dark .field--group legend{color:#e6ddd5;}
+body.dark .choice{color:#cfc5bc;}
+
+/* the honeypot must be unreachable, not merely invisible */
+.hp{position:absolute!important;left:-9999px!important;top:-9999px!important;width:1px;height:1px;overflow:hidden;}
+
+.form-error{
+  margin:14px 0 0;padding:12px 14px;border-radius:var(--radius-sm);
+  background:rgba(234,91,19,.1);border:1px solid rgba(234,91,19,.45);
+  color:#a8390a;font-size:.92rem;font-weight:600;
+}
+.form-error a{color:inherit;text-decoration:underline;}
+body.dark .form-error{background:rgba(234,91,19,.14);border-color:rgba(244,146,29,.5);color:#ffcfa8;}
+.next-orange .form-error{background:rgba(28,21,20,.1);border-color:rgba(28,21,20,.4);color:#3a2c20;}
+
 /* ---------- Partner / backer logos ----------
    Renders the organisation name as text until a real logo file exists at
    /assets/img/partners/<name>.svg (or -white.svg on dark sections), then

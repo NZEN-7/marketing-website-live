@@ -64,21 +64,21 @@
   <section class="section section--paper2 anchor" id="message-form">
     <div class="wrap narrow">
       <h2>Send us a message</h2>
-      <form name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/thank-you/">
-        <input type="hidden" name="form-name" value="contact">
-        <p class="hp"><label>Don't fill this out: <input name="bot-field"></label></p>
+      <form data-lead-form="contact" data-redirect="/thank-you/">
+        <p class="hp"><label>Don't fill this out: <input name="website" tabindex="-1" autocomplete="off"></label></p>
         <div class="field">
           <label for="name">Name <span class="req">*</span></label>
-          <input id="name" name="name" required>
+          <input id="name" name="name" autocomplete="name" required>
         </div>
         <div class="field">
           <label for="email">Email <span class="req">*</span></label>
-          <input type="email" id="email" name="email" required>
+          <input type="email" id="email" name="email" autocomplete="email" required>
         </div>
         <div class="field">
           <label for="message">Message</label>
-          <textarea id="message" name="message" rows="6"></textarea>
+          <textarea id="message" name="message" rows="6" placeholder="What's on your mind? The more detail the better."></textarea>
         </div>
+        <p class="form-error" data-form-error hidden></p>
         <button class="btn btn--primary" type="submit">Submit <span class="arrow"></span></button>
       </form>
     </div>
@@ -98,5 +98,6 @@
 <footer id="site-footer" class="site-footer"></footer>
 <script src="/assets/js/config.js?v=6" defer></script>
 <script src="/assets/js/site.js?v=6" defer></script>
+<script src="/assets/js/forms.js?v=6" defer></script>
 </body>
 </html>

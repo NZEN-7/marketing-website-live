@@ -338,18 +338,18 @@
           <h3>Just keeping an eye on it?</h3>
           <p>Subscribe for monthly updates on installs, pricing, and what we're learning. No spam, no sales calls.</p>
         </div>
-        <form class="nl-form" name="newsletter" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/thank-you/" style="grid-column:1/-1">
-          <input type="hidden" name="form-name" value="newsletter">
-          <p class="hp"><label>Don't fill this out: <input name="bot-field"></label></p>
+        <form class="nl-form" data-lead-form="subscribe" data-redirect="/thank-you/" style="grid-column:1/-1">
+          <p class="hp"><label>Don't fill this out: <input name="website" tabindex="-1" autocomplete="off"></label></p>
           <div class="field">
             <label for="nl-email">Email <span class="req">*</span></label>
-            <input type="email" id="nl-email" name="email" placeholder="e.g. your@domain.com" required>
+            <input type="email" id="nl-email" name="email" placeholder="e.g., email@example.com" autocomplete="email" required>
           </div>
           <button class="btn btn--blue" type="submit">Subscribe</button>
           <div class="field field--check">
-            <input type="checkbox" id="nl-optin" name="newsletter-optin" value="yes" required>
+            <input type="checkbox" id="nl-optin" name="optin" data-single value="yes">
             <label for="nl-optin">Yes, subscribe me to your newsletter.</label>
           </div>
+          <p class="form-error" data-form-error hidden style="grid-column:1/-1"></p>
         </form>
       </div>
     </div>
@@ -359,6 +359,7 @@
 <footer id="site-footer" class="site-footer"></footer>
 <script src="/assets/js/config.js?v=6" defer></script>
 <script src="/assets/js/site.js?v=6" defer></script>
+<script src="/assets/js/forms.js?v=6" defer></script>
 <script src="/assets/js/live-stats.js?v=6" defer></script>
 </body>
 </html>

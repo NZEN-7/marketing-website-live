@@ -5,6 +5,10 @@
   "description": "Thermal Dawn marketing site, plain static, no build step.",
   "scripts": {
     "serve": "node .claude/serve.js 8080",
-    "deploy:live": "node tools/deploy-live.mjs"
+    "deploy:live": "node tools/deploy-live.mjs",
+    "test:email": "node scripts/test-email-format.js"
+  },
+  "dependencies": {
+    "nodemailer": "^6.9.15"
   }
 }

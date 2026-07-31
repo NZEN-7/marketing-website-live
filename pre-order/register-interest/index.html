@@ -53,57 +53,94 @@
   <section class="section section--paper2">
     <div class="wrap narrow">
       <h2>Tell us about your home</h2>
-      <form class="form" name="register-interest" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/thank-you/registered/">
-        <input type="hidden" name="form-name" value="register-interest">
-        <p class="hp"><label>Don't fill this out: <input name="bot-field"></label></p>
+      <form class="form" data-lead-form="register-interest" data-redirect="/thank-you/registered/">
+        <p class="hp"><label>Don't fill this out: <input name="website" tabindex="-1" autocomplete="off"></label></p>
+
         <div class="field">
-          <label for="ri-name">Name <span class="req">*</span></label>
-          <input id="ri-name" name="name" required>
+          <label for="ri-first">First name <span class="req">*</span></label>
+          <input id="ri-first" name="first_name" autocomplete="given-name" required>
         </div>
         <div class="field">
-          <label for="ri-phone">Phone</label>
-          <input id="ri-phone" name="phone" type="tel">
+          <label for="ri-last">Last name <span class="req">*</span></label>
+          <input id="ri-last" name="last_name" autocomplete="family-name" required>
         </div>
         <div class="field">
           <label for="ri-email">Email <span class="req">*</span></label>
-          <input id="ri-email" name="email" type="email" required>
+          <input id="ri-email" name="email" type="email" autocomplete="email" required>
         </div>
         <div class="field">
-          <label for="ri-address">Address</label>
-          <input id="ri-address" name="address">
+          <label for="ri-phone">Phone <span class="req">*</span></label>
+          <input id="ri-phone" name="phone" type="tel" autocomplete="tel" required>
         </div>
         <div class="field">
-          <label for="ri-solar">Do you have solar panels installed?</label>
-          <select id="ri-solar" name="solar-panels">
+          <label for="ri-suburb">Suburb <span class="req">*</span></label>
+          <input id="ri-suburb" name="suburb" required>
+        </div>
+        <div class="field">
+          <label for="ri-state">State <span class="req">*</span></label>
+          <select id="ri-state" name="state" required>
             <option value="">Please select…</option>
-            <option value="Yes">Yes</option>
-            <option value="No">No</option>
-            <option value="Not sure">Not sure</option>
-          </select>
-        </div>
-        <div class="field">
-          <label for="ri-heating">What heating/cooling system do you currently use?</label>
-          <input id="ri-heating" name="heating-cooling">
-        </div>
-        <div class="field">
-          <label for="ri-hotwater">What type of hot water system do you currently use?</label>
-          <input id="ri-hotwater" name="hot-water">
-        </div>
-        <div class="field">
-          <label for="ri-hear">How did you hear about us?</label>
-          <select id="ri-hear" name="how-did-you-hear">
-            <option value="">Please select…</option>
-            <option value="Search">Search</option>
-            <option value="Social media">Social media</option>
-            <option value="Friend/family">Friend/family</option>
-            <option value="News/article">News/article</option>
+            <option value="NSW">NSW</option>
+            <option value="VIC">VIC</option>
+            <option value="QLD">QLD</option>
+            <option value="WA">WA</option>
+            <option value="TAS">TAS</option>
+            <option value="NT">NT</option>
             <option value="Other">Other</option>
           </select>
         </div>
+
+        <fieldset class="field field--group">
+          <legend>Current heating/cooling system <span class="req">*</span></legend>
+          <label class="choice"><input type="radio" name="heating" value="Gas hydronic - radiators or underfloor" required> Gas hydronic, radiators or underfloor</label>
+          <label class="choice"><input type="radio" name="heating" value="Gas ducted"> Gas ducted</label>
+          <label class="choice"><input type="radio" name="heating" value="Gas wall heaters / space heaters"> Gas wall heaters / space heaters</label>
+          <label class="choice"><input type="radio" name="heating" value="Ducted reverse cycle (electric)"> Ducted reverse cycle (electric)</label>
+          <label class="choice"><input type="radio" name="heating" value="Split systems only"> Split systems only</label>
+          <label class="choice"><input type="radio" name="heating" value="No heating/cooling system"> No heating/cooling system</label>
+          <label class="choice"><input type="radio" name="heating" value="Other / not sure"> Other / not sure</label>
+        </fieldset>
+
+        <fieldset class="field field--group">
+          <legend>Do you have solar panels? <span class="req">*</span></legend>
+          <label class="choice"><input type="radio" name="solar" value="Yes" required> Yes</label>
+          <label class="choice"><input type="radio" name="solar" value="No"> No</label>
+        </fieldset>
+
+        <fieldset class="field field--group">
+          <legend>Do you have a home battery? <span class="req">*</span></legend>
+          <label class="choice"><input type="radio" name="battery" value="Yes" required> Yes</label>
+          <label class="choice"><input type="radio" name="battery" value="No"> No</label>
+        </fieldset>
+
+        <fieldset class="field field--group" data-require-group="drivers">
+          <legend>What's driving your interest right now? <span class="req">*</span></legend>
+          <label class="choice"><input type="checkbox" name="drivers" value="Bills are too high"> Bills are too high</label>
+          <label class="choice"><input type="checkbox" name="drivers" value="Boiler / system needs replacing"> Boiler / system needs replacing</label>
+          <label class="choice"><input type="checkbox" name="drivers" value="Planning a renovation or extension"> Planning a renovation or extension</label>
+          <label class="choice"><input type="checkbox" name="drivers" value="Building a new house"> Building a new house</label>
+          <label class="choice"><input type="checkbox" name="drivers" value="Researching for future upgrade"> Researching for future upgrade</label>
+          <label class="choice"><input type="checkbox" name="drivers" value="Reducing my carbon footprint"> Reducing my carbon footprint</label>
+          <label class="choice"><input type="checkbox" name="drivers" value="Other"> Other</label>
+          <input class="choice__other" name="drivers_other" data-other-for="drivers" aria-label="Tell us what's driving your interest" placeholder="Tell us more" hidden>
+        </fieldset>
+
+        <fieldset class="field field--group" data-require-group="timeline">
+          <legend>When are you looking to act? <span class="req">*</span></legend>
+          <label class="choice"><input type="checkbox" name="timeline" value="Urgently (boiler broken / system failing)"> Urgently (boiler broken / system failing)</label>
+          <label class="choice"><input type="checkbox" name="timeline" value="Within 3 months"> Within 3 months</label>
+          <label class="choice"><input type="checkbox" name="timeline" value="Within 6–12 months"> Within 6–12 months</label>
+          <label class="choice"><input type="checkbox" name="timeline" value="12+ months / future planning"> 12+ months / future planning</label>
+          <label class="choice"><input type="checkbox" name="timeline" value="Other"> Other</label>
+          <input class="choice__other" name="timeline_other" data-other-for="timeline" aria-label="Tell us your timing" placeholder="Tell us more" hidden>
+        </fieldset>
+
         <div class="field">
-          <label for="ri-notes">Anything else we should know? (optional)</label>
-          <textarea id="ri-notes" name="notes"></textarea>
+          <label for="ri-comments">Anything else we should know?</label>
+          <textarea id="ri-comments" name="comments" rows="6" placeholder="The most useful box on this form. What have you got, and what are you trying to fix?"></textarea>
         </div>
+
+        <p class="form-error" data-form-error hidden></p>
         <button class="btn btn--primary" type="submit">Register My Interest <span class="arrow"></span></button>
       </form>
     </div>
@@ -113,5 +150,6 @@
 <footer id="site-footer" class="site-footer"></footer>
 <script src="/assets/js/config.js?v=6" defer></script>
 <script src="/assets/js/site.js?v=6" defer></script>
+<script src="/assets/js/forms.js?v=6" defer></script>
 </body>
 </html>
