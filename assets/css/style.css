@@ -845,3 +845,35 @@ body.dark .plogo__txt,.section--dark .plogo__txt,.section--cocoa .plogo__txt{col
 .anchor{scroll-margin-top:90px;}
 .text-links a{font-weight:600;}
 @media(max-width:520px){body{font-size:16px;}.section{padding:48px 0;}.hero__inner{padding:70px 0 60px;}}
+
+/* =========================================================================
+   v5, lighter rhythm
+   Diffed against the live Wix homepage: it runs lighter and quieter, orange
+   held back for CTAs and small accents, tight display tracking, light body
+   copy. Step toward that without undoing the v3 look: one orange band
+   instead of two, h1 down from Black, tighter heading tracking, softer
+   hero copy, display sizes a step smaller.
+   ========================================================================= */
+
+/* Display type: tighter tracking and one step smaller, closer to the Wix cut */
+h1,h2{letter-spacing:-.022em;}
+h1{font-weight:800;font-size:clamp(2rem,5.2vw,3.15rem);}
+h2{font-size:clamp(1.6rem,4vw,2.3rem);}
+.hero--center h1{font-size:clamp(1.9rem,4.6vw,2.85rem);letter-spacing:-.022em;}
+body{font-size:16.5px;}
+
+/* Hero copy carried too much weight for supporting text */
+.hero--center .subhead{font-weight:500;}
+.hero__note{font-weight:500;}
+
+/* "What's next" drops from second orange band to paper, leaving the proof
+   band as the page's single orange moment. (The Wix page works the same
+   trick in reverse: one dark moment on an otherwise light page.) */
+.next-orange{background:var(--td-paper-2);color:var(--td-black);}
+.next-orange h2{color:var(--td-black);}
+.next-orange h3{color:var(--td-black);}
+.next-orange .rule{border-top-color:var(--td-orange);}
+.next-block{border-top-color:var(--td-line);}
+.next-block p{color:#4a4642;}
+.next-orange .field input[type=email]{border-color:var(--td-line);}
+.next-orange .form-error{background:rgba(234,91,19,.1);border-color:rgba(234,91,19,.45);color:#a8390a;}
