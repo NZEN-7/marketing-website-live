@@ -69,19 +69,50 @@ in the path for them. Spec and decision record: `.claude/W1-forms-spec.md`.
   credentials and no network. Run it after touching the formatters.
 - Spam: honeypot (`website`) plus a 3-second submit-speed trap. Both return a
   success shape so a bot learns nothing.
-- **Still on Wix:** the two deposit forms (`basic-reserve`, `founder-premium`),
-  because they take payment. They move when Stripe Payment Links fill the
-  placeholders in `assets/js/config.js`. **That, not the forms, is what blocks
-  full Wix retirement.**
+- **Deposits (W1b, live 31 Jul 2026):** both reserve forms now post to the same
+  `/api/lead` and then hand off to Stripe Checkout. **No form on the site posts
+  to Wix any more.** Spec: `.claude/W1b-deposits-spec.md`.
+  - The lead email fires BEFORE payment and says so on its face ("records the
+    form submission... confirm the payment itself in Stripe"). An abandoned
+    checkout still leaves a qualified lead. **Stripe is the source of truth for
+    money; the email means intent.**
+  - Each submission mints a reference (`td-…`) that appears in the email AND is
+    passed to Stripe as `client_reference_id`, so a payment can be matched to
+    its lead.
+  - Payment confirmation arrives via Stripe's own notification email. No
+    webhook, deliberately, at this volume.
+  - The standalone "pay deposit" buttons are gone from both reserve pages, so
+    no route can reach Stripe while skipping the lead email.
+  - Payment links live only in `assets/js/config.js`. **The after-payment
+    redirect back to /thank-you/ is configured inside Stripe, not the repo, so
+    it must be updated in the Stripe dashboard whenever the domain changes.**
+  - `/pre-order/terms/` holds the pre-order T&Cs, ported verbatim from Nick's
+    text. Legal copy: changes come from Nick, never edited here.
 
 ### Wix retirement checklist (do NOT do these until all boxes tick)
 1. [x] Form-to-Gmail round trip verified on the Vercel URL (31 Jul 2026).
-2. [ ] Round trip re-verified on a production domain (freevolt.com.au, below).
-3. [ ] Deposit path moved to Stripe.
-4. [ ] Export all Wix form submissions (~154 across 6 forms) to Drive
+2. [x] Deposit path moved to Stripe (W1b, 31 Jul 2026). Intent email + Stripe
+       hand-off with prefilled email and reference all verified live.
+3. [ ] **Stripe public business name still reads "FreeVolt" at checkout**
+       (observed 31 Jul). Customers must not pay a brand that no longer
+       exists, and the card statement descriptor likely matches. Fix in
+       Stripe → Settings → Business details before any real traffic.
+4. [ ] One real end-to-end payment verified (100%-off promo code, or pay and
+       refund) confirming the /thank-you/ redirect and Stripe's notification.
+5. [ ] Round trip re-verified on a production domain (freevolt.com.au, below).
+6. [ ] Export all Wix form submissions (~154 across 6 forms) to Drive
        `Sales +/Consumer/CRM/Archive/`, then **delete them from Wix** so
        customer PII doesn't linger in a dormant account.
-5. [ ] Downgrade/close the Wix plan.
+7. [ ] Downgrade/close the Wix plan.
+
+**Known discrepancies surfaced by the T&C port (Nick to resolve, all legal/
+commercial rather than code):**
+- T&C clauses 1.2 and 2.1 say Basic Reserve is **$199**; the site, the Stripe
+  product and the button all say **$190**.
+- T&C is issued by **FreeVolt Pty Ltd trading as Thermal Dawn**, while the site
+  footer says **Thermal Dawn Pty Ltd**, same ABN. One of them is wrong.
+- T&C gives the refund contact as **nick@thermaldawn.com.au**; the working
+  domain is thermaldawn.com and that mailbox is documented as not integrated.
 
 ### freevolt.com.au cutover (next step, Nick does the DNS)
 1. Vercel → marketing-website-live → Settings → Domains → add
