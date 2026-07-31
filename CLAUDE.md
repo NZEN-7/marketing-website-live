@@ -40,13 +40,18 @@ images still to be exported.
   and re-run `node assets/animations/build-homepage-anim.js assets/animations`.
 - Stripe reserve links are placeholders, real URLs go in `assets/js/config.js`.
 
-## Domains (state as of 24 Jul 2026)
-- Live Wix site: thermaldawn.com (untouched until launch).
-- This site's Vercel URL: https://marketing-website-live-seven.vercel.app; staging domain
-  plan: freevolt.com.au (A 76.76.21.21 apex + www CNAME cname.vercel-dns.com,
-  leave MX alone; keep noindex until launch).
-- Canonicals/sitemap currently say www.thermaldawn.com.au, domain decision
-  (thermaldawn.com vs .com.au) still open; resolve before indexing.
+## Domains (state as of 31 Jul 2026)
+- Live Wix site: thermaldawn.com (untouched until launch; domain is
+  REGISTERED through Wix, renews 3 Nov 2026, transfer out before the Wix
+  plan is cancelled).
+- Staging: https://www.freevolt.com.au is live on Vercel (cutover done
+  31 Jul, GoDaddy DNS, Google MX preserved, Workspace alias domain added).
+  Vercel URL: https://marketing-website-live-seven.vercel.app. Keep noindex
+  until launch.
+- Launch domain DECIDED 31 Jul 2026: thermaldawn.com. Canonicals/sitemap/
+  robots/og:url still say www.thermaldawn.com.au; rewrite them at launch,
+  verify the vercel.json redirect map against Google's live index first
+  (see BUILD-NOTES, launch prep).
 - Portal (separate repo TD-Platform): thermal-dawn-platform.vercel.app.
   td-platform.vercel.app is a STALE alias owned by a lost Vercel account -
   never reference it.
