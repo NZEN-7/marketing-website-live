@@ -42,9 +42,55 @@ python3 -m http.server 8080      # then open http://localhost:8080
 ```
 
 ## Cache busting (IMPORTANT when editing css/js)
-`style.css` / `*.js` are plain filenames (not content-hashed), so browsers cache them. Server cache is now short (5 min) for css/js/animations, but **when you edit `style.css` or a js file, bump the `?v=` query on its references across the HTML** (currently `?v=6`) so visitors who already cached the old file pick up the change. `site.js` and `config.js` are versioned too, they were missed originally and could serve stale.
+`style.css` / `*.js` are plain filenames (not content-hashed), so browsers cache them. Server cache is now short (5 min) for css/js/animations, but **when you edit `style.css` or a js file, bump the `?v=` query on its references across the HTML** (`style.css` is currently `?v=11`; the js files still sit at `?v=8`) so visitors who already cached the old file pick up the change. `site.js` and `config.js` are versioned too, they were missed originally and could serve stale.
 
 Images/fonts keep the **year-long** cache. Either rename the file when you replace one, or version its references: the favicons are replaced in place and carry `?v=` on all three `<link rel="icon">` refs for exactly this reason. **Bump that query whenever the favicon artwork changes** or returning visitors keep the old icon for a year.
+
+## Design system (v5-v7 layers, sitewide 31 Jul 2026)
+
+Three passes, each appended as its own commented block at the foot of
+`style.css` rather than editing the v2/v3 rules in place. Read them in order;
+later blocks win by source order at equal specificity, which several rules
+depend on deliberately.
+
+- **v5, lighter rhythm.** Diffed our computed styles against the live Wix
+  homepage: it runs lighter and quieter. h1 dropped from Black 900 to
+  ExtraBold 800 and one size step, display tracking tightened to -2.2%,
+  and "What's next" was demoted from a second flat-orange band to paper so
+  the proof band is the page's only orange moment.
+- **v6/v7, accent rationing + two buttons.** From a computed-style teardown
+  of tesla.com (their headlines are weight 500, one accent colour, two
+  repeated buttons). Kept in our voice, not copied: we stay high-contrast.
+
+**Two buttons, no others.** Every CTA is `btn--primary` (sunrise gradient)
+or `btn--ghost` (outline). `btn--dark`, `btn--light`, `btn--flat`,
+`btn--blue` and `btn--outline-light` still exist in the CSS but are no
+longer used in any page; don't reintroduce them. `btn--rect` is a no-op
+(same radius as `.btn`) left in the markup, harmless.
+
+**The secondary button follows its SURFACE, not the page.** This is the
+subtle one and it has bitten twice:
+- `body.dark .btn--ghost` paints it white. Correct on dark sections, and
+  correct on `.section--paper2/paper3` too, because `body.dark` repaints
+  *those* with the cocoa gradient.
+- Wrong on the surfaces that stay white on every page (`.credstrip`,
+  `.showcase`, `.faq-block`) and on flat orange, where white sits at about
+  2.2:1. Those are re-inked by name, and each needs `body.dark` in the
+  selector to out-specify `body.dark .btn--ghost` (0,3,1 beats 0,2,1).
+
+So: **when you add a new light-on-dark-page surface, add it to that list**,
+or any ghost button inside it turns invisible.
+
+**Orange keeps four jobs:** CTAs, heading accent words (`.hl`, `.accent`,
+`.h-accent`), the proof numbers (`.figures__v`, `.metric dd`, `.step__n`,
+`.tl__label`), and the proof band. It gave up body text, list items,
+eyebrows and sub-headings, where it was competing with itself.
+
+**Primary CTA label is "Request a Quote"** (was "Book a Free Site
+Assessment"). Prose still describes the free site assessment, because that
+is what actually happens; only the buttons and the sentences directly above
+them changed. The form key stays `register-interest` and the email contract
+is untouched, see Forms below.
 
 ## Forms (W1, live 31 Jul 2026)
 
