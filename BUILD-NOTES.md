@@ -99,7 +99,10 @@ in the path for them. Spec and decision record: `.claude/W1-forms-spec.md`.
        Stripe → Settings → Business details before any real traffic.
 4. [ ] One real end-to-end payment verified (100%-off promo code, or pay and
        refund) confirming the /thank-you/ redirect and Stripe's notification.
-5. [ ] Round trip re-verified on a production domain (freevolt.com.au, below).
+5. [x] Round trip re-verified on freevolt.com.au (31 Jul 2026): all five
+       forms submitted on the new domain, every notification landed in
+       Gmail, both deposit intents carried their td- reference into the
+       Stripe redirect.
 6. [ ] Export all Wix form submissions (~154 across 6 forms) to Drive
        `Sales +/Consumer/CRM/Archive/`, then **delete them from Wix** so
        customer PII doesn't linger in a dormant account.
@@ -114,7 +117,31 @@ commercial rather than code):**
 - T&C gives the refund contact as **nick@thermaldawn.com.au**; the working
   domain is thermaldawn.com and that mailbox is documented as not integrated.
 
-### freevolt.com.au cutover (Nick does the DNS; runbook verified 31 Jul 2026)
+### freevolt.com.au cutover — DONE 31 Jul 2026
+
+Executed same day as the runbook below. GoDaddy's "Create MX records" Gmail
+wizard switched the nameservers to ns77/ns78.domaincontrol.com and created
+the five Google MX records in one step; the remaining records (A @
+76.76.21.21, CNAME www cname.vercel-dns.com, both TXT, DMARC softened from
+GoDaddy's default p=quarantine to p=none) were added by hand. Both hostnames
+verified in Vercel with SSL, apex 308s to www, noindex header intact.
+
+Still open after the cutover:
+- **freevolt.com.au is NOT a domain alias in Google Workspace.** Mail routes
+  to Google (MX correct) but Google rejects the recipient: the contact-form
+  autoresponder test to nickz@freevolt.com.au bounced "Address not found"
+  (31 Jul, 2:01 pm). Fix: admin.google.com → Account → Domains → Manage
+  domains → Add a domain → freevolt.com.au as a user alias domain. The
+  google-site-verification TXT is already in DNS.
+- Stripe after-payment redirect URLs still point at the vercel.app domain
+  (runbook step 7).
+- Remove freevolt.com.au from Wix → Domains (runbook step 8, safe now).
+
+The "bluehouse6351@gmail.com / John Doe" submissions (31 Jul ~1 pm) were
+Nick's own tests — the phone number on the lead is Nick's. Not Wix, no
+parallel automation. Mystery closed.
+
+#### Original runbook (kept for reference)
 
 Discovery that changed the plan: **Wix hosts the entire DNS zone**
 (nameservers ns2/ns3.wixdns.net). GoDaddy is registrar only and its DNS panel
