@@ -12,12 +12,12 @@
 <meta property="og:image" content="https://www.thermaldawn.com.au/assets/img/og-image.png">
 <meta property="og:url" content="https://www.thermaldawn.com.au/pre-order/founder-premium/">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="/assets/img/favicon.svg?v=7" type="image/svg+xml">
-<link rel="icon" href="/assets/img/favicon-32.png?v=7" sizes="32x32" type="image/png">
-<link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png?v=7">
+<link rel="icon" href="/assets/img/favicon.svg?v=8" type="image/svg+xml">
+<link rel="icon" href="/assets/img/favicon-32.png?v=8" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png?v=8">
 <link rel="preload" href="/assets/fonts/Montserrat-Black.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/Montserrat-Regular.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/assets/css/style.css?v=7">
+<link rel="stylesheet" href="/assets/css/style.css?v=8">
 </head>
 <body class="dark">
 <header id="site-header"></header>
@@ -70,44 +70,72 @@
   <section class="section">
     <div class="wrap narrow">
       <h2>Reserve your spot</h2>
-      <form class="form" name="founder-premium" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/thank-you/founder-premium/">
-        <input type="hidden" name="form-name" value="founder-premium">
-        <p class="hp"><label>Don't fill this out: <input name="bot-field"></label></p>
+      <form class="form" data-lead-form="founder-premium" data-stripe-key="founderPremium" data-redirect="/thank-you/founder-premium/">
+        <p class="hp"><label>Don't fill this out: <input name="website" tabindex="-1" autocomplete="off"></label></p>
+
         <div class="field">
-          <label for="fp-name">Name <span class="req">*</span></label>
-          <input id="fp-name" name="name" required>
+          <label for="fp-first">First name <span class="req">*</span></label>
+          <input id="fp-first" name="first_name" autocomplete="given-name" required>
+        </div>
+        <div class="field">
+          <label for="fp-last">Last name <span class="req">*</span></label>
+          <input id="fp-last" name="last_name" autocomplete="family-name" required>
         </div>
         <div class="field">
           <label for="fp-email">Email <span class="req">*</span></label>
-          <input id="fp-email" name="email" type="email" required>
+          <input id="fp-email" name="email" type="email" autocomplete="email" required>
         </div>
         <div class="field">
-          <label for="fp-phone">Phone</label>
-          <input id="fp-phone" name="phone" type="tel">
+          <label for="fp-phone">Phone <span class="req">*</span></label>
+          <input id="fp-phone" name="phone" type="tel" autocomplete="tel" required>
         </div>
         <div class="field">
-          <label for="fp-address">Address</label>
-          <input id="fp-address" name="address">
+          <label for="fp-address">Address <span class="req">*</span></label>
+          <input id="fp-address" name="address" autocomplete="street-address" placeholder="Street, suburb, state, postcode" required>
         </div>
-        <div class="field">
-          <label for="fp-notes">Anything else we should know?</label>
-          <textarea id="fp-notes" name="notes"></textarea>
-        </div>
-        <button class="btn btn--primary" type="submit">Reserve my spot <span class="arrow"></span></button>
-      </form>
 
-      <h3 style="margin-top:34px">Complete your deposit</h3>
-      <p>Once you've submitted your details, complete your fully refundable $990 deposit to lock in your spot.</p>
-      <div class="btn-row">
-        <!-- STRIPE PLACEHOLDER: replaced with the real Stripe Payment Link via /assets/js/config.js (TD_CONFIG.stripe.founderPremium). -->
-        <a class="btn btn--primary" data-stripe="founderPremium" href="#STRIPE-FOUNDER-PREMIUM">Pay refundable $990 deposit <span class="arrow"></span></a>
-      </div>
+        <fieldset class="field field--group">
+          <legend>Current heating/cooling system <span class="req">*</span></legend>
+          <label class="choice"><input type="radio" name="heating" value="Gas hydronic - radiators or underfloor" required> Gas hydronic, radiators or underfloor</label>
+          <label class="choice"><input type="radio" name="heating" value="Gas ducted"> Gas ducted</label>
+          <label class="choice"><input type="radio" name="heating" value="Gas wall heaters / space heaters"> Gas wall heaters / space heaters</label>
+          <label class="choice"><input type="radio" name="heating" value="Ducted reverse cycle (electric)"> Ducted reverse cycle (electric)</label>
+          <label class="choice"><input type="radio" name="heating" value="Split systems only"> Split systems only</label>
+          <label class="choice"><input type="radio" name="heating" value="No heating/cooling system"> No heating/cooling system</label>
+          <label class="choice"><input type="radio" name="heating" value="Other / not sure"> Other / not sure</label>
+        </fieldset>
+
+        <fieldset class="field field--group">
+          <legend>When are you looking to act? <span class="req">*</span></legend>
+          <label class="choice"><input type="radio" name="timeline" value="Urgently (boiler broken / system failing)" required> Urgently (boiler broken / system failing)</label>
+          <label class="choice"><input type="radio" name="timeline" value="Within 3 months"> Within 3 months</label>
+          <label class="choice"><input type="radio" name="timeline" value="Within 6–12 months"> Within 6–12 months</label>
+          <label class="choice"><input type="radio" name="timeline" value="12+ months / future planning"> 12+ months / future planning</label>
+          <label class="choice"><input type="radio" name="timeline" value="Other"> Other</label>
+          <input class="choice__other" name="timeline_other" data-other-for="timeline" aria-label="Tell us your timing" placeholder="Tell us more" hidden>
+        </fieldset>
+
+        <div class="field">
+          <label for="fp-comments">Anything else we should know?</label>
+          <textarea id="fp-comments" name="comments" rows="6" placeholder="Boiler make and model, radiator count, anything unusual about the place. The more you tell us, the better the quote."></textarea>
+        </div>
+
+        <div class="field field--check">
+          <input type="checkbox" id="fp-terms" name="terms" data-single required>
+          <label for="fp-terms">I have read and accept the <a href="/pre-order/terms/" data-terms-link target="_blank" rel="noopener">Thermal Dawn Pre-Order Terms and Conditions</a> <span class="req">*</span></label>
+        </div>
+
+        <p class="form-error" data-form-error hidden></p>
+        <button class="btn btn--primary" type="submit">Continue to secure checkout <span class="arrow"></span></button>
+        <p class="micro" style="margin-top:12px">You'll be taken to our secure Stripe checkout to complete the $990 deposit. After your deposit, we'll send you a home assessment questionnaire (about 10 minutes) so we can give you accurate numbers and confirm fit. Your deposit is fully refundable.</p>
+      </form>
     </div>
   </section>
 
 </main>
 <footer id="site-footer" class="site-footer"></footer>
-<script src="/assets/js/config.js?v=7" defer></script>
-<script src="/assets/js/site.js?v=7" defer></script>
+<script src="/assets/js/config.js?v=8" defer></script>
+<script src="/assets/js/site.js?v=8" defer></script>
+<script src="/assets/js/forms.js?v=8" defer></script>
 </body>
 </html>

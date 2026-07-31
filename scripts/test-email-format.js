@@ -34,6 +34,20 @@ const samples = [
   { form: "contact", name: "Tim Hamer", email: "timhamer842@gmail.com",
     message: "Hi Thermaldawn,\nDo you have a showroom in Melbourne please?\nCheers,\nTim." },
   { form: "subscribe", email: "someone@example.com", optin: true },
+  {
+    form: "founder-premium",
+    first_name: "Tamara", last_name: "de Silva",
+    email: "tamdesilva@example.com", phone: "+61411232755",
+    address: "12 Example St, Caulfield East VIC 3145",
+    heating: "Gas hydronic - radiators or underfloor",
+    timeline: "Within 3 months",
+    comments: "Semi detached double brick, 100 years old, new extension.",
+    terms: true,
+  },
+  { form: "basic-reserve", first_name: "Bare", last_name: "Minimum",
+    email: "bare@example.com", phone: "0400000000", address: "1 Test Rd, Testville NSW 2000",
+    heating: "Other / not sure", timeline: "12+ months / future planning",
+    comments: "", terms: true },
   // Edge case: optional fields left empty must still print their labels.
   { form: "register-interest", first_name: "Empty", last_name: "Comments",
     email: "e@example.com", phone: "0400000000", suburb: "Testville", state: "NSW",
@@ -71,6 +85,24 @@ for (const raw of samples) {
       }
     }
   }
+  if (data.form === "basic-reserve" || data.form === "founder-premium") {
+    for (const label of ["Address:", "Tier:", "Amount:", "Terms accepted:", "Reference:",
+                         "Current heating/cooling system:", "Timeline:", "Comments:"]) {
+      if (body.indexOf(label) === -1) {
+        console.error(`!! FAIL: missing deposit line "${label}"`);
+        failed++;
+      }
+    }
+    // The email must not read as confirmation of payment.
+    if (body.indexOf("Confirm the payment itself in Stripe") === -1) {
+      console.error("!! FAIL: deposit email is missing the not-yet-paid caveat");
+      failed++;
+    }
+    if (!/^td-[a-z0-9]+$/.test(data.ref || "")) {
+      console.error(`!! FAIL: bad reference format: ${data.ref}`);
+      failed++;
+    }
+  }
 }
 
 // Rejection cases: the handler must refuse these before any mail is sent.
@@ -83,6 +115,14 @@ const mustReject = [
      battery: "No", drivers: [], timeline: ["y"] }, "empty required checkbox group"],
   [{ form: "contact", email: "a@b.co" }, "missing name"],
   [{ form: "nope", email: "a@b.co" }, "unknown form"],
+  // Money path: terms must be explicitly accepted, and the address is what
+  // the site assessment depends on.
+  [{ form: "basic-reserve", first_name: "A", last_name: "B", email: "a@b.co",
+     phone: "1", address: "1 St", heating: "Gas ducted", timeline: "Within 3 months",
+     terms: false }, "deposit without accepting terms"],
+  [{ form: "founder-premium", first_name: "A", last_name: "B", email: "a@b.co",
+     phone: "1", heating: "Gas ducted", timeline: "Within 3 months",
+     terms: true }, "deposit without address"],
 ];
 
 console.log("\n" + "=".repeat(72));

@@ -39,20 +39,41 @@
       }
     }
 
-    // Swap "Other" for whatever was typed next to it.
+    // Swap "Other" for whatever was typed next to it, for both checkbox
+    // groups (array value) and radio groups (string value).
     var others = form.querySelectorAll("[data-other-for]");
     for (var j = 0; j < others.length; j++) {
       var input = others[j];
       var group = input.getAttribute("data-other-for");
-      var list = out[group];
-      if (!Array.isArray(list)) continue;
-      var idx = list.indexOf("Other");
-      if (idx === -1) continue;
       var typed = (input.value || "").trim();
-      if (typed) list[idx] = typed;
+      if (!typed) continue;
+      var val = out[group];
+      if (Array.isArray(val)) {
+        var idx = val.indexOf("Other");
+        if (idx !== -1) val[idx] = typed;
+      } else if (val === "Other") {
+        out[group] = typed;
+      }
     }
 
     return out;
+  }
+
+  /* Deposit forms hand off to Stripe rather than a thank-you page. The email
+     is already sent by this point, so an abandoned checkout still leaves a
+     qualified lead. prefilled_email saves retyping; client_reference_id is
+     what ties the Stripe payment back to that lead email. */
+  function nextUrl(form, payload, data) {
+    var stripeKey = form.getAttribute("data-stripe-key");
+    var cfg = (window.TD_CONFIG && window.TD_CONFIG.stripe) || {};
+    var link = stripeKey && cfg[stripeKey];
+    if (!link || link.charAt(0) === "#") {
+      return form.getAttribute("data-redirect") || "/thank-you/";
+    }
+    var sep = link.indexOf("?") === -1 ? "?" : "&";
+    var url = link + sep + "prefilled_email=" + encodeURIComponent(payload.email || "");
+    if (data && data.ref) url += "&client_reference_id=" + encodeURIComponent(data.ref);
+    return url;
   }
 
   function showError(form, message) {
@@ -76,18 +97,21 @@
     var button = form.querySelector('button[type="submit"], input[type="submit"]');
     var stamped = Date.now();
 
-    // Reveal the free-text box only once its "Other" checkbox is ticked.
+    // Reveal the free-text box only once its "Other" option is chosen.
+    // Works for checkbox groups and radio groups: for radios every member of
+    // the group has to be watched, since ticking a sibling clears "Other".
     var otherInputs = form.querySelectorAll("[data-other-for]");
     for (var k = 0; k < otherInputs.length; k++) {
       (function (input) {
         var group = input.getAttribute("data-other-for");
-        var boxes = form.querySelectorAll('input[name="' + group + '"][value="Other"]');
+        var all = form.querySelectorAll('input[name="' + group + '"]');
+        var otherOpt = form.querySelector('input[name="' + group + '"][value="Other"]');
         function sync() {
-          var on = boxes.length ? boxes[0].checked : false;
+          var on = otherOpt ? otherOpt.checked : false;
           input.hidden = !on;
           if (!on) input.value = "";
         }
-        for (var b = 0; b < boxes.length; b++) boxes[b].addEventListener("change", sync);
+        for (var b = 0; b < all.length; b++) all[b].addEventListener("change", sync);
         sync();
       })(otherInputs[k]);
     }
@@ -131,7 +155,7 @@
         })
         .then(function (data) {
           if (data && data.ok) {
-            window.location.href = redirect;
+            window.location.href = nextUrl(form, payload, data);
             return;
           }
           throw new Error((data && data.error) || "Send failed");

@@ -71,7 +71,33 @@ const FORMS = {
   },
   contact: { label: "Contact Form", required: ["name", "email"], requiredLists: [] },
   subscribe: { label: "Subscribe Form", required: ["email"], requiredLists: [] },
+  // Deposit tiers. These record INTENT: the email is sent immediately before
+  // the visitor is handed to Stripe, so an abandoned checkout still leaves a
+  // qualified lead. Stripe remains the source of truth for money.
+  "basic-reserve": {
+    label: "Basic Reserve ($190 deposit)",
+    tier: "Basic Reserve",
+    amount: "$190",
+    required: ["first_name", "last_name", "email", "phone", "address", "heating", "timeline"],
+    requiredLists: [],
+    requiresTerms: true,
+  },
+  "founder-premium": {
+    label: "Founder Premium ($990 deposit)",
+    tier: "Founder Premium",
+    amount: "$990",
+    required: ["first_name", "last_name", "email", "phone", "address", "heating", "timeline"],
+    requiredLists: [],
+    requiresTerms: true,
+  },
 };
+
+const isDeposit = (form) => form === "basic-reserve" || form === "founder-premium";
+
+/** Short human-quotable reference tying the lead email to the Stripe payment. */
+function makeRef() {
+  return "td-" + Date.now().toString(36) + Math.floor(Math.random() * 1296).toString(36).padStart(2, "0");
+}
 
 /** Normalise the raw body into a known shape; returns {data} or {error}. */
 function parseSubmission(body) {
@@ -96,6 +122,21 @@ function parseSubmission(body) {
       timeline: asList(body.timeline),
       comments: asText(body.comments, 5000),
     });
+  } else if (isDeposit(form)) {
+    Object.assign(data, {
+      tier: spec.tier,
+      amount: spec.amount,
+      first_name: asText(body.first_name, 120),
+      last_name: asText(body.last_name, 120),
+      email: asText(body.email, 200),
+      phone: asText(body.phone, 60),
+      address: asText(body.address, 300),
+      heating: asText(body.heating, 120),
+      timeline: asText(body.timeline, 200),
+      comments: asText(body.comments, 5000),
+      terms: body.terms === true || body.terms === "true" || body.terms === "on",
+      ref: makeRef(),
+    });
   } else if (form === "contact") {
     Object.assign(data, {
       name: asText(body.name, 200),
@@ -114,6 +155,9 @@ function parseSubmission(body) {
   }
   for (const key of spec.requiredLists) {
     if (!data[key] || !data[key].length) return { error: "Missing required field: " + key };
+  }
+  if (spec.requiresTerms && data.terms !== true) {
+    return { error: "The pre-order terms must be accepted" };
   }
   if (!isEmail(data.email)) return { error: "Invalid email address" };
 
@@ -157,6 +201,43 @@ function formatNotification(d, stamp) {
     ].join("\n");
   }
 
+  if (isDeposit(d.form)) {
+    return [
+      "Hi Thermal Dawn Team,",
+      "",
+      `Form: ${d.formLabel}`,
+      `Submission Time: ${when}`,
+      "",
+      "NOTE: This records the form submission, made immediately before Stripe",
+      "checkout. Confirm the payment itself in Stripe (reference below).",
+      "",
+      "CONTACT",
+      `First name: ${orDash(d.first_name)}`,
+      `Last name: ${orDash(d.last_name)}`,
+      `Email: ${orDash(d.email)}`,
+      `Phone: ${orDash(d.phone)}`,
+      "",
+      "PROPERTY",
+      `Address: ${orDash(d.address)}`,
+      "",
+      "CURRENT SETUP",
+      `Current heating/cooling system: ${orDash(d.heating)}`,
+      "",
+      "MOTIVATION AND TIMING",
+      `Timeline: ${orDash(d.timeline)}`,
+      "",
+      "CONTEXT",
+      `Comments: ${orDash(d.comments)}`,
+      "",
+      "DEPOSIT",
+      `Tier: ${orDash(d.tier)}`,
+      `Amount: ${orDash(d.amount)}`,
+      `Terms accepted: ${d.terms ? "Yes" : "No"}`,
+      `Reference: ${orDash(d.ref)}`,
+      "",
+    ].join("\n");
+  }
+
   if (d.form === "contact") {
     return [
       "Hi Thermal Dawn Team,",
@@ -188,6 +269,11 @@ function formatSubject(d) {
   if (d.form === "register-interest") {
     return stripHeader(
       `New website lead: ${d.first_name} ${d.last_name} · ${d.heating} · ${d.email}`
+    );
+  }
+  if (isDeposit(d.form)) {
+    return stripHeader(
+      `New deposit intent: ${d.first_name} ${d.last_name} · ${d.tier} · ${d.email}`
     );
   }
   if (d.form === "contact") {
@@ -272,6 +358,13 @@ module.exports = async function handler(req, res) {
       subject: formatSubject(data),
       text: formatNotification(data),
     });
+
+    // Deposits: no autoresponder. Stripe sends the receipt, and the
+    // thank-you page covers what happens next. The client needs the ref so
+    // it can hand it to Stripe as client_reference_id.
+    if (isDeposit(data.form)) {
+      return res.status(200).json({ ok: true, ref: data.ref });
+    }
 
     // Best effort. The notification above is the contract; a failed
     // autoresponder must not cost us the lead.
