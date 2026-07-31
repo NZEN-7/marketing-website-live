@@ -808,6 +808,10 @@ body.dark .band-orange .btn--primary,body.dark .next-orange .btn--primary{color:
   margin:0;padding:7px 0;font-size:.95rem;font-weight:400;line-height:1.45;cursor:pointer;
 }
 .field--group .choice input{width:auto;margin:3px 0 0;flex:none;accent-color:var(--td-deep);}
+/* On mobile these rows came out ~36px tall, under the 44px thumb target both
+   Apple and Google recommend, on a 12-field form where a mis-tap costs a
+   lead. Desktop keeps the tighter rhythm. */
+@media(max-width:640px){.field--group .choice{padding:11px 0;}}
 .field--group .choice__other{margin-top:8px;}
 body.dark .field--group legend{color:#e6ddd5;}
 body.dark .field--group .choice{color:#cfc5bc;}
