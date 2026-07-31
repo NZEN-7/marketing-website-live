@@ -114,15 +114,52 @@ commercial rather than code):**
 - T&C gives the refund contact as **nick@thermaldawn.com.au**; the working
   domain is thermaldawn.com and that mailbox is documented as not integrated.
 
-### freevolt.com.au cutover (next step, Nick does the DNS)
+### freevolt.com.au cutover (Nick does the DNS; runbook verified 31 Jul 2026)
+
+Discovery that changed the plan: **Wix hosts the entire DNS zone**
+(nameservers ns2/ns3.wixdns.net). GoDaddy is registrar only and its DNS panel
+is inert until the nameservers move. The Google MX records for
+nick@freevolt.com.au live inside that Wix zone, so a naive nameserver switch
+kills mail unless the records are recreated immediately.
+
+Zone inventory as captured 31 Jul 2026 (everything worth preserving):
+
+| Type | Name | Value | Note |
+|---|---|---|---|
+| MX | @ | `aspmx.l.google.com` (pri 1) | Google mail, keep |
+| MX | @ | `alt1.aspmx.l.google.com` (5) · `alt2` (5) · `alt3` (10) · `alt4` (10) | keep all four |
+| TXT | @ | `google-site-verification=LJFNYCH7ofhLyIby-ewU1sqZe5-186YqvVyebgdezMc` | keep |
+| TXT | @ | `v=spf1 include:dc-aa8e722993._spfm.freevolt.com.au ~all` | **already broken** — the include target doesn't resolve. Replace with `v=spf1 include:_spf.google.com ~all` |
+| — | — | no DMARC, no Google DKIM published | nothing to carry over |
+
+The A records (Wix IPs 185.230.63.x) and `www → cdn1.wixdns.net` CNAME are
+what get REPLACED; don't copy those.
+
+Runbook (one sitting, ~15 min active):
 1. Vercel → marketing-website-live → Settings → Domains → add
-   `freevolt.com.au` and `www.freevolt.com.au`.
-2. GoDaddy DNS: remove the existing forwarding to thermaldawn.com, then set
-   `A @ 76.76.21.21` and `CNAME www cname.vercel-dns.com`.
-   **Leave MX alone** (there's a nick@freevolt.com.au mailbox).
-3. Keep the `X-Robots-Tag: noindex` header until launch.
-4. Re-run one submission per form on the freevolt.com.au domain. That closes
-   item 2 above.
+   `freevolt.com.au` and `www.freevolt.com.au` (will show Invalid
+   Configuration until step 3 — expected).
+2. GoDaddy → freevolt.com.au → DNS → Nameservers → **change to GoDaddy
+   defaults**. This detaches the Wix zone.
+3. IMMEDIATELY in GoDaddy's now-active DNS Records tab, add:
+   - `A @ 76.76.21.21`
+   - `CNAME www cname.vercel-dns.com`
+   - the five Google MX records from the table above
+   - both TXT records (with the fixed SPF)
+   Delete any default GoDaddy parking records that conflict.
+4. Wait for propagation (minutes to ~1 h; old Wix nameservers keep answering
+   for cached resolvers during the overlap, which keeps mail flowing).
+5. Vercel shows Valid Configuration and issues SSL automatically.
+6. Verify: site over HTTPS on both hostnames, noindex header still present,
+   one submission per form on the new domain (closes retirement item 5),
+   and send/receive a test mail via nick@freevolt.com.au.
+7. Update the two Stripe Payment Link after-payment redirect URLs to the new
+   domain (they live in Stripe, not the repo).
+8. Housekeeping: remove freevolt.com.au from Wix → Domains once stable.
+
+Rollback: point nameservers back to `ns2.wixdns.net` / `ns3.wixdns.net` and
+the old zone (still held by Wix) applies again. thermaldawn.com is untouched
+throughout.
 
 ## Deploy to Vercel (current path)
 `vercel.json` twins `netlify.toml` (same caching, security headers, and 301 map), **keep the two in sync** when editing either. Deploys go via `npm run deploy:live`, which re-stamps HEAD as NZEN-7 and force-pushes to `NZEN-7/marketing-website-live` (Vercel Hobby committer-gate workaround, same as TD-Platform). ⚠ **Netlify Forms do NOT run on Vercel**, the 5 forms (`newsletter`, `contact`, `register-interest`, `basic-reserve`, `founder-premium`) submit into a 404 there. Fine for staging; a form backend is required before production traffic moves to Vercel.
