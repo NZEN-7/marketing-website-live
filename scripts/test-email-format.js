@@ -142,6 +142,26 @@ const subject = lead.formatSubject(inj.data);
 console.log(`\n${/[\r\n]/.test(subject) ? "FAIL" : "ok  "}  subject header injection stripped: ${JSON.stringify(subject)}`);
 if (/[\r\n]/.test(subject)) failed++;
 
+// Autoresponder: goes to register-interest and contact, never to deposits
+// (Stripe sends those receipts) or subscribe.
+console.log("\n" + "=".repeat(72));
+console.log("AUTORESPONDER");
+console.log("=".repeat(72));
+const auto = lead.parseSubmission({ form: "contact", name: "Tim Hamer", email: "t@example.com", message: "x" });
+const autoBody = lead.formatAutoresponder(auto.data);
+console.log(autoBody);
+if (autoBody.indexOf("Hi Tim,") !== 0) {
+  console.error(`!! FAIL: contact autoresponder should greet the first name only, got: ${autoBody.split("\n")[0]}`);
+  failed++;
+}
+const noName = lead.parseSubmission({ form: "contact", name: "", email: "t@example.com" });
+if (!noName.error) {
+  console.error("!! FAIL: contact without a name should be rejected");
+  failed++;
+}
+if (/—/.test(autoBody)) { console.error("!! FAIL: em dash in customer-facing copy"); failed++; }
+if (/\n\s*I\s/.test(autoBody)) { console.error("!! FAIL: sentence starts with I"); failed++; }
+
 console.log(`\nLive timestamp renders as: ${lead.formatTimestamp()}`);
 console.log(failed ? `\n${failed} CHECK(S) FAILED` : "\nAll checks passed.");
 process.exit(failed ? 1 : 0);

@@ -282,11 +282,20 @@ function formatSubject(d) {
   return stripHeader(`New subscriber: ${d.email}`);
 }
 
-/* Customer-facing. Voice rules apply: no em dashes, no sentence opening with
-   "I", contractions, plain text. */
+/* Sent to the customer on register-interest and contact. Voice rules apply:
+   no em dashes, no sentence opening with "I", contractions, plain text. */
+const AUTORESPOND = { "register-interest": true, contact: true };
+
+/** First name only, so "Tim Hamer" greets as "Tim". Falls back to "there". */
+function greetingName(d) {
+  var raw = d.first_name || d.name || "";
+  var first = String(raw).trim().split(/\s+/)[0];
+  return first || "there";
+}
+
 function formatAutoresponder(d) {
   return [
-    `Hi ${d.first_name},`,
+    `Hi ${greetingName(d)},`,
     "",
     "Thanks for getting in touch. Nick will be back to you within the next few days.",
     "",
@@ -368,7 +377,7 @@ module.exports = async function handler(req, res) {
 
     // Best effort. The notification above is the contract; a failed
     // autoresponder must not cost us the lead.
-    if (data.form === "register-interest") {
+    if (AUTORESPOND[data.form]) {
       try {
         await transport.sendMail({
           from: `"Nick at Thermal Dawn" <${process.env.GMAIL_USER}>`,
