@@ -533,7 +533,7 @@
         <div class="step-inner">
           <div class="step-eyebrow">Question 6 of 6, Optional</div>
           <h2 class="step-q">Where are <em>you based</em>?</h2>
-          <p class="step-hint">Used to tailor rebate information, the VEU program is Victoria-specific.</p>
+          <p class="step-hint">Used to tailor the recommendation to your climate and grid.</p>
           <div class="options-list" id="opts-6">
             <button class="opt" data-val="vic" onclick="pickOption(6,'vic',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>Melbourne / Victoria</button>
             <button class="opt" data-val="nsw" onclick="pickOption(6,'nsw',this)"><span class="opt-check"><span class="opt-check-inner"></span></span>Sydney / NSW</button>
@@ -727,9 +727,7 @@ function showResult() {
 
   const pri = optionMeta[primary], sec = optionMeta[secondary];
   const hasSolar = ['solar_yes_want','solar_planning'].includes(answers[3]);
-  const isVic = answers[6]==='vic';
   const wantsSolar = answers[4].includes('use_solar') || hasSolar;
-  const showVEU = isVic && (primary==='A'||primary==='B'||secondary==='A'||secondary==='B');
   const showSolarCallout = wantsSolar && (primary==='C'||secondary==='C');
 
   const whyFns = { A:buildWhy_A, B:buildWhy_B, C:buildWhy_C, D:buildWhy_D };
@@ -750,7 +748,6 @@ function showResult() {
         <div class="result-card-note">${sec.short}</div>
       </div>
     </div>
-    ${showVEU?`<div class="callout yellow"><div class="callout-label">VEU Rebate</div>You may be eligible for VEU rebates on this upgrade, a Victorian program that can meaningfully reduce your upfront cost.</div>`:''}
     ${showSolarCallout?`<div class="callout green"><div class="callout-label">Solar + Thermal Storage</div>Thermal storage pairs well with solar, charges during the day, delivers heat when you need it in the evening.</div>`:''}
     <div class="cta-block">
       <div class="cta-block-title">Thermal Dawn offers pilot pricing for early customers.</div>

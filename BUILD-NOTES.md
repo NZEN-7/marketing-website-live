@@ -52,6 +52,31 @@ Everything here needs a commercial, legal or engineering call, so it is
 deliberately NOT actioned. Mechanical fixes from the same reviews are already
 applied. Ordered by risk.
 
+### STANDING RULE: no rebates, subsidies or VEU anywhere on the site
+
+Nick, 1 Aug 2026: **"remove all reference to rebates and subsidies and VEU
+from the website. that will delay orders."** Mentioning money that might
+arrive later gives a prospect a reason to wait, and waiting is the enemy.
+
+Removed on 1 Aug: the VEU regulatory paragraph on mission, the "What rebates
+can I get?" FAQ on pricing, the rebate clause in the site-assessment promise,
+the VEU parentheticals in both VPP passages on intelligence, "even after
+rebates" and "even subsidised" in the battery comparisons, and the VEU rebate
+callout plus its dead `isVic` variable in
+`assets/animations/heating-tool.html`.
+
+Do not reintroduce any of it, including the VEU incentive dollar ranges that
+were already on the hold-back list. **This supersedes anything in the
+register below that assumed rebate content was allowed**, including the
+earlier note about softening the wording rather than cutting it: the wording
+is gone entirely now.
+
+Two things deliberately kept, because they are not customer rebates:
+- "backed by an Investment NSW **grant**" on the homepage, which is company
+  funding and a backer credential.
+- "It's worth being frank about **incentives**" in the pipe-diameter blog
+  post, which is about installer motivations, not government money.
+
 ### A0. IMPORTANT: the 1 Aug external review was of the WIX site, not ours
 
 A detailed review arrived 1 Aug listing "live defects" (visible `[ANNUALISED,
