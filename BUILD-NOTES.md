@@ -52,6 +52,31 @@ Everything here needs a commercial, legal or engineering call, so it is
 deliberately NOT actioned. Mechanical fixes from the same reviews are already
 applied. Ordered by risk.
 
+### A0. IMPORTANT: the 1 Aug external review was of the WIX site, not ours
+
+A detailed review arrived 1 Aug listing "live defects" (visible `[ANNUALISED,
+~$3,000]` placeholder text, a "week one" label over ~9 weeks of data, an
+Apollo Place footer, "Half the Cost of Lithium", a FreeVolt LinkedIn link,
+five competing CTAs, US spellings, a 50kWh spec). **Almost none of it exists
+in this repo.** Verified by grep across all 28 pages, then confirmed by
+fetching thermaldawn.com directly: `ANNUALISED`, `week one`, `19,257`, `948`,
+`Half the Cost of Lithium` and `freevoltac` are all PRESENT on the live Wix
+site and ABSENT here.
+
+Two consequences:
+
+1. **The Wix site has real defects live to customers right now**, including
+   unrendered template brackets and a savings figure labelled "week one" that
+   is actually about nine weeks, overstating the rate roughly ninefold. Those
+   cannot be fixed from this repo; they are Wix-side. The fastest route to
+   fixing most of them is launching this site.
+2. Before actioning any future external review, check which site it looked
+   at. The reviewer had no way to know freevolt.com.au existed.
+
+Genuinely applied from that review: a stale HTML comment on the pricing page,
+and softening "rebate assessment" (see B4 below). Everything else either did
+not apply or is logged here already.
+
 ### A. Claims a regulator or competitor could challenge
 
 **A1. "Australian-made" scope.** The thermal store is built in Hornsby; the
@@ -86,6 +111,26 @@ exposing. Needs a wording that anchors without publishing unit economics.
 **A4. "45°C summers" design spec** (`hydronic/how-it-works/`) reads as a
 tested rating. Confirm it traces to something.
 
+**A5. Lifespan claims sit above the actual warranty.** NEW 1 Aug, and the
+strongest point in that review because it brought outside information: the
+site says "15+ years, no degradation, no replacement cycle" as a *system*
+lifespan, while the real cover is reportedly Sunrain's 2 years whole-unit
+and 3 years compressor. The tank lasting decades is defensible; the system
+claim is not, because the heat pump is the limiting component and its
+warranty says so. Suggested fix is to scope the durability claim to the
+store, the same move as A1. Appears on `hydronic/index.html` and
+`hydronic/how-it-works/`, and underpins the whole battery comparison.
+
+**A6. The site sells a retail product; the contracts sell a pilot trial.**
+NEW 1 Aug. Paid tank and install, with a pre-certification heat pump
+provided under a trial agreement. Nothing on the site reflects that
+structure, and in an ACL dispute the website is evidence of what was
+represented. The reviewer suggests one honest paragraph on the pricing page
+and a LegalVision glance once drafted. **This directly conflicts with Nick's
+1 Aug instruction not to explain the pre-certification status**, so it needs
+his call rather than a copy edit. Worth noting the reviewer argues it would
+likely *help* conversion with this audience.
+
 ### B. Product facts to confirm
 
 **B1. Lead time "6-10 weeks"** (`hydronic/how-it-works/`) is now unmarked
@@ -99,6 +144,28 @@ number, since the blogs previously said otherwise.
 tall, and 500L rectangular 500 x 1300 x 1600. Outdoor unit is 450mm deep,
 ~150mm off the wall. Width of the outdoor unit is still unpublished because
 it was never supplied.
+
+**B4. Rebate wording softened 1 Aug, confirm it is right.** The pricing page
+promised the free site assessment includes a "rebate assessment". Because
+pre-certification pilot units cannot claim rebates, that was reworded to
+"guidance on current and upcoming rebate eligibility", which promises advice
+rather than an outcome. Done without asking because the change is strictly
+in the safer direction, but it is commercially adjacent, so sanity-check it.
+
+**B5. Storage capacity.** The review flagged "up to 50kWh" as a stale
+PCM-era spec against ~20-30kWh real water tanks. That figure does not appear
+in this repo; the site says 35kWh throughout. Confirm 35kWh is right, since
+the review implies the true figure may be lower.
+
+### D0. The second install is the missing story (NEW 1 Aug)
+
+Sharper than the dataroom framing already logged below. The narrative arc:
+Hawthorn was the test case, deliberately complicated, and taught us
+everything; Warragul was two days in and out and has not hiccupped since.
+That is the "this is repeatable" proof a buyer actually needs, and the site
+still leads on one install. Suggested as a second card beside the Hawthorn
+stats. Overlaps items 1 and 3 in the dataroom list; this version is the one
+to write from.
 
 ### C. Terms page (legal copy, changes come from Nick only)
 
@@ -133,6 +200,15 @@ Proposed by review, needs sign-off on the measured claims (1-3) before use:
    vs ~$1,100/kWh installed, Solar Choice May 2026). Would also fix A3.
    Conflicts with Nick's 1 Aug decision to remove per-kWh figures, so this
    is a reversal to make consciously or not at all.
+
+6b. **Publish the price.** NEW 1 Aug, and it cuts against the current
+   position. The argument: the $12k figure is already quoted openly,
+   conversion is holding, the customers are researchers, and "well below
+   market rate" reads as evasive next to an otherwise unusually honest
+   site. Proposed wording: "From $12,990 installed, confirmed after your
+   free site assessment", which filters tyre-kickers and saves the scarcest
+   resource, Nick's hours. Directly reverses the 1 Aug decision to keep the
+   anchor vague, and would also resolve A3. Decision, not a copy edit.
 7. Solar Sharer is a mandate, not a trend: retailers **must** offer it from
    1 Jul 2026, reaching Victoria 2027. One word plus a date makes the
    tailwind inevitable rather than promotional.
