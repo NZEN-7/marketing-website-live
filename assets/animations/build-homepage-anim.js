@@ -291,6 +291,9 @@ ${v2Svg}
        scenarios (from the store with storage, from the grid without), so
        night alone is the condition. */
     document.body.classList.toggle('house-warm', !isDay);
+    /* Same pattern: the scene dims its edge highlights via
+       \`body.is-night .edge-line\`, another class its own script sets. */
+    document.body.classList.toggle('is-night', !isDay);
 
     /* ── the thermal store only exists in the "with storage" world ── */
     show('g-store', isSto);
