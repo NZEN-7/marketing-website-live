@@ -1,14 +1,39 @@
-/* Build the homepage animation: the v2 scene graphic from TD-Platform
-   dropped into the existing homepage shell (With/Without Storage toggle,
-   day/night buttons, timer bar, three explainer cards).
+/* Build the homepage animation: the scene graphic from TD-Platform dropped
+   into the existing homepage shell (With/Without Storage toggle, day/night
+   buttons, timer bar, three explainer cards).
 
    node build-homepage-anim.js <animationsDir>
-*/
+
+   SCENE SOURCE: thermal-dawn-flow-v2.html.
+
+   Only the scene's <style> and <svg> are used; its <script> is dropped,
+   because the homepage shell drives the scene itself and the platform's
+   live-data/mode logic is irrelevant here. (That is also why the known v3
+   Direct-Heating mode bug could never reach this build.)
+
+   ── WHY NOT v3 ──────────────────────────────────────────────────────────
+   thermal-dawn-flow-v3.html IS vendored alongside this file (copied from
+   TD-Platform/apps/web/public/animations/, 3 Aug 2026) but is NOT usable
+   here yet, and swapping the filename below is not enough.
+
+   v3 changed architecture: its plant (heat pump, thermal store, pipes,
+   flow groups, store glow) is no longer static markup. buildPlant() at
+   v3:551 assembles that geometry as a string and injects it with
+   `getElementById('plant').innerHTML = s` at v3:704, into an otherwise
+   EMPTY <g id="plant">. Since this builder drops the script, v3 would
+   render sky and house around a hollow middle.
+
+   To adopt v3, pre-render it: run the scene headlessly, snapshot the
+   generated #plant innerHTML, and splice that static markup in here.
+   buildPlant() runs once at layout (v3:719) and applyMode() only re-wires
+   the result afterwards, so a single snapshot is safe. Tracked in the
+   Coda backlog under the marketing port.
+   ─────────────────────────────────────────────────────────────────────── */
 const fs = require("fs");
 const path = require("path");
 
 const DIR = process.argv[2];
-const v2 = fs.readFileSync(path.join(DIR, "thermal-dawn-flow-v2.html"), "utf8");
+const scene = fs.readFileSync(path.join(DIR, "thermal-dawn-flow-v2.html"), "utf8");
 const shell = fs.readFileSync(path.join(DIR, "homepage_web_animation_new.html"), "utf8");
 
 const grab = (src, re, what) => {
@@ -17,9 +42,22 @@ const grab = (src, re, what) => {
   return m[1];
 };
 
-// v2: the scene's own CSS and the whole <svg> block.
-const v2Style = grab(v2, /<style>([\s\S]*?)<\/style>/, "v2 style");
-const v2Svg = grab(v2, /(<svg[\s\S]*<\/svg>)/, "v2 svg");
+// scene: its own CSS and the whole <svg> block.
+const v2Style = grab(scene, /<style>([\s\S]*?)<\/style>/, "scene style");
+const v2Svg = grab(scene, /(<svg[\s\S]*<\/svg>)/, "scene svg");
+
+/* The scene must expose every id the shell script drives, or the build looks
+   fine and silently does nothing at runtime. Fail loudly instead. */
+const REQUIRED_SCENE_IDS = [
+  "lbl-battery-val", "lbl-hp-val", "lbl-mode-chip", "lbl-radiators-val",
+  "lbl-outdoor-temp", "lbl-outdoor-cond", "store-glow-el",
+  "sky-sun", "sky-moon", "sky-clouds", "sky-stars",
+  "sky-dusk-rect", "sky-night-rect", "cloud-extra-wrap",
+];
+const missing = REQUIRED_SCENE_IDS.filter((id) => !v2Svg.includes('id="' + id + '"'));
+if (missing.length) {
+  throw new Error("scene is missing ids the shell drives: " + missing.join(", "));
+}
 
 // shell: its CSS, and the chrome either side of the scene.
 const shellStyle = grab(shell, /<style>([\s\S]*?)<\/style>/, "shell style");
