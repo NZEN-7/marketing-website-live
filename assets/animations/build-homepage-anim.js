@@ -11,23 +11,33 @@
    live-data/mode logic is irrelevant here. (That is also why the known v3
    Direct-Heating mode bug could never reach this build.)
 
-   ── WHY NOT v3 ──────────────────────────────────────────────────────────
-   thermal-dawn-flow-v3.html IS vendored alongside this file (copied from
-   TD-Platform/apps/web/public/animations/, 3 Aug 2026) but is NOT usable
-   here yet, and swapping the filename below is not enough.
+   ── WHY NOT v3 (two blockers, one solved, one not) ──────────────────────
+   thermal-dawn-flow-v3.html is vendored alongside this file (from
+   TD-Platform/apps/web/public/animations/, 3 Aug 2026). Swapping the
+   filename below is NOT enough. Investigated 3 Aug:
 
-   v3 changed architecture: its plant (heat pump, thermal store, pipes,
-   flow groups, store glow) is no longer static markup. buildPlant() at
-   v3:551 assembles that geometry as a string and injects it with
-   `getElementById('plant').innerHTML = s` at v3:704, into an otherwise
-   EMPTY <g id="plant">. Since this builder drops the script, v3 would
-   render sky and house around a hollow middle.
+   BLOCKER 1 (SOLVED). v3 stopped keeping its plant (heat pump, thermal
+   store, pipes, flow groups, store glow) as static markup: buildPlant()
+   assembles it as a string and injects it into an otherwise empty
+   <g id="plant">. Since this builder drops the scene's <script>, raw v3
+   renders sky and house around a hollow middle.
+     → prerender-v3-plant.js solves this. It runs the scene's script under
+       a stub DOM, captures what buildPlant() assigns to #plant, and bakes
+       it in as static markup, producing thermal-dawn-flow-v3-static.html.
+       Verified working: 6,967 chars of plant geometry, all ids present.
 
-   To adopt v3, pre-render it: run the scene headlessly, snapshot the
-   generated #plant innerHTML, and splice that static markup in here.
-   buildPlant() runs once at layout (v3:719) and applyMode() only re-wires
-   the result afterwards, so a single snapshot is safe. Tracked in the
-   Coda backlog under the marketing port.
+   BLOCKER 2 (NOT SOLVED, needs scene work). The homepage tells a
+   comparison story that v3 has no elements for:
+       show('g-store',       isSto);              // hide the tank entirely
+       show('g-flow-export', isDay && !isSto);    // solar sold to the grid
+   v2 has both; v3 has NEITHER, and reasonably so — it renders a real
+   installed system, where there is no "without storage" state and no
+   export flow. Adopting v3 here therefore means ADDING those two groups
+   to the scene (in TD-Platform, or as a marketing variant), not changing
+   this builder.
+
+   So: v2 stays the source until that scene work happens. The pre-render
+   script and the static output are kept ready for when it does.
    ─────────────────────────────────────────────────────────────────────── */
 const fs = require("fs");
 const path = require("path");
