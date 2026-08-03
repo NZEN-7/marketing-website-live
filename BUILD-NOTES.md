@@ -104,17 +104,42 @@ not apply or is logged here already.
 
 ### A. Claims a regulator or competitor could challenge
 
-**A1. "Australian-made" scope.** The thermal store is built in Hornsby; the
-heat pump is an imported OEM unit. These read as whole-system origin claims
-and are ACCC country-of-origin territory:
-`hydronic/index.html` comparison row "Made in: Australia"; `index.html`
-"designed, built, and assembled in Australia... from Australian materials";
-`hydronic/pricing/index.html` "Australian-made components included";
-`hydronic/index.html` hero note "Australian-made."; `hydronic/how-it-works/`
-"This isn't imported technology we're reselling."
-Suggested pattern: scope the claim to the store and controls, e.g. table row
-"Thermal store: made in Australia", and "designed and assembled in Australia,
-with the thermal store built here from Australian materials".
+**A1. "Australian-made" scope. RESOLVED 3 Aug 2026, actioned.** The thermal
+store is built in Hornsby; the heat pump is an imported OEM unit, so the
+whole-system origin claims were ACCC country-of-origin territory.
+
+Nick's call (Coda, Web backlog): *"yeah we're over claiming. Australian
+developed tech, au made tanks, local controls and data. Stick to that while
+claiming to be as local as possible."*
+
+Rule now applied sitewide: **a claim scoped to the store, the controls, the
+data or the technology stays; a claim that reads as whole-system origin goes.**
+Ten edits:
+
+| File | Was | Now |
+| --- | --- | --- |
+| `index.html` | "and made in Australia." | "and an Australian-made store at the heart of it." |
+| `index.html` | "built from Australian materials, and retrofittable" | "Australian-developed technology, built around an Australian-made thermal store, and retrofittable" |
+| `index.html` | "Our systems are designed, built, and assembled in Australia... This isn't imported technology we're reselling." | "Our technology is developed in Australia, and our thermal stores are built and assembled at [Hornsby]... The heat pump is a proven unit we source rather than build; the storage, the controls, and the intelligence that runs them are ours." |
+| `hydronic/` hero note | "Australian-made." | "Australian-made thermal store." |
+| `hydronic/` table row | "Made in / Mostly imported / Australia" | "Storage made in / Mostly imported / Australia" |
+| `hydronic/` risk reversal | "Australian-made, Australian-installed." | "Australian-made store, Australian-installed." |
+| `hydronic/pricing/` | "Australian-made components included." | "an Australian-made thermal store included." |
+| `hydronic/pricing/` table row | "Made in Australia" | "Australian-made storage" |
+| `hydronic/pricing/` | "Australian-made, Australian-installed." | "Australian-made store, Australian-installed." |
+| `hydronic/pricing/` | "plus Australian-made manufacturing." | "plus manufacturing the thermal store ourselves." |
+| `hydronic/how-it-works/` | "This isn't imported technology we're reselling." | "The heat pump is a proven unit we source rather than build, but the thermal store, the controls, and the intelligence that runs them are ours, developed and built here." |
+
+**Deliberately left alone**, because they were already correctly scoped:
+`index.html` meta/og/subhead "Australian-made thermal storage" (it is the
+storage that is Australian-made); the `install-unit.webp` alt text; both
+animation build-lists' "35kWh Australian-made thermal storage tank";
+`hydronic/pricing/` "An Australian-made, heavily insulated thermal tank";
+`blog/hawthorn-first-install/` same; `mission/` throughout, which already said
+"The thermal store is built from Australian materials" and "not imported
+storage". `mission/` meta and subhead keep "designed here, made here" because
+the subject is the thermal infrastructure, i.e. the storage layer, and Nick
+asked to stay as local as the facts allow.
 
 **A2. "Up to $5,000/yr" does not reconcile with our own pricing page.**
 Set by Nick 1 Aug. But `hydronic/pricing/` 15-year table implies ~$1,400-1,600/yr
@@ -136,15 +161,32 @@ exposing. Needs a wording that anchors without publishing unit economics.
 **A4. "45°C summers" design spec** (`hydronic/how-it-works/`) reads as a
 tested rating. Confirm it traces to something.
 
-**A5. Lifespan claims sit above the actual warranty.** NEW 1 Aug, and the
-strongest point in that review because it brought outside information: the
-site says "15+ years, no degradation, no replacement cycle" as a *system*
-lifespan, while the real cover is reportedly Sunrain's 2 years whole-unit
-and 3 years compressor. The tank lasting decades is defensible; the system
-claim is not, because the heat pump is the limiting component and its
-warranty says so. Suggested fix is to scope the durability claim to the
-store, the same move as A1. Appears on `hydronic/index.html` and
-`hydronic/how-it-works/`, and underpins the whole battery comparison.
+**A5. Lifespan claims sit above the actual warranty. ACTIONED 3 Aug 2026,
+CONFIRM THE WORDING.** The site said "15+ years, no degradation, no
+replacement cycle" as a *system* lifespan, while the real cover is reportedly
+Sunrain's 2 years whole-unit and 3 years compressor. The tank lasting decades
+is defensible; the system claim is not, because the heat pump is the limiting
+component and its warranty says so.
+
+Nick's note in Coda was an acknowledgement rather than an instruction:
+*"yeah I mean we're reaching there - it's just some heat pumps you see
+lasting 20"*. Read as agreement that the claim overreaches, and actioned with
+the smallest edit that fixes it, the same scoping move as A1. The number is
+untouched, only what it describes changed:
+
+- `hydronic/index.html` and `hydronic/how-it-works/`, the stat block label
+  "System lifespan, no degradation, no replacement cycle" is now
+  "**Thermal store design life**, no degradation, no replacement cycle".
+  The headline figure stays "15+ years".
+- `blog/thermal-storage-vs-lithium-battery/`, the Degradation row now reads
+  "15+ year **store** design life".
+
+**Nick, this one is my judgement call, not your explicit instruction, so
+check you're happy with it.** Left untouched because they are already about
+the store or are comparative rather than warranty-like: `hydronic/index.html`
+"infrastructure that lasts decades, not a battery that fades in 10 years" and
+"no degradation and no replacement costs in 10 years";
+`hydronic/pricing/index.html` "Built to last decades, not years."
 
 **A6. The site sells a retail product; the contracts sell a pilot trial.**
 NEW 1 Aug. Paid tank and install, with a pre-certification heat pump
@@ -246,6 +288,17 @@ Proposed by review, needs sign-off on the measured claims (1-3) before use:
    citation. Verify the exact landing page before linking:
    yourhome.gov.au/energy/heating-and-cooling and
    yourhome.gov.au/energy/hot-water-systems.
+   **Attempted 3 Aug 2026, still not done.** yourhome.gov.au would not load
+   from here, three fetches across two URLs timed out or reset. The *figures*
+   were already verified on 1 Aug, so the only thing outstanding is confirming
+   which page to link. Not adding a citation we cannot check: a citation is a
+   promise the reader can follow it, and a dead or wrong link is worse than
+   the uncited number we have now. Retry when the site responds.
+   Note for whoever picks this up: 40% + 23% is 63%, so the **70% top of the
+   site's "60 to 70%" range is not supported by this source**. Either soften
+   to "around two thirds" at the same time, or cite a second source for the
+   upper bound. Nick signed the range off 1 Aug, so it is his call, and it is
+   why the number was left alone today.
 
 **Deliberately held back** (per review): tiered warranty detail, VEU incentive
 dollar ranges (draft regulation), the ~6-hour install target (that is the plan
