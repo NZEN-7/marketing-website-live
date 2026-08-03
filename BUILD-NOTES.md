@@ -257,14 +257,26 @@ zero-compressor claim must come from the audit *verbatim* rather than
 paraphrased; it is currently written from the Coda summary, so diff it against
 the audit.
 
-**Resolved 3 Aug.** The source note's "charged free at midday" was held back
-at first as ambiguous between free solar and a free-window tariff. Nick
-confirmed it is both: *"for the second home it was free three hours generally
-with extra solar"*. So the site now says the heat "cost nothing to make:
-charged inside a free three-hour power window at midday, topped up from its
-own solar", which is the stronger line and the one that makes the economics
-land. Note this is specific to that customer's tariff, it is not a claim about
-what every home gets.
+**Resolved 3 Aug, in two passes.** The source note's "charged free at midday"
+was held back at first as ambiguous. Nick then confirmed the tariff, and a
+first attempt wrote it as heat that "cost nothing to make". **That overclaimed
+and was corrected the same day.** His full description: *"it just ran in free
+priced on solar hours or late night off peak keeping slab warm and toastie for
+wakeup"*. Three charging windows, not one, and **late-night off-peak is cheap,
+not free**, so "nothing" was wrong.
+
+Live wording: *"It tops the slab up whenever power is free or cheapest, the
+three-hour free window, its own solar, or late-night off-peak, so the house is
+warm to wake up to."*
+
+Two things that wording is doing deliberately. "Free or cheapest" covers all
+three windows without claiming any of them is free. And the wake-up benefit is
+the actual consumer story here, better than the compressor-minutes framing,
+because a warm slab in the morning is something a buyer can picture.
+
+Still specific to that customer's tariff. It is not a promise that every home
+gets a free window, and the surrounding copy should not be allowed to drift
+into implying the system supplies one. The retailer does.
 
 **Not carried over:** `class="draft"` was not applied, because Nick signed
 these figures off directly rather than leaving them pending.
