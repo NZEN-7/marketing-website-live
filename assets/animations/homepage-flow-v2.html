@@ -751,7 +751,16 @@ body, .scene-title h2, .scene-title p, .ic-title, .ic-body {
     var homeFlow   = (!isDay && isSto) || gridHeat;
     var flowCol    = gridHeat ? RED : (isDay ? ORANGE : GREEN);
 
-    show('g-flow-hp', chargeFlow || gridHeat);
+    /* The v3 scene strokes its flow paths from CSS variables that its own
+       script normally sets, and we drop that script. The HP leg uses a
+       DIFFERENT variable from the house legs (--flow-hp vs --flow-main); if
+       we only set --flow-main, the charge flow strokes resolve to nothing
+       and the pipe animation is invisible. Set both. */
+    var hpFlowG = el('g-flow-hp');
+    if (hpFlowG) {
+      hpFlowG.style.opacity = (chargeFlow || gridHeat) ? '1' : '0';
+      hpFlowG.style.setProperty('--flow-hp', flowCol);
+    }
     // Solar leaving the property: only when there is nowhere to store it.
     show('g-flow-export', isDay && !isSto);
     ['g-flow-home', 'g-flow-home-2'].forEach(function (id) {

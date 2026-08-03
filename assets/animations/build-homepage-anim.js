@@ -313,7 +313,16 @@ ${v2Svg}
     var homeFlow   = (!isDay && isSto) || gridHeat;
     var flowCol    = gridHeat ? RED : (isDay ? ORANGE : GREEN);
 
-    show('g-flow-hp', chargeFlow || gridHeat);
+    /* The v3 scene strokes its flow paths from CSS variables that its own
+       script normally sets, and we drop that script. The HP leg uses a
+       DIFFERENT variable from the house legs (--flow-hp vs --flow-main); if
+       we only set --flow-main, the charge flow strokes resolve to nothing
+       and the pipe animation is invisible. Set both. */
+    var hpFlowG = el('g-flow-hp');
+    if (hpFlowG) {
+      hpFlowG.style.opacity = (chargeFlow || gridHeat) ? '1' : '0';
+      hpFlowG.style.setProperty('--flow-hp', flowCol);
+    }
     // Solar leaving the property: only when there is nowhere to store it.
     show('g-flow-export', isDay && !isSto);
     ['g-flow-home', 'g-flow-home-2'].forEach(function (id) {
@@ -438,6 +447,26 @@ const danglingRefs = [...new Set([...out.matchAll(/url\(#([a-zA-Z0-9_-]+)\)/g)].
   .filter((id) => !definedIds.has(id));
 if (danglingRefs.length) {
   throw new Error("output references undefined paint ids: " + danglingRefs.join(", "));
+}
+
+/* Every --flow-* the scene strokes from must actually be set by the shell.
+   v3 paints its flow paths from CSS variables its own script assigns, and we
+   drop that script. It uses --flow-hp for the heat-pump leg and --flow-main
+   for the house legs; setting only --flow-main left the charge animation
+   stroked with an undefined value, i.e. invisible, with no error anywhere.
+   Variables carrying a fallback (var(--x,#fff)) are fine unset. */
+const strokedVars = new Set(
+  [...out.matchAll(/var\((--flow-[a-z-]+)\s*\)/g)].map((m) => m[1]),
+);
+const setVars = new Set(
+  [...out.matchAll(/setProperty\('(--flow-[a-z-]+)'/g)].map((m) => m[1]),
+);
+const unsetVars = [...strokedVars].filter((v) => !setVars.has(v));
+if (unsetVars.length) {
+  throw new Error(
+    "the scene strokes from CSS variables the shell never sets: " + unsetVars.join(", ") +
+    " (they would render as invisible flows)",
+  );
 }
 
 // Cheap structural assertions, silent truncation is the failure mode here.
