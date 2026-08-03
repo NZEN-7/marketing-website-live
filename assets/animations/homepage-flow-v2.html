@@ -721,11 +721,23 @@ body, .scene-title h2, .scene-title p, .ic-title, .ic-body {
     el('cloud-extra-wrap').style.opacity = '0';
     hide('sky-rain', true); hide('sky-lightning', true);
 
+    /* ── house lights ──
+       The v3 scene keeps its windows dark by default and only lights them
+       for `body.house-warm`, a class its OWN script sets. We drop that
+       script, so without this the windows never come on. v3's condition is
+       "being fed AND dark"; here the house is heated on both night
+       scenarios (from the store with storage, from the grid without), so
+       night alone is the condition. */
+    document.body.classList.toggle('house-warm', !isDay);
+
     /* ── the thermal store only exists in the "with storage" world ── */
     show('g-store', isSto);
     var glow = el('store-glow-el');
     if (glow) {
-      glow.setAttribute('fill', isDay ? 'url(#store-glow-o)' : 'url(#store-glow-g)');
+      /* v3 renamed these: store-glow-o/-g (v2) are store-glow-c/-d here,
+         charge and discharge. Pointing at the old names filled the glow
+         with a gradient that does not exist. */
+      glow.setAttribute('fill', isDay ? 'url(#store-glow-c)' : 'url(#store-glow-d)');
       glow.style.opacity = isSto ? '0.55' : '0';
     }
 

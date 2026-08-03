@@ -283,11 +283,23 @@ ${v2Svg}
     el('cloud-extra-wrap').style.opacity = '0';
     hide('sky-rain', true); hide('sky-lightning', true);
 
+    /* ── house lights ──
+       The v3 scene keeps its windows dark by default and only lights them
+       for \`body.house-warm\`, a class its OWN script sets. We drop that
+       script, so without this the windows never come on. v3's condition is
+       "being fed AND dark"; here the house is heated on both night
+       scenarios (from the store with storage, from the grid without), so
+       night alone is the condition. */
+    document.body.classList.toggle('house-warm', !isDay);
+
     /* ── the thermal store only exists in the "with storage" world ── */
     show('g-store', isSto);
     var glow = el('store-glow-el');
     if (glow) {
-      glow.setAttribute('fill', isDay ? 'url(#store-glow-o)' : 'url(#store-glow-g)');
+      /* v3 renamed these: store-glow-o/-g (v2) are store-glow-c/-d here,
+         charge and discharge. Pointing at the old names filled the glow
+         with a gradient that does not exist. */
+      glow.setAttribute('fill', isDay ? 'url(#store-glow-c)' : 'url(#store-glow-d)');
       glow.style.opacity = isSto ? '0.55' : '0';
     }
 
@@ -414,6 +426,19 @@ ${v2Svg}
 </body>
 </html>
 `;
+
+/* Every url(#id) must resolve to something defined in the output.
+   Swapping the v2 scene for v3 renamed store-glow-o/-g to store-glow-c/-d,
+   and the shell kept pointing at the old names: the glow then filled with a
+   gradient that did not exist, which renders as nothing and throws no error.
+   The id check below cannot catch that, because these are paint references,
+   not elements the script looks up. */
+const definedIds = new Set([...out.matchAll(/id="([^"]+)"/g)].map((m) => m[1]));
+const danglingRefs = [...new Set([...out.matchAll(/url\(#([a-zA-Z0-9_-]+)\)/g)].map((m) => m[1]))]
+  .filter((id) => !definedIds.has(id));
+if (danglingRefs.length) {
+  throw new Error("output references undefined paint ids: " + danglingRefs.join(", "));
+}
 
 // Cheap structural assertions, silent truncation is the failure mode here.
 [
