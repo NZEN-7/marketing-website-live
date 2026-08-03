@@ -252,14 +252,19 @@ The homepage heading changed with it, "It's on a home in Melbourne" is now
 - *"Not sure about quoting the slab battery"*, so the poured-in-slab battery
   line and the ~11 kWh/degC figure are **not used**.
 
-**Two things to check before launch.** First, the original dataroom note said
-the zero-compressor claim must come from the audit *verbatim* rather than
+**One thing to check before launch.** The original dataroom note said the
+zero-compressor claim must come from the audit *verbatim* rather than
 paraphrased; it is currently written from the Coda summary, so diff it against
-the audit. Second, the phrase "charged free at midday" in the source note was
-deliberately not reproduced, because it is ambiguous between free solar and a
-free-electricity-window tariff and neither is confirmed for that customer. The
-site says "on heat it had already stored at midday", which is true either way.
-If the tariff detail is confirmed it is a stronger line and worth putting back.
+the audit.
+
+**Resolved 3 Aug.** The source note's "charged free at midday" was held back
+at first as ambiguous between free solar and a free-window tariff. Nick
+confirmed it is both: *"for the second home it was free three hours generally
+with extra solar"*. So the site now says the heat "cost nothing to make:
+charged inside a free three-hour power window at midday, topped up from its
+own solar", which is the stronger line and the one that makes the economics
+land. Note this is specific to that customer's tariff, it is not a claim about
+what every home gets.
 
 **Not carried over:** `class="draft"` was not applied, because Nick signed
 these figures off directly rather than leaving them pending.
