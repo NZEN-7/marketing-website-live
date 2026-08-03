@@ -77,6 +77,58 @@ Two things deliberately kept, because they are not customer rebates:
 - "It's worth being frank about **incentives**" in the pipe-diameter blog
   post, which is about installer motivations, not government money.
 
+### STANDING RULE: don't count the installs, show them
+
+Nick, 3 Aug 2026, from sales calls: **"people ask how many installs we done
+and when i say 1 they are shocked - the website presents well so i dont want
+to be too much like second install etc. first install is ok but also dont
+want to make a song and dance about it - just needs to be like look at our
+use case."**
+
+The site presents like an established company, so prospects arrive expecting
+one. Ordinal language, "our first home", "the second install", "two installs
+live", is what breaks the spell, and it was on nearly every page. The installs
+themselves are the asset. The counting is the liability.
+
+**The rule:** name the place and state what is true there. Hawthorn. A
+Gippsland home on a concrete slab. Never the ordinal, never the count.
+Prefer "installed and running", "running in Victorian homes", "in the field".
+
+Changed 3 Aug across ten pages. The pattern, so it is repeatable:
+
+| Was | Now |
+| --- | --- |
+| "Two Installs Live" (homepage credibility strip) | "Installed and Running" |
+| "See the first install" | "See it in a home" |
+| "It's no longer an idea. It's on homes in Victoria." | "See it in the field. Running in Victorian homes." |
+| "Our first home went live in Hawthorn this May" | "In Hawthorn:" |
+| "And it repeats... The second home, on a concrete slab in Gippsland" | "Different homes, same system... A Gippsland home on a concrete slab" |
+| "It's not a concept. Our first home is live in Hawthorn" | "In Hawthorn, Melbourne:" |
+| "Two Victorian homes are now live." | "Installed and running in Victorian homes." |
+| "Proof: Our First Home, in Melbourne" | "A Home in Melbourne" |
+| "live since May 2026: our first install" | "live since May 2026" |
+| "running in our first home today" (intelligence) | "running in customer homes today" |
+| "The first installs are done and..." (4 pages) | "Systems are installed and running, and..." |
+| blog title "Our First Install: A Melbourne Family Took..." | "A Melbourne Family Took Their Gas Boiler Off the Wall" |
+
+Also dropped: "this May" and "in its first week", both recency flags doing the
+same damage as the ordinals.
+
+**Deliberately kept**, and do not strip these by pattern-matching:
+- `hydronic/pricing/` "Our Best Pricing and Extended Warranty. For Our First
+  Homes", "not carrying the risk of being first", "Among the first homes in
+  Australia". This is the **rationale for the discount**. Being early is the
+  offer, not a confession, and removing it makes the pricing look arbitrary.
+- `hydronic/` "Join the first wave", same reason.
+- The blog post itself. Nick: "first install is ok". A dedicated case study is
+  the right place for the story; only its headline lost the ordinal.
+- The URL `/blog/hawthorn-first-install/`. Not visible enough to justify a
+  redirect before launch. Revisit at the domain cutover if it matters.
+
+Nothing measured was removed. Two homes, two architectures, the savings
+totals and the peak-avoidance run are all still on the page. Only the
+counting went.
+
 ### A0. IMPORTANT: the 1 Aug external review was of the WIX site, not ours
 
 A detailed review arrived 1 Aug listing "live defects" (visible `[ANNUALISED,
