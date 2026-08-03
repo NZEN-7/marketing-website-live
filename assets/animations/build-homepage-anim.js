@@ -4,46 +4,53 @@
 
    node build-homepage-anim.js <animationsDir>
 
-   SCENE SOURCE: thermal-dawn-flow-v2.html.
+   SCENE SOURCE: thermal-dawn-flow-v3-marketing.html.
 
    Only the scene's <style> and <svg> are used; its <script> is dropped,
    because the homepage shell drives the scene itself and the platform's
-   live-data/mode logic is irrelevant here. (That is also why the known v3
-   Direct-Heating mode bug could never reach this build.)
+   live-data/mode logic is irrelevant here. (That is also why the v3
+   Direct-Heating mode bug cannot reach this build: it lives in the scene's
+   applyMode(), which we never ship.)
 
-   ── WHY NOT v3 (two blockers, one solved, one not) ──────────────────────
-   thermal-dawn-flow-v3.html is vendored alongside this file (from
-   TD-Platform/apps/web/public/animations/, 3 Aug 2026). Swapping the
-   filename below is NOT enough. Investigated 3 Aug:
+   ── THE SCENE IS DERIVED FROM v3, IN TWO STEPS ──────────────────────────
+   The platform's thermal-dawn-flow-v3.html cannot be consumed directly:
 
-   BLOCKER 1 (SOLVED). v3 stopped keeping its plant (heat pump, thermal
-   store, pipes, flow groups, store glow) as static markup: buildPlant()
-   assembles it as a string and injects it into an otherwise empty
-   <g id="plant">. Since this builder drops the scene's <script>, raw v3
-   renders sky and house around a hollow middle.
-     → prerender-v3-plant.js solves this. It runs the scene's script under
-       a stub DOM, captures what buildPlant() assigns to #plant, and bakes
-       it in as static markup, producing thermal-dawn-flow-v3-static.html.
-       Verified working: 6,967 chars of plant geometry, all ids present.
+   1. v3 stopped keeping its plant (heat pump, thermal store, pipes, flow
+      groups, store glow) as static markup. buildPlant() assembles it as a
+      string and injects it into an otherwise empty <g id="plant">. Since
+      this builder drops the script, raw v3 renders sky and house around a
+      hollow middle.
 
-   BLOCKER 2 (NOT SOLVED, needs scene work). The homepage tells a
-   comparison story that v3 has no elements for:
-       show('g-store',       isSto);              // hide the tank entirely
-       show('g-flow-export', isDay && !isSto);    // solar sold to the grid
-   v2 has both; v3 has NEITHER, and reasonably so — it renders a real
-   installed system, where there is no "without storage" state and no
-   export flow. Adopting v3 here therefore means ADDING those two groups
-   to the scene (in TD-Platform, or as a marketing variant), not changing
-   this builder.
+   2. The homepage tells a With/Without Storage comparison, needing two
+      things a real installed system never has, so v3 rightly lacks them:
+          show('g-store',       isSto);            // hide the tank entirely
+          show('g-flow-export', isDay && !isSto);  // solar sold to the grid
 
-   So: v2 stays the source until that scene work happens. The pre-render
-   script and the static output are kept ready for when it does.
+   make-marketing-scene.js handles both, producing
+   thermal-dawn-flow-v3-marketing.html. It DERIVES that from whatever v3
+   sits beside it, so nothing is hand-forked and nothing drifts.
+
+   Pipeline, and THE FIRST STEP IS REQUIRED:
+
+     node make-marketing-scene.js <dir>   # v3           -> v3-marketing
+     node build-homepage-anim.js  <dir>   # v3-marketing -> homepage-flow-v2.html
+
+   After taking a newer v3 from TD-Platform, re-run BOTH, in that order.
    ─────────────────────────────────────────────────────────────────────── */
 const fs = require("fs");
 const path = require("path");
 
 const DIR = process.argv[2];
-const scene = fs.readFileSync(path.join(DIR, "thermal-dawn-flow-v2.html"), "utf8");
+const SCENE_FILE = "thermal-dawn-flow-v3-marketing.html";
+const scenePath = path.join(DIR, SCENE_FILE);
+if (!fs.existsSync(scenePath)) {
+  throw new Error(
+    SCENE_FILE + " not found. Run `node make-marketing-scene.js " + DIR + "` first: " +
+    "it bakes v3's JS-generated plant into static markup and adds the " +
+    "g-store / g-flow-export groups the homepage comparison needs.",
+  );
+}
+const scene = fs.readFileSync(scenePath, "utf8");
 const shell = fs.readFileSync(path.join(DIR, "homepage_web_animation_new.html"), "utf8");
 
 const grab = (src, re, what) => {
@@ -63,6 +70,8 @@ const REQUIRED_SCENE_IDS = [
   "lbl-outdoor-temp", "lbl-outdoor-cond", "store-glow-el",
   "sky-sun", "sky-moon", "sky-clouds", "sky-stars",
   "sky-dusk-rect", "sky-night-rect", "cloud-extra-wrap",
+  // the two the comparison depends on, added by make-marketing-scene.js
+  "g-store", "g-flow-export",
 ];
 const missing = REQUIRED_SCENE_IDS.filter((id) => !v2Svg.includes('id="' + id + '"'));
 if (missing.length) {
@@ -116,7 +125,7 @@ const out = `<!DOCTYPE html>
 /* ─────────────────────────────────────────────────────────────────────
    GENERATED FILE, do not hand-edit.
    Built by scratchpad/build-homepage-anim.js from:
-     · thermal-dawn-flow-v2.html      (the scene graphic, from TD-Platform)
+     · thermal-dawn-flow-v3-marketing.html (derived from the platform v3 scene)
      · homepage_web_animation_new.html (the shell: toggle, buttons, cards)
    Re-run the builder after changing either source.
    ───────────────────────────────────────────────────────────────────── */
