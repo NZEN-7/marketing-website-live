@@ -224,15 +224,45 @@ PCM-era spec against ~20-30kWh real water tanks. That figure does not appear
 in this repo; the site says 35kWh throughout. Confirm 35kWh is right, since
 the review implies the true figure may be lower.
 
-### D0. The second install is the missing story (NEW 1 Aug)
+### D0. The second install is the missing story. DONE 3 Aug 2026
 
-Sharper than the dataroom framing already logged below. The narrative arc:
-Hawthorn was the test case, deliberately complicated, and taught us
-everything; Warragul was two days in and out and has not hiccupped since.
-That is the "this is repeatable" proof a buyer actually needs, and the site
-still leads on one install. Suggested as a second card beside the Hawthorn
-stats. Overlaps items 1 and 3 in the dataroom list; this version is the one
-to write from.
+The narrative arc: Hawthorn was the test case, deliberately complicated, and
+taught us everything; Warragul was two days in and out and has not hiccupped
+since. That is the "this is repeatable" proof a buyer actually needs, and the
+site led on one install.
+
+Written in two places, both replacing the throwaway line "And the second
+install is already in":
+
+- `index.html`, a second `.metric-card` stacked under the live-stats card.
+- `hydronic/index.html`, a paragraph in the proof section, placed after the
+  Mike and Kay quote so the Hawthorn story closes before repeatability opens.
+
+The homepage heading changed with it, "It's on a home in Melbourne" is now
+"It's on homes in Victoria", which the second install made true.
+
+**What was used, and Nick's sign-off for each** (Coda, Web backlog):
+
+- *"Yes to different architectures same brain"*, so: radiator home in
+  Hawthorn, slab home in Gippsland, same hardware and software, configured
+  per house. Topologies confirmed against the platform: Mason St Hawthorn is
+  `valved-buffer`, Rulemount Rd Warragul is `direct-slab` with `valves: none`.
+- *"Yes to zero compressor peak days"*, so: three days straight in the first
+  week with the compressor off through the 4pm to 9pm peak.
+- *"Not sure about quoting the slab battery"*, so the poured-in-slab battery
+  line and the ~11 kWh/degC figure are **not used**.
+
+**Two things to check before launch.** First, the original dataroom note said
+the zero-compressor claim must come from the audit *verbatim* rather than
+paraphrased; it is currently written from the Coda summary, so diff it against
+the audit. Second, the phrase "charged free at midday" in the source note was
+deliberately not reproduced, because it is ambiguous between free solar and a
+free-electricity-window tariff and neither is confirmed for that customer. The
+site says "on heat it had already stored at midday", which is true either way.
+If the tariff detail is confirmed it is a stronger line and worth putting back.
+
+**Not carried over:** `class="draft"` was not applied, because Nick signed
+these figures off directly rather than leaving them pending.
 
 ### C. Terms page (legal copy, changes come from Nick only)
 
@@ -294,11 +324,13 @@ Proposed by review, needs sign-off on the measured claims (1-3) before use:
    which page to link. Not adding a citation we cannot check: a citation is a
    promise the reader can follow it, and a dead or wrong link is worse than
    the uncited number we have now. Retry when the site responds.
-   Note for whoever picks this up: 40% + 23% is 63%, so the **70% top of the
-   site's "60 to 70%" range is not supported by this source**. Either soften
-   to "around two thirds" at the same time, or cite a second source for the
-   upper bound. Nick signed the range off 1 Aug, so it is his call, and it is
-   why the number was left alone today.
+   **The number is fine, do not "fix" it.** A 3 Aug note here briefly claimed
+   the 70% top of the range was unsupported. That was wrong: it added only the
+   central figures (40 + 23 = 63) and ignored the ranges recorded above. The
+   source spans 40-50% heating and cooling plus 15-27% water heating, so
+   roughly 63% typical and up to 77%. "60 to 70%" sits inside that, and
+   stating it as a range is the honest form precisely because the split varies
+   by climate zone. Citation only, no copy change.
 
 **Deliberately held back** (per review): tiered warranty detail, VEU incentive
 dollar ranges (draft regulation), the ~6-hour install target (that is the plan
