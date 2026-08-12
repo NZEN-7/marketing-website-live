@@ -255,6 +255,12 @@ table.data td:first-child{font-weight:600;}
 
 /* app screenshot frame */
 .phone{max-width:280px;margin:0 auto;border-radius:30px;overflow:hidden;box-shadow:var(--shadow-lg);border:8px solid #14130f;background:#14130f;}
+/* The V2 phone artwork is ALREADY a rendered device, bezel and drop shadow on
+   transparency, so it must not sit inside .phone or it gets a second frame
+   drawn around it. Device plus shadow fills 78% x 82% of the canvas, so 440px
+   wide renders the device about 571px tall, matching the height of the old
+   .phone-framed screenshot it replaced. Measured, not guessed. */
+.device-shot{display:block;width:100%;max-width:440px;height:auto;margin:0 auto;}
 .phone img{border-radius:22px;}
 
 /* ---------- Quote / testimonial ---------- */
