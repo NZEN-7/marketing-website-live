@@ -77,6 +77,78 @@ Two things deliberately kept, because they are not customer rebates:
 - "It's worth being frank about **incentives**" in the pipe-diameter blog
   post, which is about installer motivations, not government money.
 
+## Designer review, 12 Aug 2026 (Website V2 Assets drop)
+
+19 items from the designer, all actioned. Assets came from
+`My Drive/Thermal Dawn/Marketing +/Website/Website V2 Assets/Website Images-120826`.
+
+**Background sections use the existing `.section--photo` mechanism**, which was
+already the "hero style" treatment: `<section class="section section--photo"
+style="--img:url('/assets/img/x.avif')">`. It layers the image at 0.28 opacity
+under a dark gradient. Nothing new was invented for this.
+
+### Two problems found in the drop itself
+
+**1. Five of the six files were AVIF with the wrong extension.** Only
+`HP-Proof-Phone.png` was a real PNG. `HP-Charts-bg.png`, both `-bg.jpg` files,
+`HowItWorks-intelligence-bg.jpg` and `Mission-Proof.jpg` all had `ftypavif`
+magic bytes. Served under a `.jpg`/`.png` content-type they decoded
+inconsistently. All renamed to `.avif` and references updated. **Tell the
+designer**, so the next export is labelled correctly.
+`.claude/serve.js` had no `.avif` MIME entry either, added, or local preview
+does not match Vercel.
+
+**2. `HP-Proof-Phone.png` is 640x1009**, not the 640x1385 of the
+`app-dashboard.webp` it replaced. The declared `width`/`height` were corrected
+on both pages that use it; leaving them would have reserved the wrong space and
+distorted the render. The phone frame is visibly shorter now, worth a look.
+
+### A real CSS bug this surfaced
+
+`body.dark .section+.section::before` draws the 1px orange hairline between
+sections using the **`background` shorthand**, which resets `background-image`,
+at specificity (0,3,3) against `.section--photo::before` at (0,1,1). Any photo
+section following another section had its image silently wiped, leaving just
+the hairline. That is most of them, **and it had already been breaking the one
+pre-existing use** on `hydronic/` section 6 before this review.
+
+Fixed by excluding photo sections from the divider:
+`body.dark .section+.section:not(.section--photo)::before`. A photo section
+carries its own visual boundary, so it does not need the hairline. Do not
+remove the `:not()`.
+
+### Measured, not guessed
+
+The two `how-it-works` spacing values were tuned against live measurements:
+60px hero-bottom to video-top, 100px caption-bottom to next-section-top. Note
+the first measuring pass returned nonsense (crumbs 130px tall, video 2px)
+because the browser pane was not displayed and the viewport had collapsed to
+zero width. **Always set an explicit viewport before measuring layout.**
+
+### Open questions for Nick and the designer
+
+1. **`#FF9C00` vs `--td-orange` `#f4921d`.** Three separate items specify
+   `#FF9C00` (metric figures and arrows, table headers, the how-it-works H2
+   line 2). That looks like the brand accent moving, but it was only applied
+   where explicitly asked, so the site now runs two oranges. If the accent is
+   changing, change `--td-orange` once and it propagates; if not, expect more
+   one-off `#FF9C00` requests.
+2. **White on orange fails contrast.** `#fff` on the `--td-orange-flat`
+   `#f5860f` band is roughly 2.6:1, under the 4.5:1 WCAG AA minimum for body
+   text. Done as asked. The applist and metric-card keep dark text because they
+   sit on cream, not on the band.
+3. **`bills-bg.avif` is used in four places** (hydronic 3 and 6, how-it-works 5,
+   intelligence 8), as specified. It will read as repetitive; the drop may be
+   missing intended per-section images.
+4. **Item 9 of the review was truncated**: "the '3. WHY A STANDARD HEAT PUMP
+   ISN'T ENOUGH' section background image should be" and then nothing. Used
+   `HowItWorks-WHY A STANDARD HEAT PUMP ISN'T ENOUGH-bg.jpg` from the same
+   drop, since the filename names that exact section. Confirm.
+5. **Two chart assets in the drop went unused**, no comment referenced them:
+   `Charts/maximising-usage-chart.avif` and
+   `Charts/solar-mismatch-chart.avif.avif` (note the doubled extension). The
+   homepage charts are currently inline SVG. Ask whether these replace them.
+
 ### STANDING RULE: don't count the installs, show them
 
 Nick, 3 Aug 2026, from sales calls: **"people ask how many installs we done

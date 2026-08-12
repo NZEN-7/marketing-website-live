@@ -221,14 +221,23 @@ li{margin:.35em 0;}
 .table-wrap{overflow-x:auto;margin:0 0 1.4em;border-radius:var(--radius);border:1px solid var(--td-line);}
 table.data{width:100%;border-collapse:collapse;font-size:.96rem;min-width:460px;background:#fff;}
 table.data th,table.data td{padding:13px 16px;text-align:left;border-bottom:1px solid var(--td-line);vertical-align:top;}
-table.data thead th{background:var(--td-black);color:#fff;font-weight:700;}
+/* Designer, 12 Aug 2026: table headers are a SOLID #FF9C00, never a gradient.
+   The dark-mode override further down was the sunrise gradient; it is now the
+   same flat colour, so the two themes agree. */
+table.data thead th{background:#FF9C00;color:#1c1514;font-weight:700;}
 table.data tbody tr:nth-child(even){background:var(--td-paper-2);}
 table.data td:first-child{font-weight:600;}
 
 /* ---------- Media / figures ---------- */
-.figure{border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);}
-.figure img{width:100%;}
-.figure figcaption{font-size:.85rem;color:var(--td-grey);padding:10px 14px;background:#fff;}
+/* Designer, 12 Aug 2026: side-by-side figures must show matching rounded
+   corners on their captions. In a grid the figures stretch to equal height,
+   so a shorter image left a gap BELOW its caption, and the rounded bottom
+   corners showed the figure's own (empty) background instead of the caption.
+   Making the figure a flex column and letting the caption grow means the
+   caption always reaches the bottom, whatever the image aspect ratio. */
+.figure{border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);display:flex;flex-direction:column;}
+.figure img{width:100%;flex:0 0 auto;}
+.figure figcaption{font-size:.85rem;color:var(--td-grey);padding:10px 14px;background:#fff;flex:1 1 auto;}
 
 /* media placeholder (missing Wix assets) */
 .media-ph{
@@ -468,14 +477,34 @@ table.data td:first-child{font-weight:600;}
 .metric{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px;padding:10px 0;border-bottom:1px solid #ece0d1;}
 .metric:last-of-type{border-bottom:0;}
 .metric dt{font-size:.74rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#6e6965;}
-.metric dd{margin:0;font-size:clamp(1.35rem,3.4vw,1.9rem);font-weight:900;color:var(--td-deep);display:flex;align-items:center;gap:.35em;}
-.metric dd::before{content:"\2192";color:var(--td-orange);font-weight:900;}
+/* Designer, 12 Aug 2026: proof figures and their arrows are #FF9C00, a lighter
+   orange than --td-deep/--td-orange, so the numbers lift off the band. */
+.metric dd{margin:0;font-size:clamp(1.35rem,3.4vw,1.9rem);font-weight:900;color:#FF9C00;display:flex;align-items:center;gap:.35em;}
+.metric dd::before{content:"\2192";color:#FF9C00;font-weight:900;}
 .band-orange .btn-row{margin-top:20px;}
 .band-orange .micro{color:#5c3d1f;}
 body.dark .band-orange{color:#1c1514;}
 body.dark .band-orange h2,body.dark .band-orange h3{color:#fff;}
-body.dark .band-orange p,body.dark .band-orange li,body.dark .band-orange strong{color:#2c2119;}
+/* Designer, 12 Aug 2026: copy sitting directly on the orange band is white.
+   The cream panels that sit ON TOP of the band (.applist, .metric-card) are a
+   different surface and keep their dark text, restored immediately below.
+   Order matters here: those two rules tie on specificity with this one and
+   win by coming later, so do not reorder them. */
+body.dark .band-orange p,body.dark .band-orange li,body.dark .band-orange strong{color:#fff;}
+body.dark .band-orange .applist li,body.dark .band-orange .applist strong{color:#2c2119;}
+body.dark .band-orange .metric-card p,body.dark .band-orange .metric-card strong{color:#4a4642;}
 .band-orange .applist{list-style:none;margin:0;padding:16px 22px;background:#fdf7ef;border-radius:12px;box-shadow:0 16px 40px rgba(60,26,4,.2);}
+/* Designer, 12 Aug 2026: the applist's cream panel runs on under the phone
+   rather than stopping at the column edge. The negative right margin is
+   -(one column + the grid gap), so the panel reaches the far edge of the
+   split; the matching padding keeps the text where it was. The phone is
+   lifted above it. Must come AFTER the rule above, which sets margin:0.
+   Two-column only: on mobile the split stacks and the panel is already
+   full width. */
+@media(min-width:880px){
+  .band-orange .applist{position:relative;z-index:1;margin-right:calc(-100% - 34px);padding-right:calc(100% + 34px);border-top-right-radius:0;border-bottom-right-radius:0;}
+  .band-orange .split .media{position:relative;z-index:2;}
+}
 .band-orange .applist li{font-size:.9rem;padding:9px 0;border-bottom:1px solid #ece0d1;margin:0;}
 .band-orange .applist li:last-child{border-bottom:0;}
 .band-orange .applist strong,body.dark .band-orange .applist strong{color:var(--td-deep);}
@@ -548,7 +577,15 @@ body.dark em{color:#cfc5bc;}
 
 /* section rhythm: alternate near-black / cocoa, hairline rule between */
 body.dark .section{background:#0d0908;padding:72px 0;position:relative;}
-body.dark .section+.section::before,
+/* The :not(.section--photo) matters. This hairline uses the `background`
+   SHORTHAND, which resets background-image, and at (0,3,3) it outranks
+   .section--photo::before at (0,1,1). Without the exclusion it silently wipes
+   every photo background on a section that follows another section, which is
+   most of them. Found 12 Aug 2026 when the new backgrounds rendered as a bare
+   hairline; it had already been breaking the one pre-existing use on
+   hydronic/. A photo section brings its own visual boundary, so it does not
+   need the divider anyway. */
+body.dark .section+.section:not(.section--photo)::before,
 body.dark .section+.credstrip::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(244,146,29,.55),transparent);}
 body.dark .section--paper2,body.dark .section--paper3{background:var(--td-cocoa-grad);color:#e2d7cd;}
 body.dark .section--dark{background:#080605;}
@@ -602,7 +639,7 @@ body.dark .stat span{color:#a2968c;}
 /* tables: orange header, dark body */
 body.dark .table-wrap{border-color:rgba(244,146,29,.35);}
 body.dark table.data{background:#120e0b;color:#d3c8bf;}
-body.dark table.data thead th{background:var(--td-sunrise);color:#1c1514;}
+body.dark table.data thead th{background:#FF9C00;color:#1c1514;}
 body.dark table.data th,body.dark table.data td{border-bottom-color:rgba(255,255,255,.09);}
 body.dark table.data tbody tr:nth-child(even){background:#171210;}
 body.dark table.data td:first-child{color:#efe6de;}

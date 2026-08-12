@@ -17,7 +17,7 @@
 <link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png?v=8">
 <link rel="preload" href="/assets/fonts/Montserrat-Black.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/Montserrat-Regular.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/assets/css/style.css?v=12">
+<link rel="stylesheet" href="/assets/css/style.css?v=13">
 </head>
 <body class="dark">
 <header id="site-header"></header>
@@ -53,7 +53,8 @@
   <section class="section section--paper2">
     <div class="wrap">
       <h2>Four Things Our AI Optimises Simultaneously</h2>
-      <div class="grid grid-3" style="margin-top:26px">
+      <!-- grid-4, so all four cards sit on one row and none is orphaned. -->
+      <div class="grid grid-4" style="margin-top:26px">
         <div class="card">
           <h3>Your Solar Generation</h3>
           <p class="mb0">Thermal Dawn monitors your solar output in real time and forecasts tomorrow's generation from local weather. Charging happens when your panels are producing, not when the grid is expensive.</p>
@@ -112,7 +113,7 @@
         <div>
           <p>The open API and Home Assistant integration are there for people who want them. But Thermal Dawn's own app is built for the household that just wants to be comfortable and see their savings, without configuring anything.</p>
           <p><strong>This isn't a mockup.</strong> The app is live and running in customer homes today, and we ship updates constantly, 8 firmware and 50+ app updates in a single month.</p>
-          <p class="figures__v" style="color:#1c1514;margin-bottom:8px">App Features:</p>
+          <p class="figures__v" style="color:#fff;margin-bottom:8px">App Features:</p>
           <ul class="applist">
             <li><strong>Comfort Scheduling:</strong> Set preferred temperatures by time and zone. The system handles the rest.</li>
             <li><strong>Real-Time Energy Dashboard:</strong> Solar input, thermal store level, grid draw, and estimated savings, live.</li>
@@ -123,9 +124,7 @@
           </ul>
         </div>
         <div class="media">
-          <div class="phone"><img src="/assets/img/app-dashboard.webp" alt="The Thermal Dawn app energy dashboard showing solar input, thermal store level, grid draw, and estimated savings, live" width="640" height="1385" loading="lazy"></div>
-          <!-- Forecast View screen still to come; see MISSING-MEDIA.md -->
-          <div class="phone" style="margin-top:18px"><img src="/assets/img/app-home-charging.webp" alt="The Thermal Dawn app home screen: the system charging, heat pump on, with running gas-avoided, cost-savings and CO2-avoided tiles" width="640" height="1385" loading="lazy"></div>
+          <div class="phone"><img src="/assets/img/hp-proof-phone.png" alt="The Thermal Dawn app energy dashboard showing solar input, thermal store level, grid draw, and estimated savings, live" width="640" height="1009" loading="lazy"></div>
         </div>
       </div>
     </div>
@@ -148,7 +147,7 @@
   </section>
 
   <!-- 8. FLAG PROBLEMS EARLY -->
-  <section class="section section--paper2">
+  <section class="section section--photo" style="--img:url('/assets/img/bills-bg.avif')">
     <div class="wrap narrow">
       <h2>We Flag Problems Before They Become Breakdowns.</h2>
       <p>Thermal Dawn's remote monitoring tracks performance continuously, flow rates, temperatures, pressure, compressor behaviour, electrical draw, and alerts you when something trends outside normal parameters, before it becomes a fault.</p>
