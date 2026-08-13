@@ -17,7 +17,7 @@
 <link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png?v=8">
 <link rel="preload" href="/assets/fonts/Montserrat-Black.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/Montserrat-Regular.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/assets/css/style.css?v=15">
+<link rel="stylesheet" href="/assets/css/style.css?v=16">
 </head>
 <body class="home">
 <header id="site-header"></header>
@@ -277,12 +277,17 @@
         <p class="quote-attr">Mike &amp; Kay, Hawthorn</p>
       </div>
 
+      <!-- Order is load-bearing: the CSS spans tile by :nth-child, so moving a
+           photo changes the layout. 1 is the hero, 4/5/8 run wide, 6/7 run
+           tall. People first, hardware after. -->
       <div class="mosaic" style="margin-top:34px">
-        <figure><img src="/assets/img/install-pipework.webp" alt="Hydronic pipework being installed at the Hawthorn home" width="1000" height="750" loading="lazy"></figure>
-        <figure><img src="/assets/img/install2-unit.webp" alt="The second Thermal Dawn install: heat pump and thermal store in place at the customer's home" width="1200" height="900" loading="lazy"></figure>
-        <figure><img src="/assets/img/brand-ute-dawn.webp" alt="The Thermal Dawn ute at dawn" width="1400" height="900" loading="lazy"></figure>
+        <figure><img src="/assets/img/customers-hawthorn.webp" alt="Mike and Kay outside their Hawthorn home, where the gas boiler was replaced with a Thermal Dawn system" width="1200" height="900" loading="lazy"></figure>
         <figure><img src="/assets/img/install-unit.webp" alt="The Australian-made Thermal Dawn thermal store installed at a Melbourne home" width="1000" height="1333" loading="lazy"></figure>
-        <figure><img src="/assets/img/install-delivery.webp" alt="The thermal store arriving at the customer's home" width="1000" height="750" loading="lazy"></figure>
+        <figure><img src="/assets/img/control-board.webp" alt="A Thermal Dawn control board, designed and built in Hornsby, NSW" width="1000" height="750" loading="lazy"></figure>
+        <figure><img src="/assets/img/install-unit-vine.webp" alt="The Thermal Dawn outdoor unit in place against the wall of the Hawthorn home, beside the disconnected gas meter" width="1200" height="900" loading="lazy"></figure>
+        <figure><img src="/assets/img/brand-ute-dawn.webp" alt="The Thermal Dawn ute at dawn, loaded for an install" width="1400" height="900" loading="lazy"></figure>
+        <figure><img src="/assets/img/install2-unit.webp" alt="The second Thermal Dawn install: heat pump and thermal store in place at the customer's home" width="1200" height="900" loading="lazy"></figure>
+        <figure><img src="/assets/img/team-workshop.webp" alt="The Thermal Dawn team in the Hornsby workshop" width="1200" height="900" loading="lazy"></figure>
         <figure><img src="/assets/img/thermal-store-build.webp" alt="A Thermal Dawn thermal store in manufacture in Hornsby, NSW" width="1000" height="750" loading="lazy"></figure>
       </div>
 
