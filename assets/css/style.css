@@ -24,6 +24,12 @@
      to call rather than changed underneath him. */
   --td-orange-rgb:255,156,0;
   --td-orange:rgb(var(--td-orange-rgb));
+  /* Same hue as the accent (37deg, full saturation), darkened for use ON
+     LIGHT surfaces. #FF9C00 on the cream metric card is 1.96:1, which fails
+     even the 3:1 large-text bar; this is 3.30:1, matching what --td-deep
+     used to score there. Use it wherever accent-coloured TEXT sits on paper
+     or cream. On dark backgrounds use --td-orange, which scores 9.5:1. */
+  --td-orange-ink:#C27800;
   --td-amber:#eda81d;
   --td-gold:#fec800;
   --td-deep:#ea5b13;
@@ -270,6 +276,31 @@ table.data td:first-child{font-weight:600;}
    itself to read at the same size. 560px fills the split column at desktop
    and puts the device around 730px tall. */
 .device-shot{display:block;width:100%;max-width:560px;height:auto;margin:0 auto;}
+/* Proof band only: match the sizing of the reference design, where the phone
+   runs about 780px tall and sits near the section's left edge rather than
+   being centred in a column. Our split column is only ~541px, so the shot
+   grows past it and bleeds LEFT into the wrap padding; calc keeps the bleed
+   proportional as the column narrows instead of hardcoding a width that
+   would collide with the copy on a small laptop. max-width is cleared
+   because the 560px cap above would otherwise win. */
+@media(min-width:880px){
+  /* #proof, NOT .band-orange: the intelligence app band is also a
+     .band-orange with a .device-shot, but its composition is different (the
+     cream applist runs right, out behind the phone) and was tuned to a 34px
+     gap. Widening the shot there closed that gap to 14px. Scoped. */
+  #proof .device-shot{
+    /* Bleed is CLAMPED to the gutter that actually exists beside the wrap,
+       never a flat -60px. The wrap maxes at 1160, so the room either side is
+       (100vw - 1160)/2; min() caps the bleed at 60, max() floors it at 0 so
+       narrow desktops get no bleed instead of a negative one. A fixed -60px
+       put the phone's left edge at -38px on a 885px viewport, clipping it. */
+    --bleed:max(0px, min(60px, (100vw - 1160px) / 2));
+    width:calc(100% + var(--bleed));
+    max-width:none;
+    margin-left:calc(-1 * var(--bleed));
+    margin-right:0;
+  }
+}
 .phone img{border-radius:22px;}
 
 /* ---------- Quote / testimonial ---------- */
@@ -493,9 +524,12 @@ table.data td:first-child{font-weight:600;}
 .metric:last-of-type{border-bottom:0;}
 .metric dt{font-size:.74rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#6e6965;}
 /* Designer, 12 Aug 2026: proof figures and their arrows carry the accent, so
-   the numbers lift off the band rather than sinking into --td-deep. */
-.metric dd{margin:0;font-size:clamp(1.35rem,3.4vw,1.9rem);font-weight:900;color:var(--td-orange);display:flex;align-items:center;gap:.35em;}
-.metric dd::before{content:"\2192";color:var(--td-orange);font-weight:900;}
+   the numbers lift off the band rather than sinking into --td-deep. These sit
+   on the cream metric card, so they take the on-light form of the accent:
+   same hue Gage picked, dark enough to actually read. These are the savings
+   figures, the most persuasive numbers on the site. */
+.metric dd{margin:0;font-size:clamp(1.35rem,3.4vw,1.9rem);font-weight:900;color:var(--td-orange-ink);display:flex;align-items:center;gap:.35em;}
+.metric dd::before{content:"\2192";color:var(--td-orange-ink);font-weight:900;}
 .band-orange .btn-row{margin-top:20px;}
 .band-orange .micro{color:#5c3d1f;}
 body.dark .band-orange{color:#1c1514;}
