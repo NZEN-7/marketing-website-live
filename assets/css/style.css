@@ -806,6 +806,12 @@ body.dark .video__cap,.section--cocoa .video__cap,.section--dark .video__cap{col
 .section--photo>*{position:relative;z-index:1;}
 body.dark .section--photo,body.dark .section--photo>.wrap{color:#e2d7cd;}
 .section--photo h2,.section--photo h3{color:#fff;}
+/* section--photo is dark regardless of body theme, so small text needs its
+   light colour HERE, not only under body.dark. Without this, the homepage
+   (body.home) chart attributions fell back to .micro's #6e6965, dark grey on
+   near-black. Mirrors the .section--cocoa .micro rule this section style
+   replaced on that page. */
+.section--photo .micro{color:#b6a89b;}
 
 /* oversized vertical watermark word */
 .watermark{position:relative;}
