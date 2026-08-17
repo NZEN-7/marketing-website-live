@@ -19,9 +19,8 @@
      sitewide on 13 Aug, replacing #f4921d. Change it HERE and nowhere else:
      the -rgb channel form feeds every rgba() tint (borders, hairlines, glows),
      which is what let the old value drift into 16 separate literals. The
-     --td-sunrise gradient below still carries #f4921d as its mid stop; that
-     is the rising-sun motif on buttons and tags, deliberately left for Gage
-     to call rather than changed underneath him. */
+     --td-sunrise gradient below was brought onto the same orange on 13 Aug,
+     so there is no longer a second accent anywhere in the system. */
   --td-orange-rgb:255,156,0;
   --td-orange:rgb(var(--td-orange-rgb));
   /* Same hue as the accent (37deg, full saturation), darkened for use ON
@@ -45,7 +44,11 @@
   --td-paper-3:#efeae6;
   --td-line:#e2ddd8;
   /* Sunrise gradient (rising-sun motif) */
-  --td-sunrise:linear-gradient(100deg,#fec800 0%,#f4921d 52%,#ea5b13 100%);
+  /* Mid stop moved #f4921d -> #FF9C00 (13 Aug 2026) so the gradient and the
+     flat accent are the same orange. Side benefit: the hue ramp is now even,
+     47deg -> 37deg -> 20deg, where the old mid sat at 33deg and bunched
+     toward the deep end. Endpoints are Gage's, untouched. */
+  --td-sunrise:linear-gradient(100deg,#fec800 0%,#FF9C00 52%,#ea5b13 100%);
   --td-sunrise-soft:linear-gradient(180deg,#fff7e8 0%,#ffffff 100%);
   /* Dark overlay for background photos */
   --td-photo-overlay:linear-gradient(180deg,rgba(28,21,20,.55) 0%,rgba(29,30,28,.82) 100%);
