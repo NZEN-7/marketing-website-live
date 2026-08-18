@@ -866,3 +866,46 @@ Re-enable with one line once the path exists:
 - Logo variant swaps by background (black logo on light header, white logo in dark footer).
 - Images: WebP, sized for web, `loading="lazy"` below the fold, hero uses `fetchpriority="high"`.
 - SEO: unique title/description per page, canonical, OpenGraph + Twitter card, `sitemap.xml`, `robots.txt`. Blog stubs and thank-you/404 pages are `noindex`.
+
+## Boroondara evidence pass (19 Aug 2026)
+
+Source: `Marketing +/Events/Electrify Boroondara Events 2H26`. That folder is
+the evidence base behind the 18 Aug webinar deck, and it carries a claims
+audit the website had not caught up with.
+
+**Backlog of record moved back to NOTION** (`Thermal Dawn Ops / Product
+Backlog / Product Backlog Items`, Category `Web`). The Coda "Founders War
+Room" table is the old copy and the two had already drifted. Update Notion.
+
+Actioned:
+
+- **Peak window 4-9pm to 5pm-9pm.** The measured window is 5-9pm (94% of
+  evenings across both homes). "4pm to 9pm" was never measured, it was written
+  from Nick's verbal description. At 3-9pm Warragul drops to 30%, so the wider
+  window must not be claimed either.
+- **Added the strongest measured claim we own:** 59 of the last 63 evenings,
+  across both homes, no heat pump between 5pm and 9pm. Re-derivable from SQL
+  (the query is in the field data reference).
+- **Baked fallbacks moved to the audited 17 Aug canonicals.** Fleet $2,260 /
+  47,311 MJ / 2,426 kg; Hawthorn $1,439 / 29,040 MJ / 1,489 kg. The old
+  numbers predated the Warragul $43.62 over-credit fix (`dd5a285`). Fleet
+  $2,260 matches the audit doc exactly rather than being recomputed from the
+  components, per the CLAUDE.md rule that these are the audited fallback.
+- **Expo block** on the homepage "What's next". Dated: remove after 11 Oct 2026.
+
+Settled by Nick, 19 Aug:
+
+- **70°C stays.** "atm we are tuning it up to 70 but claim 70 for sure." The
+  site states a spec; the measured peak is 65.0°C with a 99th percentile of
+  59.8°C. Keep those distinguishable if anyone revisits the wording.
+- **No ten-year warranty.** The site never claimed one and must not start.
+
+**CARRIED RISK: the webinar deck does claim ten years,** on slide 1 and in
+Russell's speaker notes, and it was presented on 18 Aug to a panel including a
+specialist hydronic installer. The website is clean; the deck is not. Logged
+in Notion as a Compliance item.
+
+Not done, deliberately: the supplied `hawthorn-16aug-evening-carry.svg` was
+NOT used. Nick wants it rebuilt in the idiom of the homepage duck-curve chart,
+"a little bit graphics and not perfect but legit backed up by data". Logged in
+Notion with the measured figures to draw from.
