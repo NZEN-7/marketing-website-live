@@ -571,25 +571,20 @@ body.dark .band-orange .metric-card p,body.dark .band-orange .metric-card strong
 .mosaic{display:grid;gap:10px;grid-template-columns:repeat(2,1fr);}
 .mosaic img{width:100%;height:100%;object-fit:cover;border-radius:6px;}
 .mosaic figure{margin:0;overflow:hidden;border-radius:6px;aspect-ratio:4/3;}
-/* Eight tiles that TILE EXACTLY into 4 columns x 4 rows, so default row
-   auto-placement leaves no holes and needs no `dense`. Counting cells:
-   4+1+1+2 + 2+2+2+2 = 16 = 4x4. If you add or remove a photo, redo that sum
-   or the grid will gap. Rebuilt 13 Aug 2026: the old version was three spans
-   over 150px rows and read as a thumbnail strip rather than a gallery. */
+/* THREE tiles that tile exactly into 3 columns x 2 rows, so default row
+   auto-placement leaves no holes and needs no `dense`. Cells: 4+1+1 = 6 = 3x2.
+   If you change the photo count, redo that sum or the grid will gap.
+   Cut from eight to three on 19 Aug 2026: "use less photos but more classy".
+   Rows are taller than the eight-tile version (245 vs 168) because fewer,
+   larger photos was the whole point. */
 @media(min-width:760px){
-  .mosaic{grid-template-columns:repeat(4,1fr);grid-auto-rows:168px;}
+  .mosaic{grid-template-columns:repeat(3,1fr);grid-auto-rows:245px;}
   .mosaic figure{aspect-ratio:auto;height:100%;}
   .mosaic figure:nth-child(1){grid-column:span 2;grid-row:span 2;}  /* hero */
-  /* The hero tile is wider than the photo (1.6 vs 1.33), so a centre crop
-     takes equal bites off the top and bottom and clips the customers' feet.
-     Anchoring to the bottom spends the crop on sky and roofline instead,
-     which is the part nobody is looking at. */
+  /* The hero tile is wider than the photo (1.5 vs 1.33), so a centre crop
+     takes equal bites off top and bottom and clips the customers' feet.
+     Anchoring to the bottom spends the crop on sky and roofline instead. */
   .mosaic figure:nth-child(1) img{object-position:center bottom;}
-  .mosaic figure:nth-child(4){grid-column:span 2;}
-  .mosaic figure:nth-child(5){grid-column:span 2;}
-  .mosaic figure:nth-child(6){grid-row:span 2;}
-  .mosaic figure:nth-child(7){grid-row:span 2;}
-  .mosaic figure:nth-child(8){grid-column:span 2;}
 }
 /* Below 760 the grid is two up; the hero still runs full width so the
    opening shot keeps its weight on a phone. */
