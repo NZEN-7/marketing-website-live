@@ -477,6 +477,11 @@ table.data td:first-child{font-weight:600;}
 .credstrip__title{font-weight:900;font-size:1.12rem;color:var(--td-orange);margin:0 0 4px;}
 .credstrip__sub{font-size:.92rem;color:var(--td-grey);margin:0 0 14px;}
 .credstrip__item{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;}
+/* Columns carry different content (button / logo+button / three logos), so
+   without this the buttons float at whatever height the text above left
+   them: 71px in one column, 97px in the next. Pin them to the bottom. */
+.credstrip__item .btn{margin-top:auto;}
+.credstrip__item .plogos{margin-bottom:14px;}
 .credstrip__logos{display:flex;flex-wrap:wrap;gap:10px 20px;align-items:center;justify-content:center;}
 .credstrip__logos span{font-size:.72rem;font-weight:700;color:var(--td-grey);border:1px solid var(--td-line);border-radius:6px;padding:6px 10px;max-width:180px;line-height:1.3;}
 .credstrip__wordmark{font-weight:900;font-size:1.35rem;letter-spacing:-.02em;color:var(--td-black);}
@@ -557,7 +562,12 @@ body.dark .band-orange .metric-card p,body.dark .band-orange .metric-card strong
 .proof-since{font-size:.72rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#6e6965;margin:18px 0 0;}
 .proof-totals{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:10px;padding-top:14px;border-top:1px solid #ece0d1;}
 .proof-totals b{display:block;font-weight:900;font-size:clamp(1rem,2.3vw,1.3rem);line-height:1.15;color:var(--td-orange-ink);}
-.proof-totals span{display:block;font-size:.76rem;color:#6e6965;margin-top:2px;}
+/* Label spans are DIRECT children of the cell div. The value's live-stat
+   span sits inside <b>; the old bare `.proof-totals span` caught it too and
+   stacked "$" over grey .76rem digits. Scope tightly and belt-and-brace the
+   value span back to inheriting. */
+.proof-totals>div>span{display:block;font-size:.76rem;color:#6e6965;margin-top:2px;}
+.proof-totals b span{display:inline;font-size:inherit;color:inherit;margin:0;}
 @media(max-width:420px){.proof-totals{grid-template-columns:1fr;gap:8px;}}
 .band-orange .applist{list-style:none;margin:0;padding:16px 22px;background:#fdf7ef;border-radius:12px;box-shadow:0 16px 40px rgba(60,26,4,.2);}
 /* Designer, 12 Aug 2026: the applist's cream panel runs on under the phone
@@ -769,6 +779,29 @@ body.dark .hero__bg::after{background:linear-gradient(180deg,rgba(13,9,8,.72) 0%
 .figures--stack{grid-template-columns:1fr;text-align:left;gap:22px;margin:0;}
 @media(min-width:720px){.figures--stack{grid-template-columns:1fr;border-left:1px solid rgba(var(--td-orange-rgb),.4);padding-left:28px;}}
 .figures--stack p{margin:0;}
+
+/* ── Cost equation (homepage 6b) ────────────────────────────────────────
+   Two things you'd otherwise buy, joined by real operators, resolving into
+   the accent-ringed answer. Replaces a centered .figures row whose third
+   "value" was a full sentence and read as a broken column. */
+.cost-eq{display:grid;gap:12px;margin:26px 0;text-align:left;}
+@media(min-width:760px){.cost-eq{grid-template-columns:1fr auto 1fr auto 1.12fr;gap:14px;align-items:stretch;}}
+.cost-card{background:#fff;border:1px solid var(--td-line);border-radius:var(--radius-sm);padding:20px 22px;}
+.cost-card b{display:block;font-weight:900;font-size:1.24rem;letter-spacing:-.01em;color:var(--td-black);margin-bottom:7px;}
+.cost-card p{margin:0;font-size:.9rem;color:var(--td-grey);line-height:1.55;}
+.cost-card--td{border:2px solid var(--td-orange);}
+.cost-card--td b{color:var(--td-orange-ink);}
+.cost-op{font-weight:900;font-size:1.45rem;color:var(--td-grey-2);align-self:center;justify-self:center;line-height:1;}
+
+/* ── Fossil-fuels band (homepage 6a) ────────────────────────────────────
+   Was an .altrow--flip: right-aligned text against a floating icon circle.
+   Now one card, icon left, text left, same copy. */
+.fossil-card{display:grid;gap:18px;align-items:center;background:#fff;border:1px solid var(--td-line);border-radius:var(--radius-sm);padding:22px 24px;}
+@media(min-width:640px){.fossil-card{grid-template-columns:auto 1fr;gap:24px;}}
+.fossil-card .altrow__icon{width:84px;height:84px;margin:0;}
+.fossil-card .altrow__icon svg{width:38px;height:38px;}
+.fossil-card h3{margin:0 0 .35em;}
+.fossil-card p{margin:0;color:#4a4642;}
 .figures--stack .figures__l{margin:0;max-width:34ch;}
 
 /* numbered steps with an orange rule */

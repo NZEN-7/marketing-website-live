@@ -171,6 +171,43 @@ body, .scene-title h2, .scene-title p, .ic-title, .ic-body {
 .info-card { padding: 18px; }
 /* the small caps labels stay mono, they read as instrument type */
 .label-row, .storage-label, .tod-btn { font-family: 'DM Mono', ui-monospace, monospace; }
+
+/* ── chrome restyle, 19 Aug 2026: match the site design system ──────────
+   One accent (#FF9C00), flat surfaces, no glow, no emoji, Montserrat for
+   anything that reads as UI. The mono stays ONLY on the top label-row,
+   where instrument type is the point. The scene's own internals (flow
+   colours, in-SVG tags) are the platform's and are not touched. */
+:root { --orange: #FF9C00; }
+
+.storage-label, .tod-btn { font-family: "Montserrat", sans-serif; letter-spacing: .08em; }
+.storage-label { font-weight: 800; }
+.storage-label.active { color: #FF9C00; }
+
+/* toggle: the on-state was green with a glow halo; flat orange now */
+.toggle-track.on { background: rgba(255,156,0,.16); border-color: rgba(255,156,0,.55); }
+.toggle-track.on .toggle-knob { background: #FF9C00; box-shadow: none; }
+.toggle-knob { box-shadow: none; }
+
+/* scene chips: one accent for the active state regardless of scenario.
+   The story's mood (charging / serving / costing) belongs to the scene,
+   not to the buttons. 2px border matches the site's flat button spec. */
+.tod-btn { font-weight: 700; border-width: 2px; border-radius: 8px; }
+.tod-btn.active-day,
+.tod-btn.active-night-s,
+.tod-btn.active-night-n { border-color: #FF9C00; background: rgba(255,156,0,.10); color: #FF9C00; }
+
+.timer-bar { background: #FF9C00 !important; }
+
+/* headline: white setup, accent payoff */
+.scene-title h2 .h-pay { color: #FF9C00; }
+
+/* info cards: the site's dark-card language, and no emoji icon row */
+.ic-icon { display: none; }
+.info-card { background: #15100c; border: 1px solid rgba(255,156,0,.28); border-radius: 10px; }
+.info-card.hl-o, .info-card.hl-g { border-color: #FF9C00; background: rgba(255,156,0,.08); }
+/* the red card marks the money leaking away; keep the warning, drop the shout */
+.info-card.hl-r { border-color: rgba(232,74,42,.55); background: rgba(232,74,42,.05); }
+.ic-title { color: rgba(255,255,255,.92); }
 </style>
 </head>
 <body>
@@ -197,7 +234,9 @@ ${v2Svg}
   var timerProgress = 0, timerInterval = null;
   var CYCLE_MS = 6000;
 
-  var ORANGE = '#E87C2A', GREEN = '#2EC68A', RED = '#E84A2A', DIM = 'rgba(255,255,255,0.5)';
+  // Site accent, not the old platform orange: the chrome and the flows the
+  // shell drives should match the design system (#FF9C00, 13 Aug 2026).
+  var ORANGE = '#FF9C00', GREEN = '#2EC68A', RED = '#E84A2A', DIM = 'rgba(255,255,255,0.5)';
 
   // The night + no-storage "grid heating" flow reuses the store-to-home
   // pipework recoloured red, which reads badly, the energy appears to come
@@ -212,7 +251,7 @@ ${v2Svg}
       day: {
         h: 'With Thermal Storage: Your Solar. All Night Long.',
         s: 'See how Thermal Dawn captures daytime solar and delivers it as comfort after dark.',
-        btnDay: '\\u2600 Daytime charging', btnNight: '\\ud83c\\udf19 Evening comfort',
+        btnDay: 'Daytime charging', btnNight: 'Evening comfort',
         cards: [
           { title:'Daytime Charging', icon:'\\u2600\\ufe0f', body:'Solar panels power the heat pump during the day, charging the thermal store while electricity is free.', hl:'hl-o' },
           { title:'35 kWh Stored',    icon:'\\u25c9',        body:'Enough heat for an entire evening and overnight, without touching the grid.', hl:'' },
@@ -222,7 +261,7 @@ ${v2Svg}
       night: {
         h: 'With Thermal Storage: Your Solar. All Night Long.',
         s: 'See how Thermal Dawn captures daytime solar and delivers it as comfort after dark.',
-        btnDay: '\\u2600 Daytime charging', btnNight: '\\ud83c\\udf19 Evening comfort',
+        btnDay: 'Daytime charging', btnNight: 'Evening comfort',
         cards: [
           { title:'Daytime Charging', icon:'\\u2600\\ufe0f', body:'Solar panels power the heat pump during the day, charging the thermal store while electricity is free.', hl:'' },
           { title:'35 kWh Stored',    icon:'\\u25c9',        body:'Enough heat for an entire evening and overnight, without touching the grid.', hl:'' },
@@ -234,7 +273,7 @@ ${v2Svg}
       day: {
         h: 'Without Storage: Buy High, Sell Low.',
         s: 'Without thermal storage, you sell cheap solar during the day, then buy expensive peak-rate grid power all evening.',
-        btnDay: '\\u2600 Cheap exports', btnNight: '\\ud83c\\udf19 Evening cost',
+        btnDay: 'Cheap exports', btnNight: 'Evening cost',
         cards: [
           { title:'Daytime Export',    icon:'\\u2600\\ufe0f', body:'Your solar generates power during the day, but with nowhere to store it, it\\'s exported to the grid at near-zero feed-in rates.', hl:'hl-o' },
           { title:'No Storage',        icon:'\\u25c9',        body:'Without thermal storage there\\'s nowhere to keep your solar energy for later use.', hl:'' },
@@ -244,7 +283,7 @@ ${v2Svg}
       night: {
         h: 'Without Storage: Buy High, Sell Low.',
         s: 'Without thermal storage, you sell cheap solar during the day, then buy expensive peak-rate grid power all evening.',
-        btnDay: '\\u2600 Cheap exports', btnNight: '\\ud83c\\udf19 Evening cost',
+        btnDay: 'Cheap exports', btnNight: 'Evening cost',
         cards: [
           { title:'Daytime Export',    icon:'\\u2600\\ufe0f', body:'Your solar generates power during the day, but with nowhere to store it, it\\'s exported to the grid at near-zero feed-in rates.', hl:'' },
           { title:'No Storage',        icon:'\\u25c9',        body:'Without thermal storage there\\'s nowhere to keep your solar energy for later use.', hl:'' },
@@ -385,7 +424,15 @@ ${v2Svg}
     el('lbl-yes').classList.toggle('active', isSto);
 
     el('timer-bar').style.background = isDay ? 'var(--orange)' : (isSto ? 'var(--green)' : 'var(--red)');
-    el('scene-heading').textContent = d.h;
+    // "Setup: Payoff." renders the payoff in the accent, the site's
+    // headline pattern. COPY is builder-owned constant text, never input.
+    var ci = d.h.indexOf(': ');
+    if (ci > 0) {
+      el('scene-heading').innerHTML =
+        '<span>' + d.h.slice(0, ci + 1) + '</span> <span class="h-pay">' + d.h.slice(ci + 2) + '</span>';
+    } else {
+      el('scene-heading').textContent = d.h;
+    }
     el('scene-sub').textContent = d.s;
 
     var hls = ['hl-o', 'hl-g', 'hl-r'];

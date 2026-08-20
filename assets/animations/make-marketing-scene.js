@@ -147,9 +147,9 @@ let out = src.replace(plantRe, (_, open, _inner, close) => open + "\n" + plant +
    homepage shell shows it via show('g-flow-export', isDay && !isSto). */
 const EXPORT_FLOW = [
   '  <g id="g-flow-export" style="opacity:0">',
-  '    <path class="flow-line" style="stroke:var(--flow-export,#E87C2A)" d="M415,262 L350,222 L297,190"/>',
-  '    <path class="flow-line flow-delay-2" style="stroke:rgba(232,124,42,0.5)" d="M417,268 L353,229 L300,197"/>',
-  '    <path d="M297,190 l10.5,2.5 M297,190 l2.5,10.5" fill="none" stroke="#E87C2A" stroke-width="1.8" stroke-linecap="round" opacity="0.9"/>',
+  '    <path class="flow-line" style="stroke:var(--flow-export,#FF9C00)" d="M415,262 L350,222 L297,190"/>',
+  '    <path class="flow-line flow-delay-2" style="stroke:rgba(255,156,0,0.5)" d="M417,268 L353,229 L300,197"/>',
+  '    <path d="M297,190 l10.5,2.5 M297,190 l2.5,10.5" fill="none" stroke="#FF9C00" stroke-width="1.8" stroke-linecap="round" opacity="0.9"/>',
   '    <text x="299" y="180" text-anchor="middle" class="tag">To grid</text>',
   '    <text x="299" y="168" text-anchor="middle" class="temp" style="font-size:10px">near-zero FiT</text>',
   '  </g>',
