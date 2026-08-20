@@ -646,11 +646,11 @@ body, .scene-title h2, .scene-title p, .ic-title, .ic-body {
     <rect class="lightning-flash" x="235" y="0" width="363" height="460" fill="#cfe0ff" opacity="0"/>
   </g>
   <g id="g-flow-export" style="opacity:0">
-    <path class="flow-line" style="stroke:var(--flow-export,#FF9C00)" d="M415,262 L350,222 L297,190"/>
-    <path class="flow-line flow-delay-2" style="stroke:rgba(255,156,0,0.5)" d="M417,268 L353,229 L300,197"/>
-    <path d="M297,190 l10.5,2.5 M297,190 l2.5,10.5" fill="none" stroke="#FF9C00" stroke-width="1.8" stroke-linecap="round" opacity="0.9"/>
-    <text x="299" y="180" text-anchor="middle" class="tag">To grid</text>
-    <text x="299" y="168" text-anchor="middle" class="temp" style="font-size:10px">near-zero FiT</text>
+    <path class="flow-line" style="stroke:var(--flow-export,#FF9C00)" d="M480,150 L566,88"/>
+    <path class="flow-line flow-delay-2" style="stroke:rgba(255,156,0,0.5)" d="M474,158 L560,96"/>
+    <path d="M566,88 l-10.6,3 M566,88 l-6.2,9.1" fill="none" stroke="#FF9C00" stroke-width="1.8" stroke-linecap="round" opacity="0.9"/>
+    <text x="545" y="76" text-anchor="middle" class="tag">To grid</text>
+    <text x="545" y="64" text-anchor="middle" class="temp" style="font-size:10px">near-zero FiT</text>
   </g>
 </svg>
   </div>
@@ -676,12 +676,11 @@ body, .scene-title h2, .scene-title p, .ic-title, .ic-body {
   // shell drives should match the design system (#FF9C00, 13 Aug 2026).
   var ORANGE = '#FF9C00', GREEN = '#2EC68A', RED = '#E84A2A', DIM = 'rgba(255,255,255,0.5)';
 
-  // The night + no-storage "grid heating" flow reuses the store-to-home
-  // pipework recoloured red, which reads badly, the energy appears to come
-  // out of a tank that isn't there. Disabled until that path is drawn
-  // properly (grid -> heat pump -> home, with its own geometry).
-  // The scenario still tells its story through the heading, chip and cards.
-  var SHOW_GRID_HEATING_FLOW = false;
+  // Night + no-storage: the heat pump is On, buying peak power, and the
+  // house loop runs red. Was disabled over the reused store pipework
+  // reading oddly; Nick reviewed the static version on 19 Aug 2026 and
+  // ruled the dead scene worse: "the heat loop is completely off".
+  var SHOW_GRID_HEATING_FLOW = true;
 
   // Four scenarios: {storage} x {day,night}. Copy is the shell's, kept as-is.
   var COPY = {

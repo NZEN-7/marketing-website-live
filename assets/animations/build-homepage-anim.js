@@ -238,12 +238,11 @@ ${v2Svg}
   // shell drives should match the design system (#FF9C00, 13 Aug 2026).
   var ORANGE = '#FF9C00', GREEN = '#2EC68A', RED = '#E84A2A', DIM = 'rgba(255,255,255,0.5)';
 
-  // The night + no-storage "grid heating" flow reuses the store-to-home
-  // pipework recoloured red, which reads badly, the energy appears to come
-  // out of a tank that isn't there. Disabled until that path is drawn
-  // properly (grid -> heat pump -> home, with its own geometry).
-  // The scenario still tells its story through the heading, chip and cards.
-  var SHOW_GRID_HEATING_FLOW = false;
+  // Night + no-storage: the heat pump is On, buying peak power, and the
+  // house loop runs red. Was disabled over the reused store pipework
+  // reading oddly; Nick reviewed the static version on 19 Aug 2026 and
+  // ruled the dead scene worse: "the heat loop is completely off".
+  var SHOW_GRID_HEATING_FLOW = true;
 
   // Four scenarios: {storage} x {day,night}. Copy is the shell's, kept as-is.
   var COPY = {

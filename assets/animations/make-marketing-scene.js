@@ -146,12 +146,16 @@ let out = src.replace(plantRe, (_, open, _inner, close) => open + "\n" + plant +
    above), so the coordinates need no adjustment. Hidden by default; the
    homepage shell shows it via show('g-flow-export', isDay && !isSto). */
 const EXPORT_FLOW = [
+  /* Rises from the top edge of the solar array to the grid at the UPPER
+     RIGHT, clear of the Solar tag (468,126) and above the Outdoor readout
+     (y 112+). Shown only by day, so no clash with the moon. The first cut
+     pointed upper-LEFT, into empty sky away from anything grid-like. */
   '  <g id="g-flow-export" style="opacity:0">',
-  '    <path class="flow-line" style="stroke:var(--flow-export,#FF9C00)" d="M415,262 L350,222 L297,190"/>',
-  '    <path class="flow-line flow-delay-2" style="stroke:rgba(255,156,0,0.5)" d="M417,268 L353,229 L300,197"/>',
-  '    <path d="M297,190 l10.5,2.5 M297,190 l2.5,10.5" fill="none" stroke="#FF9C00" stroke-width="1.8" stroke-linecap="round" opacity="0.9"/>',
-  '    <text x="299" y="180" text-anchor="middle" class="tag">To grid</text>',
-  '    <text x="299" y="168" text-anchor="middle" class="temp" style="font-size:10px">near-zero FiT</text>',
+  '    <path class="flow-line" style="stroke:var(--flow-export,#FF9C00)" d="M480,150 L566,88"/>',
+  '    <path class="flow-line flow-delay-2" style="stroke:rgba(255,156,0,0.5)" d="M474,158 L560,96"/>',
+  '    <path d="M566,88 l-10.6,3 M566,88 l-6.2,9.1" fill="none" stroke="#FF9C00" stroke-width="1.8" stroke-linecap="round" opacity="0.9"/>',
+  '    <text x="545" y="76" text-anchor="middle" class="tag">To grid</text>',
+  '    <text x="545" y="64" text-anchor="middle" class="temp" style="font-size:10px">near-zero FiT</text>',
   '  </g>',
 ].join("\n");
 
