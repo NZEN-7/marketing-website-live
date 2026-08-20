@@ -48,8 +48,8 @@
     '<div class="wrap footer-center">' +
       '<div class="footer-center__logo"><img src="/assets/img/logo-white.webp" alt="Thermal Dawn" width="240" height="48"></div>' +
       '<div class="footer-social footer-social--icons">' +
-        '<a href="https://www.facebook.com/" rel="noopener" aria-label="Thermal Dawn on Facebook">' + ICON_FB + '</a>' +
-        '<a href="https://www.linkedin.com/" rel="noopener" aria-label="Thermal Dawn on LinkedIn">' + ICON_LI + '</a>' +
+        '<a href="https://www.facebook.com/profile.php?id=61573933276656" rel="noopener" aria-label="Thermal Dawn on Facebook">' + ICON_FB + '</a>' +
+        '<a href="https://www.linkedin.com/company/freevoltac/" rel="noopener" aria-label="Thermal Dawn on LinkedIn">' + ICON_LI + '</a>' +
       '</div>' +
       '<nav class="footer-links" aria-label="Footer">' +
         '<a href="/hydronic/">Hydronic</a>' +

@@ -585,20 +585,14 @@ body.dark .band-orange .metric-card p,body.dark .band-orange .metric-card strong
 .mosaic{display:grid;gap:10px;grid-template-columns:repeat(2,1fr);}
 .mosaic img{width:100%;height:100%;object-fit:cover;border-radius:6px;}
 .mosaic figure{margin:0;overflow:hidden;border-radius:6px;aspect-ratio:4/3;}
-/* THREE tiles that tile exactly into 3 columns x 2 rows, so default row
-   auto-placement leaves no holes and needs no `dense`. Cells: 4+1+1 = 6 = 3x2.
+/* FIVE tiles that tile exactly into 4 columns x 2 rows, so default row
+   auto-placement leaves no holes and needs no `dense`. Cells: 4+1+1+1+1 = 8.
    If you change the photo count, redo that sum or the grid will gap.
-   Cut from eight to three on 19 Aug 2026: "use less photos but more classy".
-   Rows are taller than the eight-tile version (245 vs 168) because fewer,
-   larger photos was the whole point. */
+   Nick 19 Aug: same photos as the live site, ute at dawn as the hero. */
 @media(min-width:760px){
-  .mosaic{grid-template-columns:repeat(3,1fr);grid-auto-rows:245px;}
+  .mosaic{grid-template-columns:repeat(4,1fr);grid-auto-rows:235px;}
   .mosaic figure{aspect-ratio:auto;height:100%;}
   .mosaic figure:nth-child(1){grid-column:span 2;grid-row:span 2;}  /* hero */
-  /* The hero tile is wider than the photo (1.5 vs 1.33), so a centre crop
-     takes equal bites off top and bottom and clips the customers' feet.
-     Anchoring to the bottom spends the crop on sky and roofline instead. */
-  .mosaic figure:nth-child(1) img{object-position:center bottom;}
 }
 /* Below 760 the grid is two up; the hero still runs full width so the
    opening shot keeps its weight on a phone. */

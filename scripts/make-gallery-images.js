@@ -38,6 +38,24 @@ const JOBS = [
     width: 1200,
     note: "the finished outdoor unit against the rendered wall",
   },
+  {
+    from: "Install 1/IMG_2513.JPG",
+    to: "ute-dawn.webp",
+    width: 1600,
+    note: "the branded ute loaded at dawn, rural road. Wider than the rest: it is the gallery hero.",
+  },
+  {
+    from: "Install 1/IMG_2798.JPG",
+    to: "brand-plate.webp",
+    width: 1200,
+    note: "THERMAL DAWN brand plate on the installed enclosure. EXIF-rotated.",
+  },
+  {
+    from: "Install 1/IMG_2976.JPG",
+    to: "pipework-valve.webp",
+    width: 1200,
+    note: "copper pipework, Caleffi DIRTMAG separator and isolation valve. EXIF-rotated.",
+  },
 ];
 
 (async () => {
