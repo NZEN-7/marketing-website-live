@@ -17,7 +17,7 @@
 <link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png?v=8">
 <link rel="preload" href="/assets/fonts/Montserrat-Black.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/Montserrat-Regular.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/assets/css/style.css?v=21">
+<link rel="stylesheet" href="/assets/css/style.css?v=22">
 </head>
 <body class="home">
 <header id="site-header"></header>
@@ -52,10 +52,11 @@
         </div>
         <div class="credstrip__item">
           <p class="credstrip__title">Graduated</p>
-          <p class="credstrip__sub">Summer '26 Accelerator</p>
+          <p class="credstrip__sub">Australia's leading startup accelerator</p>
           <div class="plogos plogos--sm">
             <span class="plogo" data-logo="startmate"><span class="plogo__txt">Startmate</span></span>
           </div>
+          <a class="btn btn--ghost btn--rect btn--sm" href="#why">See our Demo Day pitch<span class="arrow"></span></a>
         </div>
         <div class="credstrip__item">
           <p class="credstrip__title">Backed By</p>
@@ -134,18 +135,21 @@
     </div>
   </section>
 
-  <!-- 6. ALTERNATIVES -->
+  <!-- 6. YOUR BATTERY WASN'T BUILT FOR HEATING (Nick's copy, 19 Aug 2026,
+       replacing "Batteries are Expensive and Risky". Most of our customers
+       already own a battery, so the versus framing was costing us them.) -->
   <section class="section section--paper2">
     <div class="wrap narrow">
-      <div class="altrow">
-        <div class="altrow__icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#1d1e1c" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="3" width="12" height="18" rx="2"/><path d="M10 3V1.6h4V3"/><path d="M9 15h6"/><path d="M12 8v4"/></svg>
-        </div>
-        <div>
-          <h3>Batteries are Expensive and Risky</h3>
-          <p>Home batteries cost $8,000–$15,000, degrade within a decade, and carry fire risk. Thermal Dawn stores your solar as heating, cooling, and hot water for a fraction of the cost, no degradation, no fire risk, and an Australian-made store at the heart of it.</p>
-        </div>
-      </div>
+      <h2>Your battery wasn't built for heating</h2>
+      <p>You've probably already noticed it. Run the air conditioner for an hour and watch the battery drop off a cliff. Heating and cooling are the biggest loads in your home by a long way, and a home battery is sized for the lights, the fridge and the telly.</p>
+      <p>Now picture electrifying a 30kW gas boiler. Even through an efficient heat pump, that's more power than most home batteries can deliver, let alone sustain for an evening. You'd flatten it before dinner was over, with nothing left for the rest of the house.</p>
+      <p class="mb0">Thermal Dawn stores the energy as heat instead, in a store built for that one job and nothing else. Across our first two homes, the heat pump stayed off through the entire 5pm to 9pm peak on <strong>59 of the last 63 evenings</strong>. No lithium, and it isn't competing with the rest of your house for what's left in the tank.</p>
+    </div>
+  </section>
+
+  <!-- 6a. FOSSIL FUELS (kept from the old alternatives block) -->
+  <section class="section section--paper2" style="padding-top:0">
+    <div class="wrap narrow">
       <div class="altrow altrow--flip">
         <div>
           <h3>Fossil Fuels Keep Getting More Expensive</h3>
@@ -158,14 +162,16 @@
     </div>
   </section>
 
-  <!-- 6b. PRICE ANCHOR -->
+  <!-- 6b. SO WHAT DOES IT COST (Nick's copy, 19 Aug 2026. Reframed from
+       "half the cost of a battery" to "one system instead of two".) -->
   <section class="section section--paper2" style="padding-top:0">
     <div class="wrap narrow center">
-      <h2>So What Does It Cost?</h2>
+      <h2>So what does it cost?</h2>
+      <p style="max-width:62ch;margin:0 auto 18px">To get what Thermal Dawn does using off-the-shelf parts, you're buying two things, not one.</p>
       <div class="figures">
-        <p><span class="figures__v">$20,000–$40,000</span><span class="figures__l">What a traditional hydronic heat pump replacement typically costs in Australia</span></p>
-        <p><span class="figures__v">$8,000–$15,000</span><span class="figures__l">What a home lithium battery costs, and it fades within a decade</span></p>
-        <p><span class="figures__v">Well below both</span><span class="figures__l">Thermal Dawn installed, with thermal storage, cooling and smart controls included</span></p>
+        <p><span class="figures__v">$20,000&ndash;$40,000</span><span class="figures__l">A hydronic heat pump replacement, installed. What it typically costs in Australia to get off gas.</span></p>
+        <p><span class="figures__v">plus $8,000&ndash;$15,000</span><span class="figures__l">A home battery to shift that heating to your own solar hours, and it loses capacity as it ages.</span></p>
+        <p><span class="figures__v">One system instead of two</span><span class="figures__l">Thermal Dawn does both jobs in a single install, for well under the two combined. Thermal storage, cooling and smart controls included.</span></p>
       </div>
       <p class="micro" style="max-width:62ch;margin:0 auto 18px">Every home is different: pipework, placement, switchboard, and how many of the four capabilities you want all move the number. You get a <strong>fixed installed price at your free site assessment</strong>, with nothing to pay until you approve it.</p>
       <div class="btn-row center">
@@ -219,7 +225,10 @@
     </div>
   </section>
 
-  <!-- 8. PROOF -->
+  <!-- 8. PROOF (rebuilt to Nick's spec, 19 Aug 2026: kicker, headline, hero
+       stat, live totals, two home cards. Heading runs BLACK like the live
+       site rather than a white lede. Fleet figures are Nick's current
+       readings, newer than the 17 Aug audit doc. -->
   <section class="band-orange anchor" id="proof">
     <div class="wrap">
       <div class="split">
@@ -227,38 +236,43 @@
           <img class="device-shot" src="/assets/img/hp-proof-phone.png" alt="The Thermal Dawn app showing the system discharging, with gas-avoided and CO₂-avoided tiles" width="640" height="1009" loading="lazy">
         </div>
         <div>
-          <h2><span class="lede">See it in the field.</span>Running in Victorian homes.</h2>
-          <div class="metric-card">
-            <p class="metric-card__intro">In Hawthorn: gas boiler gone, gas meter off the house, heating running on stored solar. Running totals across our installs, measured by the systems themselves. <span class="live-dot" hidden>live</span></p>
-            <dl style="margin:0">
-              <div class="metric">
-                <dt>Saved so far</dt>
-                <dd>$<span data-live-stat="totalSavedAud">2,260</span></dd>
-              </div>
-              <div class="metric">
-                <dt>CO₂ avoided</dt>
-                <dd><span data-live-stat="co2AvoidedKg">2,426</span>&nbsp;kg</dd>
-              </div>
-              <div class="metric">
-                <dt>Gas avoided</dt>
-                <dd><span data-live-stat="gasAvoidedMj">47,311</span>&nbsp;MJ</dd>
-              </div>
-            </dl>
+          <h2><span class="lede">See it in the field.</span>Two Victorian homes. No gas.</h2>
+
+          <div class="proof-panel">
+            <p class="proof-stat">9 evenings out of 10</p>
+            <p class="metric-card__intro">The heat pump doesn't switch on at all between 5pm and 9pm. The house stays warm on stored heat right through the most expensive hours of the day.</p>
+            <p class="micro" style="margin:0">Measured, not modelled: 59 of the last 63 evenings, across both homes.</p>
+
+            <p class="proof-since">Since May 2026, measured by the systems themselves <span class="live-dot" hidden>live</span></p>
+            <div class="proof-totals">
+              <div><b>$<span data-live-stat="totalSavedAud">2,386</span></b><span>saved</span></div>
+              <div><b><span data-live-stat="gasAvoidedMj">48,954</span>&nbsp;MJ</b><span>gas never burned</span></div>
+              <div><b><span data-live-stat="co2AvoidedKg">2,511</span>&nbsp;kg</b><span>CO&#8322; avoided</span></div>
+            </div>
           </div>
-          <div class="metric-card" style="margin-top:16px">
-            <p class="metric-card__intro" style="margin-bottom:0"><strong>Different homes, same system.</strong> Hawthorn is a radiator home and a deliberately complicated retrofit, the kind that teaches you the most. A Gippsland home on a concrete slab went in and out in two days and hasn't hiccuped since. Same hardware, same software, configured per house. The Gippsland system tops the slab up whenever power is free or cheapest, the three-hour free window, its own solar, or late-night off-peak. It has run three days straight with the compressor off right through the 5pm to 9pm peak, leaving the house warm to wake up to. Across both homes, on 59 of the last 63 evenings, the heat pump hasn't run at all between 5pm and 9pm.</p>
+
+          <div class="proof-panel" style="margin-top:14px">
+            <h3 class="proof-home">Hawthorn. The hard one.</h3>
+            <p class="metric-card__intro" style="margin-bottom:0">Fifteen zones of radiators and a deliberately complicated retrofit, the kind that teaches you the most. The gas boiler is gone and the gas meter is off the house.</p>
           </div>
+
+          <div class="proof-panel" style="margin-top:14px">
+            <h3 class="proof-home">Gippsland. The repeatable one.</h3>
+            <p class="metric-card__intro">A concrete slab home, in and out in two days, and it hasn't hiccuped since. Same hardware, same software, just configured for the house.</p>
+            <p class="metric-card__intro" style="margin-bottom:0">It tops the slab up whenever power is cheapest, whether that's the three-hour free window, its own solar, or late-night off-peak. It recently ran three days straight with the compressor off right through the evening peak, leaving the house warm to wake up to.</p>
+          </div>
+
           <div class="btn-row">
             <a class="btn btn--primary btn--rect" href="/blog/hawthorn-first-install/">Take a Closer Look at the System<span class="arrow"></span></a>
           </div>
-          <p class="micro" style="margin-top:14px;max-width:60ch">Measured against the gas heating it replaced, from the system's own counters, not a brochure figure. Your home's number is confirmed at your free site assessment.</p>
+          <p class="micro" style="margin-top:14px;max-width:60ch">Measured against the gas heating it replaced, from each system's own telemetry.</p>
         </div>
       </div>
     </div>
   </section>
 
   <!-- 9. WHY WE'RE BUILDING THIS (a face, straight after the proof) -->
-  <section class="section center">
+  <section class="section center anchor" id="why">
     <div class="wrap">
       <h2>Why we're building this</h2>
       <p class="narrow">Thermal Dawn was selected for Startmate's 2026 cohort. Here's our founder making the case, to a room of investors and operators, for why Australian homes need thermal storage, not another imported battery.</p>

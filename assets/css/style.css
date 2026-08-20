@@ -518,7 +518,10 @@ table.data td:first-child{font-weight:600;}
 /* ---------- Orange proof band ---------- */
 .band-orange{background:var(--td-orange-flat);color:#1c1514;padding:60px 0;}
 .band-orange h2{color:#fff;font-size:clamp(1.8rem,4.4vw,2.7rem);line-height:1.12;}
-.band-orange h2 .lede{display:block;color:#fff;font-weight:600;font-size:.72em;opacity:.9;}
+/* Nick 19 Aug: the heading runs BLACK on the orange band, like the live
+   site, rather than a white setup line. Only the homepage proof band
+   uses .lede, so this does not touch the intelligence band. */
+.band-orange h2 .lede{display:block;color:#1c1514;font-weight:600;font-size:.72em;opacity:.75;}
 .band-orange .split{align-items:center;}
 .band-orange .phone{border-color:#241a13;}
 .metric-card{background:#fdf7ef;border-radius:12px;padding:24px 26px;box-shadow:0 16px 40px rgba(60,26,4,.22);max-width:520px;}
@@ -545,6 +548,17 @@ body.dark .band-orange h2,body.dark .band-orange h3{color:#fff;}
 body.dark .band-orange p,body.dark .band-orange li,body.dark .band-orange strong{color:#fff;}
 body.dark .band-orange .applist li,body.dark .band-orange .applist strong{color:#2c2119;}
 body.dark .band-orange .metric-card p,body.dark .band-orange .metric-card strong{color:#4a4642;}
+/* Homepage proof band, rebuilt 19 Aug 2026 to the live-site layout: hero
+   stat, live totals row, then one card per home. Cream panels on the orange,
+   same surface as .metric-card, so accent TEXT here takes --td-orange-ink. */
+.proof-panel{background:#fdf7ef;border-radius:12px;padding:22px 24px;box-shadow:0 16px 40px rgba(60,26,4,.22);}
+.proof-stat{font-weight:900;font-size:clamp(1.75rem,4.4vw,2.45rem);line-height:1.05;color:var(--td-orange-ink);margin:0 0 10px;}
+.proof-home{font-size:1.05rem;font-weight:900;color:var(--td-orange-ink);margin:0 0 8px;}
+.proof-since{font-size:.72rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#6e6965;margin:18px 0 0;}
+.proof-totals{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:10px;padding-top:14px;border-top:1px solid #ece0d1;}
+.proof-totals b{display:block;font-weight:900;font-size:clamp(1rem,2.3vw,1.3rem);line-height:1.15;color:var(--td-orange-ink);}
+.proof-totals span{display:block;font-size:.76rem;color:#6e6965;margin-top:2px;}
+@media(max-width:420px){.proof-totals{grid-template-columns:1fr;gap:8px;}}
 .band-orange .applist{list-style:none;margin:0;padding:16px 22px;background:#fdf7ef;border-radius:12px;box-shadow:0 16px 40px rgba(60,26,4,.2);}
 /* Designer, 12 Aug 2026: the applist's cream panel runs on under the phone
    rather than stopping at the column edge. The negative right margin is
