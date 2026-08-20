@@ -71,7 +71,7 @@ const REQUIRED_SCENE_IDS = [
   "sky-sun", "sky-moon", "sky-clouds", "sky-stars",
   "sky-dusk-rect", "sky-night-rect", "cloud-extra-wrap",
   // the two the comparison depends on, added by make-marketing-scene.js
-  "g-store", "g-flow-export",
+  "g-store", "g-flow-export", "g-flow-gridclose",
 ];
 const missing = REQUIRED_SCENE_IDS.filter((id) => !v2Svg.includes('id="' + id + '"'));
 if (missing.length) {
@@ -208,6 +208,10 @@ body, .scene-title h2, .scene-title p, .ic-title, .ic-body {
 /* the red card marks the money leaking away; keep the warning, drop the shout */
 .info-card.hl-r { border-color: rgba(232,74,42,.55); background: rgba(232,74,42,.05); }
 .ic-title { color: rgba(255,255,255,.92); }
+
+/* grid-heat scenario: the static HP-to-store pipes plumb a tank that this
+   world does not have. Tagged pipe-static by the scene generator. */
+body.grid-heat .pipe-static { opacity: 0; }
 </style>
 </head>
 <body>
@@ -383,6 +387,16 @@ ${v2Svg}
       g2.style.opacity = (!isDay && isSto) ? '1' : '0';
       g2.style.setProperty('--flow-main', flowCol);
     }
+    /* Grid heat closes the loop along the front-right base edge, the
+       quarter that discharge closes through the tank plumbing instead. */
+    var gc = el('g-flow-gridclose');
+    if (gc) {
+      gc.style.opacity = gridHeat ? '1' : '0';
+      gc.style.setProperty('--flow-main', flowCol);
+    }
+    /* And hides the static grey HP-to-store pipe runs: they plumb a tank
+       this scenario does not have. CSS hook in the overrides block. */
+    document.body.classList.toggle('grid-heat', gridHeat);
 
     /* ── heat pump: runs when charging by day, or heating off-grid at night ── */
     var hpOn = chargeFlow || (!isDay && !isSto);   // runs regardless of the flow flag

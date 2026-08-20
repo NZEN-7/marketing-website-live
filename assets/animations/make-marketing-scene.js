@@ -126,13 +126,31 @@ for (const m of src.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/g
   );
 }
 
-const plant = captured["plant"];
+let plant = captured["plant"];
 if (!plant || plant.length < 500) {
   throw new Error("buildPlant did not populate #plant (got " + (plant ? plant.length : 0) + " chars)");
 }
+/* Tag the static grey pipe runs between heat pump and store. In the
+   no-storage night scenario the shell hides them: they plumb a tank that
+   world does not have. Only the plant pipe paths get the class; the scene
+   uses the same stroke elsewhere for edges. */
+plant = plant.replace(/<path (fill="none" stroke="rgba\(255,255,255,0\.10\)")/g,
+  '<path class="pipe-static" $1');
+const PIPE_TAGS = (plant.match(/pipe-static/g) || []).length;
+if (PIPE_TAGS < 3) {
+  throw new Error("expected the HP-to-store pipe runs to tag as pipe-static, got " + PIPE_TAGS);
+}
+
 if (!plant.includes('id="g-store"')) {
   throw new Error("the g-store id did not survive into the generated plant markup");
 }
+
+/* Grid-heat only: the loop's missing quarter. g-flow-home runs the front
+   base then returns over the roof to the right ground corner (699,217);
+   discharge closes the circuit through the tank plumbing, which grid-heat
+   hides. This runs the front-right base edge back to the start. Same
+   parent as g-flow-home, so scale, squash and line weight match exactly. */
+const GRIDCLOSE = '<g id="g-flow-gridclose" style="opacity:0"><path class="flow-line flow-delay-2" style="stroke:var(--flow-main)" d="M699,217 L390,390"/></g>' + "\n  ";
 
 const plantRe = /(<g\s+id="plant"[^>]*>)([\s\S]*?)(<\/g>)/;
 if (!plantRe.test(src)) throw new Error('could not find <g id="plant"> in v3');
@@ -140,6 +158,7 @@ if (src.match(plantRe)[2].trim().length > 200) {
   throw new Error("#plant already has substantial static content; refusing to overwrite");
 }
 let out = src.replace(plantRe, (_, open, _inner, close) => open + "\n" + plant + "\n" + close);
+out = out.replace('<g id="g-flow-home-2"', GRIDCLOSE + '<g id="g-flow-home-2"');
 
 /* ── 3. add the export flow (marketing-only) ────────────────────────────── */
 /* Lifted from thermal-dawn-flow-v2.html, whose viewBox is identical (asserted
@@ -183,7 +202,7 @@ const REQUIRED = [
   "lbl-outdoor-temp", "lbl-outdoor-cond", "store-glow-el",
   "sky-sun", "sky-moon", "sky-clouds", "sky-stars",
   "sky-dusk-rect", "sky-night-rect", "cloud-extra-wrap",
-  "g-store", "g-flow-export", "g-flow-hp", "g-flow-home",
+  "g-store", "g-flow-export", "g-flow-gridclose", "g-flow-hp", "g-flow-home",
 ];
 const missing = REQUIRED.filter((id) => !svg.includes('id="' + id + '"'));
 if (missing.length) throw new Error("marketing scene is missing: " + missing.join(", "));
