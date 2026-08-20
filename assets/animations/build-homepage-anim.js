@@ -211,7 +211,7 @@ body, .scene-title h2, .scene-title p, .ic-title, .ic-body {
 
 /* grid-heat scenario: the static HP-to-store pipes plumb a tank that this
    world does not have. Tagged pipe-static by the scene generator. */
-body.grid-heat .pipe-static, body.charging .pipe-static { opacity: 0; }
+body.grid-heat .pipe-static, body.charging .pipe-static, body.exporting .pipe-static { opacity: 0; }
 </style>
 </head>
 <body>
@@ -400,6 +400,10 @@ ${v2Svg}
        line. CSS hooks in the overrides block. */
     document.body.classList.toggle('grid-heat', gridHeat);
     document.body.classList.toggle('charging', chargeFlow);
+    // Export too (Nick, 19 Aug: grey lines "there when we dont want them").
+    // Only discharge keeps the static plumbing, where the tank is real and
+    // no flow overlays those routes.
+    document.body.classList.toggle('exporting', isDay && !isSto);
 
     /* ── heat pump: runs when charging by day, or heating off-grid at night ── */
     var hpOn = chargeFlow || (!isDay && !isSto);   // runs regardless of the flow flag

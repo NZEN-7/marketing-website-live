@@ -149,8 +149,12 @@ if (!plant.includes('id="g-store"')) {
    base then returns over the roof to the right ground corner (699,217);
    discharge closes the circuit through the tank plumbing, which grid-heat
    hides. This runs the front-right base edge back to the start. Same
-   parent as g-flow-home, so scale, squash and line weight match exactly. */
-const GRIDCLOSE = '<g id="g-flow-gridclose" style="opacity:0"><path class="flow-line flow-delay-2" style="stroke:var(--flow-main)" d="M699,217 L390,390"/></g>' + "\n  ";
+   parent as g-flow-home, so scale, squash and line weight match exactly.
+   At 0.18 opacity, the same treatment the loop's roof return gets: this
+   edge passes behind the battery box, and at full strength it sliced
+   straight through it ("the red pipe line is on the piss"). Discharge has
+   the identical collision and hides it exactly this way. */
+const GRIDCLOSE = '<g id="g-flow-gridclose" style="opacity:0"><g opacity="0.18"><path class="flow-line flow-delay-2" style="stroke:var(--flow-main)" d="M699,217 L390,390"/></g></g>' + "\n  ";
 
 const plantRe = /(<g\s+id="plant"[^>]*>)([\s\S]*?)(<\/g>)/;
 if (!plantRe.test(src)) throw new Error('could not find <g id="plant"> in v3');
