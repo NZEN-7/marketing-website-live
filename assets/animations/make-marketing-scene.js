@@ -160,6 +160,13 @@ if (src.match(plantRe)[2].trim().length > 200) {
 let out = src.replace(plantRe, (_, open, _inner, close) => open + "\n" + plant + "\n" + close);
 out = out.replace('<g id="g-flow-home-2"', GRIDCLOSE + '<g id="g-flow-home-2"');
 
+/* Marketing build drops the white callout leader dots (Nick, 19 Aug: "get
+   rid of the dots"). The leader rule lines and labels stay; only the
+   circles go. The platform scene keeps its own. */
+const DOTS = (out.match(/<circle class="dot"[^>]*\/>/g) || []).length;
+if (DOTS < 4) throw new Error("expected the callout leader dots, found " + DOTS);
+out = out.replace(/<circle class="dot"[^>]*\/>/g, "");
+
 /* ── 3. add the export flow (marketing-only) ────────────────────────────── */
 /* Lifted from thermal-dawn-flow-v2.html, whose viewBox is identical (asserted
    above), so the coordinates need no adjustment. Hidden by default; the

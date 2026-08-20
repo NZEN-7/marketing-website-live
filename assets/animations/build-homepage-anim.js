@@ -211,7 +211,7 @@ body, .scene-title h2, .scene-title p, .ic-title, .ic-body {
 
 /* grid-heat scenario: the static HP-to-store pipes plumb a tank that this
    world does not have. Tagged pipe-static by the scene generator. */
-body.grid-heat .pipe-static { opacity: 0; }
+body.grid-heat .pipe-static, body.charging .pipe-static { opacity: 0; }
 </style>
 </head>
 <body>
@@ -394,9 +394,12 @@ ${v2Svg}
       gc.style.opacity = gridHeat ? '1' : '0';
       gc.style.setProperty('--flow-main', flowCol);
     }
-    /* And hides the static grey HP-to-store pipe runs: they plumb a tank
-       this scenario does not have. CSS hook in the overrides block. */
+    /* Static grey HP-to-store pipe runs: hidden in grid heat (they plumb
+       a tank that world does not have) and in daytime charging, where the
+       orange flow runs the same route and the grey underlay doubled every
+       line. CSS hooks in the overrides block. */
     document.body.classList.toggle('grid-heat', gridHeat);
+    document.body.classList.toggle('charging', chargeFlow);
 
     /* ── heat pump: runs when charging by day, or heating off-grid at night ── */
     var hpOn = chargeFlow || (!isDay && !isSto);   // runs regardless of the flow flag
