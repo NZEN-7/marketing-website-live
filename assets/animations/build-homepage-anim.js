@@ -71,7 +71,7 @@ const REQUIRED_SCENE_IDS = [
   "sky-sun", "sky-moon", "sky-clouds", "sky-stars",
   "sky-dusk-rect", "sky-night-rect", "cloud-extra-wrap",
   // the two the comparison depends on, added by make-marketing-scene.js
-  "g-store", "g-flow-export", "g-flow-perimeter",
+  "g-store", "g-flow-export",
 ];
 const missing = REQUIRED_SCENE_IDS.filter((id) => !v2Svg.includes('id="' + id + '"'));
 if (missing.length) {
@@ -364,22 +364,25 @@ ${v2Svg}
       hpFlowG.style.opacity = chargeFlow ? '1' : '0';
       hpFlowG.style.setProperty('--flow-hp', flowCol);
     }
-    // Grid heating: a dashed ground loop around the whole property, red.
-    // Replaces the old roofline recolour (Nick, 19 Aug: "just do a
-    // perimeter ground loop around the house").
-    var perim = el('g-flow-perimeter');
-    if (perim) {
-      perim.style.opacity = gridHeat ? '1' : '0';
-      perim.style.setProperty('--flow-main', flowCol);
-    }
+
     // Solar leaving the property: only when there is nowhere to store it.
     show('g-flow-export', isDay && !isSto);
-    var storeHomeFlow = (!isDay && isSto);   // the ring covers gridHeat now
-    ['g-flow-home', 'g-flow-home-2'].forEach(function (id) {
-      var g = el(id); if (!g) return;
-      g.style.opacity = storeHomeFlow ? '1' : '0';
-      g.style.setProperty('--flow-main', flowCol);
-    });
+    /* Grid heating reuses the scene's OWN house loop (g-flow-home), so it
+       is pixel-identical in weight and geometry to discharge mode, just
+       red. g-flow-home-2 is the tank ports and the vertical risers to the
+       heat pump; with no tank in the no-storage world those stay hidden.
+       (Nick, 19 Aug: "keep the loop around the house that's in the main
+       animation, but no tank and no vertical pipes. just a basic loop.") */
+    var g1 = el('g-flow-home');
+    if (g1) {
+      g1.style.opacity = ((!isDay && isSto) || gridHeat) ? '1' : '0';
+      g1.style.setProperty('--flow-main', flowCol);
+    }
+    var g2 = el('g-flow-home-2');
+    if (g2) {
+      g2.style.opacity = (!isDay && isSto) ? '1' : '0';
+      g2.style.setProperty('--flow-main', flowCol);
+    }
 
     /* ── heat pump: runs when charging by day, or heating off-grid at night ── */
     var hpOn = chargeFlow || (!isDay && !isSto);   // runs regardless of the flow flag

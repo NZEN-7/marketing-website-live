@@ -160,24 +160,6 @@ const EXPORT_FLOW = [
   '  </g>',
 ].join("\n");
 
-/* ── marketing-only: perimeter ground loop ──────────────────────────────
-   A dashed isometric ring on the ground encircling the house, heat pump
-   and battery. Shown by the shell only for night-without-storage, where it
-   replaces the old roofline recolour Nick rejected. It must paint UNDER
-   the scene, so it is inserted before the scene-squash wrapper: the house
-   then occludes the far edge exactly as ground behind a building should.
-   Corners follow the scene's iso slopes (+-0.47 in viewport space):
-   left (245,300) -> front (455,400) -> right (585,338) -> back (375,238). */
-const PERIMETER_FLOW = [
-  '  <g id="g-flow-perimeter" style="opacity:0">',
-  '    <path class="flow-line" style="stroke:var(--flow-main,#E84A2A)" d="M245,300 L455,400 L585,338 L375,238 Z"/>',
-  '  </g>',
-].join("\n");
-
-const squashIdx = out.indexOf('<g id="scene-squash"');
-if (squashIdx === -1) throw new Error("no scene-squash wrapper found; the perimeter loop needs it to paint under the house");
-out = out.slice(0, squashIdx) + PERIMETER_FLOW + "\n" + out.slice(squashIdx);
-
 /* Insert just before the closing </svg> so it paints above the scene. */
 const lastSvgClose = out.lastIndexOf("</svg>");
 if (lastSvgClose === -1) throw new Error("no </svg> found");
@@ -201,7 +183,7 @@ const REQUIRED = [
   "lbl-outdoor-temp", "lbl-outdoor-cond", "store-glow-el",
   "sky-sun", "sky-moon", "sky-clouds", "sky-stars",
   "sky-dusk-rect", "sky-night-rect", "cloud-extra-wrap",
-  "g-store", "g-flow-export", "g-flow-perimeter", "g-flow-hp", "g-flow-home",
+  "g-store", "g-flow-export", "g-flow-hp", "g-flow-home",
 ];
 const missing = REQUIRED.filter((id) => !svg.includes('id="' + id + '"'));
 if (missing.length) throw new Error("marketing scene is missing: " + missing.join(", "));
