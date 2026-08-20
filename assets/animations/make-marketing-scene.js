@@ -147,17 +147,36 @@ let out = src.replace(plantRe, (_, open, _inner, close) => open + "\n" + plant +
    homepage shell shows it via show('g-flow-export', isDay && !isSto). */
 const EXPORT_FLOW = [
   /* Rises from the top edge of the solar array to the grid at the UPPER
-     RIGHT, clear of the Solar tag (468,126) and above the Outdoor readout
+     RIGHT, from the panel surface itself (the Solar leader ends at 468,219),
+     over the roof plane and into sky, clear of the Outdoor readout
      (y 112+). Shown only by day, so no clash with the moon. The first cut
      pointed upper-LEFT, into empty sky away from anything grid-like. */
   '  <g id="g-flow-export" style="opacity:0">',
-  '    <path class="flow-line" style="stroke:var(--flow-export,#FF9C00)" d="M480,150 L566,88"/>',
-  '    <path class="flow-line flow-delay-2" style="stroke:rgba(255,156,0,0.5)" d="M474,158 L560,96"/>',
+  '    <path class="flow-line" style="stroke:var(--flow-export,#FF9C00)" d="M468,215 L566,88"/>',
+  '    <path class="flow-line flow-delay-2" style="stroke:rgba(255,156,0,0.5)" d="M460,220 L558,93"/>',
   '    <path d="M566,88 l-10.6,3 M566,88 l-6.2,9.1" fill="none" stroke="#FF9C00" stroke-width="1.8" stroke-linecap="round" opacity="0.9"/>',
   '    <text x="545" y="76" text-anchor="middle" class="tag">To grid</text>',
   '    <text x="545" y="64" text-anchor="middle" class="temp" style="font-size:10px">near-zero FiT</text>',
   '  </g>',
 ].join("\n");
+
+/* ── marketing-only: perimeter ground loop ──────────────────────────────
+   A dashed isometric ring on the ground encircling the house, heat pump
+   and battery. Shown by the shell only for night-without-storage, where it
+   replaces the old roofline recolour Nick rejected. It must paint UNDER
+   the scene, so it is inserted before the scene-squash wrapper: the house
+   then occludes the far edge exactly as ground behind a building should.
+   Corners follow the scene's iso slopes (+-0.47 in viewport space):
+   left (245,300) -> front (455,400) -> right (585,338) -> back (375,238). */
+const PERIMETER_FLOW = [
+  '  <g id="g-flow-perimeter" style="opacity:0">',
+  '    <path class="flow-line" style="stroke:var(--flow-main,#E84A2A)" d="M245,300 L455,400 L585,338 L375,238 Z"/>',
+  '  </g>',
+].join("\n");
+
+const squashIdx = out.indexOf('<g id="scene-squash"');
+if (squashIdx === -1) throw new Error("no scene-squash wrapper found; the perimeter loop needs it to paint under the house");
+out = out.slice(0, squashIdx) + PERIMETER_FLOW + "\n" + out.slice(squashIdx);
 
 /* Insert just before the closing </svg> so it paints above the scene. */
 const lastSvgClose = out.lastIndexOf("</svg>");
@@ -182,7 +201,7 @@ const REQUIRED = [
   "lbl-outdoor-temp", "lbl-outdoor-cond", "store-glow-el",
   "sky-sun", "sky-moon", "sky-clouds", "sky-stars",
   "sky-dusk-rect", "sky-night-rect", "cloud-extra-wrap",
-  "g-store", "g-flow-export", "g-flow-hp", "g-flow-home",
+  "g-store", "g-flow-export", "g-flow-perimeter", "g-flow-hp", "g-flow-home",
 ];
 const missing = REQUIRED.filter((id) => !svg.includes('id="' + id + '"'));
 if (missing.length) throw new Error("marketing scene is missing: " + missing.join(", "));

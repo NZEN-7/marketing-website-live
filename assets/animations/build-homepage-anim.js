@@ -71,7 +71,7 @@ const REQUIRED_SCENE_IDS = [
   "sky-sun", "sky-moon", "sky-clouds", "sky-stars",
   "sky-dusk-rect", "sky-night-rect", "cloud-extra-wrap",
   // the two the comparison depends on, added by make-marketing-scene.js
-  "g-store", "g-flow-export",
+  "g-store", "g-flow-export", "g-flow-perimeter",
 ];
 const missing = REQUIRED_SCENE_IDS.filter((id) => !v2Svg.includes('id="' + id + '"'));
 if (missing.length) {
@@ -361,14 +361,23 @@ ${v2Svg}
        and the pipe animation is invisible. Set both. */
     var hpFlowG = el('g-flow-hp');
     if (hpFlowG) {
-      hpFlowG.style.opacity = (chargeFlow || gridHeat) ? '1' : '0';
+      hpFlowG.style.opacity = chargeFlow ? '1' : '0';
       hpFlowG.style.setProperty('--flow-hp', flowCol);
+    }
+    // Grid heating: a dashed ground loop around the whole property, red.
+    // Replaces the old roofline recolour (Nick, 19 Aug: "just do a
+    // perimeter ground loop around the house").
+    var perim = el('g-flow-perimeter');
+    if (perim) {
+      perim.style.opacity = gridHeat ? '1' : '0';
+      perim.style.setProperty('--flow-main', flowCol);
     }
     // Solar leaving the property: only when there is nowhere to store it.
     show('g-flow-export', isDay && !isSto);
+    var storeHomeFlow = (!isDay && isSto);   // the ring covers gridHeat now
     ['g-flow-home', 'g-flow-home-2'].forEach(function (id) {
       var g = el(id); if (!g) return;
-      g.style.opacity = homeFlow ? '1' : '0';
+      g.style.opacity = storeHomeFlow ? '1' : '0';
       g.style.setProperty('--flow-main', flowCol);
     });
 
