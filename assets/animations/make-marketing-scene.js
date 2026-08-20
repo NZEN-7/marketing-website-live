@@ -136,8 +136,12 @@ if (!plant || plant.length < 500) {
    uses the same stroke elsewhere for edges. */
 plant = plant.replace(/<path (fill="none" stroke="rgba\(255,255,255,0\.10\)")/g,
   '<path class="pipe-static" $1');
+/* The six small port circles where those pipes meet the hardware
+   (Nick: "dots/circles near the heat pump") hide with them. */
+plant = plant.replace(/<circle (cx="[^"]+" cy="[^"]+" r="1\.8" fill="#0a0a0a")/g,
+  '<circle class="pipe-static" $1');
 const PIPE_TAGS = (plant.match(/pipe-static/g) || []).length;
-if (PIPE_TAGS < 3) {
+if (PIPE_TAGS < 8) {
   throw new Error("expected the HP-to-store pipe runs to tag as pipe-static, got " + PIPE_TAGS);
 }
 
@@ -145,16 +149,18 @@ if (!plant.includes('id="g-store"')) {
   throw new Error("the g-store id did not survive into the generated plant markup");
 }
 
-/* Grid-heat only: the loop's missing quarter. g-flow-home runs the front
-   base then returns over the roof to the right ground corner (699,217);
-   discharge closes the circuit through the tank plumbing, which grid-heat
-   hides. This runs the front-right base edge back to the start. Same
-   parent as g-flow-home, so scale, squash and line weight match exactly.
-   At 0.18 opacity, the same treatment the loop's roof return gets: this
-   edge passes behind the battery box, and at full strength it sliced
-   straight through it ("the red pipe line is on the piss"). Discharge has
-   the identical collision and hides it exactly this way. */
-const GRIDCLOSE = '<g id="g-flow-gridclose" style="opacity:0"><g opacity="0.18"><path class="flow-line flow-delay-2" style="stroke:var(--flow-main)" d="M699,217 L390,390"/></g></g>' + "\n  ";
+/* Grid-heat only: the loop's missing quarter, drawn at FULL strength.
+   It must render ON the pale ground outline, and that outline lives in a
+   DIFFERENT transform context from the flow groups: identical coordinates
+   rendered 21px apart at the far end (measured 19 Aug, Nick: "the angle on
+   the front right edge is fucked. should follow the edge of the house").
+   So it is injected immediately AFTER the static outline path below,
+   inheriting that context, where these numbers land pixel-exact on the
+   edge. That context also paints BEFORE the plant, so the battery and
+   heat pump occlude the line the way they occlude the outline itself,
+   which is what makes full brightness safe: the earlier 0.18 fade was a
+   bandage over the battery slice. */
+const GRIDCLOSE = '<g id="g-flow-gridclose" style="opacity:0"><path class="flow-line flow-delay-2" style="stroke:var(--flow-main)" d="M699,217 L390,390"/></g>';
 
 const plantRe = /(<g\s+id="plant"[^>]*>)([\s\S]*?)(<\/g>)/;
 if (!plantRe.test(src)) throw new Error('could not find <g id="plant"> in v3');
@@ -162,7 +168,11 @@ if (src.match(plantRe)[2].trim().length > 200) {
   throw new Error("#plant already has substantial static content; refusing to overwrite");
 }
 let out = src.replace(plantRe, (_, open, _inner, close) => open + "\n" + plant + "\n" + close);
-out = out.replace('<g id="g-flow-home-2"', GRIDCLOSE + '<g id="g-flow-home-2"');
+const STATIC_LOOP = 'M699,217 L390,390 L25.5,190.6 Q16.75,185.8 25.5,180.9"/>';
+const loopIdx = out.indexOf(STATIC_LOOP);
+if (loopIdx === -1) throw new Error("static ground outline not found; the grid-heat closure needs it as anchor and transform context");
+const loopEnd = loopIdx + STATIC_LOOP.length;
+out = out.slice(0, loopEnd) + "\n  " + GRIDCLOSE + out.slice(loopEnd);
 
 /* Marketing build drops the white callout leader dots (Nick, 19 Aug: "get
    rid of the dots"). The leader rule lines and labels stay; only the
