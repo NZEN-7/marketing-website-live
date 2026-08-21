@@ -64,7 +64,7 @@ body{display:flex;justify-content:center;padding:16px;font-family:'DM Sans',syst
     <div class="hint">Select any component to learn more</div>
   </div>
   <div class="stage"><svg id="svg" viewBox="0 0 510 470" role="img" aria-label="System diagram"></svg></div>
-  <div class="note" id="note">You have solar and a battery, but your heating still burns gas. None of that clean energy is reaching your biggest load.</div>
+  <div class="note" id="note">Your heating is the biggest load in the house, and it is still burning gas. Whatever cheap energy you have, none of it is reaching it.</div>
   <div class="info" id="info"></div>
 </div>
 <script>
@@ -118,10 +118,10 @@ var UNUSED={solar_b:1,battery_b:1};
 var Bx={};BEFORE.forEach(function(c){Bx[c.id]=c});
 
 var AFTER=[
-  {id:"heatpump",label:"Heat Pump",sub:"Runs on daytime solar",ic:"bolt",x:20,y:30,w:115,h:60,col:GREEN,tag:"NEW",
+  {id:"heatpump",label:"Heat Pump",sub:"Runs when power is cheapest",ic:"bolt",x:20,y:30,w:115,h:60,col:GREEN,tag:"NEW",
    info:"An efficient heat pump takes the boiler's place. It runs in the middle of the day on solar you were otherwise exporting, and it does cooling in summer as well."},
   {id:"store",label:"Thermal Store",sub:"35 kWh of stored heat",ic:"tank",x:155,y:25,w:115,h:68,col:GREEN,tag:"NEW",
-   info:"The thermal store is the heart of the system. It holds heat, not electricity, and enough of it to carry the evening and overnight in most Australian homes without drawing from the grid."},
+   info:"The thermal store is the heart of the system. It holds heat, not electricity, and enough of it to carry the evening and overnight in most Australian homes with the heat pump off through the expensive hours."},
   {id:"controls",label:"Smart Controls",sub:"Schedules around your tariff",ic:"fan",x:20,y:155,w:115,h:60,col:GREEN,tag:"NEW",
    info:"The controls decide when to charge the store: reading the forecast, your tariff windows and how much heat the house has left, then charging on solar or on the cheapest hours overnight. It runs itself."},
   mix(S.solar,{id:"solar_a",label:"Solar Panels",sub:"Now powering your heating",ic:"sun",col:GREEN,tag:"UNLOCKED",
@@ -135,7 +135,7 @@ var AFTER=[
   mix(S.fcu,{id:"fcu",label:"Fan Coil Units",sub:"Ducted or non-ducted",ic:"fan",col:ORANGE,tag:"OPTIONAL",
    info:"Fan coil units add heating and cooling to rooms with no radiator or underfloor circuit. Wall-mounted, ceiling cassette, or connected to ducting you already have."}),
   mix(S.hotwater,{id:"hotwater",label:"Hot Water",sub:"Optional add-on",ic:"drop",col:ORANGE,tag:"OPTIONAL",
-   info:"The same thermal store can run your domestic hot water, taking out the gas hot water unit in the same visit. Worth raising at your site assessment."})
+   info:"The same thermal store can run your domestic hot water, taking out the gas hot water unit as part of the same install. Worth raising at your site assessment."})
 ];
 var Ax={};AFTER.forEach(function(c){Ax[c.id]=c});
 
@@ -242,7 +242,7 @@ function draw(){
   }else{
     info.style.background="rgba(255,255,255,.04)";info.style.borderColor="rgba(255,255,255,.08)";
     info.innerHTML='<div class="info__idle">'+(view==="before"
-      ?"A standard gas hydronic system, even with solar and a battery on the house. Your biggest energy load is still running on gas, disconnected from the clean energy you already generate."
+      ?"A standard gas hydronic system. Your biggest energy load runs on gas, cut off from the cheapest energy available to you, whether that is your own solar, a free power window, or overnight off-peak."
       :"Thermal Dawn replaces the heat source and nothing else. Your pipes, radiators and underfloor circuits stay as they are. Fan coil units and hot water are optional add-ons.")+'</div>';
   }
   report();

@@ -211,3 +211,167 @@ No duration, so compliant with the rule. But `DECISIONS.md` quotes the approved 
 3. **C, the solar-first heroes.** Biggest reach, and C3 is a genuine strategic call rather than a copy fix.
 4. **D and E.** Quick accuracy tidy-ups.
 5. **F.** Query, not an edit.
+
+---
+---
+
+# Part 2: How It Works, and the interactive it embeds
+
+**Added 21 Aug 2026.** Covers `hydronic/how-it-works/index.html` and `assets/animations/hydronic-before-after.html`.
+
+Checked against `DECISIONS.md` as at 21 Aug, including the **35 kWh capacity now settled** ("35 is right, 60 is wrong") and the note that the before/after graphic was ported from Wix the same day. Some of what follows is therefore hours-old copy rather than legacy.
+
+This is the strongest page on the site. Install counting is clean. The origin claim at `:111` is the best-scoped sentence anywhere: *"the heat pump is a proven unit we source rather than build, but the thermal store, the controls, and the intelligence that runs them are ours."* No warranty duration, no rebates, no en-dash ranges (everything is written as "70 to 80°C", "6 to 10 weeks", "one to two days").
+
+---
+
+## H. The section heading and the interactive inside it disagree about batteries
+
+The sharpest contradiction on the site, because both are visible in one screen.
+
+**H1 · `hydronic/how-it-works/index.html:158`**
+> **Not a Battery. Something Better for Heating.**
+
+Against `assets/animations/hydronic-before-after.html:130`, inside the diagram embedded on the same page:
+> A battery works alongside the thermal store rather than against it: battery for appliances, thermal store for heating, cooling and hot water. It also means a smaller battery goes further.
+
+The animation copy is the new framing and it is the best version of this argument on the site. The heading above it is the old versus framing.
+
+→ Heading: *Built for Heat, Not Electricity*
+→ Or to match the homepage: *Your Battery Wasn't Built for Heating*
+
+**H2 · `:159`**
+> Lithium batteries store electricity, which then gets converted back into heat when you need it, losing efficiency at every step.
+
+Framed as a deficiency of batteries rather than job fit.
+
+→ *A battery stores electricity, then converts it back to heat when you need it, losing a little at each step. Thermal Dawn skips the round trip and stores heat as heat, which is why it's so much cheaper for the loads that dominate your bill.*
+
+*(The Marketing and Growth agent's finding 1 covers the same posture problem on home and hydronic. This is the third instance, and the only one where the contradiction sits inside a single viewport.)*
+
+---
+
+## I. 35 kWh is settled, but it does not reconcile with the tank sizes on the same page
+
+Not reopening the capacity figure. `DECISIONS.md` settled it on 21 Aug and this is a narrower point about two blocks on one page.
+
+> `:163` **35kWh** Thermal storage capacity
+> `:211` **250L**, cylindrical: 600mm diameter, around 2m tall
+> `:212` **500L**, rectangular: 500mm deep, 1300mm wide, 1600mm tall
+> `:164` **Up to 70°C** flow temperature in our R290 configuration
+
+Water stores roughly 1.16 kWh per 100 litres per 10°C of usable swing. Against a 70°C ceiling, 500L gives about 30 kWh and 250L about 15 kWh. Reaching 35 kWh from 500L needs roughly a 60°C swing, which implies charging near 80°C, above the ceiling this page states fourteen lines earlier.
+
+A reader who does that arithmetic finds the page disagreeing with itself. Worth resolving how the 35 kWh is derived and either stating the assumption at `:163` or adjusting which tank the headline figure describes.
+
+---
+
+## J. "Without touching the grid" appears twice more
+
+**J1 · `:146`**
+> Stored thermal energy circulates through your radiators and underfloor circuits, keeping every room at your set temperature **without touching the grid**.
+
+Contradicted at `:125` on the same page, where the Dawn phase "starts pre-charging from off-peak grid power". Charging from the grid is the design, not an embarrassment.
+
+→ *...keeping every room at your set temperature with the compressor off through the priciest hours.*
+
+**J2 · `assets/animations/hydronic-before-after.html:124`**
+> ...enough of it to carry the evening and overnight in most Australian homes **without drawing from the grid**.
+
+Same fix. Animation copy, so the change belongs in the builder, never the generated file.
+
+*(Third instance is `hydronic/index.html:58`, Part 1 finding D3.)*
+
+---
+
+## K. The interactive opens by excluding anyone without solar and a battery
+
+**K1 · `hydronic-before-after.html:67`**, the first line a reader sees in the Gas Boiler state:
+> **You have solar and a battery**, but your heating still burns gas.
+
+**K2 ·** and the panel directly beneath it repeats the assumption:
+> A standard gas hydronic system, **even with solar and a battery on the house**. Your biggest energy load is still running on gas, disconnected from the clean energy you already generate.
+
+Two statements, both assuming the reader owns both. A prospect with 2.4 kW and no battery is told twice, before any content, that this is not about them. Same class as Part 1 finding C, and the Marketing and Growth agent's finding 2.
+
+→ K1: *Your heating is the biggest load in the house, and it's still burning gas. Whatever cheap energy you have, none of it is reaching it.*
+→ K2: *A standard gas hydronic system. Your biggest energy load runs on gas, cut off from the cheapest energy available to you, whether that's your own solar, a free power window, or overnight off-peak.*
+
+**K3 · Free power windows appear nowhere on this page.**
+
+`hydronic/index.html:146-147` has a strong section on them, and both live systems run primarily on them. The page that explains *how it works* covers off-peak pre-charge at `:125`, then goes solar-only across the rest of the timeline. The mechanism behind the field results is missing from the mechanism explainer.
+
+→ Add to the Morning phase at `:131-132`: *If your retailer offers a free power window, that's when the store fills fastest and cheapest, whether or not your panels are covering it.*
+
+Also worth revisiting `hydronic-before-after.html:121-122`, where the Heat Pump caption reads *"Runs on daytime solar"*. → *"Runs when power is cheapest"*.
+
+---
+
+## L. Height is named as the constraint, then never given
+
+**L1 · `:207-208`**
+> The outdoor unit is 450mm deep and sits about 150mm off the wall, so allow around 600mm out from the wall face...
+> **Height is more often the constraint than floor space.**
+
+Depth and clearance are given. Height and width are not, on a page that says height is the more common problem.
+
+This has already cost a redesign in the field: a customer's system was re-specified around a 12 kW unit because the 15 kW stood 1400mm tall and would not fit beneath her window.
+
+→ Add the height and width to `:207`, as a range if it varies by capacity: *The outdoor unit is 450mm deep, roughly [X] wide and between [X] and [X] tall depending on capacity, and sits about 150mm off the wall.*
+
+One number turns the section from reassurance into something a customer can measure against. The tank dimensions at `:211-212` already do this well, which makes the omission more noticeable.
+
+---
+
+## M. Smaller items
+
+**M1 · `:33`**
+> The Same Warm Floors. None of the Gas.
+
+"Warm floors" reads as underfloor. Most enquiries are radiators, and the page covers both.
+
+→ *Same Radiators. Same Warm Floors. None of the Gas.*
+
+**M2 · `:139`**
+> Any remaining solar goes to **your hot water** or back to the grid.
+
+Presents hot water as standard. The animation correctly labels it "Optional add-on" at `hydronic-before-after.html:137`.
+
+→ *Any remaining solar goes to your hot water, if that's part of your system, or back to the grid.*
+
+**M3 · `hydronic-before-after.html:138`**
+> The same thermal store can run your domestic hot water, taking out the gas hot water unit **in the same visit**.
+
+Confident scheduling language for a module that has not yet run in a customer home.
+
+→ *...taking out the gas hot water unit as part of the same install. Worth raising at your site assessment.*
+
+**M4 · `:241`, lead time**
+> (Current lead time: **6 to 10 weeks**.)
+
+Previously draft-marked, now unmarked and reading as a commitment. Units ordered 28 July ship around 9 October, so ten weeks is holding and six is optimistic. Worth confirming it is the number you want in front of customers.
+
+---
+
+## What is working, and should not be touched
+
+- `:111` — the origin sentence. Correctly scoped, plainly written, and the model for how this claim should read everywhere.
+- `:198` — *"Already have underfloor? You're the easy case."* The only place on the site making this point, and it is true: underfloor already runs at heat-pump temperatures, so there is no flow-temperature risk at all. Worth lifting onto `hydronic/index.html`, where the radiator anxiety gets answered.
+- `:206-215` — the whole "Will It Fit?" section, height gap aside. It answers a question that has come up in four separate sales threads this month.
+- `:288` — the serviceability answer. *"No proprietary lock-in, no special parts to order from us, and no service contract you're tied into."* A customer asked this twice in writing before buying.
+- `:190-193` — the R290 / R32 flow temperature explanation. Honest about the ceiling each refrigerant sets, and it reads as spec rather than measurement, per the 19 Aug ruling.
+- `hydronic-before-after.html:130` — the battery-alongside caption. The heading above it should be rewritten to match this, not the other way around.
+
+---
+
+## Where Part 2 sits in the order
+
+Slotting into the Part 1 list:
+
+1. **The battery reframe, now three pages** (Part 1 B, Part 2 H). How-it-works is the worst of the three because the contradiction is visible without scrolling.
+2. **I, the 35 kWh against the tank sizes.** Not the settled question, a new one.
+3. **A, install counting** (Part 1 only, this page is clean).
+4. **L, the missing height.** Small addition, already cost one redesign.
+5. **J and K.** Two of these live in the animation builder rather than the pages.
+6. **C3, the homepage hero.** Strategic call.
+7. **M.** Tidy-ups.
