@@ -31,11 +31,25 @@ Ranked by what it costs to leave them open. Each is also a Notion row.
 
 ### Settled 21 Aug 2026
 
-- **Thermal store capacity is 35 kWh.** Nick, 21 Aug: 35 is right, 60 is
-  wrong. The 60 kWh figure came in with the Wix before/after graphic and
-  never matched the site. Nothing live says 60; the ported graphic says 35,
-  as does every page. Two unreferenced copies of the old graphic still sit
-  in `assets/animations` carrying the React/CDN build (see below).
+- **Thermal store capacity is 30 kWh.** Nick, 21 Aug, superseding the 35 kWh
+  call made earlier the same day. Sequence: the ported Wix graphic said 60,
+  Nick corrected it to 35, then both copy reviewers independently showed 35
+  does not reconcile with the tank sizes and the 70C ceiling stated on the
+  same page (500L against a 70C ceiling is roughly 30 kWh). Nick: "call it
+  30kwh everywhere." Now 30 in every live page, both build sources, and the
+  unreferenced animations, so nothing stale can resurface. **Still open:**
+  the page sells a 250L and a 500L store and quotes one capacity. 30 kWh
+  describes the 500L. Whether to qualify it, or quote both, is unresolved.
+
+- **The adaptive AI claim stands.** Nick, 21 Aug: "yes its adaptive AI, a bit
+  manual now but defencable." The Marketing and Growth agent's finding 11
+  asked for four instances of "learns / optimises" to be rewritten, citing a
+  17 Aug ruling that does not exist in this repo. Not applied. The claim is
+  defensible today and the wording stays as it is.
+
+- **Lead time stays "6 to 10 weeks".** Nick, 21 Aug, confirming it is the
+  number he wants in front of customers. It is no longer draft-marked and
+  reads as a commitment, which is intended.
 
 ### Settled 19 Aug 2026
 

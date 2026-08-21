@@ -12,7 +12,8 @@
    from the original, see BUILD-NOTES:
      - brand orange moved #E87C2A -> #FF9C00 (Gage, 18 Aug)
      - emoji icons -> flat stroked SVG (the flat, non-shiny design direction)
-     - store capacity 60 kWh -> 35 kWh; 60 was simply wrong (Nick, 21 Aug)
+     - store capacity 60 kWh -> 30 kWh (Nick, 21 Aug; 60 was wrong, and 35
+       does not reconcile with a 500L store against a 70C ceiling)
      - the unsupported "gas up 40%+ in five years" line dropped
      - em dashes removed (site rule: the copy dump asserts zero)
    Both views reserve the note strip so switching does not jump the layout,
@@ -120,7 +121,7 @@ var Bx={};BEFORE.forEach(function(c){Bx[c.id]=c});
 var AFTER=[
   {id:"heatpump",label:"Heat Pump",sub:"Runs when power is cheapest",ic:"bolt",x:20,y:30,w:115,h:60,col:GREEN,tag:"NEW",
    info:"An efficient heat pump takes the boiler's place. It runs in the middle of the day on solar you were otherwise exporting, and it does cooling in summer as well."},
-  {id:"store",label:"Thermal Store",sub:"35 kWh of stored heat",ic:"tank",x:155,y:25,w:115,h:68,col:GREEN,tag:"NEW",
+  {id:"store",label:"Thermal Store",sub:"30 kWh of stored heat",ic:"tank",x:155,y:25,w:115,h:68,col:GREEN,tag:"NEW",
    info:"The thermal store is the heart of the system. It holds heat, not electricity, and enough of it to carry the evening and overnight in most Australian homes with the heat pump off through the expensive hours."},
   {id:"controls",label:"Smart Controls",sub:"Schedules around your tariff",ic:"fan",x:20,y:155,w:115,h:60,col:GREEN,tag:"NEW",
    info:"The controls decide when to charge the store: reading the forecast, your tariff windows and how much heat the house has left, then charging on solar or on the cheapest hours overnight. It runs itself."},

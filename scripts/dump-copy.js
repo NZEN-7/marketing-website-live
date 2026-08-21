@@ -345,7 +345,7 @@ idx.push("- No counting installs (no \"first\", \"second\", \"two homes live\").
 idx.push("- Origin claims scope to the store, controls and technology, never the whole system. The heat pump is sourced, not built.");
 idx.push("- The peak window is 5pm to 9pm, measured. Never 3pm or 4pm variants.");
 idx.push("- 70C flow temperature is a spec commitment, not a measurement. Do not rewrite it as measured.");
-idx.push("- The thermal store holds **35 kWh**. A 60 kWh figure came in with an old graphic and is wrong wherever it appears.");
+idx.push("- The thermal store holds **30 kWh** (Nick, 21 Aug). Earlier 35 and 60 kWh figures are both superseded.");
 idx.push("- No warranty duration is stated anywhere, and a ten-year figure must never appear.");
 idx.push("- Batteries are framed as the wrong tool for heating, not as the enemy: \"one system instead of two\".");
 idx.push("- No em dashes, and no en dashes in ranges: write \"3 to 5 years\". Straight quotes. Contractions welcome. Australian spelling.");

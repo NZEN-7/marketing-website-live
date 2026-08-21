@@ -257,7 +257,7 @@ ${v2Svg}
         btnDay: 'Daytime charging', btnNight: 'Evening comfort',
         cards: [
           { title:'Daytime Charging', icon:'\\u2600\\ufe0f', body:'Solar panels power the heat pump during the day, charging the thermal store while electricity is free.', hl:'hl-o' },
-          { title:'35 kWh Stored',    icon:'\\u25c9',        body:'Enough heat for an entire evening and overnight, without touching the grid.', hl:'' },
+          { title:'30 kWh Stored',    icon:'\\u25c9',        body:'Enough heat for an entire evening and overnight, without touching the grid.', hl:'' },
           { title:'Evening Comfort',  icon:'\\u2668\\ufe0f', body:'Heat pump switches off at sunset. Stored heat flows through radiators and underfloor all evening, no grid needed.', hl:'' }
         ]
       },
@@ -267,7 +267,7 @@ ${v2Svg}
         btnDay: 'Daytime charging', btnNight: 'Evening comfort',
         cards: [
           { title:'Daytime Charging', icon:'\\u2600\\ufe0f', body:'Solar panels power the heat pump during the day, charging the thermal store while electricity is free.', hl:'' },
-          { title:'35 kWh Stored',    icon:'\\u25c9',        body:'Enough heat for an entire evening and overnight, without touching the grid.', hl:'' },
+          { title:'30 kWh Stored',    icon:'\\u25c9',        body:'Enough heat for an entire evening and overnight, without touching the grid.', hl:'' },
           { title:'Evening Comfort',  icon:'\\u2668\\ufe0f', body:'Heat pump switches off at sunset. Stored heat flows through radiators and underfloor all evening, no grid needed.', hl:'hl-g' }
         ]
       }
