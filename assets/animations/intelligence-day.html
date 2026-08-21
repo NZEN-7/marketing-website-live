@@ -117,7 +117,7 @@ var PHASES=[
   [9.5, "Waiting again. Heating on demand now would cost more than charging at midday will."],
   [10.5,"The midday charge. Cheap energy drives the heat pump hard, warming the house and filling the store."],
   [13.75,"Store full, compressor off at 1:45pm. From here the house holds its warmth on its own."],
-  [17,  "Evening peak, 5 to 9pm. Power is at its priciest, and the heat pump does not run at all."],
+  [17,  "Evening peak, 5 to 9pm. The thermal battery releases its stored heat, paced to hold the day's warmth and keep the house comfortable, while the heat pump stays off."],
   [21,  "9pm and the house is still 21.1°C. The whole evening ran on heat bought at midday prices."]
 ];
 function phaseAt(h){var p=PHASES[0][1],i;for(i=0;i<PHASES.length;i++){if(h>=PHASES[i][0])p=PHASES[i][1];}return p;}
