@@ -139,16 +139,24 @@ for (const file of files) {
     }
 
     const text = tidy(raw);
-    if (!text || !hasWords(text)) continue;
+    if (!text) continue;
 
-    const flags = [];
+    /* The mechanical checks run BEFORE the hasWords gate. A bare range like
+       "$20,000-$40,000" (written with an entity) decodes to a dash with no
+       two consecutive letters in it, so hasWords dropped the line and the
+       counters read zero while six were live on the site. Sal found those
+       by eye on 21 Aug; this is why the tool could not. */
+    const mech = [];
+    if (text.includes("—")) { mech.push("EM-DASH"); emDashLines.push(`${rel}:${n}`); }
+    if (CURLY.test(text)) { mech.push("CURLY-QUOTE"); curlyLines.push(`${rel}:${n}`); }
+    /* House style writes ranges as "to". */
+    if (text.includes("–")) { mech.push("EN-DASH"); enDashLines.push(`${rel}:${n}`); }
+
+    if (!hasWords(text)) continue;
+
+    const flags = mech.slice();
     if (/class="[^"]*\bdraft\b/.test(raw)) { flags.push("DRAFT"); draftLines.push(`${rel}:${n}`); }
     if (/<button|class="btn\b|class="[^"]*\bbtn\b/.test(raw)) flags.push("CTA");
-    if (text.includes("—")) { flags.push("EM-DASH"); emDashLines.push(`${rel}:${n}`); }
-    if (CURLY.test(text)) { flags.push("CURLY-QUOTE"); curlyLines.push(`${rel}:${n}`); }
-    /* House style writes ranges as "to". The em-dash check never caught these
-       and a reviewer had to find them by eye (M&G, 21 Aug). */
-    if (text.includes("–")) { flags.push("EN-DASH"); enDashLines.push(`${rel}:${n}`); }
 
     page.blocks.push({ n, text, flags });
   }

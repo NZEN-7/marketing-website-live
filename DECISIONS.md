@@ -15,6 +15,11 @@ the index.
 
 ## Open decisions
 
+| W4 | Pool heating is sold as an available capability (`hydronic/pricing`), and neither field system has one | Open. Both round 2 reviewers flagged it. Copy softened around it ("one system can cover all of these"), but the Pool Heating card still says "can extend to" | The four-capabilities framing at `:137` and the FAQ |
+| W5 | "fan coils/controls" in the included list reads as fan coils being in every quote | Open, and it is a commercial inclusion question rather than a wording one. How-it-works and the not-included list both imply they are an addition | What a customer expects before paying |
+| W6 | Cooling is stated present tense sitewide; both installs are heating only so far | Open. Needs a yes/no on whether cooling has been commissioned anywhere before 11 Oct | `pricing:93`, `pricing:257` |
+
+
 Ranked by what it costs to leave them open. Each is also a Notion row.
 
 | # | Decision | Status | Blocks |
@@ -61,6 +66,15 @@ Ranked by what it costs to leave them open. Each is also a Notion row.
   4pm to 9pm, which was never measured. Corrected.
 - **No ten-year warranty.** The site has never claimed one and must not start;
   it says "comprehensive coverage, details confirmed with your quote".
+  **Record corrected 21 Aug:** this entry said the site was clean on warranty
+  duration. It is not. Three live pages state one, and both round 2 reviewers
+  found them independently: `pre-order/index.html:67` and `:90`, and
+  `pre-order/founder-premium/index.html:60`, all "+2 years beyond standard".
+  `pre-order/terms/index.html:40` references it too and is legal copy, flag
+  only. Left in place pending Nick, because it is a commercial offer term
+  rather than copy. Note the second problem in it: "standard" is not
+  published anywhere, so the pricing page's "Coverage beyond our standard
+  terms" promises a comparison the customer cannot make.
   **The 18 Aug webinar deck does claim it.** See below.
 
 ---
