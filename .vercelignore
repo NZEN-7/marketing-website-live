@@ -1,0 +1,12 @@
+# Internal working files. The repo root IS the served site, so anything not
+# listed here is publicly fetchable at its path. Keep this in sync with the
+# 404 redirects in netlify.toml (the config twins rule in CLAUDE.md).
+BUILD-NOTES.md
+CLAUDE.md
+DECISIONS.md
+MISSING-MEDIA.md
+feedback
+scripts
+tools
+package.json
+package-lock.json
