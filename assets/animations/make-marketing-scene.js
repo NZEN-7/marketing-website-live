@@ -168,11 +168,31 @@ if (src.match(plantRe)[2].trim().length > 200) {
   throw new Error("#plant already has substantial static content; refusing to overwrite");
 }
 let out = src.replace(plantRe, (_, open, _inner, close) => open + "\n" + plant + "\n" + close);
+const EXPORT_FLOW = [
+  /* Routed in the STATIC house context (same as GRIDCLOSE), so line weight
+     matches the scene flows and the plant occludes it where it should.
+     Nick's route, 19 Aug: leave the panel bottom edge, slope down the roof
+     at the roof's own fall line to the eaves, drop vertically to the top
+     of the battery (the continuation to the ground line hides behind the
+     battery), then follow the base edge right and straight off into the
+     air to the FiT note. Waypoints measured via getScreenCTM:
+       (610.4,132) panel bottom edge, on the array's fall line
+       (623,146.3) eaves, directly above the battery
+       (623,259.6) ground line behind the battery (top face is at y226)
+       (740,194)   the same base-edge line extended into the air. */
+  '<g id="g-flow-export" style="opacity:0">',
+  '  <path class="flow-line" style="stroke:var(--flow-export,#FF9C00)" d="M610.4,132 L623,146.3 L623,259.6 L740,194"/>',
+  '  <path d="M740,194 l-9.9,1.6 M740,194 l-6.5,7.6" fill="none" stroke="#FF9C00" stroke-width="2" stroke-linecap="round" opacity="0.9"/>',
+  '  <text x="738" y="180" text-anchor="end" class="tag">To grid</text>',
+  '  <text x="738" y="168" text-anchor="end" class="temp" style="font-size:10px">near-zero FiT</text>',
+  '</g>',
+].join("\n");
+
 const STATIC_LOOP = 'M699,217 L390,390 L25.5,190.6 Q16.75,185.8 25.5,180.9"/>';
 const loopIdx = out.indexOf(STATIC_LOOP);
 if (loopIdx === -1) throw new Error("static ground outline not found; the grid-heat closure needs it as anchor and transform context");
 const loopEnd = loopIdx + STATIC_LOOP.length;
-out = out.slice(0, loopEnd) + "\n  " + GRIDCLOSE + out.slice(loopEnd);
+out = out.slice(0, loopEnd) + "\n  " + GRIDCLOSE + "\n  " + EXPORT_FLOW + out.slice(loopEnd);
 
 /* Marketing build drops the white callout leader dots (Nick, 19 Aug: "get
    rid of the dots"). The leader rule lines and labels stay; only the
@@ -185,25 +205,9 @@ out = out.replace(/<circle class="dot"[^>]*\/>/g, "");
 /* Lifted from thermal-dawn-flow-v2.html, whose viewBox is identical (asserted
    above), so the coordinates need no adjustment. Hidden by default; the
    homepage shell shows it via show('g-flow-export', isDay && !isSto). */
-const EXPORT_FLOW = [
-  /* Rises from the top edge of the solar array to the grid at the UPPER
-     RIGHT, from the panel surface itself (the Solar leader ends at 468,219),
-     over the roof plane and into sky, clear of the Outdoor readout
-     (y 112+). Shown only by day, so no clash with the moon. The first cut
-     pointed upper-LEFT, into empty sky away from anything grid-like. */
-  '  <g id="g-flow-export" style="opacity:0">',
-  '    <path class="flow-line" style="stroke:var(--flow-export,#FF9C00)" d="M468,215 L566,88"/>',
-  '    <path class="flow-line flow-delay-2" style="stroke:rgba(255,156,0,0.5)" d="M460,220 L558,93"/>',
-  '    <path d="M566,88 l-10.6,3 M566,88 l-6.2,9.1" fill="none" stroke="#FF9C00" stroke-width="1.8" stroke-linecap="round" opacity="0.9"/>',
-  '    <text x="545" y="76" text-anchor="middle" class="tag">To grid</text>',
-  '    <text x="545" y="64" text-anchor="middle" class="temp" style="font-size:10px">near-zero FiT</text>',
-  '  </g>',
-].join("\n");
 
-/* Insert just before the closing </svg> so it paints above the scene. */
-const lastSvgClose = out.lastIndexOf("</svg>");
-if (lastSvgClose === -1) throw new Error("no </svg> found");
-out = out.slice(0, lastSvgClose) + EXPORT_FLOW + "\n" + out.slice(lastSvgClose);
+
+
 
 out = out.replace(
   /<title>[\s\S]*?<\/title>/,
