@@ -194,6 +194,10 @@ li{margin:.35em 0;}
 
 /* ---------- Cards ---------- */
 .card{background:#fff;border:1px solid var(--td-line);border-radius:var(--radius);padding:26px;box-shadow:var(--shadow);}
+/* opt-in lift for interactive-feeling card grids (pricing capabilities) */
+.card--lift{transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease;}
+.card--lift:hover{transform:translateY(-4px);box-shadow:0 12px 26px rgba(0,0,0,.16);border-color:rgba(var(--td-orange-rgb),.6);}
+body.dark .card--lift:hover{box-shadow:0 12px 26px rgba(0,0,0,.55);border-color:rgba(var(--td-orange-rgb),.75);}
 .section--dark .card{background:#26251f;border-color:#37342c;color:#e9e4df;}
 .card h3{margin-top:0;}
 .card--pad-lg{padding:32px;}

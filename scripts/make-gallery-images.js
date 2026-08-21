@@ -57,6 +57,12 @@ const JOBS = [
     note: "the real install: branded thermal store on the paving, heat pump above, autumn vine on the wall. Portrait once EXIF is baked. Replaces the AI concept render on hydronic/how-it-works.",
   },
   {
+    from: "Install 1/IMG_2811.JPG",
+    to: "install-team-unit.webp",
+    width: 1400,
+    note: "commissioning day: engineer beside the branded store and heat pump, autumn vine. Landscape. Pricing page install section.",
+  },
+  {
     from: "Install 1/IMG_2976.JPG",
     to: "pipework-valve.webp",
     width: 1200,
