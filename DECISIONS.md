@@ -37,9 +37,10 @@ Ranked by what it costs to leave them open. Each is also a Notion row.
   does not reconcile with the tank sizes and the 70C ceiling stated on the
   same page (500L against a 70C ceiling is roughly 30 kWh). Nick: "call it
   30kwh everywhere." Now 30 in every live page, both build sources, and the
-  unreferenced animations, so nothing stale can resurface. **Still open:**
-  the page sells a 250L and a 500L store and quotes one capacity. 30 kWh
-  describes the 500L. Whether to qualify it, or quote both, is unresolved.
+  unreferenced animations, so nothing stale can resurface. **Closed same day:**
+  30 kWh is qualified as the 500L store everywhere it appears (the figures
+  block, pricing, the diagram's detail panel, and the homepage flow card).
+  The 250L is described by its dimensions only; no capacity is quoted for it.
 
 - **The adaptive AI claim stands.** Nick, 21 Aug: "yes its adaptive AI, a bit
   manual now but defencable." The Marketing and Growth agent's finding 11

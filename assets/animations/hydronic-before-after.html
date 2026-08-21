@@ -28,20 +28,20 @@ body{display:flex;justify-content:center;padding:16px;font-family:'DM Sans',syst
   text-transform:uppercase;color:#FF9C00;margin-bottom:6px}
 .title{font-size:18px;font-weight:600;letter-spacing:-.02em;margin-bottom:14px}
 .seg{display:flex;background:rgba(255,255,255,.05);border-radius:8px;padding:3px;width:fit-content;margin-bottom:6px}
-.seg button{padding:7px 22px;border-radius:6px;border:0;background:transparent;color:rgba(255,255,255,.4);
+.seg button{padding:7px 22px;border-radius:6px;border:0;background:transparent;color:rgba(255,255,255,.55);
   font-family:'DM Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.08em;
   text-transform:uppercase;cursor:pointer}
 .seg button:focus-visible{outline:2px solid #FF9C00;outline-offset:2px}
 .seg button[aria-pressed="true"][data-v="before"]{background:#E84A2A22;color:#E84A2A;outline:1px solid #E84A2A44}
 .seg button[aria-pressed="true"][data-v="after"]{background:#2EC68A22;color:#2EC68A;outline:1px solid #2EC68A44}
-.hint{font-size:11px;color:rgba(255,255,255,.4)}
+.hint{font-size:11px;color:rgba(255,255,255,.55)}
 .stage{padding:0 24px}
 .stage svg{display:block;width:100%}
 .box{cursor:pointer}
 .box:focus-visible{outline:none}
 .box:focus-visible rect{stroke:#FF9C00;stroke-width:2}
 .note{margin:0 24px 12px;padding:10px 14px;border-radius:8px;font-size:12px;line-height:1.5;
-  background:rgba(232,74,42,.06);border:1px solid rgba(232,74,42,.15);color:rgba(255,255,255,.5)}
+  background:rgba(232,74,42,.09);border:1px solid rgba(232,74,42,.28);color:rgba(255,255,255,.72)}
 .note[hidden]{display:block;visibility:hidden}
 .info{margin:0 24px 24px;min-height:90px;padding:16px 18px;border-radius:10px;
   background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
@@ -49,8 +49,8 @@ body{display:flex;justify-content:center;padding:16px;font-family:'DM Sans',syst
 .info__h .nm{font-weight:600;font-size:14px}
 .tag{font-size:9px;font-family:'DM Mono',monospace;font-weight:700;letter-spacing:.1em;
   border-radius:3px;padding:1px 5px;margin-left:6px}
-.info__b{font-size:13px;line-height:1.65;color:rgba(255,255,255,.72)}
-.info__idle{font-size:13px;line-height:1.65;color:rgba(255,255,255,.4)}
+.info__b{font-size:13px;line-height:1.65;color:rgba(255,255,255,.86)}
+.info__idle{font-size:13px;line-height:1.65;color:rgba(255,255,255,.62)}
 </style>
 </head>
 <body>
@@ -71,7 +71,7 @@ body{display:flex;justify-content:center;padding:16px;font-family:'DM Sans',syst
 <script>
 (function(){
 "use strict";
-var RED="#E84A2A", GREEN="#2EC68A", ORANGE="#FF9C00", GREY="#6B7280";
+var RED="#E84A2A", GREEN="#2EC68A", ORANGE="#FF9C00", GREY="#93A0B0";
 var TAGC={REPLACED:RED,REMOVED:RED,NEW:GREEN,UNLOCKED:GREEN,STAYS:GREY,UNUSED:GREY,OPTIONAL:ORANGE};
 
 var cx=function(c){return c.x+c.w/2}, cy=function(c){return c.y+c.h/2};
@@ -122,7 +122,7 @@ var AFTER=[
   {id:"heatpump",label:"Heat Pump",sub:"Runs when power is cheapest",ic:"bolt",x:20,y:30,w:115,h:60,col:GREEN,tag:"NEW",
    info:"An efficient heat pump takes the boiler's place. It runs in the middle of the day on solar you were otherwise exporting, and it does cooling in summer as well."},
   {id:"store",label:"Thermal Store",sub:"30 kWh of stored heat",ic:"tank",x:155,y:25,w:115,h:68,col:GREEN,tag:"NEW",
-   info:"The thermal store is the heart of the system. It holds heat, not electricity, and enough of it to carry the evening and overnight in most Australian homes with the heat pump off through the expensive hours."},
+   info:"The thermal store is the heart of the system. It holds heat, not electricity: 30 kWh in the 500L store, enough to carry the evening and overnight in most Australian homes with the heat pump off through the expensive hours."},
   {id:"controls",label:"Smart Controls",sub:"Schedules around your tariff",ic:"fan",x:20,y:155,w:115,h:60,col:GREEN,tag:"NEW",
    info:"The controls decide when to charge the store: reading the forecast, your tariff windows and how much heat the house has left, then charging on solar or on the cheapest hours overnight. It runs itself."},
   mix(S.solar,{id:"solar_a",label:"Solar Panels",sub:"Now powering your heating",ic:"sun",col:GREEN,tag:"UNLOCKED",
@@ -162,8 +162,8 @@ function afterPipes(){return[
   {x1:TRUNK,y1:cy(Ax.hotwater),x2:L(Ax.hotwater),y2:cy(Ax.hotwater),k:"warm"}
 ];}
 
-var PIPE={gas:{s:"rgba(232,74,42,.7)",w:2},warm:{s:"rgba(255,156,0,.7)",w:2},
-          cold:{s:"rgba(255,255,255,.18)",w:2},dead:{s:"rgba(232,74,42,.2)",w:1,d:"4 3"}};
+var PIPE={gas:{s:"rgba(232,74,42,.9)",w:2.5},warm:{s:"rgba(255,156,0,.92)",w:2.5},
+          cold:{s:"rgba(255,255,255,.4)",w:2},dead:{s:"rgba(232,74,42,.3)",w:1.2,d:"4 3"}};
 
 var NS="http://www.w3.org/2000/svg";
 function mk(n,a){var e=document.createElementNS(NS,n),k;for(k in a)e.setAttribute(k,a[k]);return e;}
@@ -197,29 +197,29 @@ function draw(){
     var on=active===c.id, faded=!!UNUSED[c.id]&&view==="before"&&!on;
     var g=mk("g",{"class":"box",tabindex:"0",role:"button","aria-pressed":on?"true":"false",
                   "aria-label":c.label+", "+c.tag});
-    if(faded)g.setAttribute("opacity",".75");
+    if(faded)g.setAttribute("opacity",".85");
     var rect=mk("rect",{x:c.x,y:c.y,width:c.w,height:c.h,rx:8,
-      fill:on?c.col+"20":"rgba(255,255,255,.03)",
-      stroke:on?c.col:(faded?"rgba(255,255,255,.18)":"rgba(255,255,255,.11)"),
-      "stroke-width":on?1.5:1});
+      fill:on?c.col+"2c":(faded?"rgba(255,255,255,.02)":c.col+"14"),
+      stroke:on?c.col:(faded?"rgba(255,255,255,.25)":c.col+"90"),
+      "stroke-width":on?2:1.3});
     if(faded)rect.setAttribute("stroke-dasharray","4 3");
     g.appendChild(rect);
 
     /* icon art is drawn on a 24 unit grid, scaled to 16 and hung off the top */
     var ig=mk("g",{transform:"translate("+(cx(c)-8)+","+(c.y+5)+") scale(0.6667)",
-      fill:"none",stroke:on?c.col:(faded?"rgba(255,255,255,.35)":"rgba(255,255,255,.4)"),
-      "stroke-width":1.7,"stroke-linecap":"round","stroke-linejoin":"round"});
+      fill:"none",stroke:faded?"rgba(255,255,255,.45)":c.col,
+      "stroke-width":1.8,"stroke-linecap":"round","stroke-linejoin":"round"});
     ig.appendChild(mk("path",{d:ICON[c.ic]}));
     g.appendChild(ig);
 
     var t1=mk("text",{x:cx(c),y:c.y+38,"text-anchor":"middle","font-size":11,"font-weight":600,
       "font-family":"DM Sans,system-ui,sans-serif",
-      fill:on?"rgba(255,255,255,.95)":(faded?"rgba(255,255,255,.65)":"rgba(255,255,255,.72)")});
+      fill:on?"#fff":(faded?"rgba(255,255,255,.68)":"rgba(255,255,255,.93)")});
     t1.textContent=c.label; g.appendChild(t1);
 
     var t2=mk("text",{x:cx(c),y:c.y+52,"text-anchor":"middle","font-size":8.5,
       "font-family":"DM Sans,system-ui,sans-serif",
-      fill:on?"rgba(255,255,255,.48)":"rgba(255,255,255,.28)"});
+      fill:on?"rgba(255,255,255,.68)":(faded?"rgba(255,255,255,.42)":"rgba(255,255,255,.58)")});
     t2.textContent=c.sub; g.appendChild(t2);
 
     function pick(){active=(active===c.id)?null:c.id;draw();}
