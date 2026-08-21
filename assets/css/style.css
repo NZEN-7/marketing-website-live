@@ -314,6 +314,19 @@ table.data td:first-child{font-weight:600;}
 .quote{border-left:5px solid var(--td-orange);padding:8px 0 8px 22px;font-size:1.3rem;font-weight:600;font-style:italic;color:var(--td-black);margin:0 0 .6em;}
 .section--dark .quote{color:#fff;}
 .quote-attr{font-weight:800;font-style:normal;color:var(--td-deep);}
+
+/* Big single-line statement. For a sentence that carries the whole argument
+   on its own, so it is not competing with a heading or buried in a para. */
+.statement{max-width:900px;margin:0 auto;text-align:center;font-weight:800;
+  line-height:1.22;letter-spacing:-.01em;font-size:clamp(1.35rem,3.4vw,2.1rem);
+  color:var(--td-black);}
+.statement em{font-style:normal;color:var(--td-orange);}
+.statement__sub{text-align:center;margin:12px auto 0;max-width:640px;font-size:.95rem;
+  color:var(--td-grey);}
+.section--dark .statement,body.dark .statement{color:#fff;}
+/* body.dark em is more specific than .statement em, so restate it here */
+.section--dark .statement em,body.dark .statement em{color:var(--td-orange);}
+.section--dark .statement__sub,body.dark .statement__sub{color:#b6a89b;}
 .section--dark .quote-attr{color:var(--td-gold);}
 
 /* ---------- Animation embed ----------
