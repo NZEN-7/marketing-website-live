@@ -39,10 +39,10 @@ const JOBS = [
     note: "the finished outdoor unit against the rendered wall",
   },
   {
-    from: "Install 1/IMG_2513.JPG",
-    to: "ute-dawn.webp",
+    from: "Install 1/IMG_2517.JPG",
+    to: "ute-sunrise.webp",
     width: 1600,
-    note: "the branded ute loaded at dawn, rural road. Wider than the rest: it is the gallery hero.",
+    note: "the branded ute loaded at sunrise, plate readable. Gallery hero. Replaced IMG_2513 (19 Aug); new filename because images carry a year-long cache.",
   },
   {
     from: "Install 1/IMG_2798.JPG",
