@@ -117,6 +117,25 @@
     upgradePartnerLogos();
   }
 
+  /* Embedded diagrams whose height depends on their own width (the SVG keeps
+     a fixed aspect) tell us how tall they actually are. Opt in per iframe with
+     data-autoheight; the height in style.css is the pre-JS fallback. */
+  window.addEventListener("message", function (e) {
+    if (e.origin !== window.location.origin) return;
+    var d = e.data;
+    if (!d || d.type !== "td:frameHeight") return;
+    var h = Number(d.height);
+    if (!isFinite(h)) return;
+    h = Math.max(200, Math.min(2000, Math.round(h)));
+    var frames = document.querySelectorAll("iframe[data-autoheight]");
+    for (var i = 0; i < frames.length; i++) {
+      if (frames[i].contentWindow === e.source) {
+        frames[i].style.height = h + "px";
+        return;
+      }
+    }
+  });
+
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", inject);
   } else {

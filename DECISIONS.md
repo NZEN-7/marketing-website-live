@@ -28,6 +28,7 @@ Ranked by what it costs to leave them open. Each is also a Notion row.
 | E2 | Live demo vs static display (Tech23, Everything Electric, Boroondara Expo) | Notion says Critical, target 14 Aug, **overdue**. Same decision three times | Expo prep |
 | W1 | Publish the price, or keep the anchor vague | Open | A3, D1 |
 | W2 | Republish per-kWh storage cost with a public source | Open, reverses the 1 Aug "too exposing" call | A3 |
+| W3 | Thermal store capacity: the Wix before/after graphic says **60 kWh**, the site says **35 kWh** everywhere else | Open. Ported the graphic on 35 kWh to stay self-consistent; if 60 is the right number it is the whole site that needs changing, not the graphic | Every capacity claim |
 
 ### Settled 19 Aug 2026
 
@@ -58,6 +59,31 @@ to rot, or this recurs.
 ---
 
 ## Changelog
+
+### 21 Aug 2026, how-it-works page
+
+- **The AI concept render is off `hydronic/how-it-works`.** Replaced with the
+  real install (IMG_2793): the branded store and heat pump against the wall of
+  the Hawthorn home. `product-unit.webp` is still on two blog pages, tracked in
+  `MISSING-MEDIA.md`.
+- **Ported the Wix before/after graphic** to `assets/animations/
+  hydronic-before-after.html`, vanilla JS. The original pulled React off the
+  unpkg CDN on every page load; nothing else on this site does that, so it was
+  rewritten rather than pasted. Deliberate changes: brand orange to #FF9C00,
+  emoji icons to flat stroked SVG, em dashes out, the unsupported "gas up 40%+
+  in five years" line dropped, and store capacity **60 kWh to 35 kWh** to match
+  the rest of the site (see W3, it may be 35 that is wrong).
+- **Frames can now size themselves.** The card's height moves with its own
+  width, because the SVG holds a fixed aspect ratio, so no pair of CSS
+  breakpoints tracks it: a height that fits at 620px clips at 505px and leaves
+  200px of dead space on a phone. The diagram posts `td:frameHeight` and
+  `site.js` sizes any `iframe[data-autoheight]` whose `contentWindow` matches
+  the message source, same-origin only. The style.css height stays as the
+  pre-JS fallback. Reusable, but only this one iframe opts in today.
+- Copy review feedback now lands in `feedback/<date>-copy-review/`, one file
+  per reviewer, and `scripts/dump-copy.js` writes that path into the pack's
+  own instructions so reviewers do not have to be told separately.
+
 
 ### 19 Aug 2026, Boroondara evidence pass
 - Peak window corrected 4-9pm to **5pm to 9pm** on `index.html` and

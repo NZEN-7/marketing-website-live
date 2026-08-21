@@ -17,7 +17,7 @@
 <link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png?v=8">
 <link rel="preload" href="/assets/fonts/Montserrat-Black.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/Montserrat-Regular.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/assets/css/style.css?v=24">
+<link rel="stylesheet" href="/assets/css/style.css?v=25">
 </head>
 <body class="dark">
 <header id="site-header"></header>
@@ -60,9 +60,20 @@
       <p>Thermal Dawn replaces just the heat source. Your pipes, your radiators, your zones, your thermostats, all stay exactly as they are. We connect our system where your boiler was, and from that point on your home is heated by stored solar energy instead of burning gas.</p>
     </div>
     <div class="wrap" style="margin-top:26px">
-      <figure class="figure" style="max-width:720px;margin:6px auto 0">
-        <img src="/assets/img/product-unit.webp" alt="A Thermal Dawn thermal store and heat pump installed beside a home, replacing the gas boiler" width="1024" height="1024" loading="lazy">
+      <!-- Real install (Nick, 21 Aug), replacing the AI concept render that was
+           here. Portrait, so the frame is narrower than the old square. -->
+      <figure class="figure" style="max-width:460px;margin:6px auto 0">
+        <img src="/assets/img/install-store-heatpump.webp" alt="A Thermal Dawn thermal store and heat pump installed against the wall of a home, where the gas boiler used to be" width="1100" height="1467" loading="lazy">
+        <figcaption>The thermal store and heat pump in place at a Hawthorn home, plumbed into the hydronic circuit that was already there.</figcaption>
       </figure>
+    </div>
+    <div class="wrap" style="margin-top:30px">
+      <div class="panel-dark">
+        <div class="embed embed--beforeafter">
+          <iframe data-autoheight src="/assets/animations/hydronic-before-after.html?v=1" title="Interactive diagram: a gas hydronic system compared with the same system running on Thermal Dawn" loading="lazy" scrolling="no"></iframe>
+        </div>
+        <p class="embed__cap" style="color:#c9c2bb;margin-bottom:0">Interactive: switch between <strong>Gas Boiler</strong> and <strong>Thermal Dawn</strong>, and select any component to see what happens to it.</p>
+      </div>
     </div>
   </section>
 
@@ -176,7 +187,7 @@
       <p>Most existing gas hydronic systems are straightforward Thermal Dawn retrofits. Here's what our engineers assess to confirm compatibility and design your installation:</p>
       <div class="card">
         <h3>Flow temperature requirements</h3>
-        <p>Most existing radiator systems in Australia were designed around 70–80°C gas-boiler temperatures, though plenty run comfortably lower, especially in well-insulated homes. The refrigerant we specify sets your ceiling:</p>
+        <p>Most existing radiator systems in Australia were designed around 70 to 80°C gas-boiler temperatures, though plenty run comfortably lower, especially in well-insulated homes. The refrigerant we specify sets your ceiling:</p>
         <ul>
           <li><strong>R290 reaches 70°C.</strong> That matches what most gas boilers actually run at, so your existing radiators work as they are, no resizing.</li>
           <li><strong>R32 tops out around 55°C.</strong> Ideal for underfloor and generously sized radiators, and the more efficient choice when your system suits it.</li>
@@ -227,7 +238,7 @@
       <ol>
         <li><strong>Free site assessment</strong>: we confirm compatibility, placement, and capacity, and answer every question. No obligation.</li>
         <li><strong>Fixed quote</strong>: a single installed price with no surprises. Nothing to pay until you approve it. Reserve your place in the queue with a fully refundable <strong>$190 deposit</strong>.</li>
-        <li><strong>Unit build &amp; order</strong>: your system is configured and built for your home. <em>(Current lead time: 6–10 weeks.)</em></li>
+        <li><strong>Unit build &amp; order</strong>: your system is configured and built for your home. <em>(Current lead time: 6 to 10 weeks.)</em></li>
         <li><strong>Install day</strong>: most homes are done in <strong>one to two days</strong>. We remove your old gas boiler, install the thermal store and heat pump, and connect to your existing pipework, with electrical connection completed by a licensed electrician, then commission the system across every zone. Homes with more complex pipework or a switchboard upgrade may take a day longer, we flag that in your quote.</li>
         <li><strong>Your old gas system</strong>: we remove and dispose of the boiler. A qualified, licensed plumber caps the gas line, arranged through us or by your own tradesperson. Disconnecting the gas meter to cut the daily supply charge entirely is optional, we'll walk you through whether it's worth it for you.</li>
         <li><strong>First winter</strong>: the system learns your home and gets more efficient as it goes. We're on hand through the first months, direct engineering access, not a call centre.</li>
@@ -299,6 +310,6 @@
 </main>
 <footer id="site-footer" class="site-footer"></footer>
 <script src="/assets/js/config.js?v=8" defer></script>
-<script src="/assets/js/site.js?v=10" defer></script>
+<script src="/assets/js/site.js?v=11" defer></script>
 </body>
 </html>

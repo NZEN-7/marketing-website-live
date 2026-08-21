@@ -51,6 +51,12 @@ const JOBS = [
     note: "THERMAL DAWN brand plate on the installed enclosure. EXIF-rotated.",
   },
   {
+    from: "Install 1/IMG_2793.JPG",
+    to: "install-store-heatpump.webp",
+    width: 1100,
+    note: "the real install: branded thermal store on the paving, heat pump above, autumn vine on the wall. Portrait once EXIF is baked. Replaces the AI concept render on hydronic/how-it-works.",
+  },
+  {
     from: "Install 1/IMG_2976.JPG",
     to: "pipework-valve.webp",
     width: 1200,

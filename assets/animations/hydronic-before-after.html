@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Thermal Dawn, Same Pipes Smarter Heat Source</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+/* Ported from the Wix embed of the same graphic (React off the unpkg CDN) to
+   plain vanilla JS so it carries no third-party runtime. Deliberate changes
+   from the original, see BUILD-NOTES:
+     - brand orange moved #E87C2A -> #FF9C00 (Gage, 18 Aug)
+     - emoji icons -> flat stroked SVG (the flat, non-shiny design direction)
+     - store capacity 60 kWh -> 35 kWh, to match the rest of the site
+     - the unsupported "gas up 40%+ in five years" line dropped
+     - em dashes removed (site rule: the copy dump asserts zero)
+   Both views reserve the note strip so switching does not jump the layout,
+   and the card posts its real height up to site.js, which sizes the frame. */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%;max-width:100%;overflow-x:hidden;background:#0f0808}
+body{display:flex;justify-content:center;padding:16px;font-family:'DM Sans',system-ui,sans-serif}
+.card{width:100%;max-width:620px;background:#0f0808;color:rgba(255,255,255,.88);
+  border:1px solid rgba(255,255,255,.07);border-radius:16px;overflow:hidden}
+.head{padding:20px 24px 12px}
+.eyebrow{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.12em;
+  text-transform:uppercase;color:#FF9C00;margin-bottom:6px}
+.title{font-size:18px;font-weight:600;letter-spacing:-.02em;margin-bottom:14px}
+.seg{display:flex;background:rgba(255,255,255,.05);border-radius:8px;padding:3px;width:fit-content;margin-bottom:6px}
+.seg button{padding:7px 22px;border-radius:6px;border:0;background:transparent;color:rgba(255,255,255,.4);
+  font-family:'DM Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.08em;
+  text-transform:uppercase;cursor:pointer}
+.seg button:focus-visible{outline:2px solid #FF9C00;outline-offset:2px}
+.seg button[aria-pressed="true"][data-v="before"]{background:#E84A2A22;color:#E84A2A;outline:1px solid #E84A2A44}
+.seg button[aria-pressed="true"][data-v="after"]{background:#2EC68A22;color:#2EC68A;outline:1px solid #2EC68A44}
+.hint{font-size:11px;color:rgba(255,255,255,.4)}
+.stage{padding:0 24px}
+.stage svg{display:block;width:100%}
+.box{cursor:pointer}
+.box:focus-visible{outline:none}
+.box:focus-visible rect{stroke:#FF9C00;stroke-width:2}
+.note{margin:0 24px 12px;padding:10px 14px;border-radius:8px;font-size:12px;line-height:1.5;
+  background:rgba(232,74,42,.06);border:1px solid rgba(232,74,42,.15);color:rgba(255,255,255,.5)}
+.note[hidden]{display:block;visibility:hidden}
+.info{margin:0 24px 24px;min-height:90px;padding:16px 18px;border-radius:10px;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
+.info__h{display:flex;align-items:center;margin-bottom:8px}
+.info__h .nm{font-weight:600;font-size:14px}
+.tag{font-size:9px;font-family:'DM Mono',monospace;font-weight:700;letter-spacing:.1em;
+  border-radius:3px;padding:1px 5px;margin-left:6px}
+.info__b{font-size:13px;line-height:1.65;color:rgba(255,255,255,.72)}
+.info__idle{font-size:13px;line-height:1.65;color:rgba(255,255,255,.4)}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="head">
+    <div class="eyebrow">Thermal Dawn, Hydronic System</div>
+    <div class="title">Same Pipes. Smarter Heat Source.</div>
+    <div class="seg" role="group" aria-label="Choose a system">
+      <button type="button" data-v="before" aria-pressed="true">Gas Boiler</button>
+      <button type="button" data-v="after" aria-pressed="false">Thermal Dawn</button>
+    </div>
+    <div class="hint">Select any component to learn more</div>
+  </div>
+  <div class="stage"><svg id="svg" viewBox="0 0 510 470" role="img" aria-label="System diagram"></svg></div>
+  <div class="note" id="note">You have solar and a battery, but your heating still burns gas. None of that clean energy is reaching your biggest load.</div>
+  <div class="info" id="info"></div>
+</div>
+<script>
+(function(){
+"use strict";
+var RED="#E84A2A", GREEN="#2EC68A", ORANGE="#FF9C00", GREY="#6B7280";
+var TAGC={REPLACED:RED,REMOVED:RED,NEW:GREEN,UNLOCKED:GREEN,STAYS:GREY,UNUSED:GREY,OPTIONAL:ORANGE};
+
+var cx=function(c){return c.x+c.w/2}, cy=function(c){return c.y+c.h/2};
+var R=function(c){return c.x+c.w}, B_=function(c){return c.y+c.h};
+var T=function(c){return c.y}, L=function(c){return c.x};
+
+/* The right-hand outputs and the solar/battery pair sit on identical
+   coordinates in both views, so switching reads as a swap of the heat
+   source alone rather than a redrawn diagram. */
+var S={
+  radiator:{x:385,y:30,w:115,h:60}, underfloor:{x:385,y:148,w:115,h:60},
+  fcu:{x:385,y:265,w:115,h:65},     hotwater:{x:385,y:388,w:115,h:60},
+  solar:{x:20,y:390,w:115,h:60},    battery:{x:165,y:390,w:115,h:60}
+};
+var TRUNK=330;
+function mix(a,b){var o={},k;for(k in a)o[k]=a[k];for(k in b)o[k]=b[k];return o}
+
+var ICON={
+  flame:"M12 3c3 4 5 6 5 9a5 5 0 0 1-10 0c0-1.6.8-3 2-4 .3 1.2 1 2 2 2.3C11.4 8 11 5.6 12 3z",
+  rad:"M5 5v14M9.7 5v14M14.3 5v14M19 5v14M3 8.5h18M3 15.5h18",
+  floor:"M4 6h16M4 12h16M4 18h16M20 6v6M4 12v6",
+  fan:"M4 7.5h13a2.5 2.5 0 1 0-2.5-2.5M4 12h9M4 16.5h13a2.5 2.5 0 1 1-2.5 2.5",
+  drop:"M12 3.5s5.5 6.2 5.5 9.7a5.5 5.5 0 0 1-11 0C6.5 9.7 12 3.5 12 3.5z",
+  tank:"M6 7.5a6 2.5 0 0 1 12 0v9a6 2.5 0 0 1-12 0zM6 7.5a6 2.5 0 0 0 12 0M9.5 12h5",
+  bolt:"M13 2.5 5 14h5.5L9.5 21.5 18 10h-5.5z",
+  sun:"M12 8.2a3.8 3.8 0 1 0 0 7.6 3.8 3.8 0 0 0 0-7.6zM12 2.5v2.4M12 19.1v2.4M4.2 12H1.8M22.2 12h-2.4M6.5 6.5 4.8 4.8M19.2 19.2l-1.7-1.7M6.5 17.5l-1.7 1.7M19.2 4.8l-1.7 1.7",
+  batt:"M3.5 8h14v8h-14zM17.5 10.5h2.5v3h-2.5zM6.5 10.5v3M10 10.5v3"
+};
+
+var BEFORE=[
+  {id:"gas",label:"Gas Connection",sub:"Supply charge plus usage",ic:"flame",x:20,y:30,w:115,h:60,col:RED,tag:"REMOVED",
+   info:"A gas connection costs you a daily supply charge before you burn a single unit, on top of what the gas itself costs. Switching to Thermal Dawn removes the connection and that standing cost with it."},
+  {id:"boiler",label:"Gas Boiler",sub:"Burns gas to heat water",ic:"flame",x:155,y:25,w:115,h:68,col:RED,tag:"REPLACED",
+   info:"Your gas boiler makes hot water by burning gas. It is the only part of your system Thermal Dawn replaces."},
+  mix(S.radiator,{id:"radiator",label:"Radiators",sub:"Warm water circulates",ic:"rad",col:GREY,tag:"STAYS",
+   info:"Your radiators stay exactly as they are. Thermal Dawn connects to your existing hydronic pipework, so nothing gets resized or replaced."}),
+  mix(S.underfloor,{id:"underfloor",label:"Underfloor",sub:"Radiant heat circuits",ic:"floor",col:GREY,tag:"STAYS",
+   info:"Underfloor circuits stay exactly as they are. The warm water running through them simply comes from a cheaper source."}),
+  mix(S.solar,{id:"solar_b",label:"Solar Panels",sub:"Generating, but not heating",ic:"sun",col:GREY,tag:"UNUSED",
+   info:"Your panels generate clean energy all day, and none of it reaches your heating. The boiler burns gas regardless, and the daytime surplus is exported for a feed-in rate worth very little."}),
+  mix(S.battery,{id:"battery_b",label:"Home Battery",sub:"Stores electricity, not heat",ic:"batt",col:GREY,tag:"UNUSED",
+   info:"Even with a battery, your heating still runs on gas. The battery covers lights and appliances, while your largest energy load stays on fossil fuel."})
+];
+var UNUSED={solar_b:1,battery_b:1};
+var Bx={};BEFORE.forEach(function(c){Bx[c.id]=c});
+
+var AFTER=[
+  {id:"heatpump",label:"Heat Pump",sub:"Runs on daytime solar",ic:"bolt",x:20,y:30,w:115,h:60,col:GREEN,tag:"NEW",
+   info:"An efficient heat pump takes the boiler's place. It runs in the middle of the day on solar you were otherwise exporting, and it does cooling in summer as well."},
+  {id:"store",label:"Thermal Store",sub:"35 kWh of stored heat",ic:"tank",x:155,y:25,w:115,h:68,col:GREEN,tag:"NEW",
+   info:"The thermal store is the heart of the system. It holds heat, not electricity, and enough of it to carry the evening and overnight in most Australian homes without drawing from the grid."},
+  {id:"controls",label:"Smart Controls",sub:"Schedules around your tariff",ic:"fan",x:20,y:155,w:115,h:60,col:GREEN,tag:"NEW",
+   info:"The controls decide when to charge the store: reading the forecast, your tariff windows and how much heat the house has left, then charging on solar or on the cheapest hours overnight. It runs itself."},
+  mix(S.solar,{id:"solar_a",label:"Solar Panels",sub:"Now powering your heating",ic:"sun",col:GREEN,tag:"UNLOCKED",
+   info:"Your existing panels now power your biggest load. Instead of exporting the surplus for a feed-in rate worth very little, you keep it as heat for the evening."}),
+  mix(S.battery,{id:"battery_a",label:"Home Battery",sub:"Part of the whole picture",ic:"batt",col:GREEN,tag:"UNLOCKED",
+   info:"A battery works alongside the thermal store rather than against it: battery for appliances, thermal store for heating, cooling and hot water. It also means a smaller battery goes further."}),
+  mix(S.radiator,{id:"radiator2",label:"Radiators",sub:"Unchanged, stay as-is",ic:"rad",col:GREY,tag:"STAYS",
+   info:"Your radiators stay exactly as they are. Same panels, same pipework, no resizing."}),
+  mix(S.underfloor,{id:"underfloor2",label:"Underfloor",sub:"Unchanged, stay as-is",ic:"floor",col:GREY,tag:"STAYS",
+   info:"Underfloor circuits stay exactly as they are. Same radiant comfort, powered by stored solar instead of gas."}),
+  mix(S.fcu,{id:"fcu",label:"Fan Coil Units",sub:"Ducted or non-ducted",ic:"fan",col:ORANGE,tag:"OPTIONAL",
+   info:"Fan coil units add heating and cooling to rooms with no radiator or underfloor circuit. Wall-mounted, ceiling cassette, or connected to ducting you already have."}),
+  mix(S.hotwater,{id:"hotwater",label:"Hot Water",sub:"Optional add-on",ic:"drop",col:ORANGE,tag:"OPTIONAL",
+   info:"The same thermal store can run your domestic hot water, taking out the gas hot water unit in the same visit. Worth raising at your site assessment."})
+];
+var Ax={};AFTER.forEach(function(c){Ax[c.id]=c});
+
+function beforePipes(){return[
+  {x1:R(Bx.gas),y1:cy(Bx.radiator),x2:L(Bx.boiler),y2:cy(Bx.radiator),k:"gas"},
+  {x1:R(Bx.boiler),y1:cy(Bx.radiator),x2:TRUNK,y2:cy(Bx.radiator),k:"warm"},
+  {x1:TRUNK,y1:cy(Bx.radiator),x2:TRUNK,y2:cy(Bx.underfloor),k:"warm"},
+  {x1:TRUNK,y1:cy(Bx.radiator),x2:L(Bx.radiator),y2:cy(Bx.radiator),k:"warm"},
+  {x1:TRUNK,y1:cy(Bx.underfloor),x2:L(Bx.underfloor),y2:cy(Bx.underfloor),k:"warm"},
+  {x1:cx(Bx.solar_b),y1:T(Bx.solar_b),x2:cx(Bx.solar_b),y2:T(Bx.solar_b)-40,k:"dead"},
+  {x1:cx(Bx.battery_b),y1:T(Bx.battery_b),x2:cx(Bx.battery_b),y2:T(Bx.battery_b)-40,k:"dead"}
+];}
+function afterPipes(){return[
+  {x1:cx(Ax.solar_a),y1:T(Ax.solar_a),x2:cx(Ax.solar_a),y2:B_(Ax.controls),k:"cold"},
+  {x1:L(Ax.battery_a),y1:cy(Ax.battery_a),x2:R(Ax.solar_a),y2:cy(Ax.battery_a),k:"cold"},
+  {x1:cx(Ax.controls),y1:T(Ax.controls),x2:cx(Ax.heatpump),y2:B_(Ax.heatpump),k:"cold"},
+  {x1:R(Ax.heatpump),y1:cy(Ax.radiator2),x2:L(Ax.store),y2:cy(Ax.radiator2),k:"warm"},
+  {x1:R(Ax.store),y1:cy(Ax.radiator2),x2:TRUNK,y2:cy(Ax.radiator2),k:"warm"},
+  {x1:TRUNK,y1:cy(Ax.radiator2),x2:TRUNK,y2:cy(Ax.hotwater),k:"warm"},
+  {x1:TRUNK,y1:cy(Ax.radiator2),x2:L(Ax.radiator2),y2:cy(Ax.radiator2),k:"warm"},
+  {x1:TRUNK,y1:cy(Ax.underfloor2),x2:L(Ax.underfloor2),y2:cy(Ax.underfloor2),k:"warm"},
+  {x1:TRUNK,y1:cy(Ax.fcu),x2:L(Ax.fcu),y2:cy(Ax.fcu),k:"warm"},
+  {x1:TRUNK,y1:cy(Ax.hotwater),x2:L(Ax.hotwater),y2:cy(Ax.hotwater),k:"warm"}
+];}
+
+var PIPE={gas:{s:"rgba(232,74,42,.7)",w:2},warm:{s:"rgba(255,156,0,.7)",w:2},
+          cold:{s:"rgba(255,255,255,.18)",w:2},dead:{s:"rgba(232,74,42,.2)",w:1,d:"4 3"}};
+
+var NS="http://www.w3.org/2000/svg";
+function mk(n,a){var e=document.createElementNS(NS,n),k;for(k in a)e.setAttribute(k,a[k]);return e;}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;");}
+
+var svg=document.getElementById("svg"), info=document.getElementById("info"),
+    note=document.getElementById("note"), view="before", active=null;
+
+function draw(){
+  var list=view==="before"?BEFORE:AFTER, pipes=view==="before"?beforePipes():afterPipes();
+  while(svg.firstChild)svg.removeChild(svg.firstChild);
+
+  pipes.forEach(function(p){
+    var st=PIPE[p.k];
+    var l=mk("line",{x1:p.x1,y1:p.y1,x2:p.x2,y2:p.y2,stroke:st.s,"stroke-width":st.w});
+    if(st.d)l.setAttribute("stroke-dasharray",st.d);
+    svg.appendChild(l);
+  });
+
+  if(view==="before"){
+    [Bx.solar_b,Bx.battery_b].forEach(function(c){
+      var x=cx(c),y=T(c)-28,s=7;
+      [[x-s,y-s,x+s,y+s],[x+s,y-s,x-s,y+s]].forEach(function(a){
+        svg.appendChild(mk("line",{x1:a[0],y1:a[1],x2:a[2],y2:a[3],
+          stroke:"rgba(232,74,42,.8)","stroke-width":2.5,"stroke-linecap":"round"}));
+      });
+    });
+  }
+
+  list.forEach(function(c){
+    var on=active===c.id, faded=!!UNUSED[c.id]&&view==="before"&&!on;
+    var g=mk("g",{"class":"box",tabindex:"0",role:"button","aria-pressed":on?"true":"false",
+                  "aria-label":c.label+", "+c.tag});
+    if(faded)g.setAttribute("opacity",".75");
+    var rect=mk("rect",{x:c.x,y:c.y,width:c.w,height:c.h,rx:8,
+      fill:on?c.col+"20":"rgba(255,255,255,.03)",
+      stroke:on?c.col:(faded?"rgba(255,255,255,.18)":"rgba(255,255,255,.11)"),
+      "stroke-width":on?1.5:1});
+    if(faded)rect.setAttribute("stroke-dasharray","4 3");
+    g.appendChild(rect);
+
+    /* icon art is drawn on a 24 unit grid, scaled to 16 and hung off the top */
+    var ig=mk("g",{transform:"translate("+(cx(c)-8)+","+(c.y+5)+") scale(0.6667)",
+      fill:"none",stroke:on?c.col:(faded?"rgba(255,255,255,.35)":"rgba(255,255,255,.4)"),
+      "stroke-width":1.7,"stroke-linecap":"round","stroke-linejoin":"round"});
+    ig.appendChild(mk("path",{d:ICON[c.ic]}));
+    g.appendChild(ig);
+
+    var t1=mk("text",{x:cx(c),y:c.y+38,"text-anchor":"middle","font-size":11,"font-weight":600,
+      "font-family":"DM Sans,system-ui,sans-serif",
+      fill:on?"rgba(255,255,255,.95)":(faded?"rgba(255,255,255,.65)":"rgba(255,255,255,.72)")});
+    t1.textContent=c.label; g.appendChild(t1);
+
+    var t2=mk("text",{x:cx(c),y:c.y+52,"text-anchor":"middle","font-size":8.5,
+      "font-family":"DM Sans,system-ui,sans-serif",
+      fill:on?"rgba(255,255,255,.48)":"rgba(255,255,255,.28)"});
+    t2.textContent=c.sub; g.appendChild(t2);
+
+    function pick(){active=(active===c.id)?null:c.id;draw();}
+    g.addEventListener("click",pick);
+    g.addEventListener("keydown",function(e){
+      if(e.key==="Enter"||e.key===" "){e.preventDefault();pick();}
+    });
+    svg.appendChild(g);
+  });
+
+  note.hidden=(view!=="before");
+
+  var c=null;list.forEach(function(x){if(x.id===active)c=x;});
+  if(c){
+    info.style.background=c.col+"10";info.style.borderColor=c.col+"30";
+    /* UNLOCKED reads as EXISTING to a homeowner: the kit is already on the roof */
+    var shown=c.tag==="UNLOCKED"?"EXISTING":c.tag;
+    info.innerHTML='<div class="info__h"><span class="nm">'+esc(c.label)+'</span>'+
+      '<span class="tag" style="color:'+TAGC[c.tag]+';border:1px solid '+TAGC[c.tag]+'44">'+shown+'</span></div>'+
+      '<div class="info__b">'+esc(c.info)+'</div>';
+  }else{
+    info.style.background="rgba(255,255,255,.04)";info.style.borderColor="rgba(255,255,255,.08)";
+    info.innerHTML='<div class="info__idle">'+(view==="before"
+      ?"A standard gas hydronic system, even with solar and a battery on the house. Your biggest energy load is still running on gas, disconnected from the clean energy you already generate."
+      :"Thermal Dawn replaces the heat source and nothing else. Your pipes, radiators and underfloor circuits stay as they are. Fan coil units and hot water are optional add-ons.")+'</div>';
+  }
+  report();
+}
+
+/* The card's height moves with its width (the SVG keeps a fixed aspect) and
+   with how far the selected component's text wraps, so no pair of CSS
+   breakpoints tracks it honestly. Report the real height and let the parent
+   size the frame; the height in style.css stays as the pre-JS fallback. */
+function report(){
+  if(window.parent===window)return;
+  var h=Math.ceil(document.querySelector(".card").getBoundingClientRect().height)+32;
+  window.parent.postMessage({type:"td:frameHeight",height:h},window.location.origin);
+}
+window.addEventListener("resize",report);
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(report);
+
+[].forEach.call(document.querySelectorAll(".seg button"),function(b){
+  b.addEventListener("click",function(){
+    view=b.getAttribute("data-v");active=null;
+    [].forEach.call(document.querySelectorAll(".seg button"),function(o){
+      o.setAttribute("aria-pressed",o===b?"true":"false");});
+    draw();
+  });
+});
+draw();
+})();
+</script>
+</body>
+</html>
