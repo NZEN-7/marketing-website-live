@@ -204,6 +204,67 @@ console.log(`  ${pages.length} pages, ${words.toLocaleString()} words, ${(bytes 
 console.log(`  em dashes: ${emDashLines.length}, en dashes: ${enDashLines.length}, draft figures: ${draftLines.length}, curly quotes: ${curlyLines.length}`);
 console.log(`Read that file to review the copy. Report findings as path:line.`);
 
+/* ---------- copy that lives inside embedded interactives ------------------
+   The diagrams under assets/animations are iframed, so their strings never
+   appear in a page's own HTML and a reviewer reading the pack cannot see
+   them. They are still customer-facing copy: the component names, the
+   captions under them, and a paragraph of explanation for each one. Pull
+   them out and hang them off whichever page embeds the file.
+
+   Generated animations stay excluded, per the note on SKIP_PATHS: their
+   strings are reviewed in the builder that emits them, not here. */
+const ANIM_DIR = path.join(ROOT, "assets", "animations");
+
+function readInteractive(relSrc) {
+  const file = path.join(ROOT, relSrc.replace(/^\//, "").split("?")[0]);
+  if (!file.startsWith(ANIM_DIR) || !fs.existsSync(file)) return null;
+  const raw = fs.readFileSync(file, "utf8");
+  if (/GENERATED FILE/i.test(raw)) return null;
+
+  const lineOf = (idx) => raw.slice(0, idx).split("\n").length;
+  const out = [];
+  const seen = new Set();
+  const add = (label, text, idx) => {
+    const t = tidy(decode(String(text)));
+    if (!t || !hasWords(t) || seen.has(label + t)) return;
+    seen.add(label + t);
+    out.push({ label, text: t, n: lineOf(idx) });
+  };
+
+  /* static chrome: the heading, the toggle buttons, the standing note */
+  const bodyAt = raw.indexOf("<body");
+  if (bodyAt !== -1) {
+    const scriptAt = raw.indexOf("<script", bodyAt);
+    const tail = raw.slice(bodyAt, scriptAt === -1 ? undefined : scriptAt);
+    const re = />([^<>{}]{2,})</g;
+    let m;
+    while ((m = re.exec(tail))) add("chrome", m[1], bodyAt + m.index);
+  }
+
+  /* the component data: label / sub / info on each object literal */
+  const KEYS = { label: "name", sub: "caption", info: "detail" };
+  for (const key of Object.keys(KEYS)) {
+    const re = new RegExp(key + ':\\s*"((?:[^"\\\\]|\\\\.)*)"', "g");
+    let m;
+    while ((m = re.exec(raw))) add(KEYS[key], m[1].replace(/\\"/g, '"'), m.index);
+  }
+  return out.length
+    ? { rel: path.relative(ROOT, file).split(path.sep).join("/"), items: out }
+    : null;
+}
+
+/* map each page to the interactives it embeds */
+for (const p of pages) {
+  p.interactives = [];
+  const src = fs.readFileSync(path.join(ROOT, p.rel), "utf8");
+  const re = /<iframe[^>]*\ssrc="([^"]+)"/g;
+  let m;
+  while ((m = re.exec(src))) {
+    const got = readInteractive(m[1]);
+    if (got) p.interactives.push(got);
+  }
+}
+
 /* ---------- the reviewer pack: organised markdown, one file per page ------
    The txt dump above is tuned for one AI session reading everything at once.
    The pack is for HUMAN reviewers working a page at a time: same content,
@@ -249,6 +310,14 @@ for (const p of pages) {
     md.push("");
     for (const c of p.chartLabels) md.push(`- \`${p.rel}:${c.n}\` ${c.text}`);
   }
+  for (const iv of p.interactives || []) {
+    md.push("");
+    md.push(`## Embedded interactive: \`${iv.rel}\``);
+    md.push("");
+    md.push("Copy inside the diagram. It is iframed, so it never appears in this page's own HTML, but readers see it on the page.");
+    md.push("");
+    for (const it of iv.items) md.push(`- \`${iv.rel}:${it.n}\` *(${it.label})* ${it.text}`);
+  }
   fs.writeFileSync(path.join(PAGES_DIR, slug(p.rel) + ".md"), md.join("\n") + "\n", "utf8");
 }
 
@@ -276,6 +345,7 @@ idx.push("- No counting installs (no \"first\", \"second\", \"two homes live\").
 idx.push("- Origin claims scope to the store, controls and technology, never the whole system. The heat pump is sourced, not built.");
 idx.push("- The peak window is 5pm to 9pm, measured. Never 3pm or 4pm variants.");
 idx.push("- 70C flow temperature is a spec commitment, not a measurement. Do not rewrite it as measured.");
+idx.push("- The thermal store holds **35 kWh**. A 60 kWh figure came in with an old graphic and is wrong wherever it appears.");
 idx.push("- No warranty duration is stated anywhere, and a ten-year figure must never appear.");
 idx.push("- Batteries are framed as the wrong tool for heating, not as the enemy: \"one system instead of two\".");
 idx.push("- No em dashes, and no en dashes in ranges: write \"3 to 5 years\". Straight quotes. Contractions welcome. Australian spelling.");

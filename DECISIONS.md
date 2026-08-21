@@ -28,7 +28,14 @@ Ranked by what it costs to leave them open. Each is also a Notion row.
 | E2 | Live demo vs static display (Tech23, Everything Electric, Boroondara Expo) | Notion says Critical, target 14 Aug, **overdue**. Same decision three times | Expo prep |
 | W1 | Publish the price, or keep the anchor vague | Open | A3, D1 |
 | W2 | Republish per-kWh storage cost with a public source | Open, reverses the 1 Aug "too exposing" call | A3 |
-| W3 | Thermal store capacity: the Wix before/after graphic says **60 kWh**, the site says **35 kWh** everywhere else | Open. Ported the graphic on 35 kWh to stay self-consistent; if 60 is the right number it is the whole site that needs changing, not the graphic | Every capacity claim |
+
+### Settled 21 Aug 2026
+
+- **Thermal store capacity is 35 kWh.** Nick, 21 Aug: 35 is right, 60 is
+  wrong. The 60 kWh figure came in with the Wix before/after graphic and
+  never matched the site. Nothing live says 60; the ported graphic says 35,
+  as does every page. Two unreferenced copies of the old graphic still sit
+  in `assets/animations` carrying the React/CDN build (see below).
 
 ### Settled 19 Aug 2026
 
