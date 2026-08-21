@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Thermal Dawn, One Day As The AI Planned It</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+/* Animated proof chart for the intelligence page. Every figure here is
+   already published: the day chart is the Hawthorn Sunday 16 Aug 2026
+   telemetry from the Boroondara deck (2.6 compressor-hours, off from
+   1:45pm, 21.1C at 9pm), and 59-of-63 is the site's standing claim.
+   The curve is redrawn from that published chart, and the caption says
+   so. Never swap in new numbers here without the claims register.
+   Height is posted to site.js (td:frameHeight), same as the
+   before/after diagram; the inline height on the iframe is the no-JS
+   fallback. prefers-reduced-motion skips straight to the final frame. */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%;max-width:100%;overflow-x:hidden;background:#0f0808}
+body{display:flex;justify-content:center;padding:16px;font-family:'DM Sans',system-ui,sans-serif}
+.card{width:100%;max-width:640px;background:#0f0808;color:rgba(255,255,255,.9);
+  border:1px solid rgba(255,255,255,.07);border-radius:16px;overflow:hidden;position:relative}
+.head{padding:20px 24px 6px}
+.eyebrow{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.12em;
+  text-transform:uppercase;color:#FF9C00;margin-bottom:6px}
+.title{font-size:18px;font-weight:600;letter-spacing:-.02em}
+.sub{font-size:12.5px;color:rgba(255,255,255,.62);margin-top:4px}
+.stage{padding:8px 18px 0}
+.stage svg{display:block;width:100%}
+.legend{display:flex;gap:16px;flex-wrap:wrap;padding:8px 24px 0;font-size:11px;color:rgba(255,255,255,.65)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.k{width:14px;height:3px;border-radius:2px;display:inline-block}
+.grid-block{padding:18px 24px 4px}
+.grid-block h3{font-size:14px;font-weight:600;margin-bottom:2px}
+.grid-block .gsub{font-size:12px;color:rgba(255,255,255,.62);margin-bottom:12px}
+.dots{display:grid;grid-template-columns:repeat(21,1fr);gap:6px;max-width:480px}
+.dot{aspect-ratio:1;border-radius:50%;background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.14);transform:scale(.6);opacity:.4;
+  transition:background .25s,border-color .25s,transform .25s,opacity .25s}
+.dot.on{background:#2EC68A;border-color:#2EC68A;transform:scale(1);opacity:1;
+  box-shadow:0 0 6px rgba(46,198,138,.45)}
+.dot.miss{background:transparent;border-color:rgba(255,255,255,.3);transform:scale(1);opacity:.8}
+.score{display:flex;align-items:baseline;gap:8px;margin-top:14px}
+.score .n{font-family:'DM Mono',monospace;font-size:34px;font-weight:600;color:#2EC68A}
+.score .of{font-size:13px;color:rgba(255,255,255,.65)}
+.cap{padding:12px 24px 20px;font-size:11.5px;line-height:1.55;color:rgba(255,255,255,.5)}
+.replay{position:absolute;top:18px;right:18px;background:transparent;
+  border:1px solid rgba(255,255,255,.25);color:rgba(255,255,255,.65);
+  font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.08em;
+  text-transform:uppercase;border-radius:6px;padding:6px 12px;cursor:pointer}
+.replay:hover{border-color:#FF9C00;color:#FF9C00}
+</style>
+</head>
+<body>
+<div class="card">
+  <button class="replay" id="replay" type="button" hidden>Replay</button>
+  <div class="head">
+    <div class="eyebrow">Thermal Dawn Intelligence, measured field data</div>
+    <div class="title">One day, as the AI planned it.</div>
+    <div class="sub">Hawthorn, Sunday 16 August 2026. The system charged on cheap midday energy, switched the compressor off at 1:45pm, and the house was still 21.1&deg;C at 9pm.</div>
+  </div>
+  <div class="legend">
+    <span><i class="k" style="background:#3DAFE5"></i>Room temperature</span>
+    <span><i class="k" style="background:#FF9C00"></i>Compressor current</span>
+    <span><i class="k" style="background:rgba(232,74,42,.35);height:10px;border-radius:2px"></i>Evening peak, 5 to 9pm</span>
+  </div>
+  <div class="stage">
+    <svg id="chart" viewBox="0 0 600 330" role="img" aria-label="Chart of one measured day: room temperature rises to 25 degrees on midday charging, the compressor switches off at 1:45pm, and the room is still 21.1 degrees at 9pm, through the evening peak"></svg>
+  </div>
+  <div class="grid-block">
+    <h3>And it repeats, evening after evening.</h3>
+    <p class="gsub">Each dot is one evening. Green: the heat pump never ran between 5pm and 9pm.</p>
+    <div class="dots" id="dots" aria-hidden="true"></div>
+    <div class="score"><span class="n" id="score-n">0</span><span class="of">of the last 63 evenings with the heat pump off right through the 5pm to 9pm peak, measured across Hawthorn and Gippsland.</span></div>
+  </div>
+  <p class="cap">Redrawn from unit telemetry at 15-minute resolution: 2.6 compressor-hours that day against a 3.8-hour average. Storage carries the house through the evening instead of the heat pump.</p>
+</div>
+<script>
+(function(){
+"use strict";
+var NS="http://www.w3.org/2000/svg";
+function mk(n,a){var e=document.createElementNS(NS,n),k;for(k in a)e.setAttribute(k,a[k]);return e;}
+
+/* geometry */
+var X0=46,X1=584,Y0=20,Y1=236,CB=308;             /* temp plot + compressor baseline */
+var x=function(h){return X0+(h/24)*(X1-X0);};
+var yT=function(t){return Y1-((t-16)/10)*(Y1-Y0);};/* 16..26C */
+var yC=function(a){return CB-(a/18)*54;};          /* 0..18A */
+
+/* the day, redrawn from the published Hawthorn 16 Aug chart */
+var TEMP=[[0,20.2],[1,19.8],[2,19.3],[3,18.8],[4,18.3],[5,17.8],[6,17.3],[7,17.0],
+  [7.5,17.2],[8,18.0],[8.6,19.6],[9,20.3],[9.4,19.7],[10,19.5],[10.6,20.4],[11,21.2],
+  [12,22.6],[13,24.1],[13.75,24.8],[14.5,24.7],[15.5,24.3],[16.5,23.7],[17.5,23.0],
+  [18.5,22.3],[19.5,21.7],[20.5,21.3],[21,21.1],[22,20.9],[23,20.8],[24,20.8]];
+var COMP=[[8.75,9],[9,7],[10.5,9],[10.75,10],[11,10],[11.25,11],[11.5,11],[11.75,12],
+  [12,12],[12.25,13],[12.5,13],[12.75,17],[13,14],[13.25,13],[13.5,13]]; /* [startH, amps], 15-min bars */
+
+var svg=document.getElementById("chart"), dotsEl=document.getElementById("dots"),
+    scoreEl=document.getElementById("score-n"), replayBtn=document.getElementById("replay");
+var MISSES={9:1,23:1,41:1,55:1};  /* 4 of 63, fixed so the grid is stable */
+var reduced=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+var timers=[];
+function later(fn,ms){if(reduced){fn();}else{timers.push(setTimeout(fn,ms));}}
+
+function report(){
+  if(window.parent===window)return;
+  var h=Math.ceil(document.querySelector(".card").getBoundingClientRect().height)+32;
+  window.parent.postMessage({type:"td:frameHeight",height:h},window.location.origin);
+}
+window.addEventListener("resize",report);
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(report);
+
+function buildChart(){
+  while(svg.firstChild)svg.removeChild(svg.firstChild);
+
+  /* peak band + frame */
+  svg.appendChild(mk("rect",{x:x(17),y:Y0-6,width:x(21)-x(17),height:CB-Y0+6,
+    fill:"rgba(232,74,42,.10)",stroke:"rgba(232,74,42,.25)","stroke-width":1}));
+  var pb=mk("text",{x:(x(17)+x(21))/2,y:Y0+8,"text-anchor":"middle","font-size":9,
+    "font-family":"DM Mono,monospace","letter-spacing":".08em",fill:"rgba(232,74,42,.85)"});
+  pb.textContent="PEAK 5-9PM";svg.appendChild(pb);
+
+  /* gridlines + axes */
+  [17,20,23,26].forEach(function(t){
+    svg.appendChild(mk("line",{x1:X0,y1:yT(t),x2:X1,y2:yT(t),stroke:"rgba(255,255,255,.07)"}));
+    var l=mk("text",{x:X0-6,y:yT(t)+3,"text-anchor":"end","font-size":9,
+      "font-family":"DM Mono,monospace",fill:"rgba(255,255,255,.4)"});
+    l.textContent=t+"°";svg.appendChild(l);
+  });
+  [0,6,12,18,24].forEach(function(h){
+    var l=mk("text",{x:x(h),y:CB+16,"text-anchor":"middle","font-size":9,
+      "font-family":"DM Mono,monospace",fill:"rgba(255,255,255,.4)"});
+    l.textContent=(h===0?"12am":h===12?"12pm":h===24?"12am":h<12?h+"am":(h-12)+"pm");
+    svg.appendChild(l);
+  });
+  svg.appendChild(mk("line",{x1:X0,y1:CB,x2:X1,y2:CB,stroke:"rgba(255,255,255,.18)"}));
+
+  /* compressor bars, staggered grow */
+  var barW=(X1-X0)/96-1.5;
+  COMP.forEach(function(seg,i){
+    var bx=x(seg[0]),bh=CB-yC(seg[1]);
+    var r=mk("rect",{x:bx,y:CB-bh,width:Math.max(barW,3.5),height:bh,rx:1.5,
+      fill:"rgba(255,156,0,.85)"});
+    if(!reduced){r.setAttribute("transform","translate(0,"+bh+") scale(1,0)");
+      r.style.transition="transform .5s ease "+(0.5+i*0.06)+"s";}
+    svg.appendChild(r);
+    if(!reduced)requestAnimationFrame(function(){requestAnimationFrame(function(){
+      r.setAttribute("transform","translate(0,0) scale(1,1)");});});
+  });
+
+  /* temperature line, drawn left to right */
+  var d=TEMP.map(function(p,i){return (i?"L":"M")+x(p[0]).toFixed(1)+","+yT(p[1]).toFixed(1);}).join(" ");
+  var path=mk("path",{d:d,fill:"none",stroke:"#3DAFE5","stroke-width":2.5,
+    "stroke-linecap":"round","stroke-linejoin":"round"});
+  svg.appendChild(path);
+  if(!reduced){
+    var len=path.getTotalLength();
+    path.style.strokeDasharray=len;path.style.strokeDashoffset=len;
+    path.style.transition="stroke-dashoffset 3s ease .3s";
+    requestAnimationFrame(function(){requestAnimationFrame(function(){
+      path.style.strokeDashoffset="0";});});
+  }
+
+  /* annotations, timed to when the line reaches them */
+  function annotate(){
+    var offX=x(13.75);
+    var g=mk("g",{opacity:reduced?"1":"0"});
+    g.appendChild(mk("line",{x1:offX,y1:Y0+14,x2:offX,y2:CB,stroke:"rgba(255,255,255,.3)","stroke-dasharray":"3 3"}));
+    var t=mk("text",{x:offX-6,y:Y0+26,"text-anchor":"end","font-size":10,
+      "font-family":"DM Sans,system-ui,sans-serif",fill:"rgba(255,255,255,.8)"});
+    t.textContent="compressor off 1:45pm";g.appendChild(t);
+    svg.appendChild(g);
+    if(!reduced){g.style.transition="opacity .5s";
+      requestAnimationFrame(function(){g.style.opacity="1";});}
+  }
+  function endDot(){
+    var g=mk("g",{opacity:reduced?"1":"0"});
+    g.appendChild(mk("circle",{cx:x(21),cy:yT(21.1),r:4.5,fill:"#3DAFE5",
+      stroke:"#0f0808","stroke-width":2}));
+    var t=mk("text",{x:x(21),y:yT(21.1)-12,"text-anchor":"middle","font-size":10.5,
+      "font-weight":"600","font-family":"DM Sans,system-ui,sans-serif",fill:"#fff"});
+    t.textContent="21.1°C at 9pm";g.appendChild(t);
+    svg.appendChild(g);
+    if(!reduced){g.style.transition="opacity .5s";
+      requestAnimationFrame(function(){g.style.opacity="1";});}
+  }
+  later(annotate,2100);
+  later(endDot,3300);
+}
+
+function buildDots(){
+  dotsEl.innerHTML="";scoreEl.textContent=reduced?"59":"0";
+  var count=0;
+  for(var i=0;i<63;i++){
+    var dt=document.createElement("i");dt.className="dot";dotsEl.appendChild(dt);
+  }
+  var kids=dotsEl.children;
+  function light(i){
+    if(i>=63){replayBtn.hidden=false;report();return;}
+    if(MISSES[i]){kids[i].className="dot miss";}
+    else{kids[i].className="dot on";count++;scoreEl.textContent=count;}
+    later(function(){light(i+1);},reduced?0:36);
+  }
+  later(function(){light(0);},reduced?0:3800);
+  if(reduced){
+    for(var j=0;j<63;j++)kids[j].className=MISSES[j]?"dot miss":"dot on";
+    scoreEl.textContent="59";replayBtn.hidden=false;report();
+  }
+}
+
+function run(){
+  timers.forEach(clearTimeout);timers=[];
+  replayBtn.hidden=true;
+  buildChart();buildDots();report();
+}
+
+replayBtn.addEventListener("click",run);
+
+/* start when scrolled into view, once */
+var started=false;
+if(reduced||!("IntersectionObserver" in window)){run();}
+else{
+  var io=new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(e.isIntersecting&&!started){started=true;io.disconnect();run();}
+    });
+  },{threshold:0.35});
+  io.observe(document.querySelector(".card"));
+}
+report();
+})();
+</script>
+</body>
+</html>
