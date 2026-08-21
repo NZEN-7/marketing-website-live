@@ -175,7 +175,8 @@ const EXPORT_FLOW = [
      at the roof's own fall line to the eaves, drop vertically to the top
      of the battery (the continuation to the ground line hides behind the
      battery), then follow the base edge right and straight off into the
-     air to the FiT note. Waypoints measured via getScreenCTM:
+     air. No labels: the arrowhead carries it (Nick, 19 Aug).
+     Waypoints measured via getScreenCTM:
        (610.4,132) panel bottom edge, on the array's fall line
        (623,146.3) eaves, directly above the battery
        (623,259.6) ground line behind the battery (top face is at y226)
@@ -183,8 +184,6 @@ const EXPORT_FLOW = [
   '<g id="g-flow-export" style="opacity:0">',
   '  <path class="flow-line" style="stroke:var(--flow-export,#FF9C00)" d="M610.4,132 L623,146.3 L623,259.6 L740,194"/>',
   '  <path d="M740,194 l-9.9,1.6 M740,194 l-6.5,7.6" fill="none" stroke="#FF9C00" stroke-width="2" stroke-linecap="round" opacity="0.9"/>',
-  '  <text x="738" y="180" text-anchor="end" class="tag">To grid</text>',
-  '  <text x="738" y="168" text-anchor="end" class="temp" style="font-size:10px">near-zero FiT</text>',
   '</g>',
 ].join("\n");
 
