@@ -20,8 +20,19 @@ posture unified, "without touching the grid" removed sitewide, capacity
 corrected to 30 kWh (500L), install counting scrubbed, en dashes
 converted, adaptive-AI claim reviewed and kept.
 
-## Round 2 (open)
+## Round 2 (closed 21 Aug)
 
-Reviews of the current site go in this folder. Before flagging
-something, check `DECISIONS.md`: if it's already recorded as open or
-settled there, don't re-flag it.
+Sal and the Marketing & Growth agent both reviewed `hydronic/pricing`
+and landed on the same findings. Blended and applied in `46eb9ad`: the
+boiler-swap comparator that promised a complete install under $5,000,
+the running-cost overclaims contradicting the page's own table, the
+installer-scale wording, the missing $990 tier, and the sourced gas
+range. The dash checker's blind spot came out of the same round.
+
+Held items and the DECISIONS record correction are in `DECISIONS.md`.
+The two review files stay here as the record of what was raised.
+
+## Round 3
+
+Filed in `feedback/2026-08-22-copy-review/`, against the pack
+regenerated after the brief audit.
