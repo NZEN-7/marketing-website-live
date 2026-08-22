@@ -234,8 +234,8 @@ function readInteractive(relSrc) {
   const seen = new Set();
   const add = (label, text, idx) => {
     const t = tidy(decode(String(text)));
-    if (!t || !hasWords(t) || seen.has(label + t)) return;
-    seen.add(label + t);
+    if (!t || !hasWords(t) || seen.has(t)) return;
+    seen.add(t);
     out.push({ label, text: t, n: lineOf(idx) });
   };
 
@@ -255,6 +255,22 @@ function readInteractive(relSrc) {
     const re = new RegExp(key + ':\\s*"((?:[^"\\\\]|\\\\.)*)"', "g");
     let m;
     while ((m = re.exec(raw))) add(KEYS[key], m[1].replace(/\\"/g, '"'), m.index);
+  }
+
+  /* Prose that sits behind no key at all. intelligence-day.html keeps its
+     eight phase narrations in plain arrays, so the key rule above saw none
+     of them and the pack quietly under-reported the best copy on the page
+     (found 22 Aug). Anything that reads as a sentence is customer copy,
+     wherever it lives; code-shaped strings are filtered out. */
+  const CODEISH = /[<>{}]|rgba?\(|translate\(|scale\(|url\(|\d+px|#[0-9a-f]{3,8}\b|^[.#]/i;
+  const proseRe = /"((?:[^"\\]|\\.){15,}?)"/g;
+  let pm;
+  while ((pm = proseRe.exec(raw))) {
+    const v = pm[1].replace(/\\"/g, '"');
+    if (CODEISH.test(v)) continue;
+    if (!/[.!?]$/.test(v)) continue;       /* a sentence, not an identifier */
+    if (!/[a-z]\s+[a-z]/i.test(v)) continue; /* at least two words */
+    add("narration", v, pm.index);
   }
   return out.length
     ? { rel: path.relative(ROOT, file).split(path.sep).join("/"), items: out }
@@ -323,6 +339,8 @@ for (const p of pages) {
     md.push(`## Embedded interactive: \`${iv.rel}\``);
     md.push("");
     md.push("Copy inside the diagram. It is iframed, so it never appears in this page's own HTML, but readers see it on the page.");
+    md.push("");
+    md.push("_Extracted from the source: static markup, the component `label`/`sub`/`info` fields, and any string that reads as a sentence. Short UI labels held in JS variables can still slip through, so check the file itself before concluding something is missing._");
     md.push("");
     for (const it of iv.items) md.push(`- \`${iv.rel}:${it.n}\` *(${it.label})* ${it.text}`);
   }
