@@ -51,7 +51,7 @@ These were selected, resized, and converted to WebP in `assets/img/` so pages ar
 | `thermal-store-build.webp` | Pricing §3 | Photos/Build 1 (thermal store in manufacture) |
 | `detail-coil.webp` | Blog / technical | Photos/Build 1 (copper coil) |
 | `control-board.webp` | Intelligence §7 | Photos/Build 1 (Thermal Dawn control board) |
-| `brand-ute-dawn.webp` | Mission | Photos/Build 1 (branded ute at dawn) |
+| ~~`brand-ute-dawn.webp`~~ | **Resolved 22 Aug.** Mission now uses `ute-sunrise.webp`, which is the real branded-ute-at-dawn shot (`Build 1/IMG_2517.JPG`, byte-identical to the `Install 1` copy already converted). The old file is a PCB despite its name, so it was one of the filename/content mismatches; it is now unreferenced. |
 | `logo-black.*`, `logo-white.*` | Header / footer | CI/Logos |
 
 > Product-render shots are concept art of a wall-mounted unit. If you'd rather show the *actual* Hawthorn hardware, swap these for real install photos when available.
