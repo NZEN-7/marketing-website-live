@@ -22,7 +22,7 @@
   --white: rgba(255,255,255,0.88); --dim: rgba(255,255,255,0.3);
 }
 html, body { background: var(--bg); min-height: 100vh; font-family: 'DM Sans', sans-serif; color: var(--white); overflow-x: hidden; }
-.scene { display: flex; flex-direction: column; align-items: center; padding: 32px 20px 60px; max-width: 900px; margin: 0 auto; }
+.scene { display: flex; flex-direction: column; align-items: center; padding: 32px 20px 18px; max-width: 900px; margin: 0 auto; }
 .label-row { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--orange); margin-bottom: 10px; }
 .controls { display: flex; flex-direction: column; align-items: center; gap: 14px; margin-bottom: 28px; width: 100%; }
 .storage-toggle-wrap { display: flex; align-items: center; gap: 12px; }
@@ -659,9 +659,9 @@ body.grid-heat .pipe-static, body.charging .pipe-static, body.exporting .pipe-st
 
   <!-- INFO CARDS -->
   <div class="info-row">
-    <div class="info-card hl-o" id="card-0"><div class="ic-icon">☀️</div><div class="ic-title" id="c0-title">Daytime Charging</div><div class="ic-body" id="c0-body">Solar panels power the heat pump during the day, charging the thermal store while electricity is free.</div></div>
+    <div class="info-card hl-o" id="card-0"><div class="ic-icon">☀️</div><div class="ic-title" id="c0-title">Daytime Charging</div><div class="ic-body" id="c0-body">The heat pump charges the store when power is cheapest: your own solar, a free window, or late-night off-peak.</div></div>
     <div class="info-card"     id="card-1"><div class="ic-icon" id="c1-icon">◉</div><div class="ic-title" id="c1-title">30 kWh Stored</div><div class="ic-body" id="c1-body">The 500L store holds enough heat for an entire evening and overnight, with the heat pump off through the peak.</div></div>
-    <div class="info-card"     id="card-2"><div class="ic-icon" id="c2-icon">♨️</div><div class="ic-title" id="c2-title">Evening Comfort</div><div class="ic-body" id="c2-body">Heat pump switches off at sunset. Stored heat flows through radiators and underfloor all evening, no grid needed.</div></div>
+    <div class="info-card"     id="card-2"><div class="ic-icon" id="c2-icon">♨️</div><div class="ic-title" id="c2-title">Evening Comfort</div><div class="ic-body" id="c2-body">Heat pump off at sunset. Stored heat flows through radiators and underfloor all evening, through the priciest hours.</div></div>
   </div>
 </div>
 
@@ -692,9 +692,9 @@ body.grid-heat .pipe-static, body.charging .pipe-static, body.exporting .pipe-st
         s: 'See how Thermal Dawn captures daytime solar and delivers it as comfort after dark.',
         btnDay: 'Daytime charging', btnNight: 'Evening comfort',
         cards: [
-          { title:'Daytime Charging', icon:'\u2600\ufe0f', body:'Solar panels power the heat pump during the day, charging the thermal store while electricity is free.', hl:'hl-o' },
+          { title:'Daytime Charging', icon:'\u2600\ufe0f', body:'The heat pump charges the store when power is cheapest: your own solar, a free window, or late-night off-peak.', hl:'hl-o' },
           { title:'30 kWh Stored',    icon:'\u25c9',        body:'The 500L store holds enough heat for an entire evening and overnight, with the heat pump off through the peak.', hl:'' },
-          { title:'Evening Comfort',  icon:'\u2668\ufe0f', body:'Heat pump switches off at sunset. Stored heat flows through radiators and underfloor all evening, no grid needed.', hl:'' }
+          { title:'Evening Comfort',  icon:'\u2668\ufe0f', body:'Heat pump off at sunset. Stored heat flows through radiators and underfloor all evening, through the priciest hours.', hl:'' }
         ]
       },
       night: {
@@ -702,9 +702,9 @@ body.grid-heat .pipe-static, body.charging .pipe-static, body.exporting .pipe-st
         s: 'See how Thermal Dawn captures daytime solar and delivers it as comfort after dark.',
         btnDay: 'Daytime charging', btnNight: 'Evening comfort',
         cards: [
-          { title:'Daytime Charging', icon:'\u2600\ufe0f', body:'Solar panels power the heat pump during the day, charging the thermal store while electricity is free.', hl:'' },
+          { title:'Daytime Charging', icon:'\u2600\ufe0f', body:'The heat pump charges the store when power is cheapest: your own solar, a free window, or late-night off-peak.', hl:'' },
           { title:'30 kWh Stored',    icon:'\u25c9',        body:'The 500L store holds enough heat for an entire evening and overnight, with the heat pump off through the peak.', hl:'' },
-          { title:'Evening Comfort',  icon:'\u2668\ufe0f', body:'Heat pump switches off at sunset. Stored heat flows through radiators and underfloor all evening, no grid needed.', hl:'hl-g' }
+          { title:'Evening Comfort',  icon:'\u2668\ufe0f', body:'Heat pump off at sunset. Stored heat flows through radiators and underfloor all evening, through the priciest hours.', hl:'hl-g' }
         ]
       }
     },
@@ -948,6 +948,25 @@ body.grid-heat .pipe-static, body.charging .pipe-static, body.exporting .pipe-st
 
   applyState();
   startTimer();
+
+  /* Report our real height to site.js, the same contract the before/after
+     diagram and the day chart use, so the parent frame never has to guess.
+     Watching the scene rather than the window: the frame can change width
+     without a resize event reaching us, and this iframe has scrolling="no",
+     so a stale height either clips the cards or leaves dead black under them. */
+  function reportHeight(){
+    if(window.parent===window)return;
+    var el=document.querySelector('.scene');
+    if(!el)return;
+    var h=Math.ceil(el.getBoundingClientRect().height);
+    window.parent.postMessage({type:"td:frameHeight",height:h},window.location.origin);
+  }
+  window.addEventListener("resize",reportHeight);
+  if(window.ResizeObserver){
+    try{new ResizeObserver(function(){reportHeight();}).observe(document.querySelector('.scene'));}catch(e){}
+  }
+  if(document.fonts&&document.fonts.ready)document.fonts.ready.then(reportHeight);
+  reportHeight();
 })();
 </script>
 </body>

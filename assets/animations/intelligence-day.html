@@ -186,6 +186,14 @@ function report(){
   window.parent.postMessage({type:"td:frameHeight",height:h},window.location.origin);
 }
 window.addEventListener("resize",report);
+/* A window resize event is not enough: the frame can change width without
+   one reaching us, and then the card grows taller than the height we last
+   reported and gets clipped, because the iframe has scrolling="no".
+   Watch the card itself instead. */
+if(window.ResizeObserver){
+  try{new ResizeObserver(function(){report();}).observe(document.querySelector(".card"));}
+  catch(e){}
+}
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(report);
 
 var exFade=null;

@@ -21,20 +21,23 @@
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{min-height:100%;max-width:100%;overflow-x:hidden;background:#0f0808}
 body{display:flex;justify-content:center;padding:16px;font-family:'DM Sans',system-ui,sans-serif}
-.card{width:100%;max-width:620px;background:#0f0808;color:rgba(255,255,255,.88);
+.card{width:100%;max-width:780px;background:#0f0808;color:rgba(255,255,255,.88);
   border:1px solid rgba(255,255,255,.07);border-radius:16px;overflow:hidden}
 .head{padding:20px 24px 12px}
-.eyebrow{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.12em;
+.eyebrow{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.12em;
   text-transform:uppercase;color:#FF9C00;margin-bottom:6px}
-.title{font-size:18px;font-weight:600;letter-spacing:-.02em;margin-bottom:14px}
-.seg{display:flex;background:rgba(0,0,0,.35);box-shadow:inset 0 1px 3px rgba(0,0,0,.5);border-radius:8px;padding:3px;width:fit-content;margin-bottom:6px}
-.seg button{padding:7px 22px;border-radius:6px;border:0;background:transparent;color:rgba(255,255,255,.55);
-  font-family:'DM Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.08em;
-  text-transform:uppercase;cursor:pointer}
+.title{font-size:22px;font-weight:600;letter-spacing:-.02em;margin-bottom:16px}
+.seg{display:flex;gap:8px;background:rgba(0,0,0,.35);box-shadow:inset 0 1px 3px rgba(0,0,0,.5);border-radius:10px;padding:4px;width:fit-content;margin-bottom:10px}
+.seg button{padding:10px 26px;border-radius:7px;border:1px solid rgba(255,255,255,.18);
+  background:rgba(255,255,255,.06);color:rgba(255,255,255,.82);
+  font-family:'DM Mono',monospace;font-size:12.5px;font-weight:600;letter-spacing:.08em;
+  text-transform:uppercase;cursor:pointer;transition:all .18s ease}
+.seg button:hover{background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,156,0,.7);
+  box-shadow:0 0 12px rgba(255,156,0,.35)}
 .seg button:focus-visible{outline:2px solid #FF9C00;outline-offset:2px}
-.seg button[aria-pressed="true"][data-v="before"]{background:#E84A2A26;color:#ff6b4d;outline:1px solid #E84A2A66;box-shadow:0 1px 4px rgba(0,0,0,.4)}
-.seg button[aria-pressed="true"][data-v="after"]{background:#2EC68A26;color:#3fe6a5;outline:1px solid #2EC68A66;box-shadow:0 1px 4px rgba(0,0,0,.4)}
-.hint{font-size:11px;color:rgba(255,255,255,.55)}
+.seg button[aria-pressed="true"][data-v="before"]{background:#E84A2A2e;color:#ff8a70;border-color:#E84A2A;box-shadow:0 0 14px rgba(232,74,42,.45)}
+.seg button[aria-pressed="true"][data-v="after"]{background:#2EC68A2e;color:#5cf0ba;border-color:#2EC68A;box-shadow:0 0 14px rgba(46,198,138,.45)}
+.hint{font-size:12.5px;color:rgba(255,255,255,.6)}
 .stage{padding:0 24px}
 .stage svg{display:block;width:100%}
 .box{cursor:pointer;transition:filter .18s;filter:drop-shadow(0 2px 5px rgba(0,0,0,.55))}
@@ -42,18 +45,18 @@ body{display:flex;justify-content:center;padding:16px;font-family:'DM Sans',syst
 .box.is-on{filter:drop-shadow(0 0 8px var(--c,rgba(255,255,255,.25)))}
 .box:focus-visible{outline:none}
 .box:focus-visible rect{stroke:#FF9C00;stroke-width:2}
-.note{margin:0 24px 12px;padding:10px 14px;border-radius:8px;font-size:12px;line-height:1.5;
-  background:rgba(232,74,42,.09);border:1px solid rgba(232,74,42,.28);color:rgba(255,255,255,.72)}
+.note{margin:0 26px 14px;padding:12px 16px;border-radius:8px;font-size:13.5px;line-height:1.5;
+  background:rgba(232,74,42,.09);border:1px solid rgba(232,74,42,.28);color:rgba(255,255,255,.8)}
 .note[hidden]{display:none}
 .note--ok{background:rgba(46,198,138,.08);border-color:rgba(46,198,138,.3)}
 .info{margin:0 24px 24px;min-height:90px;padding:16px 18px;border-radius:10px;
   background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);box-shadow:0 3px 10px rgba(0,0,0,.35)}
 .info__h{display:flex;align-items:center;margin-bottom:8px}
-.info__h .nm{font-weight:600;font-size:14px}
+.info__h .nm{font-weight:600;font-size:16px}
 .tag{font-size:9px;font-family:'DM Mono',monospace;font-weight:700;letter-spacing:.1em;
   border-radius:3px;padding:1px 5px;margin-left:6px}
-.info__b{font-size:13px;line-height:1.65;color:rgba(255,255,255,.86)}
-.info__idle{font-size:13px;line-height:1.65;color:rgba(255,255,255,.62)}
+.info__b{font-size:14.5px;line-height:1.6;color:rgba(255,255,255,.88)}
+.info__idle{font-size:14.5px;line-height:1.6;color:rgba(255,255,255,.66)}
 </style>
 </head>
 <body>
@@ -277,6 +280,14 @@ function report(){
   window.parent.postMessage({type:"td:frameHeight",height:h},window.location.origin);
 }
 window.addEventListener("resize",report);
+/* A window resize event is not enough: the frame can change width without
+   one reaching us, and then the card grows taller than the height we last
+   reported and gets clipped, because the iframe has scrolling="no".
+   Watch the card itself instead. */
+if(window.ResizeObserver){
+  try{new ResizeObserver(function(){report();}).observe(document.querySelector(".card"));}
+  catch(e){}
+}
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(report);
 
 [].forEach.call(document.querySelectorAll(".seg button"),function(b){

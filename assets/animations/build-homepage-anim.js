@@ -256,9 +256,9 @@ ${v2Svg}
         s: 'See how Thermal Dawn captures daytime solar and delivers it as comfort after dark.',
         btnDay: 'Daytime charging', btnNight: 'Evening comfort',
         cards: [
-          { title:'Daytime Charging', icon:'\\u2600\\ufe0f', body:'Solar panels power the heat pump during the day, charging the thermal store while electricity is free.', hl:'hl-o' },
+          { title:'Daytime Charging', icon:'\\u2600\\ufe0f', body:'The heat pump charges the store when power is cheapest: your own solar, a free window, or late-night off-peak.', hl:'hl-o' },
           { title:'30 kWh Stored',    icon:'\\u25c9',        body:'The 500L store holds enough heat for an entire evening and overnight, with the heat pump off through the peak.', hl:'' },
-          { title:'Evening Comfort',  icon:'\\u2668\\ufe0f', body:'Heat pump switches off at sunset. Stored heat flows through radiators and underfloor all evening, no grid needed.', hl:'' }
+          { title:'Evening Comfort',  icon:'\\u2668\\ufe0f', body:'Heat pump off at sunset. Stored heat flows through radiators and underfloor all evening, through the priciest hours.', hl:'' }
         ]
       },
       night: {
@@ -266,9 +266,9 @@ ${v2Svg}
         s: 'See how Thermal Dawn captures daytime solar and delivers it as comfort after dark.',
         btnDay: 'Daytime charging', btnNight: 'Evening comfort',
         cards: [
-          { title:'Daytime Charging', icon:'\\u2600\\ufe0f', body:'Solar panels power the heat pump during the day, charging the thermal store while electricity is free.', hl:'' },
+          { title:'Daytime Charging', icon:'\\u2600\\ufe0f', body:'The heat pump charges the store when power is cheapest: your own solar, a free window, or late-night off-peak.', hl:'' },
           { title:'30 kWh Stored',    icon:'\\u25c9',        body:'The 500L store holds enough heat for an entire evening and overnight, with the heat pump off through the peak.', hl:'' },
-          { title:'Evening Comfort',  icon:'\\u2668\\ufe0f', body:'Heat pump switches off at sunset. Stored heat flows through radiators and underfloor all evening, no grid needed.', hl:'hl-g' }
+          { title:'Evening Comfort',  icon:'\\u2668\\ufe0f', body:'Heat pump off at sunset. Stored heat flows through radiators and underfloor all evening, through the priciest hours.', hl:'hl-g' }
         ]
       }
     },
@@ -512,6 +512,25 @@ ${v2Svg}
 
   applyState();
   startTimer();
+
+  /* Report our real height to site.js, the same contract the before/after
+     diagram and the day chart use, so the parent frame never has to guess.
+     Watching the scene rather than the window: the frame can change width
+     without a resize event reaching us, and this iframe has scrolling="no",
+     so a stale height either clips the cards or leaves dead black under them. */
+  function reportHeight(){
+    if(window.parent===window)return;
+    var el=document.querySelector('.scene');
+    if(!el)return;
+    var h=Math.ceil(el.getBoundingClientRect().height);
+    window.parent.postMessage({type:"td:frameHeight",height:h},window.location.origin);
+  }
+  window.addEventListener("resize",reportHeight);
+  if(window.ResizeObserver){
+    try{new ResizeObserver(function(){reportHeight();}).observe(document.querySelector('.scene'));}catch(e){}
+  }
+  if(document.fonts&&document.fonts.ready)document.fonts.ready.then(reportHeight);
+  reportHeight();
 })();
 </script>
 </body>
