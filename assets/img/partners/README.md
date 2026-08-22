@@ -51,3 +51,21 @@ of the Chief Scientist & Engineer, EnergyLab, Investment NSW, Startmate.
 Still check each organisation's brand guidelines for clear-space, minimum-size
 and colour rules before publishing, permission to use the mark usually comes
 with conditions on how it's shown.
+
+## Home Assistant (pending)
+
+`intelligence/index.html` renders a Home Assistant brand card in the "Open by
+Design" section. It shows the bordered text label until these land:
+
+| `data-logo` | Light-background file | Dark-background file |
+|---|---|---|
+| `home-assistant` | `home-assistant.svg` | `home-assistant-white.svg` |
+
+The card sits on Home Assistant's own blue, so the **white** variant is the one
+that matters; `upgradePartnerLogos()` picks it because the page is `body.dark`.
+
+Take the logo from the project's own brand assets
+(github.com/home-assistant/assets) rather than redrawing it, and crop to the
+horizontal lockup with the surrounding blue removed, since the card supplies
+the background. Using their mark to state a real integration is ordinary
+practice, but it stays their trademark: do not restyle or recolour it.
