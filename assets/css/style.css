@@ -1016,7 +1016,7 @@ body.dark .form-error{background:rgba(234,91,19,.14);border-color:rgba(var(--td-
   box-shadow:0 10px 30px rgba(0,0,0,.18);}
 .brandcard--ha{background:#18BCF2;}
 .brandcard .plogo{flex:0 0 auto;}
-.brandcard .plogo img{height:46px;max-width:260px;}
+.brandcard .plogo img{height:48px;max-width:360px;}
 .brandcard .plogo__txt,body.dark .brandcard .plogo__txt{color:#fff;
   border-color:rgba(255,255,255,.55);font-size:1.05rem;padding:10px 16px;
   max-width:none;letter-spacing:.01em;}
@@ -1024,7 +1024,7 @@ body.dark .form-error{background:rgba(234,91,19,.14);border-color:rgba(var(--td-
   font-weight:600;line-height:1.45;}
 body.dark .brandcard__cap{color:#06384a;}
 @media(max-width:560px){.brandcard{padding:22px;gap:18px;}
-  .brandcard .plogo img{height:38px;}}
+  .brandcard .plogo img{height:34px;max-width:250px;}}
 body.dark .plogo__txt,.section--dark .plogo__txt,.section--cocoa .plogo__txt{color:#c6bab0;border-color:rgba(255,255,255,.18);background:#15100c;}
 
 /* ---------- Utility ---------- */

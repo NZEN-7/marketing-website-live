@@ -52,20 +52,26 @@ Still check each organisation's brand guidelines for clear-space, minimum-size
 and colour rules before publishing, permission to use the mark usually comes
 with conditions on how it's shown.
 
-## Home Assistant (pending)
+## Home Assistant
 
-`intelligence/index.html` renders a Home Assistant brand card in the "Open by
-Design" section. It shows the bordered text label until these land:
+In place. The official lockup, taken unmodified from the project's own
+repository (`home-assistant/home-assistant.io`, `source/images/`), which
+serves the same files as home-assistant.io:
 
 | `data-logo` | Light-background file | Dark-background file |
 |---|---|---|
 | `home-assistant` | `home-assistant.svg` | `home-assistant-white.svg` |
 
-The card sits on Home Assistant's own blue, so the **white** variant is the one
-that matters; `upgradePartnerLogos()` picks it because the page is `body.dark`.
+The white variant is the one that renders today: the brand card in
+`intelligence/index.html` sits on Home Assistant's own blue (#18BCF2, taken
+from their colour logo), and `upgradePartnerLogos()` picks the white file
+because the page is `body.dark`.
 
-Take the logo from the project's own brand assets
-(github.com/home-assistant/assets) rather than redrawing it, and crop to the
-horizontal lockup with the surrounding blue removed, since the card supplies
-the background. Using their mark to state a real integration is ordinary
-practice, but it stays their trademark: do not restyle or recolour it.
+Both files are byte-identical to the source, with no scripts or external
+references. The lockup is about 7:1 (viewBox 1705x241), so any height rule
+needs a max-width clearing height x 7.1 or `object-fit: contain` letterboxes
+it and the logo renders short.
+
+Using their mark to state a real integration is ordinary practice, but it
+stays their trademark: do not recolour, restyle or redraw it. If it needs to
+sit on a different background, take the matching official variant instead.
