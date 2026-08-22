@@ -18,6 +18,12 @@
    temperature line reveals behind it (clip rect, so the reveal is
    exactly time-synced), compressor bars pop as the playhead passes
    them, and the explainer strip narrates the phase the playhead is in.
+
+   It plays once, then hands over: the scrubber appears and the same
+   setClock() drives everything from a slider, a drag on the chart, or a
+   phase chip. setClock is deliberately idempotent and reversible, so
+   scrubbing backwards puts the bars and annotations away again rather
+   than leaving the forward-only state the first pass built up.
    Height is posted to site.js (td:frameHeight); the inline height on
    the iframe is the no-JS fallback. prefers-reduced-motion skips
    straight to the final frame. */
@@ -43,6 +49,35 @@ body{display:flex;justify-content:center;padding:16px;font-family:'DM Sans',syst
   transition:opacity .25s}
 .stage{padding:4px 18px 0}
 .stage svg{display:block;width:100%}
+.stage.scrubbable{cursor:ew-resize;touch-action:pan-y}
+.scrub{padding:2px 24px 0;opacity:0;max-height:0;overflow:hidden;
+  transition:opacity .35s ease,max-height .35s ease}
+.scrub.on{opacity:1;max-height:200px}
+.scrub__row{display:flex;align-items:center;gap:12px}
+.scrub__hint{font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:.09em;
+  text-transform:uppercase;color:rgba(255,255,255,.4);white-space:nowrap}
+input[type=range].scrub__range{-webkit-appearance:none;appearance:none;flex:1;
+  height:22px;background:transparent;cursor:grab;margin:0}
+input[type=range].scrub__range:active{cursor:grabbing}
+input[type=range].scrub__range::-webkit-slider-runnable-track{height:4px;border-radius:2px;
+  background:rgba(255,255,255,.16)}
+input[type=range].scrub__range::-moz-range-track{height:4px;border-radius:2px;
+  background:rgba(255,255,255,.16)}
+input[type=range].scrub__range::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;
+  width:16px;height:16px;margin-top:-6px;border-radius:50%;background:#FF9C00;
+  border:2px solid #0f0808;box-shadow:0 0 0 1px rgba(255,156,0,.5),0 2px 6px rgba(0,0,0,.6)}
+input[type=range].scrub__range::-moz-range-thumb{width:16px;height:16px;border-radius:50%;
+  background:#FF9C00;border:2px solid #0f0808;box-shadow:0 0 0 1px rgba(255,156,0,.5)}
+input[type=range].scrub__range:focus-visible{outline:2px solid #FF9C00;outline-offset:4px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.chips button{font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:.06em;
+  text-transform:uppercase;color:rgba(255,255,255,.6);background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.14);border-radius:20px;padding:5px 11px;cursor:pointer;
+  transition:color .15s,border-color .15s,background .15s}
+.chips button:hover{color:#FF9C00;border-color:rgba(255,156,0,.55)}
+.chips button[aria-current="true"]{color:#FF9C00;border-color:#FF9C00;
+  background:rgba(255,156,0,.12)}
+.chips button:focus-visible{outline:2px solid #FF9C00;outline-offset:2px}
 .grid-block{padding:18px 24px 4px}
 .grid-block h3{font-size:14px;font-weight:600;margin-bottom:2px}
 .grid-block .gsub{font-size:12px;color:rgba(255,255,255,.62);margin-bottom:12px}
@@ -81,6 +116,14 @@ body{display:flex;justify-content:center;padding:16px;font-family:'DM Sans',syst
   <div class="stage">
     <svg id="chart" viewBox="0 0 600 330" role="img" aria-label="Chart of one measured day: room temperature rises to 25 degrees on midday charging, the compressor switches off at 1:45pm, and the room is still 21.1 degrees at 9pm, through the evening peak"></svg>
   </div>
+  <div class="scrub" id="scrub">
+    <div class="scrub__row">
+      <span class="scrub__hint">Drag</span>
+      <input type="range" class="scrub__range" id="scrub-range" min="0" max="1440" step="1" value="1440"
+             aria-label="Scrub through the day" aria-valuetext="12:00 am">
+    </div>
+    <div class="chips" id="chips"></div>
+  </div>
   <div class="grid-block">
     <h3>And it repeats, evening after evening.</h3>
     <p class="gsub">Each dot is one evening. Green: the heat pump never ran between 5pm and 9pm.</p>
@@ -110,15 +153,16 @@ var COMP=[[8.75,9],[9,7],[10.5,9],[10.75,10],[11,10],[11.25,11],[11.5,11],[11.75
   [12,12],[12.25,13],[12.5,13],[12.75,17],[13,14],[13.25,13],[13.5,13]]; /* [startH, amps], 15-min bars */
 
 /* what the playhead narrates as it crosses each phase of the day */
+/* [hour, narration, chip label] */
 var PHASES=[
-  [0,   "Overnight. Nothing runs; the house drifts down slowly on heat stored the day before."],
-  [7,   "The coldest part of the morning. The AI holds off: a cheaper charging window is coming."],
-  [8.75,"A short off-peak top-up takes the chill off the morning."],
-  [9.5, "Waiting again. Heating on demand now would cost more than charging at midday will."],
-  [10.5,"The midday charge. Cheap energy drives the heat pump hard, warming the house and filling the store."],
-  [13.75,"Store full, compressor off at 1:45pm. From here the house holds its warmth on its own."],
-  [17,  "Evening peak, 5 to 9pm. The thermal battery releases its stored heat, paced to hold the day's warmth and keep the house comfortable, while the heat pump stays off."],
-  [21,  "9pm and the house is still 21.1°C. The whole evening ran on heat bought at midday prices."]
+  [0,   "Overnight. Nothing runs; the house drifts down slowly on heat stored the day before.","Overnight"],
+  [7,   "The coldest part of the morning. The AI holds off: a cheaper charging window is coming.","Pre-dawn"],
+  [8.75,"A short off-peak top-up takes the chill off the morning.","Off-peak top-up"],
+  [9.5, "Waiting again. Heating on demand now would cost more than charging at midday will.","Holding"],
+  [10.5,"The midday charge. Cheap energy drives the heat pump hard, warming the house and filling the store.","Midday charge"],
+  [13.75,"Store full, compressor off at 1:45pm. From here the house holds its warmth on its own.","Store full"],
+  [17,  "Evening peak, 5 to 9pm. The thermal battery releases its stored heat, paced to hold the day's warmth and keep the house comfortable, while the heat pump stays off.","Evening peak"],
+  [21,  "9pm and the house is still 21.1°C. The whole evening ran on heat bought at midday prices.","9pm"]
 ];
 function phaseAt(h){var p=PHASES[0][1],i;for(i=0;i<PHASES.length;i++){if(h>=PHASES[i][0])p=PHASES[i][1];}return p;}
 function fmtTime(h){
@@ -144,13 +188,17 @@ function report(){
 window.addEventListener("resize",report);
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(report);
 
+var exFade=null;
 function setExplainer(h){
   exTime.textContent=fmtTime(h);
   var txt=phaseAt(h);
-  if(exText.textContent!==txt){
-    exText.style.opacity="0";
-    (function(t){setTimeout(function(){exText.textContent=t;exText.style.opacity="1";},120);})(txt);
-  }
+  if(exText.textContent===txt)return;
+  /* dragging crosses phases fast, so only the latest swap is allowed to land */
+  if(exFade)clearTimeout(exFade);
+  exText.style.opacity="0";
+  exFade=setTimeout(function(){
+    exText.textContent=txt;exText.style.opacity="1";exFade=null;
+  },120);
 }
 
 var bars=[],clipRect=null,playhead=null,playLabel=null,annOff=null,annEnd=null;
@@ -234,17 +282,92 @@ function setClock(h){
   playhead.setAttribute("x1",px);playhead.setAttribute("x2",px);
   playLabel.setAttribute("x",Math.min(Math.max(px,X0+24),X1-24));
   playLabel.textContent=fmtTime(h);
+  /* reversible: scrubbing back puts them away again */
   bars.forEach(function(r){
-    if(!r._shown&&h>=r._h+0.1){r._shown=true;r.setAttribute("transform","translate(0,0) scale(1,1)");}
+    var on=h>=r._h+0.1;
+    if(r._on!==on){
+      r._on=on;
+      r.setAttribute("transform",on?"translate(0,0) scale(1,1)":"translate(0,"+r._bh+") scale(1,0)");
+    }
   });
-  if(h>=13.75)annOff.style.opacity="1";
-  if(h>=21)annEnd.style.opacity="1";
+  annOff.style.opacity=h>=13.75?"1":"0";
+  annEnd.style.opacity=h>=21?"1":"0";
   setExplainer(Math.min(h,23.99));
+  markChip(h);
 }
+
+var rangeEl=document.getElementById("scrub-range"),
+    scrubEl=document.getElementById("scrub"),
+    chipsEl=document.getElementById("chips"),
+    stageEl=document.querySelector(".stage");
+var scrubbing=false;
+
+function markChip(h){
+  var active=0,i;
+  for(i=0;i<PHASES.length;i++){if(h>=PHASES[i][0])active=i;}
+  var kids=chipsEl.children;
+  for(i=0;i<kids.length;i++)kids[i].setAttribute("aria-current",i===active?"true":"false");
+}
+
+function buildChips(){
+  chipsEl.innerHTML="";
+  PHASES.forEach(function(p,i){
+    var b=document.createElement("button");
+    b.type="button";b.textContent=p[2];
+    b.addEventListener("click",function(){ goTo(p[0]===0?0:p[0]); });
+    chipsEl.appendChild(b);
+  });
+}
+
+/* single entry point for every scrub gesture */
+function goTo(h){
+  h=Math.max(0,Math.min(24,h));
+  rangeEl.value=Math.round(h*60);
+  rangeEl.setAttribute("aria-valuetext",fmtTime(h));
+  setClock(h);
+}
+
+function enableScrub(){
+  scrubEl.classList.add("on");
+  stageEl.classList.add("scrubbable");
+  playhead.setAttribute("opacity","1");playLabel.setAttribute("opacity","1");
+  report();
+}
+function disableScrub(){
+  scrubEl.classList.remove("on");
+  stageEl.classList.remove("scrubbable");
+}
+
+rangeEl.addEventListener("input",function(){ goTo(rangeEl.value/60); });
+
+/* dragging on the chart itself, which is what most people try first */
+function hourFromEvent(e){
+  var r=svg.getBoundingClientRect();
+  /* the viewBox is 600 wide; X0..X1 is the plotted span inside it */
+  var vx=((e.clientX-r.left)/r.width)*600;
+  return ((vx-X0)/(X1-X0))*24;
+}
+stageEl.addEventListener("pointerdown",function(e){
+  if(!scrubEl.classList.contains("on"))return;
+  scrubbing=true;
+  try{stageEl.setPointerCapture(e.pointerId);}catch(err){}
+  goTo(hourFromEvent(e));
+});
+stageEl.addEventListener("pointermove",function(e){
+  if(!scrubbing)return;
+  e.preventDefault();
+  goTo(hourFromEvent(e));
+});
+["pointerup","pointercancel"].forEach(function(ev){
+  stageEl.addEventListener(ev,function(e){
+    if(!scrubbing)return;
+    scrubbing=false;
+    try{stageEl.releasePointerCapture(e.pointerId);}catch(err){}
+  });
+});
 
 function finishFrame(){
   setClock(24);
-  playhead.setAttribute("opacity","0");playLabel.setAttribute("opacity","0");
   exTime.textContent="9:00 pm";exText.textContent=PHASES[PHASES.length-1][1];
 }
 
@@ -271,9 +394,14 @@ function run(){
   timers.forEach(clearTimeout);timers=[];
   if(raf)cancelAnimationFrame(raf);
   replayBtn.hidden=true;
-  buildStatic();buildDots();report();
+  disableScrub();
+  buildStatic();buildDots();buildChips();report();
 
-  if(reduced){finishFrame();finishDots();replayBtn.hidden=false;report();return;}
+  if(reduced){
+    finishFrame();finishDots();
+    rangeEl.value=1440;enableScrub();
+    replayBtn.hidden=false;report();return;
+  }
 
   var t0=null;
   function tick(ts){
@@ -282,7 +410,9 @@ function run(){
     setClock(f*24);
     if(f<1){raf=requestAnimationFrame(tick);}
     else{
-      playhead.setAttribute("opacity","0");playLabel.setAttribute("opacity","0");
+      /* played once; now it belongs to the reader */
+      rangeEl.value=1440;
+      enableScrub();
       timers.push(setTimeout(function(){
         lightDots(function(){replayBtn.hidden=false;report();});
       },500));
@@ -303,7 +433,7 @@ else{
     });
   },{threshold:0.35});
   io.observe(document.querySelector(".card"));
-  buildStatic();buildDots();  /* quiet first frame while waiting for the scroll */
+  buildStatic();buildDots();buildChips();  /* quiet frame, waiting for the scroll */
 }
 report();
 })();
