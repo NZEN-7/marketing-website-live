@@ -15,6 +15,28 @@ the index.
 
 ## Open decisions
 
+**Brief audit, 22 Aug.** Section A of `feedback/2026-08-22-brief-audit/` is
+implemented; the items below are its section B, plus two corrections it makes
+to the brief itself. The brief is
+`Marketing +/Strategy & Research/August 2026 - Marketing Strategy Review/
+Copywriting & Messaging Brief - website rebuild (23 Aug 2026).md`.
+
+| B1 | The homepage cost block (`index.html:165-192`) is a battery price comparison, which the brief bans, and it is also the only price anchor on the site | Open. Auditor's recommendation: drop the battery card, keep "$20,000 to $40,000 to one system instead of two". Closes A3 and D1 together | A3, D1 |
+| B2 | **Flow temperature: the brief and DECISIONS contradict each other.** DECISIONS 19 Aug says "up to 70C". The brief says measured 65C, designed 75C, rated 80C, measured number first | Open, and nothing touched. **Dependency:** the 30 kWh figure was reconciled against a 500L tank at a 70C ceiling. Moving the published claim to 75C re-opens that arithmetic on four pages | Capacity claims sitewide |
+| B4 | The hydronic "bills" section is now a heading, one lifespan tile and a gas-price paragraph | Open. Two savings tiles removed under A3, and the orphaned savings disclaimer with them. Either delete the section or rebuild it next to the CTA | |
+| B5 | "Gas prices have risen over 40% in five years", linked to AER 2025, live at `hydronic/index.html:71` | Open. The same claim was dropped from the ported animation on 21 Aug as unsupported. Someone has to open the report: either it supports the claim or the line goes | |
+| B6 | The 15-year table's gas comparator ($5 to 8k, unsourced) and the whole table under E1 | Open. Gate 1 wants two written quotes or a published industry figure | E1 |
+| B3 / B7 | Page architecture: proof sits two-thirds down on home and hydronic; the how-it-works lead paragraph runs four arguments before the timeline | Open, restructure not copy | |
+
+**Corrections the audit makes to the brief** (the brief is wrong, not the site):
+
+- **The brief's "our AI learns" ban is struck.** It contradicts the 21 Aug
+  DECISIONS entry, which the auditor now accepts supersedes it. No AI wording
+  was touched.
+- **The brief needs a precedence line** for what happens when a later close-out
+  contradicts an earlier settled DECISIONS entry. B2 is the first case.
+
+
 | W4 | Pool heating is sold as an available capability (`hydronic/pricing`), and neither field system has one | Open. Both round 2 reviewers flagged it. Copy softened around it ("one system can cover all of these"), but the Pool Heating card still says "can extend to" | The four-capabilities framing at `:137` and the FAQ |
 | W5 | "fan coils/controls" in the included list reads as fan coils being in every quote | Open, and it is a commercial inclusion question rather than a wording one. How-it-works and the not-included list both imply they are an addition | What a customer expects before paying |
 | W6 | Cooling is stated present tense sitewide; both installs are heating only so far | Open. Needs a yes/no on whether cooling has been commissioned anywhere before 11 Oct | `pricing:93`, `pricing:257` |
