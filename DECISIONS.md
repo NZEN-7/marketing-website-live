@@ -15,6 +15,22 @@ the index.
 
 ## Open decisions
 
+**Intelligence page, Lane C out-of-lane notes 22 Aug.** Three findings applied
+(the solar-only exclusion, the unlabelled derived figures, the third degradation
+attack). Two held:
+
+| I1 | The update-count claim, stated twice: "8 firmware and 50+ app updates in a single month" (`intelligence:129` and `:153`) | Open. Not a breach, but it is an unregistered number appearing twice, the denominator is two homes, and to a buyer it can read as a system needing constant fixing. Reviewer suggests keeping it once at `:153` with a register row, or dropping it | Claims register |
+| I2 | `:93` says the cloud layer "adds the smart optimisation"; `:202` says "the controller in your home makes the decisions, not our servers" | Open. Probably both true, the controller executes and the cloud plans, but as written they can be read as disagreeing. Needs one sentence from someone with the engineering fact | |
+
+**Note on the citations in that review.** It justifies the derived-figure change
+with two internal rulings, a COP model at plus or minus 20% and an intermittent
+grounding fault on Hawthorn's tank probes. **Neither exists in this repo.** The
+change was applied anyway because marking a derived figure as derived is correct
+whether or not those rulings are real, but the same reviewer cited a
+non-existent ruling on 21 Aug, so the pattern is worth watching: a claim about
+an internal ruling needs a repo line before it drives a decision.
+
+
 **Mission page, CEO review 22 Aug** (`feedback/2026-08-22-copy-review/COPY-FEEDBACK-cowork.md`).
 Two breaches applied. Three held:
 
