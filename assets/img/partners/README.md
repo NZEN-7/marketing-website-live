@@ -62,10 +62,14 @@ serves the same files as home-assistant.io:
 |---|---|---|
 | `home-assistant` | `home-assistant.svg` | `home-assistant-white.svg` |
 
-The white variant is the one that renders today: the brand card in
+The white variant is the one that renders today: the badge in
 `intelligence/index.html` sits on Home Assistant's own blue (#18BCF2, taken
 from their colour logo), and `upgradePartnerLogos()` picks the white file
 because the page is `body.dark`.
+
+The badge (`.pbadge`) holds the logo and nothing else. Our copy sits beside
+it on the page, never inside their colour block, so it never reads as though
+Home Assistant is saying our words.
 
 Both files are byte-identical to the source, with no scripts or external
 references. The lockup is about 7:1 (viewBox 1705x241), so any height rule
