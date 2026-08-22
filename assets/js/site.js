@@ -29,10 +29,10 @@
           '<li><a href="/mission/" data-nav="/mission/">Mission</a></li>' +
           '<li><a href="/blog/" data-nav="/blog/">Blog</a></li>' +
           '<li><a href="/contact/" data-nav="/contact/">Contact</a></li>' +
-          /* Reserve stays visible as a nav item, but it is not the primary
-             CTA: reserving almost always follows an email conversation,
-             whereas requesting a quote is the real front door. */
-          '<li><a href="/pre-order/" data-nav="/pre-order/">Reserve</a></li>' +
+          /* Reserve is out of the nav (Nick, 22 Aug). Reserving follows an
+             email conversation, so the quote request is the only front door
+             the header offers. Still reachable from the footer and from the
+             pricing and pre-order pages. */
           '<li class="nav__cta-mob"><a href="/pre-order/register-interest/" data-nav="/pre-order/register-interest/">Request a Quote</a></li>' +
         '</ul>' +
         '<a class="btn btn--primary btn--sm nav__cta" href="/pre-order/register-interest/" data-nav="/pre-order/register-interest/">Request a Quote</a>' +
