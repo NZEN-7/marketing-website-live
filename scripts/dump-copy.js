@@ -62,6 +62,10 @@ const tidy = (s) =>
   decode(stripTags(s))
     .replace(/\s+/g, " ")
     .replace(/\s+([,.;:!?%])/g, "$1")
+    /* A live-stat span sits right after its symbol ("$<span>1,439</span>"),
+       so stripping tags leaves "$ 1,439" and a reviewer reports a spacing
+       bug that is not in the HTML (happened 22 Aug). Pull those back too. */
+    .replace(/([$~])\s+(?=[\d.])/g, "$1")
     .replace(/\(\s+/g, "(")
     .replace(/\s+\)/g, ")")
     .trim();

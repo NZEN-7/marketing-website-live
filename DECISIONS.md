@@ -15,6 +15,14 @@ the index.
 
 ## Open decisions
 
+**Mission page, CEO review 22 Aug** (`feedback/2026-08-22-copy-review/COPY-FEEDBACK-cowork.md`).
+Two breaches applied. Three held:
+
+| M1 | Three different CTAs on one page: "Request a Quote" in the hero, "Secure Your Spot" and "Reserve Your System" in the footer | Open. Reviewer flagged it as a choice, not copy, because it touches how the funnel closes. Reserve came out of the header nav the same day, so the direction is quote-first, but that has not been ruled for the page CTAs | W1, P2 |
+| M2 | `mission:139` quotes the EU calling inverter dependence one of the "most pressing threats", with no source link, while the page's other external claim links AEMO | Open, and the most checkable unsourced claim on the site because it is a direct quotation. Either cite it or paraphrase it | |
+| M3 | "60 to 70% of the energy a home actually controls is thermal" (`mission:100`) has no claims-register row | Open, for the register owner. It is the successor to the retired "63% of your energy bill" and anchors the page's argument | |
+
+
 **Brief audit, 22 Aug.** Section A of `feedback/2026-08-22-brief-audit/` is
 implemented; the items below are its section B, plus two corrections it makes
 to the brief itself. The brief is
