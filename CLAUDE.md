@@ -23,7 +23,11 @@ images still to be exported.
 - **Forms post to `api/lead.js`** (Vercel function, Google Workspace SMTP,
   `GMAIL_USER`/`GMAIL_APP_PASSWORD` env vars). Newsletter, contact and
   register-interest are live and verified. The email layout is a contract, the
-  sales agent parses it, see BUILD-NOTES before editing. The two deposit forms
+  sales agent parses it, see BUILD-NOTES before editing. **As of 24 Aug 2026 the
+  CRM depends on it too**: `Sales +/CRM/` is rebuilt around parsing these emails
+  out of Gmail (its August capture gap was recovered from them), and a subscriber
+  capture script is being built on the same layout. Changing a field label now
+  breaks lead capture, not just the agent. The two deposit forms
   (basic-reserve, founder-premium) still post to Wix and stay there until
   Stripe Payment Links exist.
 - **Live savings counter:** elements with `data-live-stat` tick up on scroll
