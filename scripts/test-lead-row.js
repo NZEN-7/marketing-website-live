@@ -30,6 +30,9 @@ const bodies = {
     state: "VIC", heating: "Gas wall heaters / space heaters", solar: "No",
     battery: "No", drivers: ["Bills are too high", "Researching"],
     timeline: ["Within 3 months"], comments: "Two storey, 1920s.",
+    // the form posts this from a hidden field; the consent line under the
+    // Request a Quote button is what the customer actually agreed to
+    optin: "true",
   },
   contact: { form: "contact", name: "Simon Radcliffe", email: "s@example.com", message: "Got hydronic." },
   subscribe: { form: "subscribe", email: "sub@example.com", optin: "true" },
@@ -72,7 +75,7 @@ check("deposit label",           rows["basic-reserve"].form === "Basic Reserve (
 check("opt-in true when ticked",   rows.subscribe.newsletter_opt_in === true);
 check("opt-in false when offered but unticked", rows["subscribe-nooptin"].newsletter_opt_in === false);
 check("opt-in NULL on contact",    rows.contact.newsletter_opt_in === null);
-check("opt-in NULL on register",   rows["register-interest"].newsletter_opt_in === null);
+check("opt-in true on register",   rows["register-interest"].newsletter_opt_in === true);
 check("opt-in NULL on deposit",    rows["basic-reserve"].newsletter_opt_in === null);
 
 // 4. Empty must be NULL, never the email layer's "-".

@@ -909,3 +909,48 @@ Not done, deliberately: the supplied `hawthorn-16aug-evening-carry.svg` was
 NOT used. Nick wants it rebuilt in the idiom of the homepage duck-curve chart,
 "a little bit graphics and not perfect but legit backed up by data". Logged in
 Notion with the measured figures to draw from.
+
+## Consent stated instead of ticked (25 Aug 2026)
+
+Nick: *"can we make a by clicking this button you agree to receive comms from
+thermal dawn? rather than opt in? because people often miss that"*. Right call,
+and on the subscribe form it also fixed a live bug.
+
+- **The subscribe tickbox was cancelling the 24 Aug fix.** `index.html` carried
+  BOTH a hidden `optin=true` (added 24 Aug so pressing Subscribe records as the
+  opt-in it is) AND the original `#nl-optin` checkbox, which has been there
+  since the initial commit and sat *below* the Subscribe button. Both were named
+  `optin`. `serialize()` walks `form.elements` in DOM order and, for a
+  `data-single` checkbox, assigns `out[name] = el.checked` unconditionally, so
+  the later checkbox overwrote `true` with `false` on every unticked
+  submission. The 24 Aug fix therefore never took effect except when someone
+  happened to tick a box positioned after the button they had already pressed.
+  Checkbox removed; do not reintroduce a second field named `optin`.
+- **Both forms now state consent under the submit button** in a new
+  `.form-consent` paragraph: subscribe ("By subscribing you agree to receive
+  email updates from Thermal Dawn. Unsubscribe any time.") and register-interest
+  / Request a Quote ("...contacted about your enquiry, and to receive occasional
+  updates..."). Contrast measured in-browser: 7.59:1 on the homepage section,
+  6.55:1 on the dark quote form. Both pass AA, the first passes AAA.
+- **The claim is now recorded, not just displayed.** register-interest posts a
+  hidden `optin=true`; `parseSubmission()` normalises `optin` once for both
+  consent-bearing forms (hoisted out of the subscribe branch so the two cannot
+  drift); `leadRow()` writes `newsletter_opt_in` for both, still NULL on contact
+  and the deposits, which genuinely do not ask. A `Newsletter opt-in:` line was
+  added to the register-interest notification, a label the parser already knew.
+- `newsletter_opt_in` alone no longer distinguishes intent, since a quote now
+  sets it too. **The `form` column is the consent basis**: `Subscribe Form` is
+  someone who came for the newsletter, a quote row is bundled consent given at
+  the point of enquiry. `Sales +/CRM/LEADS.md` still documents the old meaning.
+- **"Unsubscribe any time" is now a promise on the site.** Every marketing send
+  must carry a working unsubscribe and sender identification (Spam Act 2003,
+  required regardless of how consent was obtained). Whatever tool sends the
+  newsletter has to honour it.
+- Tests: `test:parser`, `test:leadrow`, `test:email` all pass. The leadrow
+  assertion `opt-in NULL on register` encoded the old behaviour and was updated
+  to `opt-in true on register`, with the fixture posting `optin` as the form does.
+- CSS bumped to `?v=38` across all 28 pages.
+
+Not done: the contact form was left alone. Nick named subscribe and the quote
+form; someone sending a question has not asked for marketing, and replying to
+their enquiry needs no opt-in.

@@ -147,10 +147,15 @@ function leadRow(d) {
     driver: joinForDb(d.drivers),
     timeline: joinForDb(d.timeline),
     comments: d.comments || d.message || null,
-    // NULL, not false, on every form that does not ask. Only Subscribe carries
-    // a real answer; recording "No" for the others would assert a refusal
-    // nobody made.
-    newsletter_opt_in: d.form === "subscribe" ? !!d.optin : null,
+    // NULL, not false, on every form that does not ask. Subscribe and
+    // register-interest both state consent under their submit button and post
+    // optin=true; recording "No" for the rest would assert a refusal nobody
+    // made. The form column carries the basis: a Subscribe Form row is someone
+    // who came for the newsletter, a quote row is bundled consent.
+    newsletter_opt_in:
+      d.form === "subscribe" || d.form === "register-interest"
+        ? !!d.optin
+        : null,
     payment_ref: d.ref || null,
   };
 }
@@ -178,6 +183,15 @@ function parseSubmission(body) {
   if (!spec) return { error: "Unknown form" };
 
   const data = { form, formLabel: spec.label };
+
+  // Subscribe and register-interest both state the consent under their submit
+  // button and post a hidden optin field. Normalised once, here, so the two
+  // cannot drift apart: a quote form that stated consent but dropped it on the
+  // way through would have the site claiming something nothing recorded.
+  if (form === "subscribe" || form === "register-interest") {
+    data.optin =
+      body.optin === true || body.optin === "true" || body.optin === "on";
+  }
 
   if (form === "register-interest") {
     Object.assign(data, {
@@ -218,7 +232,6 @@ function parseSubmission(body) {
   } else {
     Object.assign(data, {
       email: asText(body.email, 200),
-      optin: body.optin === true || body.optin === "true" || body.optin === "on",
     });
   }
 
@@ -269,6 +282,7 @@ function formatNotification(d, stamp) {
       "",
       "CONTEXT",
       `Comments: ${orDash(d.comments)}`,
+      `Newsletter opt-in: ${d.optin ? "Yes" : "No"}`,
       "",
     ].join("\n");
   }

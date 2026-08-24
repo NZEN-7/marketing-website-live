@@ -17,7 +17,7 @@
 <link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png?v=8">
 <link rel="preload" href="/assets/fonts/Montserrat-Black.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/Montserrat-Regular.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/assets/css/style.css?v=37">
+<link rel="stylesheet" href="/assets/css/style.css?v=38">
 </head>
 <body class="home">
 <header id="site-header"></header>
@@ -374,20 +374,23 @@
         <form class="nl-form" data-lead-form="subscribe" data-redirect="/thank-you/" style="grid-column:1/-1">
           <p class="hp"><label>Don't fill this out: <input name="website" tabindex="-1" autocomplete="off"></label></p>
           <!-- Submitting this form IS the newsletter opt-in: it is an email
-               field and a Subscribe button, nothing else. Without this the
-               notification said "Newsletter opt-in: No" for every subscriber,
-               which understates the consent that was actually given (found in
-               the 24 Aug mailing-list spec review). lead.js is untouched. -->
+               field and a Subscribe button, nothing else, and the consent line
+               under the button says so. Without this the notification said
+               "Newsletter opt-in: No" for every subscriber (found in the 24 Aug
+               mailing-list spec review).
+
+               The tickbox that used to sit below the button is gone. It shared
+               the name "optin" with this input and, being later in the DOM,
+               serialize() overwrote true with el.checked on every unticked
+               submission, so the 24 Aug fix never actually took effect. Do not
+               reintroduce a second field called optin. -->
           <input type="hidden" name="optin" value="true">
           <div class="field">
             <label for="nl-email">Email <span class="req">*</span></label>
             <input type="email" id="nl-email" name="email" placeholder="e.g., email@example.com" autocomplete="email" required>
           </div>
           <button class="btn btn--primary btn--rect" type="submit">Subscribe</button>
-          <div class="field field--check">
-            <input type="checkbox" id="nl-optin" name="optin" data-single value="yes">
-            <label for="nl-optin">Yes, subscribe me to your newsletter.</label>
-          </div>
+          <p class="form-consent">By subscribing you agree to receive email updates from Thermal Dawn. Unsubscribe any time.</p>
           <p class="form-error" data-form-error hidden style="grid-column:1/-1"></p>
         </form>
       </div>

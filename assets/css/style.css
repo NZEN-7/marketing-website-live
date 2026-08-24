@@ -390,6 +390,12 @@ table.data td:first-child{font-weight:600;}
 }
 .field input:focus,.field textarea:focus,.field select:focus{border-color:var(--td-orange);outline:none;box-shadow:0 0 0 3px rgba(var(--td-orange-rgb),.18);}
 .field textarea{min-height:120px;resize:vertical;}
+/* Consent stated at the point of action. Replaced the opt-in tickboxes on
+   25 Aug: people scrolled past them, and on the subscribe form the box also
+   shared the name "optin" with the hidden field and overwrote it. */
+.form-consent{grid-column:1/-1;margin:10px 0 0;font-size:.82rem;line-height:1.5;color:var(--td-grey);}
+.next-orange .form-consent{color:rgba(28,21,20,.75);}
+body.dark .form-consent{color:#a2968c;}
 .field--check{display:flex;gap:10px;align-items:flex-start;}
 .field--check input{width:auto;margin-top:5px;}
 .hp{position:absolute;left:-9999px;top:-9999px;height:0;overflow:hidden;}
