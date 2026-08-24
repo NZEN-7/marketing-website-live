@@ -27,7 +27,11 @@ images still to be exported.
   CRM depends on it too**: `Sales +/CRM/` is rebuilt around parsing these emails
   out of Gmail (its August capture gap was recovered from them), and a subscriber
   capture script is being built on the same layout. Changing a field label now
-  breaks lead capture, not just the agent. The two deposit forms
+  breaks lead capture, not just the agent, so **run `npm run test:parser` after
+  touching `formatNotification()`**: it feeds real generated emails through the
+  real CRM parser (`scripts/apps-script/`) and fails on any label drift. When
+  the parser changes, re-paste it into the Apps Script project by hand, nothing
+  syncs it (`scripts/apps-script/SETUP.md`). The two deposit forms
   (basic-reserve, founder-premium) still post to Wix and stay there until
   Stripe Payment Links exist.
 - **Live savings counter:** elements with `data-live-stat` tick up on scroll

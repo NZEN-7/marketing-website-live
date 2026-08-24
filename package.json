@@ -7,6 +7,7 @@
     "serve": "node .claude/serve.js 8080",
     "deploy:live": "node tools/deploy-live.mjs",
     "test:email": "node scripts/test-email-format.js",
+    "test:parser": "node scripts/test-lead-parser.js",
     "copy:dump": "node scripts/dump-copy.js"
   },
   "dependencies": {
