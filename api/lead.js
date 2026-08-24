@@ -99,6 +99,78 @@ function makeRef() {
   return "td-" + Date.now().toString(36) + Math.floor(Math.random() * 1296).toString(36).padStart(2, "0");
 }
 
+/* ---------- lead capture (Supabase) ----------
+   Second consumer of a contract that already exists. The notification email
+   stays the system of record and is sent FIRST; this runs after it and can
+   never fail the request. Worst case we are back to exactly today's behaviour,
+   with the lead sitting in the inbox.
+
+   No SDK on purpose. This repo has one dependency and a "no build step" rule;
+   PostgREST is a plain HTTP endpoint, and a hand-rolled fetch has no
+   supply-chain surface for a 30-line insert.
+
+   The service-role key bypasses RLS, which is why it is server-side only and
+   never reaches the browser. The form posts here, exactly as it did before. */
+
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+/** Multi-selects arrive as arrays; leads stores one readable string.
+    Deliberately NOT the joinList above: that one returns "-" for empty, which
+    is a display convention for the email body. Written into a column it would
+    make an unanswered question look answered. Empty means NULL here.
+    Also tolerates a plain string, because the deposit forms send timeline as
+    text while register-interest sends it as a list. */
+const joinForDb = (v) =>
+  (Array.isArray(v) ? v.filter(Boolean).join(", ") : (v || "")) || null;
+
+function leadRow(d) {
+  return {
+    submitted_at: new Date().toISOString(),
+    // FORMS[...].label, so these read identically to the Wix-era values
+    // ("Homeowner Register Interest", "Contact Form", "Subscribe Form") and the
+    // backfill lands in the same vocabulary instead of a parallel one.
+    form: d.formLabel,
+    source_site: "freevolt",
+    // Contact form collects one name field. Wix put the whole name in
+    // first_name too, so matching that keeps both eras comparable.
+    first_name: d.first_name || d.name || null,
+    last_name: d.last_name || null,
+    email: d.email || null,
+    phone: d.phone || null,
+    suburb: d.suburb || null,
+    state: d.state || null,
+    address: d.address || null,
+    solar: d.solar || null,
+    battery: d.battery || null,
+    heating_system_type: d.heating || null,
+    driver: joinForDb(d.drivers),
+    timeline: joinForDb(d.timeline),
+    comments: d.comments || d.message || null,
+    // NULL, not false, on every form that does not ask. Only Subscribe carries
+    // a real answer; recording "No" for the others would assert a refusal
+    // nobody made.
+    newsletter_opt_in: d.form === "subscribe" ? !!d.optin : null,
+    payment_ref: d.ref || null,
+  };
+}
+
+async function recordLead(d) {
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) return "skipped (not configured)";
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/leads`, {
+    method: "POST",
+    headers: {
+      apikey: SUPABASE_SERVICE_ROLE_KEY,
+      Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+      "Content-Type": "application/json",
+      Prefer: "return=minimal",
+    },
+    body: JSON.stringify(leadRow(d)),
+  });
+  if (!res.ok) throw new Error(`${res.status} ${(await res.text()).slice(0, 300)}`);
+  return "ok";
+}
+
 /** Normalise the raw body into a known shape; returns {data} or {error}. */
 function parseSubmission(body) {
   const form = String(body && body.form ? body.form : "").trim();
@@ -368,6 +440,20 @@ module.exports = async function handler(req, res) {
       text: formatNotification(data),
     });
 
+    // The email is out and the lead is safe. Everything below is best effort.
+    //
+    // AWAITED deliberately. Returning before this settles lets Vercel freeze or
+    // kill the container mid-flight, and the insert vanishes with no error
+    // anywhere: passes every local test, drops rows under real traffic.
+    // "Non-fatal" and "fire-and-forget" are not the same thing.
+    try {
+      await recordLead(data);
+    } catch (leadErr) {
+      // Loud, and never fatal. The lead exists in the inbox either way, which
+      // is the whole reason the email goes first.
+      console.error("Supabase lead insert failed:", leadErr && leadErr.message);
+    }
+
     // Deposits: no autoresponder. Stripe sends the receipt, and the
     // thank-you page covers what happens next. The client needs the ref so
     // it can hand it to Stripe as client_reference_id.
@@ -405,3 +491,4 @@ module.exports.formatSubject = formatSubject;
 module.exports.formatAutoresponder = formatAutoresponder;
 module.exports.formatTimestamp = formatTimestamp;
 module.exports.parseSubmission = parseSubmission;
+module.exports.leadRow = leadRow;
