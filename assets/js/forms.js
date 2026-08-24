@@ -116,6 +116,26 @@
       })(otherInputs[k]);
     }
 
+    /* Pill selectors carry their selected state as a class rather than with
+       :has(input:checked). The CSS selector matches and the browser reports
+       support for it, but the declaration never wins in practice here (tested
+       24 Aug), so the visual state was silently dead while the form still
+       submitted correctly, which is the worst version of that bug. A class is
+       boring and it works everywhere. */
+    var pills = form.querySelectorAll(".field--group .choice input");
+    if (pills.length) {
+      var paintPills = function () {
+        for (var q = 0; q < pills.length; q++) {
+          var lab = pills[q].closest ? pills[q].closest(".choice") : pills[q].parentNode;
+          if (lab) lab.classList.toggle("is-selected", pills[q].checked);
+        }
+      };
+      for (var pz = 0; pz < pills.length; pz++) {
+        pills[pz].addEventListener("change", paintPills);
+      }
+      paintPills();
+    }
+
     form.addEventListener("submit", function (e) {
       e.preventDefault();
 
