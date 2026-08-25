@@ -142,8 +142,9 @@ const subject = lead.formatSubject(inj.data);
 console.log(`\n${/[\r\n]/.test(subject) ? "FAIL" : "ok  "}  subject header injection stripped: ${JSON.stringify(subject)}`);
 if (/[\r\n]/.test(subject)) failed++;
 
-// Autoresponder: goes to register-interest and contact, never to deposits
-// (Stripe sends those receipts) or subscribe.
+// Autoresponder: goes to register-interest, contact and (since 25 Aug 2026)
+// subscribe. Never to deposits, where Stripe sends the receipt and a second
+// thanks from us reads as a duplicate payment confirmation.
 console.log("\n" + "=".repeat(72));
 console.log("AUTORESPONDER");
 console.log("=".repeat(72));
@@ -161,6 +162,26 @@ if (!noName.error) {
 }
 if (/—/.test(autoBody)) { console.error("!! FAIL: em dash in customer-facing copy"); failed++; }
 if (/\n\s*I\s/.test(autoBody)) { console.error("!! FAIL: sentence starts with I"); failed++; }
+
+/* Subscribe autoresponder. A subscriber gives an email and nothing else, so it
+   has to greet without a name, and it must not promise a reply that nobody
+   owes them: this is a confirmation, not an enquiry. */
+const sub = lead.parseSubmission({ form: "subscribe", email: "s@example.com", optin: "true" });
+const subBody = lead.formatAutoresponder(sub.data);
+console.log("\n" + "-".repeat(72) + "\nSUBSCRIBE\n" + "-".repeat(72));
+console.log(subBody);
+[
+  ["greets without a name",          () => subBody.indexOf("Hi there,") === 0],
+  ["confirms the subscription",      () => /You've subscribed/.test(subBody)],
+  ["absolute quote-form link",       () => subBody.includes("https://www.thermaldawn.com/pre-order/register-interest/")],
+  ["offers the sales address",       () => subBody.includes("nickz@thermaldawn.com")],
+  ["honours the unsubscribe promise",() => /unsubscribe/i.test(subBody)],
+  ["no em dash",                     () => !/—/.test(subBody)],
+  ["does not promise a reply",       () => !/back to you/i.test(subBody)],
+].forEach(([label, fn]) => {
+  if (fn()) { console.log(`ok    ${label}`); }
+  else { console.error(`!! FAIL: subscribe autoresponder ${label}`); failed++; }
+});
 
 console.log(`\nLive timestamp renders as: ${lead.formatTimestamp()}`);
 console.log(failed ? `\n${failed} CHECK(S) FAILED` : "\nAll checks passed.");

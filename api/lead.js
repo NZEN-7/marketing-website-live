@@ -19,6 +19,9 @@
 const TZ = "Australia/Sydney";
 const NOTIFY_TO = "nickz@thermaldawn.com";
 const CALENDLY = "https://calendly.com/nickz-thermaldawn/30min";
+// Live from 25 Aug 2026. Autoresponders are read outside the site, so links in
+// them have to be absolute.
+const SITE = "https://www.thermaldawn.com";
 
 /* ---------- small helpers ---------- */
 
@@ -370,7 +373,9 @@ function formatSubject(d) {
 
 /* Sent to the customer on register-interest and contact. Voice rules apply:
    no em dashes, no sentence opening with "I", contractions, plain text. */
-const AUTORESPOND = { "register-interest": true, contact: true };
+// Deposits are excluded on purpose: Stripe sends those receipts, and a second
+// "thanks" from us reads as a duplicate confirmation of a payment.
+const AUTORESPOND = { "register-interest": true, contact: true, subscribe: true };
 
 /** First name only, so "Tim Hamer" greets as "Tim". Falls back to "there". */
 function greetingName(d) {
@@ -380,6 +385,31 @@ function greetingName(d) {
 }
 
 function formatAutoresponder(d) {
+  // A subscriber gave us an email address and nothing else. They have not asked
+  // to be sold to, so this confirms what they signed up for and then offers the
+  // quote path once, rather than opening with it.
+  if (d.form === "subscribe") {
+    return [
+      `Hi ${greetingName(d)},`,
+      "",
+      "You've subscribed to Thermal Dawn updates: installs, pricing, and what",
+      "we're learning as we go. No spam, no sales calls.",
+      "",
+      "If you'd like to talk about a quote for your home, fill in the form here:",
+      `${SITE}/pre-order/register-interest/`,
+      "",
+      `Or just send me an email at ${NOTIFY_TO}.`,
+      "",
+      "Nick",
+      "Thermal Dawn",
+      "",
+      // The subscribe form now promises "Unsubscribe any time", and until there
+      // is a mailing tool with a real unsubscribe link, this is that mechanism.
+      'Want out? Reply with "unsubscribe" and I will take you off the list.',
+      "",
+    ].join("\n");
+  }
+
   return [
     `Hi ${greetingName(d)},`,
     "",
@@ -483,7 +513,9 @@ module.exports = async function handler(req, res) {
           from: `"Nick at Thermal Dawn" <${process.env.GMAIL_USER}>`,
           to: data.email,
           replyTo: NOTIFY_TO,
-          subject: "Thanks For Getting in Touch",
+          subject: data.form === "subscribe"
+            ? "You're subscribed to Thermal Dawn updates"
+            : "Thanks For Getting in Touch",
           text: formatAutoresponder(data),
         });
       } catch (autoErr) {
