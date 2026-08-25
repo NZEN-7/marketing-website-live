@@ -175,8 +175,50 @@
   status = 301
 [[redirects]]
   from = "/post/victorian-gas-boiler-replacement-timing-should-you-replace-now-or-wait"
-  to = "/blog/victorian-gas-boiler-replacement-timing/"
+  to = "/blog/"
   status = 301
 
 # SPA-style fallback is NOT wanted (this is a multipage static site).
 # 404s are served by /404.html automatically.
+
+[[redirects]]
+  from = "/learn"
+  to = "/blog/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/copy-of-learn-old"
+  to = "/blog/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/copy-of-hydronic-heat-2"
+  to = "/hydronic/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/register-interest-installer"
+  to = "/pre-order/register-interest/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/copy-of-english-privacy-policy"
+  to = "/contact/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/post/i-want-to-replace-my-ducted-gas-heating-what-are-my-options"
+  to = "/blog/heat-pump-replace-gas-hydronic-boiler/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/post/why-your-gas-boiler-s-days-are-numbered-and-what-to-do-about-it"
+  to = "/blog/old-gas-boiler-removal-electrification/"
+  status = 301
+  force = true
