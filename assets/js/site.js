@@ -115,6 +115,26 @@
     }
 
     upgradePartnerLogos();
+    stickyHeaderState(h);
+  }
+
+  /* The bar stays put via CSS (position:sticky on #site-header). This only
+     tells it whether the page has moved, so it can go slightly see-through
+     once there is something scrolling behind it. Passive listener and a
+     rAF gate: this runs on every scroll event on every page. */
+  function stickyHeaderState(header) {
+    if (!header) return;
+    var ticking = false;
+    function apply() {
+      header.classList.toggle("is-scrolled", window.pageYOffset > 8);
+      ticking = false;
+    }
+    window.addEventListener("scroll", function () {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(apply);
+    }, { passive: true });
+    apply();   // correct on a reload that restores scroll position
   }
 
   /* Embedded diagrams whose height depends on their own width (the SVG keeps

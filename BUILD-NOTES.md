@@ -1024,3 +1024,30 @@ old photo showed, which put the sensitive detail back into public page source.
 The comment now just points here. **The image is still in git history, including
 the public NZEN-7 mirror** - if that matters, the history needs rewriting, which
 is a separate job.
+
+### Header now actually sticks (25 Aug 2026)
+
+Nick: *"can we make the banner scroll with the UI so its always visible"* and
+*"on scroll can you make it slightly transparent"*.
+
+`position:sticky` was already in the CSS and had never worked. It sat on the
+inner `<div class="site-header">` that `site.js` injects, and a sticky element
+only travels within its own parent: that parent is `<header id="site-header">`,
+which is exactly as tall as the bar itself. Zero distance to travel, so it
+scrolled away like a static element. Moved to `#site-header`, a direct child of
+body, which is the only element in that chain with the whole page to stay put
+against.
+
+On scroll, `site.js` toggles `is-scrolled` and the bar goes from solid
+`#14100d` to `rgba(20,16,13,.82)` with `saturate(150%) blur(12px)`, so content
+reads as passing behind it. Listener is passive and rAF-gated, and calls once at
+init so a reload that restores scroll position paints the right state.
+
+Also added `scroll-padding-top:92px`, since a sticky bar otherwise parks itself
+over whatever an in-page anchor jumps to, and a reduced-motion opt-out.
+
+Verified in-browser via the CSSOM and computed styles: real scrolling could not
+be driven because the preview pane reports a 0x0 viewport and freezes
+transitions, so the transitioned values had to be read with transition disabled.
+
+css bumped to ?v=39, site.js to ?v=13.

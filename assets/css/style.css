@@ -142,7 +142,10 @@ li{margin:.35em 0;}
 .arrow::after{content:"\2192";font-weight:800;}
 
 /* ---------- Header / nav ---------- */
-.site-header{position:sticky;top:0;z-index:60;background:rgba(255,255,255,.94);backdrop-filter:saturate(140%) blur(10px);border-bottom:1px solid var(--td-line);}
+/* Sticky lives on the outer #site-header, further down. It was on this inner
+   div, whose parent is exactly as tall as it is, so it had no distance to
+   travel and scrolled away like a static element. */
+.site-header{background:rgba(255,255,255,.94);backdrop-filter:saturate(140%) blur(10px);border-bottom:1px solid var(--td-line);}
 .nav{display:flex;align-items:center;justify-content:space-between;height:var(--header-h);max-width:var(--wrap);margin:0 auto;padding:0 22px;}
 .nav__logo img{height:26px;width:auto;}
 .nav__toggle{display:inline-flex;flex-direction:column;gap:5px;background:none;border:0;cursor:pointer;padding:8px;}
@@ -463,6 +466,16 @@ body.dark .form-consent{color:#a2968c;}
 /* ---------- Header: dark shell + gradient hairline ---------- */
 .site-header{background:var(--td-shell);border-bottom:1px solid rgba(255,255,255,.09);backdrop-filter:none;}
 .site-header::before{content:"";display:block;height:3px;background:var(--td-sunrise);}
+/* The header is a direct child of body, so it is the only element here with
+   room to stay put for the length of the page. */
+#site-header{position:sticky;top:0;z-index:60;}
+.site-header{transition:background .25s ease,backdrop-filter .25s ease;}
+/* Once the page has moved, let content pass behind the bar instead of hiding
+   under a solid slab. --td-shell is #14100d. */
+#site-header.is-scrolled .site-header{background:rgba(20,16,13,.82);backdrop-filter:saturate(150%) blur(12px);}
+/* Without this a sticky bar parks itself over whatever an anchor jumps to. */
+html{scroll-padding-top:92px;}
+@media(prefers-reduced-motion:reduce){.site-header{transition:none;}}
 .nav__menu a{color:#f3ece6;}
 .nav__menu a:hover,.nav__menu a.is-active{color:var(--td-orange);}
 .nav__toggle span{background:#fff;}
