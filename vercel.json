@@ -42,15 +42,33 @@
         {
           "key": "Referrer-Policy",
           "value": "strict-origin-when-cross-origin"
-        },
-        {
-          "key": "X-Robots-Tag",
-          "value": "noindex"
         }
       ]
     }
   ],
   "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ],
+      "destination": "https://www.thermaldawn.com/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ],
+      "destination": "https://www.thermaldawn.com/:path*",
+      "permanent": true
+    },
     {
       "source": "/hydronic-overview",
       "destination": "/hydronic/",
