@@ -48,25 +48,25 @@
   ],
   "redirects": [
     {
-      "source": "/:path*",
+      "source": "/(.*)",
       "has": [
         {
           "type": "host",
           "value": "freevolt.com.au"
         }
       ],
-      "destination": "https://www.thermaldawn.com/:path*",
+      "destination": "https://www.thermaldawn.com/$1",
       "permanent": true
     },
     {
-      "source": "/:path*",
+      "source": "/(.*)",
       "has": [
         {
           "type": "host",
           "value": "www.freevolt.com.au"
         }
       ],
-      "destination": "https://www.thermaldawn.com/:path*",
+      "destination": "https://www.thermaldawn.com/$1",
       "permanent": true
     },
     {
