@@ -222,3 +222,8 @@
   to = "/blog/old-gas-boiler-removal-electrification/"
   status = 301
   force = true
+
+# NOTE: vercel.json carries each legacy redirect twice, with and without a
+# trailing slash, because Vercel's trailingSlash:true normalises the URL
+# before matching and a bare source never fires. Netlify matches both forms
+# already, so the twins differ here on purpose.
