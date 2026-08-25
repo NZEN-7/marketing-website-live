@@ -1004,3 +1004,23 @@ thermaldawn.com (host-conditional rules in vercel.json did not fire either as
 :path* or as a regex capture; do it in Vercel's domain settings instead).
 No privacy policy exists, so Wix's is redirected to /contact/ as an interim.
 No LocalBusiness schema, which needs a decision on what address to publish.
+
+### Prototype control board photo removed (25 Aug 2026)
+
+`assets/img/control-board.webp` showed a bare PCB silkscreened **"THERMAL DAWN /
+Pilot Prototype Rev A"** with an off-the-shelf **ESP-32** dev module soldered to
+it. It ran on the Days Are Numbered blog card and, more prominently, full width
+on the intelligence page directly under a caption about shipping firmware over
+the air. Nick called it: that photo undercuts a premium product story, dates the
+hardware as pre-production, and shows more of the design than we want public.
+
+Removed from both, and the file deleted so it is not still fetchable at its old
+path. The intelligence slot now uses `install-unit.webp`, a real photo rather
+than a concept render (`product-unit-vent.webp` was the obvious same-aspect
+swap, but it is CGI, and Nick moved the site off concept renders in August).
+
+The first version of that swap left an HTML comment explaining exactly what the
+old photo showed, which put the sensitive detail back into public page source.
+The comment now just points here. **The image is still in git history, including
+the public NZEN-7 mirror** - if that matters, the history needs rewriting, which
+is a separate job.
