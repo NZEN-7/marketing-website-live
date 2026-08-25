@@ -954,3 +954,53 @@ and on the subscribe form it also fixed a live bug.
 Not done: the contact form was left alone. Nick named subscribe and the quote
 form; someone sending a question has not asked for marketing, and replying to
 their enquiry needs no opt-in.
+
+## Launch on thermaldawn.com, and the SEO pass (25 Aug 2026)
+
+Cutover done. DNS moved at Wix: apex A to Vercel's 76.76.21.21, www CNAME to
+cname.vercel-dns.com, MX/SPF/TXT/DMARC untouched so Google Workspace mail
+never moved. Verified live: http and apex both single-hop 308 to
+https://www.thermaldawn.com/, missing pages return a real 404, all 13 legacy
+Wix URLs resolve 200.
+
+Four things were wrong and would have cost traffic:
+
+- **Every canonical pointed at www.thermaldawn.com.au, which has no DNS at
+  all.** 27 pages, og:url, sitemap and robots.txt all rewritten to
+  www.thermaldawn.com, the host Wix actually served and Google actually indexed.
+- **None of the 18 legacy redirects had ever fired.** `trailingSlash: true`
+  normalises /product to /product/ *before* redirects are matched, so a source
+  written without the slash matches nothing. Every source now exists in both
+  forms. Netlify matches both already, so the twins differ here on purpose.
+- **The redirect map was written using the NEW slugs as if they were the old
+  Wix ones.** Checked against the live Wix sitemap: of five ranking posts only
+  two landed. Added the seven real URLs that were missing, including /learn
+  (blog landing *and* a blog category) and the two articles whose Wix slugs
+  never matched their new ones. Coverage is now 23/23, nothing 404s.
+- **The Victorian timing post redirected to a noindexed Coming soon stub**,
+  which Google drops on the first crawl. Points at /blog/ until it is written.
+
+Also: four noindexed stubs came out of the sitemap (Search Console flags those
+as submitted-but-noindexed), and the staging `X-Robots-Tag: noindex` came off
+in both configs.
+
+**The blog index was stale in a way that hid two published articles.** Both
+"I Want to Replace My Ducted Gas Heating" and "Why Your Gas Boiler's Days Are
+Numbered" are live and indexable, but their cards still carried `badge-soon`,
+a "Coming soon" label and pre-publication headings that did not match the
+articles at all. Fixed. The six genuine stubs keep the label and the link (the
+stub page carries a quote CTA and two keep-reading links, so it is worth
+landing on) but lost their thumbnails: a photo promises an article that is not
+written yet, and the two published cards had none.
+
+First structured data on the site: Organization on the home page, BlogPosting
+on the four live articles. **datePublished is deliberately absent** - every
+article file dates to the initial commit and today's timestamp is only the CSS
+bump, so git cannot say when the writing shipped and a guessed date is worse
+than none. Add real dates when known.
+
+Outstanding: freevolt.com.au still serves this build and should redirect to
+thermaldawn.com (host-conditional rules in vercel.json did not fire either as
+:path* or as a regex capture; do it in Vercel's domain settings instead).
+No privacy policy exists, so Wix's is redirected to /contact/ as an interim.
+No LocalBusiness schema, which needs a decision on what address to publish.
