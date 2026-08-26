@@ -1071,6 +1071,15 @@ body.dark .form-error{background:rgba(234,91,19,.14);border-color:rgba(var(--td-
 .pbadge .plogo__txt,body.dark .pbadge .plogo__txt{color:#fff;
   border-color:rgba(255,255,255,.55);font-size:.9rem;padding:5px 10px;max-width:none;}
 .pbadge-row__cap{margin:0;flex:1 1 300px;min-width:240px;line-height:1.5;}
+/* The Home Assistant badge is a link out to home-assistant.io, so it needs the
+   affordances a button has: pointer, lift on hover, a visible focus ring. The
+   glow is scoped to --ha because it is keyed to that badge's own blue. */
+a.pbadge{cursor:pointer;text-decoration:none;transition:transform .15s ease,box-shadow .15s ease,filter .15s ease;}
+a.pbadge:hover{transform:translateY(-2px);filter:brightness(1.06);}
+a.pbadge--ha:hover{box-shadow:0 8px 20px rgba(24,188,242,.34);}
+a.pbadge:active{transform:translateY(0);}
+a.pbadge:focus-visible{outline:3px solid var(--td-orange);outline-offset:3px;}
+@media(prefers-reduced-motion:reduce){a.pbadge{transition:none;}a.pbadge:hover{transform:none;}}
 @media(max-width:560px){
   .pbadge{padding:9px 13px;}
   .pbadge .plogo img{height:22px;max-width:160px;}
