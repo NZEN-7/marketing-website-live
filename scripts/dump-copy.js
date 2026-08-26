@@ -101,7 +101,36 @@ for (const file of files) {
     ogTitle: attr(src, /<meta\s+property=(["'])og:title\1\s+content=(["'])([\s\S]*?)\2/i),
     blocks: [],
     chartLabels: [],
+    /* Alt text, placeholders and aria-labels are customer-facing copy: a
+       screen reader reads them aloud and Google reads alt. stripTags() drops
+       the whole tag, so none of it had ever reached a reviewer. Gathered from
+       the whole source rather than line by line, because a tag can wrap across
+       lines, which is also how a wrapped tag used to leak its raw attributes
+       into the body text as if they were prose. */
+    media: [],
+    uiText: [],
   };
+
+  /* Line number from the match offset, not by searching for the text: three
+     fields on this form share the placeholder "Tell us more", and a search
+     reports the first one's line for all three. In a pack whose whole
+     addressing scheme is path:line, that sends a reviewer to the wrong field. */
+  const lineAt = (offset) => src.slice(0, offset).split(/\r?\n/).length;
+
+  for (const m of src.matchAll(/<img\b[^>]*>/gi)) {
+    const at = (name) => {
+      const a = m[0].match(new RegExp(name + '="([^"]*)"', "i"));
+      return a ? decode(a[1]).trim() : "";
+    };
+    const file = at("src");
+    if (!file) continue;
+    page.media.push({ n: lineAt(m.index), file, alt: at("alt") });
+  }
+  for (const m of src.matchAll(/\b(placeholder|aria-label)="([^"]*)"/gi)) {
+    const text = decode(m[2]).trim();
+    if (!text) continue;
+    page.uiText.push({ n: lineAt(m.index), kind: m[1].toLowerCase(), text });
+  }
 
   let inBody = false;
   let skipUntil = null; // closing tag we're waiting for (script/style)
@@ -195,6 +224,19 @@ for (const p of pages) {
     out.push("");
     out.push("   -- chart labels (inside SVG) --");
     for (const c of p.chartLabels) out.push(`${String(c.n).padStart(4)}:  ${c.text}`);
+  }
+  if (p.media.length) {
+    out.push("");
+    out.push("   -- images (alt text is copy: screen readers speak it, Google reads it) --");
+    for (const m of p.media) {
+      out.push(`${String(m.n).padStart(4)}:  ${m.file}`);
+      out.push(`      alt: ${m.alt || "(EMPTY, decorative or missing)"}`);
+    }
+  }
+  if (p.uiText.length) {
+    out.push("");
+    out.push("   -- placeholders and labels (seen in form fields, not in the prose above) --");
+    for (const u of p.uiText) out.push(`${String(u.n).padStart(4)}:  ${u.kind}: ${u.text}`);
   }
 }
 
@@ -337,6 +379,26 @@ for (const p of pages) {
     md.push("## Chart labels (inside SVG)");
     md.push("");
     for (const c of p.chartLabels) md.push(`- \`${p.rel}:${c.n}\` ${c.text}`);
+  }
+  if (p.media.length) {
+    md.push("");
+    md.push("## Images");
+    md.push("");
+    md.push("Alt text is copy. A screen reader speaks it, and Google reads it as a description of the image. Review the wording, and check the image is still the one the surrounding copy is talking about.");
+    md.push("");
+    md.push("| Image | Alt text |");
+    md.push("|---|---|");
+    for (const m of p.media) {
+      md.push(`| \`${m.file}\`<br>\`${p.rel}:${m.n}\` | ${m.alt || "**(empty: decorative, or missing)**"} |`);
+    }
+  }
+  if (p.uiText.length) {
+    md.push("");
+    md.push("## Placeholders and labels");
+    md.push("");
+    md.push("Read inside form fields and by screen readers, so it never shows up in the prose above.");
+    md.push("");
+    for (const u of p.uiText) md.push(`- \`${p.rel}:${u.n}\` *(${u.kind})* ${u.text}`);
   }
   for (const iv of p.interactives || []) {
     md.push("");
