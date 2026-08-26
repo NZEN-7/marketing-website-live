@@ -1051,3 +1051,35 @@ be driven because the preview pane reports a 0x0 viewport and freezes
 transitions, so the transitioned values had to be read with transition disabled.
 
 css bumped to ?v=39, site.js to ?v=13.
+
+### "How did you hear about us" on the quote form (25 Aug 2026)
+
+Optional, and it had to be added in four places at once because the field
+crosses every consumer of the form: HTML, `api/lead.js` (parse, notification,
+Supabase row), `scripts/apps-script/lead-parser.gs` (LEAD_LABELS), and the two
+tests that guard the contract.
+
+- **Migration first, deliberately.** `leads` had no column for it, and
+  `leadRow()` writing an unknown key makes PostgREST 400 at runtime, which is
+  exactly the silent-capture-failure the tests exist to prevent. Added
+  `public.leads.referral_source` (nullable text) on the CRM project BEFORE the
+  code shipped.
+- **Free text, not an enum.** `contacts.lead_source` IS an enum (MEEH Facebook,
+  Website, Referral, Event, Cold outreach) but that is the triaged value. The
+  capture half of `leads` is as-submitted on purpose, same reasoning already
+  recorded on `heating_system_type`: coercing raw form input at capture rejects
+  real answers instead of recording them. A person maps it at triage.
+- **Checkboxes, not radios.** People genuinely arrive via a friend AND an expo,
+  and a radio cannot be un-picked once touched, which is a trap on a question
+  nobody has to answer.
+- **The legend says "Optional".** Every other group on this form is required, so
+  the absence of an asterisk is not a signal anyone reads.
+
+Verified in-browser rather than assumed: the group does not block native
+validation (only `solar` and `battery` were outstanding), and an intercepted
+submit serialises `referral` as `["An event or expo","Saw the ute in Hawthorn"]`,
+proving the shared `data-other-for` swap works here as it does for drivers and
+timeline. Tests: `test:parser` now round-trips the new label out of a real
+generated email, and `test:leadrow` asserts NULL when the question is skipped.
+
+css bumped to ?v=41.

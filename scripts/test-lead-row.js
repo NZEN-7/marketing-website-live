@@ -19,7 +19,7 @@ const { parseSubmission, leadRow } = require("../api/lead.js");
 const WRITABLE = new Set([
   "submitted_at", "form", "source_site", "first_name", "last_name", "email",
   "phone", "suburb", "state", "address", "solar", "battery",
-  "heating_system_type", "driver", "timeline", "comments",
+  "heating_system_type", "driver", "referral_source", "timeline", "comments",
   "newsletter_opt_in", "payment_ref",
 ]);
 
@@ -29,6 +29,7 @@ const bodies = {
     email: "nigeljgray11@gmail.com", phone: "+61416086011", suburb: "Hampton",
     state: "VIC", heating: "Gas wall heaters / space heaters", solar: "No",
     battery: "No", drivers: ["Bills are too high", "Researching"],
+    referral: ["An event or expo", "Friend, family or neighbour"],
     timeline: ["Within 3 months"], comments: "Two storey, 1920s.",
     // the form posts this from a hidden field; the consent line under the
     // Request a Quote button is what the customer actually agreed to
@@ -88,6 +89,10 @@ check("contact has NULL driver", rows.contact.driver === null);
 check("contact name -> first_name", rows.contact.first_name === "Simon Radcliffe");
 check("contact message -> comments", rows.contact.comments === "Got hydronic.");
 check("multi-select joined", rows["register-interest"].driver === "Bills are too high, Researching");
+check("referral joined",     rows["register-interest"].referral_source === "An event or expo, Friend, family or neighbour");
+// Optional: skipping it must write NULL, not an empty string, or an
+// unanswered question looks answered.
+check("referral NULL when skipped", rows.contact.referral_source === null, rows.contact.referral_source);
 check("deposit address captured", rows["basic-reserve"].address === "12 Example St, Hawthorn VIC 3122");
 check("deposit payment_ref captured", /^td-/.test(rows["basic-reserve"].payment_ref || ""));
 check("non-deposit has NULL payment_ref", rows.contact.payment_ref === null);

@@ -387,6 +387,11 @@ table.data td:first-child{font-weight:600;}
 .field{margin-bottom:18px;}
 .field label{display:block;font-weight:700;margin-bottom:6px;font-size:.95rem;}
 .field .req{color:var(--td-deep);}
+/* Every other group on the quote form is required, so an optional one has to
+   say so: the absence of an asterisk is not a signal anyone reads. */
+.field .optional{margin-left:6px;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;
+  color:var(--td-grey);border:1px solid var(--td-line);border-radius:999px;padding:2px 8px;vertical-align:middle;}
+body.dark .field .optional{color:#a2968c;border-color:rgba(255,255,255,.18);}
 .field input,.field textarea,.field select{
   width:100%;font-family:var(--font);font-size:1rem;padding:13px 14px;
   border:1px solid var(--td-line);border-radius:var(--radius-sm);background:#fff;color:var(--td-black);

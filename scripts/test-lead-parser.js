@@ -55,6 +55,7 @@ check(
     drivers: ["Researching for future upgrade", "Bills are too high"],
     timeline: ["Within 3 months"],
     comments: "Keen to understand running costs.",
+    referral: ["An event or expo"],
   }, stamp),
   {
     "Form": "Homeowner Register Interest",
@@ -69,6 +70,7 @@ check(
     "Current heating/cooling system": "Gas wall heaters / space heaters",
     "Timeline": "Within 3 months",
     "Comments": "Keen to understand running costs.",
+    "How did you hear about us": "An event or expo",
   }
 );
 

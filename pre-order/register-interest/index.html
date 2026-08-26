@@ -17,7 +17,7 @@
 <link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png?v=8">
 <link rel="preload" href="/assets/fonts/Montserrat-Black.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/Montserrat-Regular.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/assets/css/style.css?v=40">
+<link rel="stylesheet" href="/assets/css/style.css?v=41">
 </head>
 <body class="dark">
 <header id="site-header"></header>
@@ -170,6 +170,24 @@
           <label class="choice"><input type="checkbox" name="timeline" value="12+ months / future planning"> 12+ months / future planning</label>
           <label class="choice"><input type="checkbox" name="timeline" value="Other"> Other</label>
           <input class="choice__other" name="timeline_other" data-other-for="timeline" aria-label="Tell us your timing" placeholder="Tell us more" hidden>
+          </div>
+        </fieldset>
+
+        <!-- Optional, so no .req asterisk and nothing preselected. Checkboxes
+             rather than radios: people genuinely arrive via a friend AND an
+             expo, and a radio cannot be un-picked once touched, which is a
+             trap on a question nobody has to answer. -->
+        <fieldset class="field field--group">
+          <legend>How did you hear about us? <span class="optional">Optional</span></legend>
+          <div class="choices">
+          <label class="choice"><input type="checkbox" name="referral" value="Google or web search"> Google or web search</label>
+          <label class="choice"><input type="checkbox" name="referral" value="Facebook or Instagram"> Facebook or Instagram</label>
+          <label class="choice"><input type="checkbox" name="referral" value="Friend, family or neighbour"> Friend, family or neighbour</label>
+          <label class="choice"><input type="checkbox" name="referral" value="My plumber, electrician or builder"> My plumber, electrician or builder</label>
+          <label class="choice"><input type="checkbox" name="referral" value="An event or expo"> An event or expo</label>
+          <label class="choice"><input type="checkbox" name="referral" value="News, podcast or article"> News, podcast or article</label>
+          <label class="choice"><input type="checkbox" name="referral" value="Other"> Other</label>
+          <input class="choice__other" name="referral_other" data-other-for="referral" aria-label="Tell us how you heard about us" placeholder="Tell us more" hidden>
           </div>
         </fieldset>
 

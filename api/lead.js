@@ -148,6 +148,9 @@ function leadRow(d) {
     battery: d.battery || null,
     heating_system_type: d.heating || null,
     driver: joinForDb(d.drivers),
+    // NULL when the question was skipped. It is optional, so an empty
+    // answer is not a claim that they came from nowhere.
+    referral_source: joinForDb(d.referral),
     timeline: joinForDb(d.timeline),
     comments: d.comments || d.message || null,
     // NULL, not false, on every form that does not ask. Subscribe and
@@ -208,6 +211,7 @@ function parseSubmission(body) {
       solar: asText(body.solar, 40),
       battery: asText(body.battery, 40),
       drivers: asList(body.drivers),
+      referral: asList(body.referral),
       timeline: asList(body.timeline),
       comments: asText(body.comments, 5000),
     });
@@ -285,6 +289,7 @@ function formatNotification(d, stamp) {
       "",
       "CONTEXT",
       `Comments: ${orDash(d.comments)}`,
+      `How did you hear about us: ${joinList(d.referral)}`,
       `Newsletter opt-in: ${d.optin ? "Yes" : "No"}`,
       "",
     ].join("\n");

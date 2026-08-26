@@ -23,7 +23,8 @@
 var LEAD_LABELS = [
   'Form', 'Submission Time', 'First name', 'Last name', 'Email', 'Phone',
   'Suburb', 'State', 'Solar', 'Battery', 'Current heating/cooling system',
-  "What's driving interest", 'Timeline', 'Comments', 'Newsletter opt-in',
+  "What's driving interest", 'Timeline', 'Comments',
+  'How did you hear about us', 'Newsletter opt-in',
   'Tier', 'Name'
 ];
 
