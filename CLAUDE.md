@@ -31,9 +31,20 @@ images still to be exported.
   touching `formatNotification()`**: it feeds real generated emails through the
   real CRM parser (`scripts/apps-script/`) and fails on any label drift. When
   the parser changes, re-paste it into the Apps Script project by hand, nothing
-  syncs it (`scripts/apps-script/SETUP.md`). The two deposit forms
-  (basic-reserve, founder-premium) still post to Wix and stay there until
-  Stripe Payment Links exist.
+  syncs it (`scripts/apps-script/SETUP.md`). All five forms now post here,
+  deposits included: they write the lead, then hand off to the Stripe Payment
+  Links in `assets/js/config.js`.
+- **Every submission also writes a Supabase row** (`recordLead`, project
+  **CRM** `skyequfcoejlhzbyipwt`, `ap-southeast-2`). The email is still sent
+  FIRST and is the system of record; the insert runs after and can never fail
+  the request. Adding a form field means a **migration before the deploy**:
+  `leadRow()` writing a column that does not exist makes PostgREST 400 at
+  runtime, silently, which is exactly what `npm run test:leadrow` guards.
+  `public.leads` is **inbound only** (25 Aug 2026): as-submitted, never edited,
+  free text not enums, because coercing raw form input at capture rejects real
+  answers instead of recording them. Exactly two columns are human-written,
+  `filed_to_contact_id` and `notes`; the workflow lives in `contacts`. A row
+  with neither is one nobody has looked at.
 - **Live savings counter:** elements with `data-live-stat` tick up on scroll
   (`assets/js/live-stats.js`) and pull live fleet totals from the platform:
   `https://thermal-dawn-platform.vercel.app/api/public/stats` (public,
@@ -46,20 +57,32 @@ images still to be exported.
   don't guess.
 - `homepage-flow-v2.html` is **generated**, never hand-edit; change a source
   and re-run `node assets/animations/build-homepage-anim.js assets/animations`.
-- Stripe reserve links are placeholders, real URLs go in `assets/js/config.js`.
+- Stripe Payment Links are live in `assets/js/config.js`. That file is the
+  ONLY place a payment URL is written.
+- **Redirect sources need both forms, with and without a trailing slash.**
+  `trailingSlash: true` normalises the URL before redirects are matched, so a
+  bare `/product` never fires. This silently killed all 18 legacy Wix 301s
+  until 25 Aug 2026.
 
-## Domains (state as of 31 Jul 2026)
-- Live Wix site: thermaldawn.com (untouched until launch; domain is
-  REGISTERED through Wix, renews 3 Nov 2026, transfer out before the Wix
-  plan is cancelled).
-- Staging: https://www.freevolt.com.au is live on Vercel (cutover done
-  31 Jul, GoDaddy DNS, Google MX preserved, Workspace alias domain added).
-  Vercel URL: https://marketing-website-live-seven.vercel.app. Keep noindex
-  until launch.
-- Launch domain DECIDED 31 Jul 2026: thermaldawn.com. Canonicals/sitemap/
-  robots/og:url still say www.thermaldawn.com.au; rewrite them at launch,
-  verify the vercel.json redirect map against Google's live index first
-  (see BUILD-NOTES, launch prep).
+## Domains (LAUNCHED on thermaldawn.com, 25 Aug 2026)
+- **Live: https://www.thermaldawn.com**, served by Vercel. `www` is canonical;
+  the apex 308s to it. Wix is out of the path entirely (apex A ->
+  `76.76.21.21`, `www` CNAME -> `cname.vercel-dns.com`).
+- The noindex is **off**. Canonicals, og:url, sitemap and robots.txt all say
+  `https://www.thermaldawn.com`. They used to say `www.thermaldawn.com.au`,
+  which has never had DNS at all.
+- **MX/SPF/DMARC still live in the Wix DNS zone.** Google Workspace mail for
+  thermaldawn.com depends on them. Never touch them when changing where the
+  website points; they have nothing to do with hosting.
+- The domain is still REGISTERED through Wix and renews **3 Nov 2026**.
+  Transfer out before then (a transfer adds a year). Rebuild the zone at the
+  new host and verify it BEFORE the nameservers change: that is the one moment
+  in the plan where email is genuinely at risk.
+- freevolt.com.au serves this same build and should redirect to
+  thermaldawn.com. Host-conditional rules in `vercel.json` did not fire as
+  either `:path*` or a regex capture; do it in Vercel's domain settings.
+- Search Console: same domain, same property, history retained. Do NOT use
+  Change of Address, that is for moving between domains.
 - Portal (separate repo TD-Platform): thermal-dawn-platform.vercel.app.
   td-platform.vercel.app is a STALE alias owned by a lost Vercel account -
   never reference it.
