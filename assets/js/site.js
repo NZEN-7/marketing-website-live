@@ -116,6 +116,53 @@
 
     upgradePartnerLogos();
     stickyHeaderState(h);
+    scrollReveal();
+  }
+
+  /* Scroll reveal, deliberately narrow: heading-led sections that start below
+     the fold fade up 14px, once, as they arrive. Everything else is left
+     alone, and the list of exclusions is the interesting part.
+
+     The hidden state lives behind html.js-reveal, which only this function
+     adds. So with JS off, no IntersectionObserver, or reduced motion, nothing
+     is ever hidden and there is nothing to un-hide: the page renders as it
+     always did rather than as a blank column waiting for a callback.
+
+     Sections carrying an iframe are excluded. Both interactives start
+     themselves from their OWN IntersectionObserver, measured against the
+     iframe's viewport, which cannot see a parent fade. The day chart would
+     burn its ten-second sweep behind an opacity of 0 and the reader would
+     arrive at a finished chart. Forms and tables are excluded because a
+     reader is mid-task in them, not arriving at them. */
+  function scrollReveal() {
+    if (!("IntersectionObserver" in window)) return;
+    if (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    var vh = window.innerHeight;
+    var targets = [];
+    document.querySelectorAll("main > section.section").forEach(function (s) {
+      if (!s.querySelector("h2")) return;
+      if (s.querySelector("iframe, form, table, video")) return;
+      if (s.getBoundingClientRect().top < vh) return;   // in or above the fold
+      targets.push(s);
+    });
+    if (!targets.length) return;
+
+    document.documentElement.classList.add("js-reveal");
+    targets.forEach(function (s) { s.classList.add("reveal"); });
+
+    /* A deep link lands ON a section; it must not arrive invisible. */
+    var hashed = location.hash && document.querySelector(location.hash);
+    if (hashed && hashed.classList.contains("reveal")) hashed.classList.add("is-in");
+
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        en.target.classList.add("is-in");
+        io.unobserve(en.target);
+      });
+    }, { rootMargin: "0px 0px -8% 0px", threshold: 0 });
+    targets.forEach(function (s) { io.observe(s); });
   }
 
   /* The bar stays put via CSS (position:sticky on #site-header). This only

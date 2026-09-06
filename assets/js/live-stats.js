@@ -3,7 +3,7 @@
  * Elements with data-live-stat="<key>" hold audited static figures in the
  * HTML (the no-JS / endpoint-down truth). On first scroll into view each
  * one tickers up from 0, digits flip fast, then decelerate into the final
- * value (ease-out quartic). If the platform's public stats endpoint
+ * value (ease-out exponential). If the platform's public stats endpoint
  * answers (GET /api/public/stats, aggregates only, edge-cached), targets
  * switch to the live values and any already-landed counter glides to the
  * fresh number; elements with class "live-dot" are unhidden. Keys:
@@ -43,6 +43,11 @@
       return;
     }
     if (el.__anim) cancelAnimationFrame(el.__anim);
+    /* The baked figure is already on screen at its final width. Hold that
+       width for the count, or the element shrinks to "0" and grows back and
+       the sentence around it reflows on every frame. Cleared on landing so a
+       live value with a different digit count can resize once, at rest. */
+    if (!el.style.minWidth) el.style.minWidth = el.getBoundingClientRect().width + "px";
     var t0 = performance.now();
     function frame(t) {
       var k = Math.min(1, (t - t0) / dur);
@@ -50,8 +55,12 @@
       var v = from + (to - from) * k;
       el.textContent = fmt(v);
       el.__val = v;
-      if (k < 1) el.__anim = requestAnimationFrame(frame);
-      else el.__anim = null;
+      if (k < 1) {
+        el.__anim = requestAnimationFrame(frame);
+      } else {
+        el.__anim = null;
+        el.style.minWidth = "";
+      }
     }
     el.__anim = requestAnimationFrame(frame);
   }
@@ -65,7 +74,7 @@
           var el = en.target;
           io.unobserve(el);
           el.__seen = true;
-          tick(el, 0, targetFor(el), 3400);
+          tick(el, 0, targetFor(el), 1600);
         });
       },
       { threshold: 0.4 },
