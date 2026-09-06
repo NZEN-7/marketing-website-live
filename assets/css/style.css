@@ -67,6 +67,12 @@
   /* Spacing / layout */
   --wrap:1160px;
   --wrap-narrow:760px;
+  /* Prose measure. NOT a guessed ch value: Montserrat's ch unit is 11.73px at
+     16.5px body, but its average prose character is 7.87px, so a ch is 1.49
+     characters here and the obvious "64ch for ~75 characters" would have been
+     95. Measured in-browser, 50ch = 587px = ~75 characters, which is the top
+     of the comfortable range. The site's default prose column was 91. */
+  --measure:50ch;
   --radius:14px;
   --radius-sm:9px;
   --shadow:0 10px 34px rgba(29,30,28,.10);
@@ -745,7 +751,7 @@ body.dark .section .card,body.dark .section .table-wrap,body.dark .section .form
 body.dark .section .tier,body.dark .section .path-card,body.dark .section .article,
 body.dark .section .split,body.dark .section .altrow,body.dark .section .faq{text-align:left;}
 /* lists never centre, ragged bullets are hard to scan */
-body.dark .section ul,body.dark .section ol{text-align:left;max-width:66ch;margin-left:auto;margin-right:auto;}
+body.dark .section ul,body.dark .section ol{text-align:left;max-width:var(--measure);margin-left:auto;margin-right:auto;}
 body.dark .section ol{padding-left:1.5em;}
 body.dark .section li{margin:.6em 0;padding-left:.2em;}
 body.dark .section ol li::marker{color:var(--td-orange);font-weight:800;}
@@ -758,7 +764,7 @@ body.dark .section .article ul>li::before{display:none;}
 body.dark .section .card ul,body.dark .section .tier ul{text-align:left;}
 body.dark .section .tier ul>li::before{display:none;}
 /* body prose gets a comfortable measure even inside a centred wrap */
-body.dark .section>.wrap>p,body.dark .section>.wrap>.narrow>p{max-width:70ch;margin-left:auto;margin-right:auto;}
+body.dark .section>.wrap>p,body.dark .section>.wrap>.narrow>p{max-width:var(--measure);margin-left:auto;margin-right:auto;}
 body.dark .section .btn-row{justify-content:center;}
 body.dark .section .quote{border-left:0;border-top:2px solid var(--td-orange);padding:16px 0 0;display:inline-block;}
 /* .quote defaults to near-black, invisible on a dark page */
@@ -1179,7 +1185,7 @@ body{font-size:16.5px;}
 .hero__note{font-size:.85rem;font-weight:400;color:#b3a89e;}
 .supporting{font-size:.9rem;font-weight:500;color:#cfc4ba;}
 .hero--sunrise .subhead,.hero--sunrise .supporting{color:#1c1514;}
-.lead{font-size:1.05rem;font-weight:400;}
+.lead{font-size:1.125rem;font-weight:400;}
 
 /* Accent giving up its extra jobs */
 .eyebrow{color:var(--td-grey);}
@@ -1276,3 +1282,15 @@ body.dark .field .req{color:var(--td-orange);}
 /* Light-on-dark component text that would be invisible if the component ever
    lands on a light page. Mirrors the v7 treatment of .benefits__item h3. */
 body:not(.dark) .step p,body:not(.dark) .tl p,body:not(.dark) .benefits__item p{color:#4a4642;}
+
+/* --- v8b, measure ------------------------------------------------------ */
+/* The 70ch guard only ever reached direct <p> children of .wrap on body.dark
+   pages, so it missed the light page, anything wrapped in a div, and the
+   callouts. These are the leaks, by where the prose actually sits. */
+.measure{max-width:var(--measure);margin-left:auto;margin-right:auto;}
+.article p{max-width:var(--measure);}                 /* 91 -> ~75 chars; tables and images keep the full .article width */
+.faq details p{max-width:var(--measure);}             /* was 80ch = ~119 chars */
+.faq summary{max-width:var(--measure);}               /* was uncapped, ~110 */
+.embed__cap{max-width:var(--measure);margin-left:auto;margin-right:auto;}
+.section>.wrap>.callout{max-width:calc(var(--measure) + 44px);margin-left:auto;margin-right:auto;}
+body.home .section>.wrap>p{max-width:var(--measure);margin-left:auto;margin-right:auto;}
