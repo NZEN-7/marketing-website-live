@@ -262,16 +262,17 @@ them.
   site by 3%.
 - **`.about-split`** (~79 chars) left alone; it is inside tolerance and is not
   prose in a full-width container.
-- **`.faq` was left at 900px, and that was wrong.** Capping the answer alone
-  inside a 900px block set the text and the block's furniture to different
-  widths: the answer stopped at 540px while the rule line and the chevron ran
-  on to 900, leaving a column of empty space beside every answer. Corrected
-  after launch by moving the cap to the container: `.faq{max-width:600px}`,
-  no cap on the paragraph. 600px is ~78 characters at the answers' .92rem, so
-  the measure is unchanged; the heading, questions, rules, chevrons and
-  answers now share one right edge. The general lesson: when a component has
-  furniture positioned against its own box, the measure belongs on the box,
-  not on the text inside it.
+- **`.faq` was left at 900px, and the measure work then capped the wrong box.**
+  A `max-width` on the answer alone inside a 900px row set the text and the
+  row's furniture to different widths: the answer stopped at 540px while the
+  rule line and the chevron ran on to 900, leaving a column of dead space
+  beside every answer. Narrowing `.faq` to 600px aligned them but shrank the
+  whole block into a thin strip on a wide page. Settled after launch on a
+  two-column row (v8e): the row, the rule and the chevron run the full 900px,
+  the question takes the left 34% and the answer sits beside it in its own
+  column, which is where the measure now lives. Stacks below 760px.
+  The general lesson: when a component has furniture positioned against its
+  own box, the measure belongs to a column, not to a cap on the text.
 - **`404.html`** has no font preloads and is noindex; left as is.
 - **flow-v2's scene internals**: the `#FF8C1A` charge accent is deliberate and
   documented ("MUST match the HA theme"); `--bg:#0a0a0a` needs `stop-color`
