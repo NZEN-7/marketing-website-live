@@ -142,7 +142,7 @@ const subject = lead.formatSubject(inj.data);
 console.log(`\n${/[\r\n]/.test(subject) ? "FAIL" : "ok  "}  subject header injection stripped: ${JSON.stringify(subject)}`);
 if (/[\r\n]/.test(subject)) failed++;
 
-// Autoresponder: goes to register-interest, contact and (since 25 Aug 2026)
+// Autoresponder: goes to register-interest, contact and (since 6 Sept 2026)
 // subscribe. Never to deposits, where Stripe sends the receipt and a second
 // thanks from us reads as a duplicate payment confirmation.
 console.log("\n" + "=".repeat(72));

@@ -399,7 +399,7 @@ body.dark .field .optional{color:#a2968c;border-color:rgba(255,255,255,.18);}
 .field input:focus,.field textarea:focus,.field select:focus{border-color:var(--td-orange);outline:none;box-shadow:0 0 0 3px rgba(var(--td-orange-rgb),.18);}
 .field textarea{min-height:120px;resize:vertical;}
 /* Consent stated at the point of action. Replaced the opt-in tickboxes on
-   25 Aug: people scrolled past them, and on the subscribe form the box also
+   6 Sept: people scrolled past them, and on the subscribe form the box also
    shared the name "optin" with the hidden field and overwrote it. */
 .form-consent{grid-column:1/-1;margin:10px 0 0;font-size:.82rem;line-height:1.5;color:var(--td-grey);}
 .next-orange .form-consent{color:rgba(28,21,20,.75);}

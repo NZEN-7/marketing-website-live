@@ -19,7 +19,7 @@
 const TZ = "Australia/Sydney";
 const NOTIFY_TO = "nickz@thermaldawn.com";
 const CALENDLY = "https://calendly.com/nickz-thermaldawn/30min";
-// Live from 25 Aug 2026. Autoresponders are read outside the site, so links in
+// Live from 6 Sept 2026. Autoresponders are read outside the site, so links in
 // them have to be absolute.
 const SITE = "https://www.thermaldawn.com";
 

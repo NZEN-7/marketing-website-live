@@ -910,7 +910,7 @@ NOT used. Nick wants it rebuilt in the idiom of the homepage duck-curve chart,
 "a little bit graphics and not perfect but legit backed up by data". Logged in
 Notion with the measured figures to draw from.
 
-## Consent stated instead of ticked (25 Aug 2026)
+## Consent stated instead of ticked (6 Sept 2026)
 
 Nick: *"can we make a by clicking this button you agree to receive comms from
 thermal dawn? rather than opt in? because people often miss that"*. Right call,
@@ -955,7 +955,7 @@ Not done: the contact form was left alone. Nick named subscribe and the quote
 form; someone sending a question has not asked for marketing, and replying to
 their enquiry needs no opt-in.
 
-## Launch on thermaldawn.com, and the SEO pass (25 Aug 2026)
+## Launch on thermaldawn.com, and the SEO pass (6 Sept 2026)
 
 Cutover done. DNS moved at Wix: apex A to Vercel's 76.76.21.21, www CNAME to
 cname.vercel-dns.com, MX/SPF/TXT/DMARC untouched so Google Workspace mail
@@ -1005,7 +1005,7 @@ thermaldawn.com (host-conditional rules in vercel.json did not fire either as
 No privacy policy exists, so Wix's is redirected to /contact/ as an interim.
 No LocalBusiness schema, which needs a decision on what address to publish.
 
-### Prototype control board photo removed (25 Aug 2026)
+### Prototype control board photo removed (6 Sept 2026)
 
 `assets/img/control-board.webp` showed a bare PCB silkscreened **"THERMAL DAWN /
 Pilot Prototype Rev A"** with an off-the-shelf **ESP-32** dev module soldered to
@@ -1025,7 +1025,7 @@ The comment now just points here. **The image is still in git history, including
 the public NZEN-7 mirror** - if that matters, the history needs rewriting, which
 is a separate job.
 
-### Header now actually sticks (25 Aug 2026)
+### Header now actually sticks (6 Sept 2026)
 
 Nick: *"can we make the banner scroll with the UI so its always visible"* and
 *"on scroll can you make it slightly transparent"*.
@@ -1052,7 +1052,7 @@ transitions, so the transitioned values had to be read with transition disabled.
 
 css bumped to ?v=39, site.js to ?v=13.
 
-### "How did you hear about us" on the quote form (25 Aug 2026)
+### "How did you hear about us" on the quote form (6 Sept 2026)
 
 Optional, and it had to be added in four places at once because the field
 crosses every consumer of the form: HTML, `api/lead.js` (parse, notification,

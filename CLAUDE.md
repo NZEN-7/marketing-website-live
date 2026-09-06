@@ -40,7 +40,7 @@ images still to be exported.
   the request. Adding a form field means a **migration before the deploy**:
   `leadRow()` writing a column that does not exist makes PostgREST 400 at
   runtime, silently, which is exactly what `npm run test:leadrow` guards.
-  `public.leads` is **inbound only** (25 Aug 2026): as-submitted, never edited,
+  `public.leads` is **inbound only** (6 Sept 2026): as-submitted, never edited,
   free text not enums, because coercing raw form input at capture rejects real
   answers instead of recording them. Exactly two columns are human-written,
   `filed_to_contact_id` and `notes`; the workflow lives in `contacts`. A row
@@ -62,9 +62,9 @@ images still to be exported.
 - **Redirect sources need both forms, with and without a trailing slash.**
   `trailingSlash: true` normalises the URL before redirects are matched, so a
   bare `/product` never fires. This silently killed all 18 legacy Wix 301s
-  until 25 Aug 2026.
+  until 6 Sept 2026.
 
-## Domains (LAUNCHED on thermaldawn.com, 25 Aug 2026)
+## Domains (LAUNCHED on thermaldawn.com, 6 Sept 2026)
 - **Live: https://www.thermaldawn.com**, served by Vercel. `www` is canonical;
   the apex 308s to it. Wix is out of the path entirely (apex A ->
   `76.76.21.21`, `www` CNAME -> `cname.vercel-dns.com`).
