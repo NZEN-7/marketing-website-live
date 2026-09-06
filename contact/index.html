@@ -40,10 +40,13 @@
   <!-- Designer, 12 Aug 2026: 35px less above, 35px more below the default.
        This page is body.dark, whose section default is 72px (not the light
        theme's 64px), so 35 either way is 37/107. -->
-  <section class="section" style="padding-top:37px;padding-bottom:107px">
+  <!-- Deliberately tighter above and looser below, from the 12 Aug designer
+       review. Expressed against the section token so it tracks the scale
+       instead of being two numbers that appear nowhere else on the site. -->
+  <section class="section" style="padding-top:calc(var(--sec) - var(--sp-7));padding-bottom:calc(var(--sec) + var(--sp-7))">
     <div class="wrap">
       <h2 class="center">Which path is right for you?</h2>
-      <div class="grid grid-3" style="margin-top:26px">
+      <div class="grid grid-3 mt-6">
         <div class="path-card">
           <h3>General question?</h3>
           <p>Use the message form below, we read every one.</p>
@@ -91,7 +94,7 @@
   <section class="section section--dark center">
     <div class="wrap narrow">
       <h2>Ready to secure your spot?</h2>
-      <div class="btn-row center" style="margin-top:8px">
+      <div class="btn-row center mt-2">
         <a class="btn btn--primary btn--rect" href="/pre-order/basic-reserve/">Reserve Your System <span class="arrow"></span></a>
       </div>
     </div>

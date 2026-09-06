@@ -41,10 +41,10 @@
        video down to the next section. The crumbs line lives inside the 60px,
        so the section padding is zeroed and the spacing is carried by the
        crumbs' own padding. Measured, not guessed: see BUILD-NOTES. -->
-  <section class="section" style="padding-top:0;padding-bottom:85px">
+  <section class="section section--flush" style="padding-bottom:calc(var(--sec) + var(--sp-3))">
     <div class="wrap">
-      <p class="crumbs" style="text-align:left;padding-top:20px;margin-bottom:0"><a href="/hydronic/">Hydronic</a> / How It Works</p>
-      <div class="video" style="margin-top:18px">
+      <p class="crumbs mb0" style="text-align:left;padding-top:20px"><a href="/hydronic/">Hydronic</a> / How It Works</p>
+      <div class="video mt-4">
         <iframe src="https://www.youtube-nocookie.com/embed/oE2prWw3BMU" title="Thermal Dawn Battery Explained | Using Solar To Heat &amp; Cool Your Home (Australia)" loading="lazy" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
       </div>
       <p class="video__cap">Thermal Dawn Battery explained: using solar to heat and cool your home.</p>
@@ -58,7 +58,7 @@
     <div class="wrap narrow">
       <h2>Your Hydronic System Already Works.<span class="h-accent">Here's What We Change.</span></h2>
     </div>
-    <div class="wrap" style="margin-top:26px">
+    <div class="wrap mt-6">
       <div class="panel-dark">
         <div class="embed embed--beforeafter">
           <iframe data-autoheight src="/assets/animations/hydronic-before-after.html?v=9" title="Interactive diagram: a gas hydronic system compared with the same system running on Thermal Dawn" loading="lazy" scrolling="no"></iframe>
@@ -66,12 +66,12 @@
         <p class="embed__cap mb0">Interactive: switch between <strong>Gas Boiler</strong> and <strong>Thermal Dawn</strong>, and select any component to see what happens to it.</p>
       </div>
     </div>
-    <div class="wrap narrow" style="margin-top:30px">
+    <div class="wrap narrow mt-7">
       <p>A hydronic system heats your home by circulating warm water through radiators, underfloor circuits, or fan coil units. The water gets hot, gives up heat to the room, returns cooler, gets reheated, and the cycle continues.</p>
       <p>Your gas boiler has been doing that job reliably for years. The problem isn't the hydronic system, it's the heat source. Gas is expensive, it's getting more expensive, and it produces emissions every time it fires.</p>
       <p>Thermal Dawn replaces just the heat source. Your pipes, your radiators, your zones, your thermostats, all stay exactly as they are. We connect our system where your boiler was, and from that point on your home is heated by stored solar energy instead of burning gas.</p>
     </div>
-    <div class="wrap" style="margin-top:26px">
+    <div class="wrap mt-6">
       <!-- Real install (Nick, 21 Aug), replacing the AI concept render that was
            here. Portrait, so the frame is narrower than the old square. -->
       <figure class="figure" style="max-width:460px;margin:6px auto 0">
@@ -84,12 +84,12 @@
   <!-- 3. WHY A STANDARD HEAT PUMP ISN'T ENOUGH -->
   <section class="section section--photo" style="--img:url('/assets/img/standard-heat-pump-bg.avif')">
     <div class="wrap">
-      <div class="narrow" style="margin-left:0">
+      <div class="narrow">
         <h2>Why a Standard Heat Pump Isn't Enough</h2>
       </div>
       <!-- The old day/night charts animation ran here; retired in favour of
            the v2 flow animation in section 5 (one interactive per page). -->
-      <div class="narrow" style="margin-left:0;margin-top:26px">
+      <div class="narrow mt-6">
         <p>Swapping your gas boiler for a standard hydronic heat pump is an improvement, but it leaves a fundamental problem unsolved.</p>
         <p>Your home needs heat most at dawn and dusk. That's when your family is home, when outdoor temperatures are lowest, and when your hydronic system works hardest. It's also exactly when electricity prices peak and your solar panels aren't generating.</p>
         <p>A standard heat pump draws from the grid during those expensive hours. You've escaped gas, but you're still buying peak-rate electricity every morning and evening to keep your home warm.</p>
@@ -110,11 +110,11 @@
   <!-- 5. HOUR BY HOUR -->
   <section class="section section--photo" style="--img:url('/assets/img/bills-bg.avif')">
     <div class="wrap">
-      <div class="narrow" style="margin-left:0">
+      <div class="narrow">
         <h2>What's Happening in Your System, Hour by Hour</h2>
         <p class="lead">The heat pump is a proven unit we source rather than build, but the thermal store, the controls, and the intelligence that runs them are ours, developed and built here. Thermal Dawn is designed for 45°C summers and single-digit winters, using materials we can source, maintain, and recycle here. Our AI learns Australian weather patterns, energy tariffs, and your home's thermal rhythms, optimising performance automatically.</p>
       </div>
-      <div class="panel-dark" style="margin-top:26px">
+      <div class="panel-dark mt-6">
         <div class="embed embed--home">
           <iframe data-autoheight src="/assets/animations/homepage-flow-v2.html?v=27" title="Interactive energy flow diagram: with and without thermal storage, across day and night" loading="lazy" scrolling="no"></iframe>
         </div>
@@ -197,7 +197,7 @@
         </ul>
         <p class="mb0">We measure what your home actually needs during the assessment and specify accordingly, which is why "your radiators are too small" is rarely the end of the conversation. <a href="/blog/heat-pump-radiator-compatibility-australia/">The flow-temperature question, answered &rarr;</a></p>
       </div>
-      <div class="callout" style="margin-top:20px">
+      <div class="callout mt-5">
         <p class="mb0"><strong>Already have underfloor? You're the easy case.</strong> Underfloor circuits already run at heat-pump temperatures, so there's no flow-temperature question to answer at all. Your existing loops work exactly as they are, and the system runs at its most efficient.</p>
       </div>
     </div>
@@ -303,7 +303,7 @@
     <div class="wrap narrow">
       <h2>Be There at Dawn</h2>
       <p>Systems are installed and running; the next spots are open now.</p>
-      <div class="btn-row center" style="margin-top:8px">
+      <div class="btn-row center mt-2">
         <a class="btn btn--primary btn--rect" href="/pre-order/register-interest/">Request a Quote <span class="arrow"></span></a>
         <a class="btn btn--ghost btn--rect" href="/pre-order/">Reserve Your System <span class="arrow"></span></a>
       </div>

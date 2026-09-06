@@ -112,7 +112,7 @@
       <div class="grid grid-2">
         <div class="chart-panel">
           <h3>Solar Export Prices Have Declined<br>and Are Soon to Be <span class="hl">Taxed</span></h3>
-          <svg viewBox="0 0 320 190" role="img" aria-label="Solar export price: 2014 $0.50/kWh, 2020 $0.10, 2025 minus $0.01 per kWh" style="width:100%;height:auto;margin-top:10px">
+          <svg class="mt-2" viewBox="0 0 320 190" role="img" aria-label="Solar export price: 2014 $0.50/kWh, 2020 $0.10, 2025 minus $0.01 per kWh" style="width:100%;height:auto">
             <line x1="40" y1="150" x2="310" y2="150" stroke="rgba(255,255,255,.28)"/>
             <line x1="40" y1="20" x2="40" y2="150" stroke="rgba(255,255,255,.28)"/>
             <text x="26" y="90" text-anchor="middle" font-size="11" font-weight="700" fill="#fff" transform="rotate(-90 26 90)">$/kWh</text>
@@ -130,7 +130,7 @@
         </div>
         <div class="chart-panel">
           <h3>Meanwhile Grid Electricity Prices<br>Continue to <span class="hl">Rise</span></h3>
-          <svg viewBox="0 0 320 190" role="img" aria-label="Grid electricity price: 2014 $0.20/kWh, 2020 $0.25, 2025 $0.35 per kWh" style="width:100%;height:auto;margin-top:10px">
+          <svg class="mt-2" viewBox="0 0 320 190" role="img" aria-label="Grid electricity price: 2014 $0.20/kWh, 2020 $0.25, 2025 $0.35 per kWh" style="width:100%;height:auto">
             <line x1="40" y1="150" x2="310" y2="150" stroke="rgba(255,255,255,.28)"/>
             <line x1="40" y1="20" x2="40" y2="150" stroke="rgba(255,255,255,.28)"/>
             <rect x="70" y="90" width="46" height="60" rx="3" fill="#5c463a"/>
@@ -162,7 +162,7 @@
   </section>
 
   <!-- 6a. FOSSIL FUELS (kept from the old alternatives block) -->
-  <section class="section section--paper2" style="padding-top:0">
+  <section class="section section--paper2 section--flush">
     <div class="wrap narrow">
       <div class="fossil-card">
         <div class="altrow__icon">
@@ -178,7 +178,7 @@
 
   <!-- 6b. SO WHAT DOES IT COST (Nick's copy, 19 Aug 2026. Reframed from
        "half the cost of a battery" to "one system instead of two".) -->
-  <section class="section section--paper2" style="padding-top:0">
+  <section class="section section--paper2 section--flush">
     <div class="wrap center">
       <h2>So what does it cost?</h2>
       <p class="measure" style="margin:0 auto 18px">To get what Thermal Dawn does using off-the-shelf parts, you're buying two things, not one.</p>
@@ -215,8 +215,8 @@
       </div>
 
       <figure class="narrow" style="margin:34px auto 0">
-        <figcaption class="center" style="font-weight:800;color:#fff;margin-bottom:14px">Typical Solar Energy Consumption Mismatch</figcaption>
-        <p class="center micro" style="display:flex;flex-wrap:wrap;gap:8px 20px;justify-content:center;margin-bottom:12px">
+        <figcaption class="center mb-3" style="font-weight:800;color:#fff">Typical Solar Energy Consumption Mismatch</figcaption>
+        <p class="center micro mb-3" style="display:flex;flex-wrap:wrap;gap:8px 20px;justify-content:center">
           <span><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#fff;margin-right:6px"></span>Solar generation</span>
           <span><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#4f8b86;margin-right:6px"></span>Water heating <span style="opacity:.65">~20%</span></span>
           <span><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#e2703a;margin-right:6px"></span>Heating &amp; cooling <span style="opacity:.65">~40%</span></span>
@@ -245,7 +245,7 @@
           </g>
           <text x="365" y="294" text-anchor="middle" font-size="12" fill="#c8b8aa">Time of Day</text>
         </svg>
-        <p class="micro center" style="margin-top:10px">Illustrative daily profile: solar peaks midday, while heating, hot water and appliance demand peak at dawn and dusk.</p>
+        <p class="micro center mt-2">Illustrative daily profile: solar peaks midday, while heating, hot water and appliance demand peak at dawn and dusk.</p>
       </figure>
     </div>
   </section>
@@ -266,27 +266,27 @@
           <div class="proof-panel">
             <p class="proof-stat">More than 9 evenings out of 10</p>
             <p class="metric-card__intro">The heat pump doesn't switch on at all between 5pm and 9pm. The house stays warm on stored heat through the priciest hours of the day.</p>
-            <p class="micro" style="margin:0">Measured, not modelled: 59 of the last 63 evenings.</p>
+            <p class="micro m0">Measured, not modelled: 59 of the last 63 evenings.</p>
 
             <p class="proof-since">Since May 2026, live from the systems themselves <span class="live-dot" hidden>live</span></p>
-            <dl style="margin:0">
+            <dl class="m0">
               <div class="metric"><dt>Saved</dt><dd>$<span data-live-stat="totalSavedAud">2,399</span></dd></div>
               <div class="metric"><dt>Gas never burned</dt><dd><span data-live-stat="gasAvoidedMj">49,207</span>&nbsp;MJ</dd></div>
               <div class="metric"><dt>CO&#8322; avoided</dt><dd><span data-live-stat="co2AvoidedKg">2,524</span>&nbsp;kg</dd></div>
             </dl>
           </div>
 
-          <div class="proof-panel" style="margin-top:14px">
+          <div class="proof-panel mt-3">
             <h3 class="proof-home">How it runs</h3>
             <p class="metric-card__intro">It charges when power is cheapest, whether that's a free window, your own solar, or late-night off-peak. Then it holds the heat and runs your house through the evening with the compressor off.</p>
             <p class="metric-card__intro">Radiators or a concrete slab, it's the same hardware and the same software. You set your tariff and the temperature you want. It handles the rest.</p>
-            <p class="metric-card__intro" style="margin-bottom:0">The last one went in and out in two days.</p>
+            <p class="metric-card__intro mb0">The last one went in and out in two days.</p>
           </div>
 
           <div class="btn-row">
             <a class="btn btn--primary btn--rect" href="/hydronic/how-it-works/">Take a Closer Look at the System<span class="arrow"></span></a>
           </div>
-          <p class="micro measure" style="margin-top:14px">Measured against the gas heating it replaced, from each system's own telemetry.</p>
+          <p class="micro measure mt-3">Measured against the gas heating it replaced, from each system's own telemetry.</p>
         </div>
       </div>
     </div>
@@ -305,7 +305,7 @@
   </section>
 
   <!-- 10. QUOTE -->
-  <section class="section" style="padding-top:0">
+  <section class="section section--flush">
     <div class="wrap">
       <div class="quote-hero">
         <blockquote>"We've been looking for 5 years for a hydronic heat pump, but we didn't want to pay $25,000. We finally did it."</blockquote>
@@ -316,7 +316,7 @@
            order is load-bearing: tile 1 is the 2x2 hero, the other four fill
            the right block. Cells 4+1+1+1+1 = 8 = 4x2; redo that sum if you
            change the count or the grid will gap. -->
-      <div class="mosaic" style="margin-top:34px">
+      <div class="mosaic mt-7">
         <figure><img src="/assets/img/ute-sunrise.webp" alt="The branded Thermal Dawn ute at sunrise, loaded with crated systems for an install" width="1600" height="1200" loading="lazy"></figure>
         <figure><img src="/assets/img/customers-hawthorn.webp" alt="Mike and Kay outside their Hawthorn home, where the gas boiler was replaced with a Thermal Dawn system" width="1200" height="900" loading="lazy"></figure>
         <figure><img src="/assets/img/brand-plate.webp" alt="The Thermal Dawn brand plate on the installed enclosure" width="1200" height="900" loading="lazy"></figure>
@@ -324,13 +324,13 @@
         <figure><img src="/assets/img/pipework-valve.webp" alt="Copper pipework, magnetic dirt separator and isolation valve on the Hawthorn install" width="1200" height="1600" loading="lazy"></figure>
       </div>
 
-      <div class="center" style="margin-top:34px">
+      <div class="center mt-7">
         <p class="mb0"><strong>Designed for Australian conditions, with an Australian-made store at its heart, and retrofittable to most homes.</strong></p>
         <p style="color:var(--td-orange-text);font-weight:800">No lithium, and the store at the heart of it is built in our own workshop in Hornsby.</p>
         <div class="btn-row center">
           <a class="btn btn--primary btn--rect" href="/pre-order/">Reserve Your System <span class="arrow"></span></a>
         </div>
-        <p class="micro" style="margin-top:12px">Fully refundable $190 deposit. No obligation until you approve your quote.</p>
+        <p class="micro mt-3">Fully refundable $190 deposit. No obligation until you approve your quote.</p>
       </div>
     </div>
   </section>
@@ -341,7 +341,7 @@
     <div class="wrap">
       <div class="about-split">
         <!-- Swap for a Hornsby-facility portrait when one is shot; this is the S26 Demo Day stage shot. -->
-        <figure class="figure" style="margin:0">
+        <figure class="figure m0">
           <img src="/assets/img/founder-stage.webp" alt="Founder Nick Zeniou presenting Thermal Dawn on stage at Startmate Demo Day" width="900" height="1350" loading="lazy">
           <figcaption>Founder Nick Zeniou, Startmate Summer '26 Demo Day.</figcaption>
         </figure>
@@ -349,7 +349,7 @@
           <h2>About us</h2>
           <p>At Thermal Dawn, we're building the infrastructure Australia needs to shift from imported lithium batteries to sovereign thermal systems that balance our grid, starting with your home. Our thermal batteries solve the problem imported lithium can't: capturing abundant dawn solar and storing it as heating, cooling, and hot water for the peak-demand hours when grid power costs the most.</p>
           <p>Our technology is developed in Australia, and our thermal stores are built and assembled at our own production facility in Hornsby, New South Wales, from Australian materials. The store is built to last decades. Thermal Dawn is supported by Cicada Innovations, EnergyLab, and the NSW Office of the Chief Scientist and Engineer, backed by an Investment NSW grant, and a member of the Startmate accelerator. The heat pump is a proven unit we source rather than build; the storage, the controls, and the intelligence that runs them are ours. It's the thermal infrastructure Australia needs, engineered by Australians who live here.</p>
-          <div class="plogos plogos--left" style="margin-top:22px">
+          <div class="plogos plogos--left mt-5">
             <span class="plogo" data-logo="cicada"><span class="plogo__txt">Cicada Innovations</span></span>
             <span class="plogo" data-logo="nsw-ocse"><span class="plogo__txt">NSW Office of the Chief Scientist &amp; Engineer</span></span>
             <span class="plogo" data-logo="energylab"><span class="plogo__txt">EnergyLab</span></span>
