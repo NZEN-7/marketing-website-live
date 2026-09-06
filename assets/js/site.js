@@ -63,7 +63,7 @@
       '</nav>' +
       // TODO: add the unit/street number once confirmed (currently suburb-level only).
       '<address class="footer-address">Thermal Dawn, Hornsby, NSW 2077</address>' +
-      '<p class="footer-legal">&copy; ' + YEAR + ' Thermal Dawn Pty Ltd. ABN 47 682 866 913. All Rights Reserved.</p>' +
+      '<p class="footer-legal">&copy; ' + YEAR + ' FreeVolt Pty Ltd, T/A Thermal Dawn. ABN 47 682 866 913. All Rights Reserved.</p>' +
     '</div>';
 
   /* Partner logos degrade to the organisation's name until a real file

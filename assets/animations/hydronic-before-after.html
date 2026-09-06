@@ -38,10 +38,10 @@ html,body{min-height:100%;max-width:100%;overflow-x:hidden;background:var(--pane
 body{display:flex;justify-content:center;padding:16px;font-family:"Montserrat",system-ui,sans-serif}
 .card{width:100%;max-width:780px;background:var(--panel);color:rgba(255,255,255,.88);
   border:1px solid rgba(255,255,255,.07);border-radius:var(--r);overflow:hidden}
-.head{padding:20px 24px 12px}
+.head{padding:16px 24px 10px}
 .eyebrow{font-size:11px;font-weight:700;letter-spacing:.14em;
   text-transform:uppercase;color:#9d928a;margin-bottom:6px}
-.title{font-size:22px;font-weight:600;letter-spacing:-.02em;margin-bottom:16px}
+.title{font-size:22px;font-weight:600;letter-spacing:-.02em;margin-bottom:12px}
 .seg{display:flex;gap:10px;width:fit-content;margin-bottom:10px}
 /* The parent's body.dark .btn--ghost recipe, so a control in the frame and a
    control on the page around it are the same object. */
@@ -63,11 +63,11 @@ body{display:flex;justify-content:center;padding:16px;font-family:"Montserrat",s
 .box:hover{filter:brightness(1.22)}
 .box:focus-visible{outline:none}
 .box:focus-visible rect{stroke:#FF9C00;stroke-width:2}
-.note{margin:0 26px 14px;padding:12px 16px;border-radius:var(--r-sm);font-size:13.5px;line-height:1.5;
+.note{margin:0 26px 12px;padding:11px 16px;border-radius:var(--r-sm);font-size:13.5px;line-height:1.5;
   background:rgba(232,74,42,.09);border:1px solid rgba(232,74,42,.28);color:rgba(255,255,255,.8)}
 .note[hidden]{display:none}
 .note--ok{background:rgba(46,198,138,.08);border-color:rgba(46,198,138,.3)}
-.info{margin:0 24px 24px;min-height:90px;padding:16px 18px;border-radius:var(--r-sm);
+.info{margin:0 24px 18px;min-height:76px;padding:14px 18px;border-radius:var(--r-sm);
   background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12)}
 .info__h{display:flex;align-items:center;margin-bottom:8px}
 .info__h .nm{font-weight:600;font-size:16px}
@@ -94,7 +94,7 @@ body{display:flex;justify-content:center;padding:16px;font-family:"Montserrat",s
     </div>
     <div class="hint">Select any component to learn more</div>
   </div>
-  <div class="stage"><svg id="svg" viewBox="0 0 510 470" role="img" aria-label="System diagram"></svg></div>
+  <div class="stage"><svg id="svg" viewBox="0 0 510 400" role="img" aria-label="System diagram"></svg></div>
   <div class="note" id="note-before">Your heating is the biggest load in the house, and it is still burning gas. Whatever cheap energy you have, none of it is reaching it.</div>
   <div class="note note--ok" id="note-after" hidden>Same pipes, same radiators, same thermostats. The only thing that changed is where the heat comes from.</div>
   <div class="info" id="info"></div>
@@ -113,9 +113,9 @@ var T=function(c){return c.y}, L=function(c){return c.x};
    coordinates in both views, so switching reads as a swap of the heat
    source alone rather than a redrawn diagram. */
 var S={
-  radiator:{x:385,y:30,w:115,h:72}, underfloor:{x:385,y:148,w:115,h:72},
-  fcu:{x:385,y:265,w:115,h:72},     hotwater:{x:385,y:388,w:115,h:72},
-  solar:{x:20,y:390,w:115,h:72},    battery:{x:165,y:390,w:115,h:72}
+  radiator:{x:385,y:30,w:115,h:72}, underfloor:{x:385,y:126,w:115,h:72},
+  fcu:{x:385,y:222,w:115,h:72},     hotwater:{x:385,y:318,w:115,h:72},
+  solar:{x:20,y:318,w:115,h:72},    battery:{x:165,y:318,w:115,h:72}
 };
 var TRUNK=330;
 function mix(a,b){var o={},k;for(k in a)o[k]=a[k];for(k in b)o[k]=b[k];return o}
@@ -154,7 +154,7 @@ var AFTER=[
    info:"An efficient heat pump takes the boiler's place. It runs in the middle of the day, on solar you were otherwise exporting or on a free power window, and it does cooling in summer as well."},
   {id:"store",label:"Thermal Store",sub:"30 kWh of stored heat",ic:"tank",x:155,y:25,w:115,h:72,col:GREEN,tag:"NEW",
    info:"The thermal store is the heart of the system. It holds heat, not electricity: 30 kWh in the 500L store, enough to carry the evening and overnight in most Australian homes with the heat pump off through the expensive hours."},
-  {id:"controls",label:"Smart Controls",sub:"Schedules around your tariff",ic:"fan",x:20,y:155,w:115,h:72,col:GREEN,tag:"NEW",
+  {id:"controls",label:"Smart Controls",sub:"Schedules around your tariff",ic:"fan",x:20,y:126,w:115,h:72,col:GREEN,tag:"NEW",
    info:"The controls decide when to charge the store: reading the forecast, your tariff windows and how much heat the house has left, then charging on solar or on the cheapest hours overnight. It runs itself."},
   mix(S.solar,{id:"solar_a",label:"Solar Panels",sub:"Now powering your heating",ic:"sun",col:GREEN,tag:"UNLOCKED",
    info:"Your existing panels now power your biggest load. Instead of exporting the surplus for a feed-in rate worth very little, you keep it as heat for the evening."}),

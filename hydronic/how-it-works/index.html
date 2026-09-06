@@ -38,13 +38,12 @@
 
   <!-- 1b. EXPLAINER VIDEO -->
   <!-- Designer, 12 Aug 2026: 60px from the hero to the video, 100px from the
-       video down to the next section. The crumbs line lives inside the 60px,
-       so the section padding is zeroed and the spacing is carried by the
-       crumbs' own padding. Measured, not guessed: see BUILD-NOTES. -->
-  <section class="section section--flush" style="padding-bottom:calc(var(--sec) + var(--sp-3))">
+       video down to the next section. That 60px used to be carried by a
+       breadcrumb line's own padding, with the section's top padding zeroed.
+       The breadcrumb is gone (Nick, 6 Sept), so the section carries it. -->
+  <section class="section" style="padding-top:calc(var(--sec) - var(--sp-2));padding-bottom:calc(var(--sec) + var(--sp-3))">
     <div class="wrap">
-      <p class="crumbs mb0" style="text-align:left;padding-top:20px"><a href="/hydronic/">Hydronic</a> / How It Works</p>
-      <div class="video mt-4">
+      <div class="video">
         <iframe src="https://www.youtube-nocookie.com/embed/oE2prWw3BMU" title="Thermal Dawn Battery Explained | Using Solar To Heat &amp; Cool Your Home (Australia)" loading="lazy" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
       </div>
       <p class="video__cap">Thermal Dawn Battery explained: using solar to heat and cool your home.</p>
@@ -61,7 +60,7 @@
     <div class="wrap mt-6">
       <div class="panel-dark">
         <div class="embed embed--beforeafter">
-          <iframe data-autoheight src="/assets/animations/hydronic-before-after.html?v=10" title="Interactive diagram: a gas hydronic system compared with the same system running on Thermal Dawn" loading="lazy" scrolling="no"></iframe>
+          <iframe data-autoheight src="/assets/animations/hydronic-before-after.html?v=11" title="Interactive diagram: a gas hydronic system compared with the same system running on Thermal Dawn" loading="lazy" scrolling="no"></iframe>
         </div>
         <p class="embed__cap mb0">Interactive: switch between <strong>Gas Boiler</strong> and <strong>Thermal Dawn</strong>, and select any component to see what happens to it.</p>
       </div>
@@ -313,6 +312,6 @@
 </main>
 <footer id="site-footer" class="site-footer"></footer>
 <script src="/assets/js/config.js?v=8" defer></script>
-<script src="/assets/js/site.js?v=14" defer></script>
+<script src="/assets/js/site.js?v=15" defer></script>
 </body>
 </html>

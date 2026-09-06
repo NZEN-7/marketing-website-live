@@ -1385,9 +1385,15 @@ body.dark .post-card:hover,body.dark .post-card:focus-within{box-shadow:var(--sh
   background-color var(--dur-fast) var(--ease-out),color var(--dur-fast) var(--ease-out),
   box-shadow var(--dur-fast) var(--ease-out);}
 
-/* The chevron rotated on a transition but ALSO moved 4px via margin-top,
-   which was not in the transition list, so it snapped mid-rotate. */
-.faq details[open] summary::after{margin-top:-6px;transform:translateY(4px) rotate(-135deg);}
+/* The chevron is a 9px box showing two borders, so its visual mass sits in
+   the corner, not the centre: rotating 45deg one way and -135deg the other
+   moved that mass across the box and the two states did not read as the same
+   mark. It was also being nudged by margin-top, which was not in the
+   transition list, so it snapped mid-rotate.
+   Now the box is centred once (margin-top = half its height) and BOTH states
+   are pure transforms, mirrored about that centre. */
+.faq summary::after{margin-top:-4.5px;transform:translateY(-2px) rotate(45deg);}
+.faq details[open] summary::after{margin-top:-4.5px;transform:translateY(2px) rotate(-135deg);}
 
 /* An inline box cannot hold a min-width, and live-stats.js sets one while it
    counts so the sentence around it cannot reflow. */
