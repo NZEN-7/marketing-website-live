@@ -1083,3 +1083,57 @@ timeline. Tests: `test:parser` now round-trips the new label out of a real
 generated email, and `test:leadrow` asserts NULL when the question is skipped.
 
 css bumped to ?v=41.
+
+## Design and polish pass (6 Sept 2026)
+
+Branch `design/polish-pass`, 15 commits, not deployed. Full write-up with the
+contrast table in `feedback/2026-09-06-design-pass/DESIGN-PASS.md`. No copy or
+numbers changed; `pre-order/terms/` untouched.
+
+The four things worth knowing without reading the whole file:
+
+- **White on the orange band never passed and now does not have to.** 2.53:1 for
+  the heading and both paragraphs on /intelligence/. There is no orange light
+  enough to still read as the brand that carries white body copy, so the text
+  moved to ink at 7.11 rather than the band moving. Half the band was already
+  ink; this makes it agree with itself.
+- **`--td-orange-ink` split in two.** It was doing display figures and body-size
+  text with one value that only ever cleared the large-text bar. Now `#ad6b00`
+  for figures (4.04 on cream, was 3.30 with no headroom) and a new
+  `--td-orange-text` `#ad5700` for body-size accent text on light (5.07 white,
+  4.76 cream, 4.62 paper-2). **Never use `--td-orange-text` on dark**: 3.73.
+- **The header reserves its own 74px now.** `site.js` injects the bar into an
+  empty `<header>`, so every page was pushing 74px down when the script ran.
+  That was the largest layout shift on the site and it was not written down
+  anywhere. One `min-height` rule, all 28 pages.
+- **`--measure` is 50ch, and the number is measured, not derived.** Montserrat's
+  `ch` is 11.73px at 16.5px body but its average prose character is 7.87px, so a
+  `ch` is 1.49 characters here. `64ch` would have been 95 characters, wider than
+  the 91 the site already had. 50ch = 587px = 75.
+
+Two spacing bugs found by specificity rather than by eye: `.section.tight` and
+`.section.pad-lg` were out-specified by `body.dark .section` and so did nothing
+on 27 of 28 pages, and the mobile `.section{padding:48px}` lost the same fight,
+which is why dark pages kept desktop section padding on a phone. Section
+spacing now comes from `--sec` in `:root`, which no selector can out-specify.
+
+Anchors were being offset twice, `scroll-padding-top` on html plus
+`scroll-margin-top` on `.anchor`. Those add, so an in-page link landed 182px
+down under a 74px bar.
+
+Both hand-editable interactives are off Google Fonts and onto the self-hosted
+Montserrat, and the flow scene finally has a `prefers-reduced-motion` block. It
+lives in the BUILDER, not the shell: the shell's chrome is emitted before the
+scene CSS so it would lose on source order, the chrome filter strips
+`.flow-line`/`.glow-dot`/`.window`/`.fan-blades` lines, and the two heat-pump
+rings carry inline `animation:` that only `!important` beats. **Rebuild with
+`node assets/animations/build-homepage-anim.js assets/animations` after touching
+either source.**
+
+A shared PANEL PALETTE comment block is now duplicated at the top of
+`style.css`, both hand-edited animations and the builder. An iframe cannot read
+the parent's custom properties, so that comment is the only thing keeping the
+four documents in step.
+
+css `?v=42`, site.js `?v=14`, live-stats.js `?v=9`, forms.js `?v=10`,
+homepage-flow-v2 `?v=28`, hydronic-before-after `?v=10`, intelligence-day `?v=7`.

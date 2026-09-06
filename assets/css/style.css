@@ -338,11 +338,15 @@ table.data td:first-child{font-weight:600;}
 
 /* Big single-line statement. For a sentence that carries the whole argument
    on its own, so it is not competing with a heading or buried in a para. */
-/* Sized ABOVE the site h2 (36.8px at 1280) on purpose. Its own note below
-   says it must not compete with a heading, and at 33.6px against a 36.8px h2
-   in the same section, identical weight and colour, it was losing. */
+/* Sized ABOVE the site h2 on purpose. Its own note below says it must not
+   compete with a heading, and at 33.6px against a 36.8px h2 in the same
+   section, identical weight and colour, it was losing.
+   Every part of the clamp has to beat h2's clamp(1.6rem,4vw,2.3rem), not just
+   the desktop end: a first attempt at clamp(1.5rem,3.6vw,2.4rem) won at 1280
+   and lost at every width below it, because the minimums cross. Checked at
+   375 / 480 / 600 / 700 / 800 / 900 / 1000 / 1280 / 1600. */
 .statement{max-width:900px;margin:0 auto;text-align:center;font-weight:800;
-  line-height:1.18;letter-spacing:-.01em;font-size:clamp(1.5rem,3.6vw,2.4rem);
+  line-height:1.18;letter-spacing:-.01em;font-size:clamp(1.7rem,4.2vw,2.4rem);
   color:var(--td-black);}
 .statement em{font-style:normal;color:var(--td-orange);}
 .statement__sub{text-align:center;margin:12px auto 0;max-width:640px;font-size:.95rem;
