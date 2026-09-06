@@ -113,9 +113,9 @@ var T=function(c){return c.y}, L=function(c){return c.x};
    coordinates in both views, so switching reads as a swap of the heat
    source alone rather than a redrawn diagram. */
 var S={
-  radiator:{x:385,y:30,w:115,h:60}, underfloor:{x:385,y:148,w:115,h:60},
-  fcu:{x:385,y:265,w:115,h:65},     hotwater:{x:385,y:388,w:115,h:60},
-  solar:{x:20,y:390,w:115,h:60},    battery:{x:165,y:390,w:115,h:60}
+  radiator:{x:385,y:30,w:115,h:72}, underfloor:{x:385,y:148,w:115,h:72},
+  fcu:{x:385,y:265,w:115,h:72},     hotwater:{x:385,y:388,w:115,h:72},
+  solar:{x:20,y:390,w:115,h:72},    battery:{x:165,y:390,w:115,h:72}
 };
 var TRUNK=330;
 function mix(a,b){var o={},k;for(k in a)o[k]=a[k];for(k in b)o[k]=b[k];return o}
@@ -133,9 +133,9 @@ var ICON={
 };
 
 var BEFORE=[
-  {id:"gas",label:"Gas Connection",sub:"Supply charge plus usage",ic:"flame",x:20,y:30,w:115,h:60,col:RED,tag:"REMOVED",
+  {id:"gas",label:"Gas Connection",sub:"Supply charge plus usage",ic:"flame",x:20,y:30,w:115,h:72,col:RED,tag:"REMOVED",
    info:"A gas connection costs you a daily supply charge before you burn a single unit, on top of what the gas itself costs. Switching to Thermal Dawn removes the connection and that standing cost with it."},
-  {id:"boiler",label:"Gas Boiler",sub:"Burns gas to heat water",ic:"flame",x:155,y:25,w:115,h:68,col:RED,tag:"REPLACED",
+  {id:"boiler",label:"Gas Boiler",sub:"Burns gas to heat water",ic:"flame",x:155,y:25,w:115,h:72,col:RED,tag:"REPLACED",
    info:"Your gas boiler makes hot water by burning gas. It is the only part of your system Thermal Dawn replaces."},
   mix(S.radiator,{id:"radiator",label:"Radiators",sub:"Warm water circulates",ic:"rad",col:GREY,tag:"STAYS",
    info:"Your radiators stay exactly as they are. Thermal Dawn connects to your existing hydronic pipework, so nothing gets resized or replaced."}),
@@ -150,11 +150,11 @@ var UNUSED={solar_b:1,battery_b:1};
 var Bx={};BEFORE.forEach(function(c){Bx[c.id]=c});
 
 var AFTER=[
-  {id:"heatpump",label:"Heat Pump",sub:"Runs when power is cheapest",ic:"bolt",x:20,y:30,w:115,h:60,col:GREEN,tag:"NEW",
+  {id:"heatpump",label:"Heat Pump",sub:"Runs when power is cheapest",ic:"bolt",x:20,y:30,w:115,h:72,col:GREEN,tag:"NEW",
    info:"An efficient heat pump takes the boiler's place. It runs in the middle of the day, on solar you were otherwise exporting or on a free power window, and it does cooling in summer as well."},
-  {id:"store",label:"Thermal Store",sub:"30 kWh of stored heat",ic:"tank",x:155,y:25,w:115,h:68,col:GREEN,tag:"NEW",
+  {id:"store",label:"Thermal Store",sub:"30 kWh of stored heat",ic:"tank",x:155,y:25,w:115,h:72,col:GREEN,tag:"NEW",
    info:"The thermal store is the heart of the system. It holds heat, not electricity: 30 kWh in the 500L store, enough to carry the evening and overnight in most Australian homes with the heat pump off through the expensive hours."},
-  {id:"controls",label:"Smart Controls",sub:"Schedules around your tariff",ic:"fan",x:20,y:155,w:115,h:60,col:GREEN,tag:"NEW",
+  {id:"controls",label:"Smart Controls",sub:"Schedules around your tariff",ic:"fan",x:20,y:155,w:115,h:72,col:GREEN,tag:"NEW",
    info:"The controls decide when to charge the store: reading the forecast, your tariff windows and how much heat the house has left, then charging on solar or on the cheapest hours overnight. It runs itself."},
   mix(S.solar,{id:"solar_a",label:"Solar Panels",sub:"Now powering your heating",ic:"sun",col:GREEN,tag:"UNLOCKED",
    info:"Your existing panels now power your biggest load. Instead of exporting the surplus for a feed-in rate worth very little, you keep it as heat for the evening."}),
@@ -225,6 +225,7 @@ function draw(){
     });
   }
 
+  var subs=[];
   list.forEach(function(c){
     var on=active===c.id, faded=!!UNUSED[c.id]&&view==="before"&&!on;
     var g=mk("g",{"class":on?"box is-on":"box",tabindex:"0",role:"button","aria-pressed":on?"true":"false",
@@ -253,14 +254,14 @@ function draw(){
     var t2=mk("text",{x:cx(c),y:c.y+52,"text-anchor":"middle","font-size":10,
       "font-family":"Montserrat,system-ui,sans-serif",
       fill:on?"rgba(255,255,255,.72)":(faded?"rgba(255,255,255,.58)":"rgba(255,255,255,.65)")});
-    t2.textContent=c.sub; g.appendChild(t2);
+    t2.textContent=c.sub; g.appendChild(t2); subs.push({t:t2,c:c});
 
     /* the tag, straddling the top-right border, so REPLACED/NEW/STAYS reads
        at rest instead of being a reward for clicking */
     var shown=c.tag==="UNLOCKED"?"EXISTING":c.tag;
     var chipW=shown.length*4.4+10, chipX=c.x+c.w-chipW-6;
     g.appendChild(mk("rect",{x:chipX,y:c.y-6,width:chipW,height:12,rx:3,
-      fill:"#0f0808",stroke:TAGC[c.tag]+(faded?"55":"88"),"stroke-width":1}));
+      fill:"#100c09",stroke:TAGC[c.tag]+(faded?"55":"88"),"stroke-width":1}));
     var tt=mk("text",{x:chipX+chipW/2,y:c.y+3,"text-anchor":"middle","font-size":6.6,
       "font-weight":700,"font-family":"Montserrat,system-ui,sans-serif","letter-spacing":".08em",
       fill:faded?TAGC[c.tag]+"aa":TAGC[c.tag]});
@@ -272,6 +273,28 @@ function draw(){
       if(e.key==="Enter"||e.key===" "){e.preventDefault();pick();}
     });
     svg.appendChild(g);
+  });
+
+  /* Sub-labels wrap to two lines when they do not fit. Measured, not guessed:
+     getComputedTextLength needs the node in the document, so this runs after
+     the loop rather than inside it. Montserrat is about 12% wider per
+     character than the DM Sans these 115-unit boxes were drawn for, so the
+     longest subs ("Stores electricity, not heat") overflowed on both sides.
+     Split at the space nearest the middle so the two lines are even. */
+  subs.forEach(function(s){
+    var maxW=s.c.w-12, t=s.t;
+    if(t.getComputedTextLength()<=maxW){ t.setAttribute("y",s.c.y+57); return; }
+    var words=t.textContent.split(" ");
+    if(words.length<2){ t.setAttribute("y",s.c.y+57); return; }
+    var mid=t.textContent.length/2, at=1, best=1e9;
+    for(var i=1;i<words.length;i++){
+      var d=Math.abs(words.slice(0,i).join(" ").length-mid);
+      if(d<best){ best=d; at=i; }
+    }
+    var l1=words.slice(0,at).join(" "), l2=words.slice(at).join(" ");
+    t.textContent=""; t.setAttribute("y",s.c.y+50);
+    var a=mk("tspan",{x:cx(s.c)}); a.textContent=l1; t.appendChild(a);
+    var b=mk("tspan",{x:cx(s.c),dy:11}); b.textContent=l2; t.appendChild(b);
   });
 
   noteB.hidden=(view!=="before");
