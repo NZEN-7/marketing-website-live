@@ -883,8 +883,8 @@ body.dark .hero__bg::after{background:linear-gradient(180deg,rgba(13,9,8,.72) 0%
 /* solid sunrise cards (pricing comparison trio) */
 .card--orange{background:var(--td-sunrise) border-box;border:0;color:#1c1514;border-radius:10px;padding:24px;box-shadow:0 14px 34px rgba(234,91,19,.22);}
 body.dark .card--orange{background:var(--td-sunrise) border-box;border:0;color:#231a12;}
-.card--orange h3,body.dark .card--orange h3{color:#3a2408;font-size:1.05rem;margin-top:0;}
-.card--orange p,.card--orange li{color:#3a2408;}
+.card--orange h3,body.dark .card--orange h3{color:#1c1514;font-size:1.05rem;margin-top:0;}
+.card--orange p,.card--orange li{color:#1c1514;}
 
 /* numbered benefit list with an orange spine */
 .benefits{max-width:760px;margin:24px auto 0;text-align:left;border-left:2px solid var(--td-orange);padding-left:24px;}
@@ -1091,8 +1091,8 @@ body.dark .form-error{background:rgba(234,91,19,.14);border-color:rgba(var(--td-
   box-shadow:0 6px 18px rgba(0,0,0,.22);}
 .pbadge--ha{background:#18BCF2;}
 .pbadge .plogo img{height:26px;max-width:190px;}
-.pbadge .plogo__txt,body.dark .pbadge .plogo__txt{color:#fff;
-  border-color:rgba(255,255,255,.55);font-size:.9rem;padding:5px 10px;max-width:none;}
+.pbadge .plogo__txt,body.dark .pbadge .plogo__txt{color:#0d2b3a;
+  border-color:rgba(13,43,58,.45);font-size:.9rem;padding:5px 10px;max-width:none;}
 .pbadge-row__cap{margin:0;flex:1 1 300px;min-width:240px;line-height:1.5;}
 /* The Home Assistant badge is a link out to home-assistant.io, so it needs the
    affordances a button has: pointer, lift on hover, a visible focus ring. The
@@ -1234,3 +1234,45 @@ body.dark .next-orange .btn--ghost:hover,
    get there. Same words, own class. */
 .list-label{font-weight:700;font-size:1.05rem;letter-spacing:-.01em;margin:0 0 10px;}
 body.dark .list-label{color:#fff;}
+
+/* --- v8b, readability -------------------------------------------------- */
+
+/* Surfaces that stay WHITE on a body.dark page. Same trap the ghost button
+   fell into twice: body.dark repaints text for a dark page, and these three
+   are not dark. Every rule needs body.dark in the selector to out-specify the
+   body.dark base it is correcting. Add any new white-on-dark-page surface to
+   this list, or its text turns invisible. */
+body.dark .faq-block,body.dark .showcase,body.dark .credstrip{color:var(--td-black);}
+body.dark .faq-block h1,body.dark .faq-block h2,body.dark .faq-block h3,body.dark .faq-block h4,
+body.dark .showcase h1,body.dark .showcase h2,body.dark .showcase h3,body.dark .showcase h4,
+body.dark .credstrip h1,body.dark .credstrip h2,body.dark .credstrip h3,body.dark .credstrip h4{color:var(--td-black);}
+body.dark .faq-block a,body.dark .showcase a,body.dark .credstrip a{color:var(--td-orange-text);}
+body.dark .faq-block strong,body.dark .faq-block b,body.dark .faq-block em,
+body.dark .showcase strong,body.dark .showcase b,body.dark .showcase em,
+body.dark .credstrip strong,body.dark .credstrip b,body.dark .credstrip em{color:inherit;}
+body.dark .faq-block .lead,body.dark .showcase .lead,body.dark .credstrip .lead{color:#33322f;}
+body.dark .faq-block .micro,body.dark .faq-block .muted,body.dark .faq-block .eyebrow,body.dark .faq-block .statement__sub,
+body.dark .showcase .micro,body.dark .showcase .muted,body.dark .showcase .eyebrow,body.dark .showcase .statement__sub,
+body.dark .credstrip .micro,body.dark .credstrip .muted,body.dark .credstrip .eyebrow,body.dark .credstrip .statement__sub{color:var(--td-grey);}
+body.dark .faq-block .statement,body.dark .faq-block .quote,body.dark .faq-block blockquote,
+body.dark .showcase .statement,body.dark .showcase .quote,body.dark .showcase blockquote,
+body.dark .credstrip .statement,body.dark .credstrip .quote,body.dark .credstrip blockquote{color:var(--td-black);}
+body.dark .faq-block .statement em,body.dark .showcase .statement em,body.dark .credstrip .statement em{color:var(--td-orange-ink);}
+
+/* The price qualifier had no dark override and stayed at the light grey. */
+body.dark .tier__price small{color:#a2968c;}
+/* --td-orange-text is a light-surface colour; the dark forms keep the accent. */
+body.dark .field .req{color:var(--td-orange);}
+
+/* .micro/.muted never got a .section--dark colour, only a body.dark one, so
+   they stayed light-page grey on the dark sections of the light page. */
+.section--dark .micro,.section--dark .muted{color:#a2968c;}
+
+/* Embed captions sit on .panel-dark whatever the page theme. Three pages were
+   patching this inline; the inline colours come out with this rule. */
+.panel-dark .embed__cap,.section--dark .embed__cap,.section--cocoa .embed__cap,
+.section--photo .embed__cap,body.dark .embed__cap{color:#a2968c;}
+
+/* Light-on-dark component text that would be invisible if the component ever
+   lands on a light page. Mirrors the v7 treatment of .benefits__item h3. */
+body:not(.dark) .step p,body:not(.dark) .tl p,body:not(.dark) .benefits__item p{color:#4a4642;}
