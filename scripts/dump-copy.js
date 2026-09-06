@@ -427,7 +427,7 @@ idx.push("");
 idx.push("- Report findings as `path:line`, current text, proposed replacement. Do not edit pages directly; Nick applies or delegates the edits.");
 idx.push("- **Save your review to `feedback/" + REVIEW_ROUND + "/` in the repo**, as one markdown file named for you, for example `COPY-FEEDBACK-yourname.md`. That folder is the record of who said what; do not overwrite anyone else's file.");
 idx.push("- Read across pages, not one at a time, when checking claims: the bugs that matter are one page contradicting another.");
-idx.push("- **Review the Images and Placeholders sections too.** Alt text is copy a screen reader speaks aloud and Google reads as a description of the picture, and the placeholders sit inside form fields where a customer reads them. Neither appears in the prose, and until 6 Sept 2026 neither had ever been in this pack, so treat both as unreviewed.");
+idx.push("- **Review the Images and Placeholders sections too.** Alt text is copy a screen reader speaks aloud and Google reads as a description of the picture, and the placeholders sit inside form fields where a customer reads them. Neither appears in the prose, and until 27 Aug 2026 neither had ever been in this pack, so treat both as unreviewed.");
 idx.push("- `pre-order/terms/` is legal copy, verbatim from Nick. Flag, never reword.");
 idx.push("- Measured figures (savings counters, evening-carry stats) come from platform telemetry. If one looks wrong, query it; never substitute a plausible number.");
 idx.push("");

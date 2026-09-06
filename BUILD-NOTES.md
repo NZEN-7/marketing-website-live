@@ -1052,7 +1052,7 @@ transitions, so the transitioned values had to be read with transition disabled.
 
 css bumped to ?v=39, site.js to ?v=13.
 
-### "How did you hear about us" on the quote form (25 Aug 2026)
+### "How did you hear about us" on the quote form (27 Aug 2026)
 
 Optional, and it had to be added in four places at once because the field
 crosses every consumer of the form: HTML, `api/lead.js` (parse, notification,

@@ -40,7 +40,7 @@ them:
 | Images | Every image with its alt text. **Alt text is copy**: a screen reader speaks it aloud and Google reads it as a description of the picture |
 | Placeholders and labels | `placeholder` and `aria-label` text. A customer reads placeholders inside form fields |
 
-Images and Placeholders were invisible to every review round before 6 Sept
+Images and Placeholders were invisible to every review round before 27 Aug
 2026, so treat them as never having been read. On Images, check two things: is
 the alt wording right, and is the image still the one the surrounding copy is
 talking about.
