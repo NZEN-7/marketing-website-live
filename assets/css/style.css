@@ -246,7 +246,10 @@ body.dark .card--lift:hover{box-shadow:0 12px 26px rgba(0,0,0,.55);border-color:
 [data-live-stat]{font-variant-numeric:tabular-nums;}
 .live-dot{display:inline-flex;align-items:center;gap:6px;font-size:.68rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#1f8f63;vertical-align:middle;}
 .live-dot::before{content:"";width:7px;height:7px;border-radius:50%;background:#2ec68a;animation:td-livepulse 2s ease-in-out infinite;}
-.band-orange .live-dot,.section--dark .live-dot{color:#8ff0c8;}
+.section--dark .live-dot{color:#8ff0c8;}
+/* The band's only live-dot sits inside the cream .proof-panel, not on the
+   orange, so the mint above scored 1.28:1 there. Darkened for cream. */
+.proof-panel .live-dot{color:#1a7a54;}
 @keyframes td-livepulse{0%,100%{opacity:1;}50%{opacity:.3;}}
 .draft-note::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--td-blue);display:inline-block;flex:none;}
 .section--dark .draft-note{color:#bfe6f7;}
@@ -578,7 +581,7 @@ html{scroll-padding-top:92px;}
 
 /* ---------- Orange proof band ---------- */
 .band-orange{background:var(--td-orange-flat);color:#1c1514;padding:60px 0;}
-.band-orange h2{color:#fff;font-size:clamp(1.8rem,4.4vw,2.7rem);line-height:1.12;}
+.band-orange h2,.band-orange .h-accent{color:#1c1514;line-height:1.12;}
 /* Nick 19 Aug: the heading runs BLACK on the orange band, like the live
    site, rather than a white setup line. Only the homepage proof band
    uses .lede, so this does not touch the intelligence band. */
@@ -598,15 +601,20 @@ html{scroll-padding-top:92px;}
 .metric dd{margin:0;font-size:clamp(1.35rem,3.4vw,1.9rem);font-weight:900;color:var(--td-orange-ink);display:flex;align-items:center;gap:.35em;}
 .metric dd::before{content:"\2192";color:var(--td-orange-ink);font-weight:900;}
 .band-orange .btn-row{margin-top:20px;}
-.band-orange .micro{color:#5c3d1f;}
+.band-orange .micro{color:#3a2408;}
 body.dark .band-orange{color:#1c1514;}
-body.dark .band-orange h2,body.dark .band-orange h3{color:#fff;}
-/* Designer, 12 Aug 2026: copy sitting directly on the orange band is white.
+body.dark .band-orange h2,body.dark .band-orange h3{color:#1c1514;}
+/* Copy sitting directly on the orange band is INK, not white. The designer
+   asked for white on 12 Aug and it shipped, but white on #f5860f is 2.53:1:
+   under the 3:1 large-text bar for the heading and nowhere near 4.5 for the
+   two paragraphs on /intelligence/. No orange light enough to still read as
+   the brand passes with white body copy, so the text moved instead of the
+   band. Ink scores 7.11. The .lede line under the heading was already ink.
    The cream panels that sit ON TOP of the band (.applist, .metric-card) are a
-   different surface and keep their dark text, restored immediately below.
+   different surface and keep their own text colour, restored immediately below.
    Order matters here: those two rules tie on specificity with this one and
    win by coming later, so do not reorder them. */
-body.dark .band-orange p,body.dark .band-orange li,body.dark .band-orange strong{color:#fff;}
+body.dark .band-orange p,body.dark .band-orange li,body.dark .band-orange strong{color:#1c1514;}
 body.dark .band-orange .applist li,body.dark .band-orange .applist strong{color:#2c2119;}
 body.dark .band-orange .metric-card p,body.dark .band-orange .metric-card strong{color:#4a4642;}
 /* Homepage proof band, rebuilt 19 Aug 2026 to the live-site layout: hero
@@ -1214,3 +1222,15 @@ body.dark .next-orange .btn--ghost:hover,
    protected contrast on flat orange no longer applies there */
 .next-orange .btn--flat,.next-orange .btn--primary{background:var(--td-sunrise) border-box;color:#1c1514;box-shadow:0 8px 22px rgba(234,91,19,.32);}
 .next-orange .btn--flat:hover,.next-orange .btn--primary:hover{background:var(--td-sunrise) border-box;color:#1c1514;}
+
+/* ==========================================================================
+   v8, 6 Sept 2026: readability, hierarchy, rhythm, motion.
+   Appended, like v4-v7 before it, because source order is load-bearing in
+   this file. Rules here win ties against everything above by position.
+   ========================================================================== */
+
+/* .figures__v means "this is a measured value". Two pages were using it for
+   a plain bold label with no number attached, overriding its colour inline to
+   get there. Same words, own class. */
+.list-label{font-weight:700;font-size:1.05rem;letter-spacing:-.01em;margin:0 0 10px;}
+body.dark .list-label{color:#fff;}
