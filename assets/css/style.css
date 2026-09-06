@@ -1323,7 +1323,11 @@ body:not(.dark) .step p,body:not(.dark) .tl p,body:not(.dark) .benefits__item p{
 .measure{max-width:var(--measure);margin-left:auto;margin-right:auto;}
 .article p{max-width:var(--measure);}                 /* 91 -> ~75 chars; tables and images keep the full .article width */
 .faq details p{max-width:var(--measure);}             /* was 80ch = ~119 chars */
-.faq summary{max-width:var(--measure);}               /* was uncapped, ~110 */
+/* NOT capped: the chevron is positioned right:6px against the summary, so a
+   max-width on it strands the chevron mid-row while the rule line runs to
+   the full .faq width. The longest question on the site is 48 characters
+   against a ~110 ceiling, so there was nothing to cap. The ANSWER below is
+   the long text, and it is capped. */
 .embed__cap{max-width:var(--measure);margin-left:auto;margin-right:auto;}
 .section>.wrap>.callout{max-width:calc(var(--measure) + 44px);margin-left:auto;margin-right:auto;}
 body.home .section>.wrap>p{max-width:var(--measure);margin-left:auto;margin-right:auto;}
