@@ -260,8 +260,18 @@ them.
   of air, the cards may recede on their own. One-line change if not.
 - **`html{font-size}`** left unset: setting it would rescale every rem on the
   site by 3%.
-- **`.about-split`** (~79 chars) and `.faq` (900px) left alone; both are inside
-  tolerance and neither is prose in a full-width container.
+- **`.about-split`** (~79 chars) left alone; it is inside tolerance and is not
+  prose in a full-width container.
+- **`.faq` was left at 900px, and that was wrong.** Capping the answer alone
+  inside a 900px block set the text and the block's furniture to different
+  widths: the answer stopped at 540px while the rule line and the chevron ran
+  on to 900, leaving a column of empty space beside every answer. Corrected
+  after launch by moving the cap to the container: `.faq{max-width:600px}`,
+  no cap on the paragraph. 600px is ~78 characters at the answers' .92rem, so
+  the measure is unchanged; the heading, questions, rules, chevrons and
+  answers now share one right edge. The general lesson: when a component has
+  furniture positioned against its own box, the measure belongs on the box,
+  not on the text inside it.
 - **`404.html`** has no font preloads and is noindex; left as is.
 - **flow-v2's scene internals**: the `#FF8C1A` charge accent is deliberate and
   documented ("MUST match the HA theme"); `--bg:#0a0a0a` needs `stop-color`

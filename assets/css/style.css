@@ -904,14 +904,19 @@ body.dark .card--orange{background:var(--td-sunrise) border-box;border:0;color:#
 /* FAQ accordion (light block at the foot of the dark pages) */
 .faq-block{background:#fff;color:var(--td-black);padding:var(--sec) 0;}
 .faq-block h2{color:var(--td-black);text-align:left;}
-.faq{max-width:900px;margin:0 auto;}
+/* One column. The questions, the rule lines, the chevrons and the answers all
+   stop at the same edge. 600px is about 78 characters at the answers' .92rem,
+   which is the measure, so the paragraph needs no cap of its own. Capping the
+   paragraph inside a 900px block was what left the rules running on into empty
+   space to the right of the text. */
+.faq{max-width:600px;margin:0 auto;}
 .faq details{border-bottom:1px solid var(--td-line);}
 .faq details[open]{border-bottom-color:var(--td-orange);}
 .faq summary{list-style:none;cursor:pointer;padding:18px 34px 18px 0;font-weight:700;font-size:.98rem;position:relative;}
 .faq summary::-webkit-details-marker{display:none;}
 .faq summary::after{content:"";position:absolute;right:6px;top:50%;width:9px;height:9px;margin-top:-6px;border-right:2px solid var(--td-grey);border-bottom:2px solid var(--td-grey);transform:rotate(45deg);transition:transform .18s ease;}
 .faq details[open] summary::after{transform:rotate(-135deg);margin-top:-2px;}
-.faq details p{font-size:.92rem;color:#4c4742;margin:0 0 18px;max-width:80ch;}
+.faq details p{font-size:.92rem;color:#4c4742;margin:0 0 18px;}
 
 /* responsive 16:9 video embed */
 .video{position:relative;width:100%;max-width:820px;margin:0 auto;aspect-ratio:16/9;border-radius:var(--radius);overflow:hidden;background:#000;box-shadow:var(--shadow-lg);border:1px solid rgba(255,255,255,.1);}
@@ -1322,12 +1327,11 @@ body:not(.dark) .step p,body:not(.dark) .tl p,body:not(.dark) .benefits__item p{
    callouts. These are the leaks, by where the prose actually sits. */
 .measure{max-width:var(--measure);margin-left:auto;margin-right:auto;}
 .article p{max-width:var(--measure);}                 /* 91 -> ~75 chars; tables and images keep the full .article width */
-.faq details p{max-width:var(--measure);}             /* was 80ch = ~119 chars */
-/* NOT capped: the chevron is positioned right:6px against the summary, so a
-   max-width on it strands the chevron mid-row while the rule line runs to
-   the full .faq width. The longest question on the site is 48 characters
-   against a ~110 ceiling, so there was nothing to cap. The ANSWER below is
-   the long text, and it is capped. */
+/* The FAQ measure is on the .faq container itself, not on the paragraph. A cap
+   on the paragraph alone is invisible to the summary, whose chevron is placed
+   right:6px against its own box, so the two disagreed: text stopped at 540px
+   and the rule line and chevron carried on to 900. Narrowing the container
+   makes one column of all four. */
 .embed__cap{max-width:var(--measure);margin-left:auto;margin-right:auto;}
 .section>.wrap>.callout{max-width:calc(var(--measure) + 44px);margin-left:auto;margin-right:auto;}
 body.home .section>.wrap>p{max-width:var(--measure);margin-left:auto;margin-right:auto;}
