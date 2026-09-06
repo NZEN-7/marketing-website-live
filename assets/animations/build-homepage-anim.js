@@ -120,11 +120,11 @@ const out = `<!DOCTYPE html>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Thermal Dawn, Energy Flow</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@500;600&family=Inter:wght@500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@500;600&display=swap" rel="stylesheet"/>
 <style>
 /* ─────────────────────────────────────────────────────────────────────
    GENERATED FILE, do not hand-edit.
-   Built by scratchpad/build-homepage-anim.js from:
+   Built by assets/animations/build-homepage-anim.js from:
      · thermal-dawn-flow-v3-marketing.html (derived from the platform v3 scene)
      · homepage_web_animation_new.html (the shell: toggle, buttons, cards)
    Re-run the builder after changing either source.
@@ -203,7 +203,7 @@ body, .scene-title h2, .scene-title p, .ic-title, .ic-body {
 
 /* info cards: the site's dark-card language, and no emoji icon row */
 .ic-icon { display: none; }
-.info-card { background: #15100c; border: 1px solid rgba(255,156,0,.28); border-radius: 10px; }
+.info-card { background: #15100c; border: 1px solid rgba(255,156,0,.42); border-radius: 9px; }
 .info-card.hl-o, .info-card.hl-g { border-color: #FF9C00; background: rgba(255,156,0,.08); }
 /* the red card marks the money leaking away; keep the warning, drop the shout */
 .info-card.hl-r { border-color: rgba(232,74,42,.55); background: rgba(232,74,42,.05); }
@@ -212,6 +212,27 @@ body, .scene-title h2, .scene-title p, .ic-title, .ic-body {
 /* grid-heat scenario: the static HP-to-store pipes plumb a tank that this
    world does not have. Tagged pipe-static by the scene generator. */
 body.grid-heat .pipe-static, body.charging .pipe-static, body.exporting .pipe-static { opacity: 0; }
+
+/* ── reduced motion ──────────────────────────────────────────────────────
+   This block lives in the BUILDER, not the shell. The shell's chrome is
+   emitted before the scene CSS, so a same-specificity animation:none there
+   would lose on source order; and the chrome filter strips any line starting
+   .flow-line / .glow-dot / .window / .fan-blades, so it would never survive
+   the copy anyway. The two heat-pump rings carry inline animation:, which
+   only !important beats.
+
+   startTimer already returns early under reduce, so the day/night auto-cycle
+   is stopped. This is everything else: roughly a dozen infinite animations a
+   reduced-motion reader was still being shown. Every one rests in a sane
+   static state, so stopping them leaves a readable scene, not a broken one. */
+@media (prefers-reduced-motion: reduce) {
+  .flow-line, .glow-dot, body.house-warm .window, .fan-blades, .store-rim,
+  .cloud-move, .cloud-wobble, .raindrop, .star, .lightning-flash,
+  .sun-rays { animation: none; }
+  #hp-ring-1, #hp-ring-2 { animation: none !important; }
+  .storage-label, .toggle-track, .toggle-knob, .tod-btn, .timer-bar,
+  .info-card, .edge-line, .sky-fade, .window { transition: none; }
+}
 </style>
 </head>
 <body>

@@ -1343,6 +1343,12 @@ body.dark table.data--win td:last-child{color:#fff;}
 /* Short-celled tables do not need the 460px floor that makes a phone scroll. */
 .table-wrap--narrow table.data{min-width:0;}
 
+/* Inside a .panel-dark the embed gives up its own chrome so there is one dark
+   box, not two. body.dark .embed (0,2,1) was beating .panel-dark .embed (0,2,0)
+   and painting a second near-black back in, so dark pages showed three of them:
+   the frame's own, the embed's, and the panel's. */
+body.dark .panel-dark .embed{background:transparent;}
+
 /* --- v8d, motion -------------------------------------------------------- */
 
 /* site.js injects the bar into an EMPTY <header id="site-header">, so until

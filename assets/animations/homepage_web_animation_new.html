@@ -8,7 +8,7 @@
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --bg: #0a0a0a; --orange: #E87C2A; --green: #2EC68A; --red: #E84A2A;
+  --bg: #0a0a0a; --orange: #FF9C00; --green: #2EC68A; --red: #E84A2A;
   --white: rgba(255,255,255,0.88); --dim: rgba(255,255,255,0.3);
 }
 html, body { background: var(--bg); min-height: 100vh; font-family: 'DM Sans', sans-serif; color: var(--white); overflow-x: hidden; }
@@ -24,7 +24,7 @@ html, body { background: var(--bg); min-height: 100vh; font-family: 'DM Sans', s
 .toggle-track.on .toggle-knob { left: 26px; background: var(--green); box-shadow: 0 0 10px rgba(46,198,138,0.6); }
 .tod-wrap { display: flex; gap: 8px; }
 .tod-btn { padding: 8px 20px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); background: transparent; color: var(--dim); font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; transition: all 0.2s; }
-.tod-btn.active-day   { border-color: #E87C2A55; background: #E87C2A18; color: var(--orange); }
+.tod-btn.active-day   { border-color: rgba(255,156,0,.33); background: rgba(255,156,0,.09); color: var(--orange); }
 .tod-btn.active-night-s { border-color: #2EC68A55; background: #2EC68A18; color: var(--green); }
 .tod-btn.active-night-n { border-color: #E84A2A55; background: #E84A2A18; color: var(--red); }
 .timer-bar-wrap { width: 100%; max-width: 400px; height: 3px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden; }
