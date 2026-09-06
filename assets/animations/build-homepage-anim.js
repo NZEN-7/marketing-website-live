@@ -179,7 +179,7 @@ body, .scene-title h2, .scene-title p, .ic-title, .ic-body {
    colours, in-SVG tags) are the platform's and are not touched. */
 :root { --orange: #FF9C00; }
 
-.storage-label, .tod-btn { font-family: "Montserrat", sans-serif; letter-spacing: .08em; }
+.storage-label { font-family: "Montserrat", sans-serif; letter-spacing: .08em; }
 .storage-label { font-weight: 800; }
 .storage-label.active { color: #FF9C00; }
 
@@ -188,13 +188,46 @@ body, .scene-title h2, .scene-title p, .ic-title, .ic-body {
 .toggle-track.on .toggle-knob { background: #FF9C00; box-shadow: none; }
 .toggle-knob { box-shadow: none; }
 
-/* scene chips: one accent for the active state regardless of scenario.
-   The story's mood (charging / serving / costing) belongs to the scene,
-   not to the buttons. 2px border matches the site's flat button spec. */
-.tod-btn { font-weight: 700; border-width: 2px; border-radius: 8px; }
+/* The day/night buttons ARE the site's secondary button, so they are built
+   from the same recipe as body.dark .btn--ghost and as the segmented control
+   in hydronic-before-after.html, which sits in an identical panel on
+   /hydronic/how-it-works/. They were 11px uppercase DM Mono with 0.08em
+   tracking and a 1px border: a different control language in the same box.
+
+   The emoji tail on the font stack is the parent's, as insurance only. The
+   shell markup still carries a sun and a moon, but applyState overwrites both
+   labels from COPY, which does not, so the glyphs only exist for the instant
+   before the first paint. Self-hosted Montserrat has no emoji glyphs, so if a
+   label ever keeps one it tofus without this.
+
+   One accent for the active state regardless of scenario. The story's mood
+   (charging / serving / costing) belongs to the scene, not to the buttons. */
+.tod-btn { padding: 11px 18px; border-radius: 8px; border: 2px solid rgba(255,255,255,.75);
+  background: transparent; color: #fff;
+  font-family: "Montserrat", -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif,
+               "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
+  font-size: 14.7px; font-weight: 700; letter-spacing: 0; text-transform: none;
+  transition: background .15s cubic-bezier(.2,.7,.2,1),
+              color .15s cubic-bezier(.2,.7,.2,1),
+              border-color .15s cubic-bezier(.2,.7,.2,1); }
+.tod-btn:hover { background: #fff; color: #1c1514; }
+/* At the site's button size the pair clears a 320px frame by about 8px, so
+   they stay on one line at every width the site supports. Allowing a wrap
+   costs nothing and stops a longer label overflowing later. The shell's own
+   8px gap is left alone: raising it to 10 was enough to force a wrap at 320. */
+.tod-wrap { flex-wrap: wrap; justify-content: center; }
+/* At the site's button size the pair needs 347px and a 375 frame gives the row
+   335, so without this they stack and push the scene down on every phone.
+   Tightening the horizontal padding is enough to keep them on one line; the
+   type size, weight and colour are untouched, so it still reads as the same
+   button. The wrap above stays as the backstop below ~330. */
+@media (max-width: 430px) {
+  .tod-btn { padding-left: 12px; padding-right: 12px; }
+}
+.tod-btn:focus-visible { outline: 2px solid #FF9C00; outline-offset: 2px; }
 .tod-btn.active-day,
 .tod-btn.active-night-s,
-.tod-btn.active-night-n { border-color: #FF9C00; background: rgba(255,156,0,.10); color: #FF9C00; }
+.tod-btn.active-night-n { background: #FF9C00; border-color: #FF9C00; color: #1c1514; }
 
 .timer-bar { background: #FF9C00 !important; }
 

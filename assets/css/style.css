@@ -601,7 +601,7 @@ body.dark .form-consent{color:#a2968c;}
    on the cream metric card, so they take the on-light form of the accent:
    same hue Gage picked, dark enough to actually read. These are the savings
    figures, the most persuasive numbers on the site. */
-.metric dd{margin:0;font-size:clamp(1.2rem,2.8vw,1.55rem);font-weight:900;color:var(--td-orange-ink);display:flex;align-items:center;gap:.35em;}
+.metric dd{margin:0;font-size:clamp(1.2rem,2.8vw,1.7rem);font-weight:900;color:var(--td-orange-ink);display:flex;align-items:center;gap:.35em;}
 /* The arrow is punctuation, not a fourth figure. At 900 and full size it gave
    each row two heavy marks and the three rows together out-massed the stat. */
 .metric dd::before{content:"\2192";color:var(--td-orange-ink);font-weight:400;font-size:.7em;opacity:.6;}
@@ -849,7 +849,7 @@ body.dark .hero__bg::after{background:linear-gradient(180deg,rgba(13,9,8,.72) 0%
 .cost-card p{margin:0;font-size:.9rem;color:var(--td-grey);line-height:1.55;}
 .cost-card--td{border:2px solid var(--td-orange);}
 .cost-card--td b{color:var(--td-orange-ink);font-weight:900;}
-.cost-op{font-weight:400;font-size:1.15rem;color:var(--td-grey-2);align-self:center;justify-self:center;line-height:1;}
+.cost-op{font-weight:500;font-size:1.15rem;color:var(--td-grey-2);align-self:center;justify-self:center;line-height:1;}
 
 /* ── Fossil-fuels band (homepage 6a) ────────────────────────────────────
    Was an .altrow--flip: right-aligned text against a floating icon circle.
