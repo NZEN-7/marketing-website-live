@@ -1238,13 +1238,17 @@ body.dark .next-orange .btn--ghost:hover,
   /* Shadows. Twelve literals collapsed to four intents. The cream panels were
      the tell: the same shadow written twice at .22 and .20, on surfaces whose
      own comments say they are the same surface. */
-  --shadow-cta:var(--shadow-cta);
-  --shadow-cta-hover:var(--shadow-cta-hover);
-  --shadow-cta-ink:var(--shadow-cta-ink);
-  --shadow-panel:var(--shadow-panel);
-  --shadow-lift:var(--shadow-lift);
-  --shadow-lift-dark:var(--shadow-lift-dark);
-  --shadow-chip:var(--shadow-chip);
+  --shadow-cta:0 8px 22px rgba(234,91,19,.32);
+  --shadow-cta-hover:0 12px 30px rgba(234,91,19,.42);
+  --shadow-cta-ink:0 8px 22px rgba(60,26,4,.28);
+  --shadow-panel:0 16px 40px rgba(60,26,4,.22);
+  --shadow-lift:0 12px 26px rgba(0,0,0,.16);
+  --shadow-lift-dark:0 12px 26px rgba(0,0,0,.55);
+  --shadow-chip:0 6px 18px rgba(0,0,0,.22);
+  /* Motion. One easing and two durations, so hover states agree with each
+     other instead of being 120, 150 and 180ms apart. */
+  --ease-out:cubic-bezier(.2,.7,.2,1);
+  --dur-fast:150ms;--dur-reveal:500ms;--lift:-2px;
 }
 @media(max-width:520px){:root{--sec:46px;}}
 
@@ -1339,3 +1343,64 @@ body.dark table.data--win td:last-child{color:#fff;}
 /* Short-celled tables do not need the 460px floor that makes a phone scroll. */
 .table-wrap--narrow table.data{min-width:0;}
 
+/* --- v8d, motion -------------------------------------------------------- */
+
+/* site.js injects the bar into an EMPTY <header id="site-header">, so until
+   that script runs the page has no header box and everything below it jumps
+   74px when it appears. Largest layout shift on the site, on all 28 pages.
+   3px gradient strip + 70px bar + 1px border. */
+#site-header{min-height:calc(var(--header-h) + 4px);}
+
+/* One lift recipe. Was 2px/120ms on buttons, 4px/180ms on cards, 2px/150ms
+   on the partner badge. */
+.btn,.card--lift,a.pbadge,.post-card{
+  transition:transform var(--dur-fast) var(--ease-out),
+             box-shadow var(--dur-fast) var(--ease-out),
+             border-color var(--dur-fast) var(--ease-out),
+             background-color var(--dur-fast) var(--ease-out),
+             color var(--dur-fast) var(--ease-out);}
+.btn:hover,.btn:focus-visible,
+.card--lift:hover,.card--lift:focus-within,
+a.pbadge:hover,a.pbadge:focus-visible,
+.post-card:hover,.post-card:focus-within{transform:translateY(var(--lift));}
+.post-card:hover,.post-card:focus-within{box-shadow:var(--shadow-lift);border-color:rgba(var(--td-orange-rgb),.6);}
+body.dark .post-card:hover,body.dark .post-card:focus-within{box-shadow:var(--shadow-lift-dark);border-color:rgba(var(--td-orange-rgb),.75);}
+.btn:active,.card--lift:active,a.pbadge:active,.post-card:active{transform:none;}
+/* A button that moves inside a fixed bar is a wobble, not feedback. */
+.nav__cta:hover,.nav__cta:focus-visible{transform:none;}
+/* Dead since the drawer was built: site.js only toggles .open on the menu. */
+.nav__toggle span{transition:none;}
+/* `all` would animate any property added later, including layout ones. */
+.field--group .choice{transition:border-color var(--dur-fast) var(--ease-out),
+  background-color var(--dur-fast) var(--ease-out),color var(--dur-fast) var(--ease-out),
+  box-shadow var(--dur-fast) var(--ease-out);}
+
+/* The chevron rotated on a transition but ALSO moved 4px via margin-top,
+   which was not in the transition list, so it snapped mid-rotate. */
+.faq details[open] summary::after{margin-top:-6px;transform:translateY(4px) rotate(-135deg);}
+
+/* An inline box cannot hold a min-width, and live-stats.js sets one while it
+   counts so the sentence around it cannot reflow. */
+[data-live-stat]{display:inline-block;}
+
+/* Scroll reveal. The hidden state exists only once site.js has opted the
+   document in, so with no JS, no IntersectionObserver, reduced motion or
+   print, nothing is ever hidden and nothing needs to un-hide. */
+html.js-reveal .reveal{opacity:0;transform:translateY(14px);
+  transition:opacity var(--dur-reveal) var(--ease-out),transform var(--dur-reveal) var(--ease-out);}
+html.js-reveal .reveal.is-in{opacity:1;transform:none;}
+@media print{html.js-reveal .reveal{opacity:1;transform:none;}}
+
+/* The baseline. Before this the file had exactly two reduced-motion blocks,
+   covering the header bar and the partner badge, and nothing else: not the
+   smooth scroll, not any hover lift, not the infinite live-dot pulse. */
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto;}
+  .btn,.card--lift,a.pbadge,.post-card,.nav__sub,.faq summary::after,
+  .field--group .choice{transition:none;}
+  .btn:hover,.btn:focus-visible,.card--lift:hover,.card--lift:focus-within,
+  a.pbadge:hover,a.pbadge:focus-visible,.post-card:hover,.post-card:focus-within{transform:none;}
+  /* Stays visible: the keyframe rests at opacity 1, so this leaves a solid dot. */
+  .live-dot::before{animation:none;}
+  html.js-reveal .reveal{opacity:1;transform:none;transition:none;}
+}

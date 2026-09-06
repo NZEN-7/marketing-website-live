@@ -150,7 +150,9 @@
         if (!form.querySelector('input[name="' + groupName + '"]:checked')) {
           showError(form, "Please choose at least one option for “" +
             (groups[g].querySelector("legend") || {}).textContent.replace("*", "").trim() + "”.");
-          groups[g].scrollIntoView({ block: "center", behavior: "smooth" });
+          groups[g].scrollIntoView({ block: "center",
+        behavior: (window.matchMedia &&
+          matchMedia("(prefers-reduced-motion: reduce)").matches) ? "auto" : "smooth" });
           return;
         }
       }
