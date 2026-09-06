@@ -4,8 +4,6 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Thermal Dawn, Same Pipes Smarter Heat Source</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;600&display=swap" rel="stylesheet"/>
 <style>
 /* Ported from the Wix embed of the same graphic (React off the unpkg CDN) to
    plain vanilla JS so it carries no third-party runtime. Deliberate changes
@@ -18,45 +16,71 @@
      - em dashes removed (site rule: the copy dump asserts zero)
    Both views reserve the note strip so switching does not jump the layout,
    and the card posts its real height up to site.js, which sizes the frame. */
+/* ---- PANEL PALETTE, shared by style.css, this file, intelligence-day.html
+   and the flow-v2 builder. An iframe cannot read the parent's custom
+   properties, so these are copies. Change here AND in the other three.
+     panel   #100c09  .panel-dark, the surface every embed sits on
+     surface #15100c  body.dark .card
+     accent  #FF9C00  --td-orange   (on cream use #ad6b00 / #ad5700)
+     ink     #1c1514  text on accent
+     radii   14 / 9 / 8  --radius / --radius-sm / --btn-radius
+     type    Montserrat 400-800, self-hosted at /assets/fonts/, no mono
+     states  green #2EC68A (= .live-dot), red #E84A2A
+   ---- */
+@font-face{font-family:"Montserrat";src:url("/assets/fonts/Montserrat-Regular.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap;}
+@font-face{font-family:"Montserrat";src:url("/assets/fonts/Montserrat-SemiBold.woff2") format("woff2");font-weight:600;font-style:normal;font-display:swap;}
+@font-face{font-family:"Montserrat";src:url("/assets/fonts/Montserrat-Bold.woff2") format("woff2");font-weight:700;font-style:normal;font-display:swap;}
+@font-face{font-family:"Montserrat";src:url("/assets/fonts/Montserrat-ExtraBold.woff2") format("woff2");font-weight:800;font-style:normal;font-display:swap;}
+:root{--panel:#100c09;--accent:#FF9C00;--ink:#1c1514;
+  --r:14px;--r-sm:9px;--r-btn:8px;--state-red:#E84A2A;--state-green:#2EC68A}
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{min-height:100%;max-width:100%;overflow-x:hidden;background:#0f0808}
-body{display:flex;justify-content:center;padding:16px;font-family:'DM Sans',system-ui,sans-serif}
-.card{width:100%;max-width:780px;background:#0f0808;color:rgba(255,255,255,.88);
-  border:1px solid rgba(255,255,255,.07);border-radius:16px;overflow:hidden}
+html,body{min-height:100%;max-width:100%;overflow-x:hidden;background:var(--panel)}
+body{display:flex;justify-content:center;padding:16px;font-family:"Montserrat",system-ui,sans-serif}
+.card{width:100%;max-width:780px;background:var(--panel);color:rgba(255,255,255,.88);
+  border:1px solid rgba(255,255,255,.07);border-radius:var(--r);overflow:hidden}
 .head{padding:20px 24px 12px}
-.eyebrow{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.12em;
-  text-transform:uppercase;color:#FF9C00;margin-bottom:6px}
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:.14em;
+  text-transform:uppercase;color:#9d928a;margin-bottom:6px}
 .title{font-size:22px;font-weight:600;letter-spacing:-.02em;margin-bottom:16px}
-.seg{display:flex;gap:8px;background:rgba(0,0,0,.35);box-shadow:inset 0 1px 3px rgba(0,0,0,.5);border-radius:10px;padding:4px;width:fit-content;margin-bottom:10px}
-.seg button{padding:10px 26px;border-radius:7px;border:1px solid rgba(255,255,255,.18);
-  background:rgba(255,255,255,.06);color:rgba(255,255,255,.82);
-  font-family:'DM Mono',monospace;font-size:12.5px;font-weight:600;letter-spacing:.08em;
-  text-transform:uppercase;cursor:pointer;transition:all .18s ease}
-.seg button:hover{background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,156,0,.7);
-  box-shadow:0 0 12px rgba(255,156,0,.35)}
+.seg{display:flex;gap:10px;width:fit-content;margin-bottom:10px}
+/* The parent's body.dark .btn--ghost recipe, so a control in the frame and a
+   control on the page around it are the same object. */
+.seg button{padding:11px 18px;border-radius:var(--r-btn);border:2px solid rgba(255,255,255,.75);
+  background:transparent;color:#fff;
+  font-family:"Montserrat",system-ui,sans-serif;font-size:14.7px;font-weight:700;
+  cursor:pointer;transition:background .15s cubic-bezier(.2,.7,.2,1),color .15s cubic-bezier(.2,.7,.2,1),border-color .15s cubic-bezier(.2,.7,.2,1)}
+.seg button:hover{background:#fff;color:var(--ink)}
 .seg button:focus-visible{outline:2px solid #FF9C00;outline-offset:2px}
-.seg button[aria-pressed="true"][data-v="before"]{background:#E84A2A2e;color:#ff8a70;border-color:#E84A2A;box-shadow:0 0 14px rgba(232,74,42,.45)}
-.seg button[aria-pressed="true"][data-v="after"]{background:#2EC68A2e;color:#5cf0ba;border-color:#2EC68A;box-shadow:0 0 14px rgba(46,198,138,.45)}
+/* Pressed = the parent .btn--flat: accent fill, ink label. The red/green
+   state still reads, in the diagram, where it belongs. */
+.seg button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--ink)}
 .hint{font-size:12.5px;color:rgba(255,255,255,.6)}
 .stage{padding:0 24px}
 .stage svg{display:block;width:100%}
-.box{cursor:pointer;transition:filter .18s;filter:drop-shadow(0 2px 5px rgba(0,0,0,.55))}
-.box:hover{filter:brightness(1.22) drop-shadow(0 4px 10px rgba(0,0,0,.55)) drop-shadow(0 0 7px var(--c,rgba(255,255,255,.2)))}
-.box.is-on{filter:drop-shadow(0 0 8px var(--c,rgba(255,255,255,.25)))}
+/* No coloured zero-offset glow: the site has no such lighting model, and
+   the 2px stroke already marks selection. */
+.box{cursor:pointer;transition:filter .15s cubic-bezier(.2,.7,.2,1)}
+.box:hover{filter:brightness(1.22)}
 .box:focus-visible{outline:none}
 .box:focus-visible rect{stroke:#FF9C00;stroke-width:2}
-.note{margin:0 26px 14px;padding:12px 16px;border-radius:8px;font-size:13.5px;line-height:1.5;
+.note{margin:0 26px 14px;padding:12px 16px;border-radius:var(--r-sm);font-size:13.5px;line-height:1.5;
   background:rgba(232,74,42,.09);border:1px solid rgba(232,74,42,.28);color:rgba(255,255,255,.8)}
 .note[hidden]{display:none}
 .note--ok{background:rgba(46,198,138,.08);border-color:rgba(46,198,138,.3)}
-.info{margin:0 24px 24px;min-height:90px;padding:16px 18px;border-radius:10px;
-  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);box-shadow:0 3px 10px rgba(0,0,0,.35)}
+.info{margin:0 24px 24px;min-height:90px;padding:16px 18px;border-radius:var(--r-sm);
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12)}
 .info__h{display:flex;align-items:center;margin-bottom:8px}
 .info__h .nm{font-weight:600;font-size:16px}
-.tag{font-size:9px;font-family:'DM Mono',monospace;font-weight:700;letter-spacing:.1em;
+.tag{font-size:9px;font-weight:700;letter-spacing:.1em;
   border-radius:3px;padding:1px 5px;margin-left:6px}
 .info__b{font-size:14.5px;line-height:1.6;color:rgba(255,255,255,.88)}
 .info__idle{font-size:14.5px;line-height:1.6;color:rgba(255,255,255,.66)}
+@media(max-width:480px){
+  .head{padding:16px 18px 10px}.title{font-size:19px}
+  .stage{padding:0 12px}.note{margin-left:14px;margin-right:14px}
+  .info{margin-left:14px;margin-right:14px}
+}
+@media(prefers-reduced-motion:reduce){.seg button,.box{transition:none}}
 </style>
 </head>
 <body>
@@ -78,7 +102,7 @@ body{display:flex;justify-content:center;padding:16px;font-family:'DM Sans',syst
 <script>
 (function(){
 "use strict";
-var RED="#E84A2A", GREEN="#2EC68A", ORANGE="#FF9C00", GREY="#93A0B0";
+var RED="#E84A2A", GREEN="#2EC68A", ORANGE="#FF9C00", GREY="#B5B3B1";
 var TAGC={REPLACED:RED,REMOVED:RED,NEW:GREEN,UNLOCKED:GREEN,STAYS:GREY,UNUSED:GREY,OPTIONAL:ORANGE};
 
 var cx=function(c){return c.x+c.w/2}, cy=function(c){return c.y+c.h/2};
@@ -221,13 +245,13 @@ function draw(){
     ig.appendChild(mk("path",{d:ICON[c.ic]}));
     g.appendChild(ig);
 
-    var t1=mk("text",{x:cx(c),y:c.y+38,"text-anchor":"middle","font-size":11,"font-weight":600,
-      "font-family":"DM Sans,system-ui,sans-serif",
+    var t1=mk("text",{x:cx(c),y:c.y+38,"text-anchor":"middle","font-size":12,"font-weight":600,
+      "font-family":"Montserrat,system-ui,sans-serif",
       fill:on?"#fff":(faded?"rgba(255,255,255,.68)":"rgba(255,255,255,.97)")});
     t1.textContent=c.label; g.appendChild(t1);
 
-    var t2=mk("text",{x:cx(c),y:c.y+52,"text-anchor":"middle","font-size":9.2,
-      "font-family":"DM Sans,system-ui,sans-serif",
+    var t2=mk("text",{x:cx(c),y:c.y+52,"text-anchor":"middle","font-size":10,
+      "font-family":"Montserrat,system-ui,sans-serif",
       fill:on?"rgba(255,255,255,.72)":(faded?"rgba(255,255,255,.58)":"rgba(255,255,255,.65)")});
     t2.textContent=c.sub; g.appendChild(t2);
 
@@ -238,7 +262,7 @@ function draw(){
     g.appendChild(mk("rect",{x:chipX,y:c.y-6,width:chipW,height:12,rx:3,
       fill:"#0f0808",stroke:TAGC[c.tag]+(faded?"55":"88"),"stroke-width":1}));
     var tt=mk("text",{x:chipX+chipW/2,y:c.y+3,"text-anchor":"middle","font-size":6.6,
-      "font-weight":700,"font-family":"DM Mono,monospace","letter-spacing":".08em",
+      "font-weight":700,"font-family":"Montserrat,system-ui,sans-serif","letter-spacing":".08em",
       fill:faded?TAGC[c.tag]+"aa":TAGC[c.tag]});
     tt.textContent=shown; g.appendChild(tt);
 
