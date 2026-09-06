@@ -317,3 +317,41 @@ The flow-v2 rebuild ran clean ("all blocks present") and its generated diff is
 the five intended source changes plus the reduce block, nothing else.
 
 **Not deployed.** Branch only.
+
+---
+
+## Follow-up, after review (3 commits)
+
+**The before/after sub-labels were overflowing their boxes.** My regression:
+moving the graphic onto Montserrat made every label about 12% wider per
+character than the DM Sans the 115-unit boxes were drawn for, and I raised the
+sub-label from 9.2 to 10 in the same commit. I verified the fonts loaded and the
+height contract held, and never looked at it. Boxes now go to `h:72` and
+sub-labels that do not fit split onto two lines at the space nearest their
+middle, measured with `getComputedTextLength` after the nodes are in the
+document. Eight wrap. Verified by measuring every text node's bounding box
+against its own rect in both views: zero overflow.
+
+**The homepage animation's day/night buttons now use the site's secondary
+button**, the same recipe as `body.dark .btn--ghost` and as the before/after's
+segmented control, which sits in an identical panel 55 lines below it on
+how-it-works. Active is the flat accent fill with an ink label rather than a 10%
+tint. No word changed: the labels are authored title case and were being
+uppercased by CSS.
+
+At the site's button size the pair needs 347px against a 335px row at 375, so
+they stacked and pushed the scene down on every phone; the horizontal padding
+tightens below 430px, which is enough for one line with the type untouched.
+
+**Four fixes from the review**: contact's section padding was collapsing from
+36px to 12 at the 520px breakpoint, because `calc(--sec - --sp-7)` follows
+`--sec` down; the intelligence-day reduce block named a class that does not
+exist; `.cost-op` at weight 400 had gone from competing with the figures to
+nearly vanishing, now 500; and `.metric dd` was cut harder than it needed to be,
+now capped at 27.2px rather than 24.8, which still leaves the 39.2px stat
+clearly first.
+
+**Process note.** Three of the bugs in this pass were mine, and two of them I
+found only after committing. The overflow got through because I trusted computed
+values where a screenshot would have shown it immediately. Everything in this
+follow-up was checked by measurement *and* by looking at it.
