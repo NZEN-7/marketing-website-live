@@ -342,8 +342,11 @@ table.data td:first-child{font-weight:600;}
 
 /* Big single-line statement. For a sentence that carries the whole argument
    on its own, so it is not competing with a heading or buried in a para. */
+/* Sized ABOVE the site h2 (36.8px at 1280) on purpose. Its own note below
+   says it must not compete with a heading, and at 33.6px against a 36.8px h2
+   in the same section, identical weight and colour, it was losing. */
 .statement{max-width:900px;margin:0 auto;text-align:center;font-weight:800;
-  line-height:1.22;letter-spacing:-.01em;font-size:clamp(1.35rem,3.4vw,2.1rem);
+  line-height:1.18;letter-spacing:-.01em;font-size:clamp(1.5rem,3.6vw,2.4rem);
   color:var(--td-black);}
 .statement em{font-style:normal;color:var(--td-orange);}
 .statement__sub{text-align:center;margin:12px auto 0;max-width:640px;font-size:.95rem;
@@ -361,17 +364,13 @@ table.data td:first-child{font-weight:600;}
 .embed iframe{width:100%;border:0;display:block;height:820px;}
 .embed__cap{font-size:.85rem;color:var(--td-grey);margin-top:10px;text-align:center;}
 .embed--home iframe{height:1150px;}
-.embed--daynight iframe{height:950px;}
-.embed--flow iframe{height:820px;}
 /* flow-v2 standalone (scene only; add ?controls=1 for the control bar) */
-.embed--flow2 iframe{height:750px;}
 .embed--beforeafter iframe{height:945px;}
+.embed--day iframe{height:760px;}
 @media(max-width:640px){
   .embed--home iframe{height:1160px;}
-  .embed--daynight iframe{height:850px;}
-  .embed--flow iframe{height:720px;}
-  .embed--flow2 iframe{height:640px;}
   .embed--beforeafter iframe{height:775px;}
+  .embed--day iframe{height:700px;}
 }
 
 /* ---------- Callout / notes ---------- */
