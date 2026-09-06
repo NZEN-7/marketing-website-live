@@ -117,6 +117,83 @@
     upgradePartnerLogos();
     stickyHeaderState(h);
     scrollReveal();
+    faqSlide();
+  }
+
+
+  /* <details> snaps open. This slides it, by animating the details box itself
+     between its closed and open heights.
+
+     Two things make it awkward. The panel only has a height once it is open,
+     so an opening row is opened first, measured, then animated from where it
+     was. A closing row has to stay open for the length of the animation or the
+     content vanishes on frame one, so the open attribute is cleared at the end
+     rather than up front. The closed height is the summary plus the row's own
+     borders, read off the live box rather than assumed, so it stays right if
+     the padding ever changes.
+
+     Clicking mid-slide reads the current height BEFORE cancelling, so a fast
+     double-click reverses from where the row actually is instead of jumping.
+
+     The settle step does not trust the finish event on its own. That event is
+     delivered by the rendering loop, which does not run while the document is
+     hidden, so a row opened just before the reader switches tabs can be left
+     holding an inline height with overflow clipped, or looking closed while
+     the open attribute says otherwise. A timer runs the same settle, and the
+     token makes whichever arrives first the only one that counts. Order
+     matters inside it: the open attribute is cleared BEFORE the inline height,
+     because doing it the other way round shows one frame of the full-height
+     panel on the way to nothing.
+
+     No markup hook and no fallback state: without Web Animations, or under
+     reduced motion, this never binds and the native snap is what you get. */
+  function faqSlide() {
+    var rows = document.querySelectorAll(".faq details");
+    if (!rows.length || !("animate" in Element.prototype)) return;
+    if (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    var DUR = 260;
+
+    rows.forEach(function (d) {
+      var sum = d.querySelector("summary");
+      if (!sum) return;
+      var anim = null, timer = 0, pending = null;
+
+      sum.addEventListener("click", function (e) {
+        e.preventDefault();
+
+        var from = d.getBoundingClientRect().height;
+        if (timer) { clearTimeout(timer); timer = 0; }
+        if (anim) { anim.cancel(); anim = null; }
+        pending = null;
+
+        var opening = !d.open;
+        if (opening) d.open = true;
+
+        d.style.height = "auto";
+        d.style.overflow = "hidden";
+        var to = opening
+          ? d.getBoundingClientRect().height
+          : sum.getBoundingClientRect().height + (d.offsetHeight - d.clientHeight);
+        d.style.height = to + "px";
+
+        var settle = function () {
+          if (pending !== settle) return;      // a later click owns the row now
+          pending = null;
+          if (timer) { clearTimeout(timer); timer = 0; }
+          if (anim) { anim.cancel(); anim = null; }
+          if (!opening) d.open = false;
+          d.style.height = "";
+          d.style.overflow = "";
+        };
+        pending = settle;
+
+        anim = d.animate({ height: [from + "px", to + "px"] },
+                         { duration: DUR, easing: "cubic-bezier(.2,.7,.2,1)" });
+        anim.onfinish = settle;
+        timer = setTimeout(settle, DUR + 120);
+      });
+    });
   }
 
   /* Scroll reveal, deliberately narrow: heading-led sections that start below

@@ -266,13 +266,18 @@ them.
   A `max-width` on the answer alone inside a 900px row set the text and the
   row's furniture to different widths: the answer stopped at 540px while the
   rule line and the chevron ran on to 900, leaving a column of dead space
-  beside every answer. Narrowing `.faq` to 600px aligned them but shrank the
-  whole block into a thin strip on a wide page. Settled after launch on a
-  two-column row (v8e): the row, the rule and the chevron run the full 900px,
-  the question takes the left 34% and the answer sits beside it in its own
-  column, which is where the measure now lives. Stacks below 760px.
-  The general lesson: when a component has furniture positioned against its
-  own box, the measure belongs to a column, not to a cap on the text.
+  beside every answer. Settled on `.faq{max-width:600px}` with no cap on the
+  paragraph, so the column IS the measure and everything shares one edge. A
+  two-column row (question left, answer right) was built and reviewed as the
+  full-width alternative, and dropped: it filled the width but read worse
+  than the column. The general lesson: when a component has furniture
+  positioned against its own box, the measure belongs to the box.
+- **FAQ open/close is animated** (`site.js` `faqSlide`), 260ms on the details
+  height, guarded by Web Animations support and `prefers-reduced-motion`, so
+  the native snap is the fallback rather than a broken half-state. Cleanup
+  runs off the finish event OR a timer, whichever lands first, because the
+  finish event is delivered by the rendering loop and never arrives if the
+  reader switches tabs mid-slide.
 - **`404.html`** has no font preloads and is noindex; left as is.
 - **flow-v2's scene internals**: the `#FF8C1A` charge accent is deliberate and
   documented ("MUST match the HA theme"); `--bg:#0a0a0a` needs `stop-color`

@@ -904,7 +904,13 @@ body.dark .card--orange{background:var(--td-sunrise) border-box;border:0;color:#
 /* FAQ accordion (light block at the foot of the dark pages) */
 .faq-block{background:#fff;color:var(--td-black);padding:var(--sec) 0;}
 .faq-block h2{color:var(--td-black);text-align:left;}
-.faq{max-width:900px;margin:0 auto;}   /* two-column layout in the v8e block */
+/* One column, and the measure is the column. The questions, the rule lines,
+   the chevrons and the answers all stop at the same edge; 600px is the
+   measure at the answers' .92rem, so the paragraph needs no cap of its own.
+   Capping the paragraph inside a 900px block was what left the rules running
+   on into empty space. A two-column row (question left, answer right) was
+   tried and dropped: it filled the width but read worse than the column. */
+.faq{max-width:600px;margin:0 auto;}
 .faq details{border-bottom:1px solid var(--td-line);}
 .faq details[open]{border-bottom-color:var(--td-orange);}
 .faq summary{list-style:none;cursor:pointer;padding:18px 34px 18px 0;font-weight:700;font-size:.98rem;position:relative;}
@@ -1322,7 +1328,7 @@ body:not(.dark) .step p,body:not(.dark) .tl p,body:not(.dark) .benefits__item p{
    callouts. These are the leaks, by where the prose actually sits. */
 .measure{max-width:var(--measure);margin-left:auto;margin-right:auto;}
 .article p{max-width:var(--measure);}                 /* 91 -> ~75 chars; tables and images keep the full .article width */
-/* The FAQ measure is a COLUMN WIDTH, not a cap on the paragraph. See v8e. */
+/* The FAQ measure is the .faq width itself, not a cap on the paragraph; see 907. */
 .embed__cap{max-width:var(--measure);margin-left:auto;margin-right:auto;}
 .section>.wrap>.callout{max-width:calc(var(--measure) + 44px);margin-left:auto;margin-right:auto;}
 body.home .section>.wrap>p{max-width:var(--measure);margin-left:auto;margin-right:auto;}
@@ -1418,33 +1424,4 @@ html.js-reveal .reveal.is-in{opacity:1;transform:none;}
   /* Stays visible: the keyframe rests at opacity 1, so this leaves a solid dot. */
   .live-dot::before{animation:none;}
   html.js-reveal .reveal{opacity:1;transform:none;transition:none;}
-}
-
-/* --- v8e, FAQ layout ---------------------------------------------------- */
-/* Full-width rows with the answer in its own column.
-
-   The row, the rule line and the chevron run the full 900px; the answer sits
-   beside the question at ~73 characters. That is the measure, held by the grid
-   column rather than by a max-width on the <p>.
-
-   Two earlier attempts got this wrong in opposite directions. Capping the
-   paragraph inside a 900px block left the text stopping at 540 while the rule
-   and the chevron ran on to 900. Narrowing .faq to 600 fixed the alignment by
-   shrinking everything, which read as a thin strip on a wide page. The width
-   belongs to the row; the measure belongs to the text column.
-
-   The chevron is the fiddly part: it is positioned against .faq summary, which
-   in this layout is only the left column, so it has to resolve against the
-   details row instead. Hence position:static on the summary, and a fixed top
-   (18px of padding plus half the question's line box) rather than top:50%,
-   which would centre it against the whole open row.
-
-   Below 760px there is not room for two columns and it stacks, which is the
-   single-column layout that was already there. */
-@media (min-width:760px){
-  .faq details{position:relative;display:grid;grid-template-columns:minmax(0,34%) minmax(0,1fr);column-gap:34px;padding-right:34px;}
-  .faq summary{position:static;padding-right:0;}
-  .faq details p{grid-column:2;align-self:start;padding-top:18px;}
-  .faq details p~p{padding-top:0;}
-  .faq summary::after,.faq details[open] summary::after{top:31px;margin-top:0;}
 }
