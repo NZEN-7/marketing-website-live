@@ -8,7 +8,7 @@ Add-Type -AssemblyName System.Drawing
 
 # Two digit edits to the app screenshot used in the marketing phone render:
 #   status bar clock   8:29  ->  5:29
-#   schedule card      room 15.8 degrees  ->  16.8
+#   schedule card      room 15.8 degrees  ->  17.4
 #
 # Nothing here is DRAWN. Every replacement digit is LIFTED from a real rendering
 # of the same font at the same size. SF Pro is not installed on this machine, and
@@ -38,21 +38,33 @@ Add-Type -AssemblyName System.Drawing
 # The band stops at x=227 in the donor, clear of the 4 at 230, and lands at
 # x=167, clear of the colon at 172.
 # ---------------------------------------------------------------------------
-# EDIT 2: the room temperature, 15.8 -> 16.8.   Donor: the SAME file. The line
-# above reads "stored heat (tank 60.4 degrees) lifting", so the 6 is already
-# there, in the same font at the same size, one line up.
+# EDIT 2: the room temperature, 15.8 -> 17.4. Two digits, two different donors,
+# both real glyphs at the target size.
 #
-#   line 2  "...60.4..."   6 ink x 579..597  rows 1821..1846
-#   line 3  "...15.8..."   5 ink x 363..380  rows 1864..1888
+#   target line 3  "...15.8..."   1 x 347..356   5 x 363..381   . x 386..390
+#                                 8 x 394..414   degree x 419..431   baseline 1888
 #
-# Vertical: dy = 42, which is exactly the line spacing. That equality is the
-# check that these are the two glyphs I think they are, not a coincidence of
-# thresholds. Bottoms align; the 6's round top overshooting the 5's flat top by
-# one row is again correct.
+# 2a. the 4, from THIS file's own line above: "(tank 60.4 degrees) lifting".
+#     4 ink x 635..657 (w23) rows 1822..1846, baseline 1846, so dy = +42, which
+#     is exactly the line spacing. That equality is the check that this is the
+#     glyph I think it is and not a coincidence of thresholds.
+#     The 8's ink centre is 404 and the 4's ink is 23 wide, so dx = -242 lands it
+#     at 393..415, centre 404. The band clears the decimal point on the left
+#     (ends 390, band starts 391) and the degree sign on the right (starts 419,
+#     band ends 416).
 #
-# Horizontal: centred, 5 ink centre 371.5, 6 ink 19 wide, so dx = -217 puts the
-# 6 at 362..380. The copied band lands clear of the 1 (ends 356) and the decimal
-# point (starts 386) on both sides.
+# 2b. the 7, from the donor's "51.7 kg". IMG_4355 has no 7 anywhere at this
+#     size: its only sevens are the large OUTDOOR 7.8 and the small INDOOR 17.4,
+#     and rescaling either would land a wrong weight next to correct ones. The
+#     donor's stat-card body text is the same face at the same weight, one pixel
+#     taller. Compared side by side at 8x the glyph shapes match.
+#     7 ink x 819..836 (w18) rows 2006..2031, baseline 2031, so dy = -143.
+#     The 5's ink centre is 372 and the 7 is 18 wide, so dx = -456 lands it at
+#     363..380, centre 371.5. The band clears the 1 on the left (ends 356, band
+#     starts 359) and the decimal point on the right (starts 386, band ends 384).
+#
+# Every one of these bands is background-to-background: 28,28,28 at all three
+# sites, measured, in both files. Nothing to blend, no seam to hide.
 # ---------------------------------------------------------------------------
 
 $shotB  = [System.Drawing.Bitmap]::FromFile($Shot)
@@ -78,9 +90,13 @@ function Copy-Band($src, $dst, $x1, $x2, $y1, $y2, $dx, $dy) {
 # 1. clock: 5 from the donor's 10:54
 Copy-Band $donorB $out 193 227 45 110 -60 0
 
-# 2. room temperature: 6 from this file's own line above
-Copy-Band $out $out 577 599 1817 1850 -217 42
+# 2a. room temperature, second digit: 4 from this file's own line above.
+#     Read from $shotB, not $out, so it cannot pick up an earlier edit.
+Copy-Band $shotB $out 633 658 1818 1852 -242 42
+
+# 2b. room temperature, first digit: 7 from the donor's "51.7 kg"
+Copy-Band $donorB $out 815 840 2000 2038 -456 -143
 
 $out.Save($OutPng, [System.Drawing.Imaging.ImageFormat]::Png)
-"wrote $OutPng  ($($out.Width) x $($out.Height))  clock 5:29, room 16.8"
+"wrote $OutPng  ($($out.Width) x $($out.Height))  clock 5:29, room 17.4"
 $out.Dispose(); $shotB.Dispose(); $donorB.Dispose()
