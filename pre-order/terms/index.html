@@ -33,13 +33,19 @@
        below. Clauses 1 and 7 both turn on "the date they are published on our
        website", which a reader cannot check unless the page says it. -->
   <section class="section">
-    <div class="wrap narrow">
+    <!-- One column, and the measure IS the column. Without the cap here the
+         wrap runs 716px, the h2 clause headings run the full 716 and every
+         paragraph stops 62px short of them (.article p is capped at --measure),
+         so the page sits flush left with a ragged gap down the right. Capping
+         the wrap instead puts the crumbs, the h1, the metadata, every clause
+         and the button on the same two edges, centred. -->
+    <div class="wrap narrow" style="max-width:calc(var(--measure) + 44px)">
       <p class="crumbs" style="text-align:left"><a href="/pre-order/">Booking</a> / Terms and Conditions</p>
       <h1>Booking Terms and Conditions</h1>
       <p class="micro"><strong>Published on this website:</strong> 24 September 2026<br>
       <strong>Issued by:</strong> FreeVolt Pty Ltd (ABN 47 682 866 913), trading as Thermal Dawn ("we", "us")</p>
 
-      <article class="article" style="margin-left:0">
+      <article class="article">
         <p>These terms apply to bookings made from the date they are published on our website.</p>
 
         <h2>1. What these terms cover</h2>
