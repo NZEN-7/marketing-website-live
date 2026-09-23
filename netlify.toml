@@ -128,7 +128,15 @@
   status = 301
 [[redirects]]
   from = "/pre-order-form/founder-premium"
-  to = "/pre-order/founder-premium/"
+  to = "/pre-order/booking/"
+  status = 301
+[[redirects]]
+  from = "/pre-order/founder-premium"
+  to = "/pre-order/booking/"
+  status = 301
+[[redirects]]
+  from = "/pre-order/founder-premium/"
+  to = "/pre-order/booking/"
   status = 301
 [[redirects]]
   from = "/register"

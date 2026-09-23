@@ -13,12 +13,17 @@
    ========================================================================= */
 window.TD_CONFIG = {
   stripe: {
-    // Basic Reserve, $190 refundable deposit
+    // Legacy Basic Reserve, $190. Unlinked from the site since 24 Sep 2026
+    // but deliberately still live for direct-link use; /pre-order/basic-reserve/
+    // is the only page that uses it.
     basicReserve: "https://buy.stripe.com/5kQbIUcY9dgO37d0Gk4F200",
-    // Founder Premium, $990 refundable deposit
+    // THE booking deposit, $990 refundable. The key is still "founderPremium"
+    // because renaming it would break the api/lead.js -> email -> CRM contract;
+    // the page moved to /pre-order/booking/ on 24 Sep 2026, the key did not.
     founderPremium: "https://buy.stripe.com/14A3co4rDgt0bDJagU4F201"
   },
-  // Pre-order terms, now hosted here (ported verbatim 31 Jul 2026).
+  // Booking Terms and Conditions (replaced the Pre-Order T&Cs 24 Sep 2026,
+  // same URL so existing Stripe links and emails keep resolving).
   termsUrl: "/pre-order/terms/"
 };
 

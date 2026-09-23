@@ -101,7 +101,12 @@
     },
     {
       "source": "/pre-order-form/founder-premium",
-      "destination": "/pre-order/founder-premium/",
+      "destination": "/pre-order/booking/",
+      "permanent": true
+    },
+    {
+      "source": "/pre-order/founder-premium",
+      "destination": "/pre-order/booking/",
       "permanent": true
     },
     {
@@ -226,7 +231,12 @@
     },
     {
       "source": "/pre-order-form/founder-premium/",
-      "destination": "/pre-order/founder-premium/",
+      "destination": "/pre-order/booking/",
+      "permanent": true
+    },
+    {
+      "source": "/pre-order/founder-premium/",
+      "destination": "/pre-order/booking/",
       "permanent": true
     },
     {
