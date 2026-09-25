@@ -81,8 +81,8 @@ The 54 rules cover: the old Wix paths (`/product`, `/pricing`, `/learn`,
 
 The repo root is the site, so anything not excluded is publicly fetchable at
 its path. `.vercelignore` keeps the working files out of the deploy
-(`BUILD-NOTES.md`, `CLAUDE.md`, `DECISIONS.md`, `MISSING-MEDIA.md`, `docs/`,
-`feedback/`, `scripts/`, `tools/`, the package files), and `netlify.toml`
+(`.claude/`, `BUILD-NOTES.md`, `CLAUDE.md`, `DECISIONS.md`, `MISSING-MEDIA.md`,
+`docs/`, `feedback/`, `scripts/`, `tools/`, the package files), and `netlify.toml`
 carries a forced 404 for each of the same paths, per the twins rule. Add a new
 internal file to both.
 
