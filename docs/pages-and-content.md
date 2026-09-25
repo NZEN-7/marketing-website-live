@@ -28,9 +28,12 @@ say `https://www.thermaldawn.com` everywhere.
 - **`/pre-order/terms/` is legal copy, pasted verbatim from Nick.** Never
   reworded; flag, don't fix. The only thing on that page not in his source file
   is the publication date, which clauses 1 and 7 turn on.
-- **Measured figures come from the platform audit.** The numbers baked into
-  `data-live-stat` elements are the audited fallback; if one looks stale, ask
-  the platform side. Never substitute a plausible number.
+- **The savings figures are derived, not measured.** The platform computes
+  them from fleet telemetry and a costing method (gas avoided at a tariff),
+  and the numbers baked into `data-live-stat` elements are the audited
+  fallback for that derivation. If one looks stale, ask the platform side.
+  Never substitute a plausible number, and do not call them "measured" in
+  copy: the meter readings are measured; the dollars are derived.
 - **`class="draft"`** marks a figure awaiting publisher sign-off (the modelled
   annual range, the lead time). It renders visibly different so nobody mistakes
   it for a claim.
