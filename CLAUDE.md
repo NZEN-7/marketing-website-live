@@ -94,7 +94,7 @@ At the end of any session that shipped, changed a decision or got blocked,
 overwrite `Thermal Dawn\Engineering & Product +\Product Management\Session status\STATUS - Web Designer.md`
 on the **company Drive (nick@thermaldawn.com)**, using `_TEMPLATE - status card.md`.
 On the desktop that is `C:\Users\nickz\My Drive\Thermal Dawn\…`; on the laptop it
-is `C:\Users\nickz\My Drive (nick@thermaldawn.com)\Thermal Dawn\…`, **not** the
+is `My Drive (nick@thermaldawn.com)\Thermal Dawn\…`, **not** the
 personal `My Drive`. Test: the company Drive has a `REVIEW - repo docs…` file
 beside `Session status`; if it is missing, you are in the wrong Drive. The same
 applies to every Drive path this repo's work touches (the Sales Playbook design
