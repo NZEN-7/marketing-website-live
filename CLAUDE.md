@@ -91,8 +91,15 @@ to be exported.
 
 ## Session status card
 At the end of any session that shipped, changed a decision or got blocked,
-overwrite `C:\Users\nickz\My Drive\Thermal Dawn\Engineering & Product +\Product Management\Session status\STATUS - Web Designer.md`
-using `_TEMPLATE - status card.md`. Product requirements come from the PRDs in
+overwrite `Thermal Dawn\Engineering & Product +\Product Management\Session status\STATUS - Web Designer.md`
+on the **company Drive (nick@thermaldawn.com)**, using `_TEMPLATE - status card.md`.
+On the desktop that is `C:\Users\nickz\My Drive\Thermal Dawn\…`; on the laptop it
+is `C:\Users\nickz\My Drive (nick@thermaldawn.com)\Thermal Dawn\…`, **not** the
+personal `My Drive`. Test: the company Drive has a `REVIEW - repo docs…` file
+beside `Session status`; if it is missing, you are in the wrong Drive. The same
+applies to every Drive path this repo's work touches (the Sales Playbook design
+system, Brand & Style, the CRM): on 25 Sep a whole evening's work landed in the
+personal Drive by mistake. Product requirements come from the PRDs in
 `Product Management/PRDs/<stream>/`. Never edit a PRD. Put your input, including
 the Feasibility section, in that stream's `WORKING` doc, signed and dated, and
 put data, worked examples and assets in its `Inputs/` folder.
