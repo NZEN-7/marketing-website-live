@@ -89,7 +89,7 @@ images still to be exported.
 
 ## Session status card
 At the end of any session that shipped, changed a decision or got blocked,
-overwrite `C:\Users\nickz\My Drive\Thermal Dawn\Engineering & Product +\Product Management\Session status\STATUS - marketing-website.md`
+overwrite `C:\Users\nickz\My Drive\Thermal Dawn\Engineering & Product +\Product Management\Session status\STATUS - Web Designer.md`
 using `_TEMPLATE - status card.md`. Product requirements come from the PRDs in
 `Product Management/PRDs/<stream>/`. Never edit a PRD. Put your input, including
 the Feasibility section, in that stream's `WORKING` doc, signed and dated, and
