@@ -1,9 +1,16 @@
-# Local dev tooling: specs, the copy-review skill, and the generated
-# copy-dump.txt. Shared with other sessions by sharing the folder, not through
-# git. Keeping it untracked also keeps it out of the deploy, which matters
-# because this is a static site served from the repo root: anything committed
-# here would be publicly fetchable at /.claude/...
-.claude/
+# .claude/ holds the local dev tooling a fresh clone needs: the preview server
+# (npm run serve), the Browser-pane launch config, the build specs and the
+# copy-review skill. It is tracked since 26 Sep 2026, when sessions moved to
+# fresh clones on the desktop; before that it was shared by sharing the folder.
+# It is kept OUT OF THE DEPLOY by .vercelignore and a forced 404 in
+# netlify.toml, because the repo root is the served site.
+#
+# Still ignored inside it: personal permissions, generated output, and scratch.
+.claude/settings.local.json
+.claude/copy-dump.txt
+.claude/copy-review/
+.claude/v3-preview.html
+.claude/tmp-*
 
 # Installed by Vercel at build time from package-lock.json; never committed.
 node_modules/
