@@ -1,9 +1,11 @@
 # Thermal Dawn, marketing website
 
-Plain static site (no framework, no build step): 27 pages of hand-written
-HTML + one shared CSS file + small vanilla JS. `BUILD-NOTES.md` is the full
-build/QA history, read it before big changes. `MISSING-MEDIA.md` tracks
-images still to be exported.
+Plain static site (no framework, no build step): 28 pages of hand-written
+HTML + one shared CSS file + small vanilla JS. **`docs/` explains how it hangs
+together** (architecture, lead pipeline, hosting, pages, design system,
+tooling); start at `docs/README.md`. `BUILD-NOTES.md` is the full build/QA
+history, read it before big changes. `MISSING-MEDIA.md` tracks images still
+to be exported.
 
 ## Deploy
 - Source of truth: `Thermal-Dawn/marketing-website` (this repo), branch `main`.
