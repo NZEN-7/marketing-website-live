@@ -30,13 +30,13 @@ jobs:
       - name: Install
         run: npm ci
 
-      - name: Email layout (14 checks)
+      - name: Email layout (23 checks)
         run: npm run test:email
 
-      - name: CRM parser round-trip and capture query (7 checks)
+      - name: CRM parser round-trip and capture query (9 checks)
         run: npm run test:parser
 
-      - name: Supabase lead row and key selection (31 checks)
+      - name: Supabase lead row, key selection and interest tags (47 checks)
         run: npm run test:leadrow
 
       - name: Cache-busting (8 assets)

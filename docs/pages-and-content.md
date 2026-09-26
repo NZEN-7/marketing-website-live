@@ -16,8 +16,8 @@
 | `/pre-order/booking/` | The booking form, then Stripe | yes |
 | `/pre-order/register-interest/` | Request a quote (the primary CTA in the header) | yes |
 | `/pre-order/terms/` | Booking Terms and Conditions, verbatim | yes |
-| `/pre-order/basic-reserve/` | The legacy $190 path. Unlinked, `noindex`, out of the sitemap, still working by direct link | no |
-| `/thank-you/`, `/thank-you/registered/`, `/thank-you/founder-premium/`, `/thank-you/basic-reserve/` | Post-submit pages; Stripe returns to the last two | no |
+| `/interest/` | The free register-interest list: heating and cooling, hot water, other states, NZ | yes |
+| `/thank-you/`, `/thank-you/registered/`, `/thank-you/booking/`, `/thank-you/interest/` | Post-submit pages; Stripe returns to `/thank-you/booking/` (via a 301 from the old founder path) | no |
 | `/404.html` | Not found | no |
 
 `sitemap.xml` and `robots.txt` are hand-maintained. Canonicals and `og:url`
@@ -41,7 +41,12 @@ say `https://www.thermaldawn.com` everywhere.
   the pre-certification position is not explained on the site. These were
   Nick's calls and they stand.
 - The deposit is one **$990 refundable booking deposit, inc GST**, since
-  24 Sep 2026. No page mentions a $190 offer or a Founder tier.
+  24 Sep 2026. Tiers and discounts were retired for good on 27 Sep 2026 (CEO's
+  Option B): no page mentions a $190 offer, a Founder tier, pilot pricing or a
+  discount. `/pre-order/basic-reserve/` and both old deposit thank-you pages
+  301 away.
+- The price line is ruled copy, word for word: "From $12,000 including GST, for
+  the equipment. Installed by your own licensed installer." (booking page).
 
 ## The shared chrome
 

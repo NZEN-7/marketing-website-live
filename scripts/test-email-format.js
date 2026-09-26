@@ -49,6 +49,11 @@ const samples = [
     email: "bare@example.com", phone: "0400000000", address: "1 Test Rd, Testville NSW 2000",
     heating: "Other / not sure", timeline: "12+ months / future planning",
     comments: "", terms: true },
+  // Interest list (27 Sep 2026): unserved state, heating and cooling.
+  { form: "interest-list", first_name: "Alex", last_name: "Sample",
+    email: "alex.list@example.com", phone: "", state: "QLD", postcode: "4000",
+    interest: "Heating and cooling", heating: "Split systems only",
+    timeline: "6-12 months", referral: ["An event or expo"], consent: "on" },
   // Edge case: optional fields left empty must still print their labels.
   { form: "register-interest", first_name: "Empty", last_name: "Comments",
     email: "e@example.com", phone: "0400000000", suburb: "Testville", state: "NSW",
@@ -84,6 +89,22 @@ for (const raw of samples) {
         console.error(`!! FAIL: missing contract line "${label}"`);
         failed++;
       }
+    }
+  }
+  if (data.form === "interest-list") {
+    for (const label of ["First name:", "Last name:", "Email:", "Phone:", "State:",
+                         "Postcode:", "Interested in:", "Current heating/cooling system:",
+                         "Timeline:", "How did you hear about us:",
+                         "Consent to be contacted:", "Tags:"]) {
+      if (body.indexOf(label) === -1) {
+        console.error(`!! FAIL: missing interest-list line "${label}"`);
+        failed++;
+      }
+    }
+    // It must say it is not pipeline, so nobody counts it as a lead.
+    if (body.indexOf("not pipeline") === -1) {
+      console.error("!! FAIL: interest-list email does not say it is not pipeline");
+      failed++;
     }
   }
   if (data.form === "basic-reserve" || data.form === "founder-premium") {
@@ -124,6 +145,13 @@ const mustReject = [
   [{ form: "founder-premium", first_name: "A", last_name: "B", email: "a@b.co",
      phone: "1", heating: "Gas ducted", timeline: "Within 3 months",
      terms: true }, "deposit without address"],
+  // Interest list: joining is consent to be contacted, so it must be given.
+  [{ form: "interest-list", first_name: "A", email: "a@b.co", state: "QLD",
+     postcode: "4000", interest: "Cooling", heating: "x", timeline: "Now" },
+   "interest list without consent"],
+  [{ form: "interest-list", first_name: "A", email: "a@b.co", state: "QLD",
+     interest: "Cooling", heating: "x", timeline: "Now", consent: "on" },
+   "interest list without postcode"],
 ];
 
 console.log("\n" + "=".repeat(72));
@@ -182,6 +210,30 @@ console.log(subBody);
 ].forEach(([label, fn]) => {
   if (fn()) { console.log(`ok    ${label}`); }
   else { console.error(`!! FAIL: subscribe autoresponder ${label}`); failed++; }
+});
+
+/* Interest-list autoresponder. It must promise no price and no date (CEO
+   ruling), and a served-state, heating-only signup is pointed at the quote
+   form, because the ruling routes them to the booking funnel. */
+const il = lead.parseSubmission({ form: "interest-list", first_name: "Alex", email: "j@example.com",
+  state: "NZ", postcode: "6011", interest: "Hot water", heating: "x", timeline: "Just looking", consent: "on" });
+const ilBody = lead.formatAutoresponder(il.data);
+const ilServed = lead.formatAutoresponder(lead.parseSubmission({ form: "interest-list", first_name: "Vic",
+  email: "v@example.com", state: "VIC", postcode: "3122", interest: "Heating", heating: "x",
+  timeline: "Now", consent: "on" }).data);
+console.log("\n" + "-".repeat(72) + "\nINTEREST LIST\n" + "-".repeat(72));
+console.log(ilBody);
+[
+  ["greets the first name",          () => ilBody.indexOf("Hi Alex,") === 0],
+  ["confirms the list",              () => /interest list/.test(ilBody)],
+  ["no price, no date",              () => !/\$|\b20\d\d\b|within \d|weeks|months/i.test(ilBody)],
+  ["honours the unsubscribe promise",() => /unsubscribe/i.test(ilBody)],
+  ["no em dash",                     () => !/—/.test(ilBody + ilServed)],
+  ["served + heating -> quote form", () => ilServed.includes("https://www.thermaldawn.com/pre-order/register-interest/")],
+  ["unserved does not offer a quote",() => !ilBody.includes("/pre-order/register-interest/")],
+].forEach(([label, fn]) => {
+  if (fn()) { console.log(`ok    ${label}`); }
+  else { console.error(`!! FAIL: interest-list autoresponder ${label}`); failed++; }
 });
 
 console.log(`\nLive timestamp renders as: ${lead.formatTimestamp()}`);

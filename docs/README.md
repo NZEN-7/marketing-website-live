@@ -20,9 +20,10 @@ it points to them where they hold the detail.
 ## The one-paragraph version
 
 Pages are static HTML under `/`, `/hydronic/`, `/intelligence/`, `/mission/`,
-`/blog/`, `/contact/`, `/pre-order/` and `/thank-you/`. Each links
+`/blog/`, `/contact/`, `/pre-order/`, `/interest/` and `/thank-you/`. Each links
 `assets/css/style.css` and `assets/js/site.js` (which injects the shared
 header and footer at runtime, so there are no server-side includes). Five forms
+(plus one retired key)
 post JSON to `api/lead.js`, a Vercel function that emails a fixed-layout
 notification to Gmail (the system of record), writes a row to Supabase, and
 for deposits hands the browser to a Stripe Payment Link. Savings figures on the

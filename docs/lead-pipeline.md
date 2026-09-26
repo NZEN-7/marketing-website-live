@@ -2,23 +2,54 @@
 
 A form submission, from the browser to everywhere it ends up.
 
-## The five forms
+## The six form keys
 
 | `data-lead-form` | Page | What happens after |
 |---|---|---|
 | `register-interest` | `/pre-order/register-interest/` | Redirect to `/thank-you/registered/` |
 | `contact` | `/contact/` | Redirect to `/thank-you/` |
 | `subscribe` | newsletter field on `/` | Redirect to `/thank-you/` |
-| `founder-premium` | `/pre-order/booking/` | Lead recorded, then the browser goes to the $990 Stripe Payment Link (`data-stripe-key="founderPremium"`); Stripe returns to `/thank-you/founder-premium/` |
-| `basic-reserve` | `/pre-order/basic-reserve/` (unlinked, noindexed) | Lead recorded, then the $190 Stripe link; returns to `/thank-you/basic-reserve/` |
+| `founder-premium` | `/pre-order/booking/` | Lead recorded as "Booking Deposit ($990)", then the browser goes to the $990 Stripe Payment Link (`data-stripe-key="founderPremium"`); Stripe's after-payment redirect still names `/thank-you/founder-premium/`, which 301s to `/thank-you/booking/` |
+| `interest-list` | `/interest/` | The free register-interest list. Redirect to `/thank-you/interest/`. Not pipeline: see below |
+| `basic-reserve` | none since 27 Sep 2026 | Retired. `/pre-order/basic-reserve/` 301s to `/interest/`. The key stays in `api/lead.js` so a stale cached page still records |
 
 The two deposit form keys are internal names and are older than the offers
 they now carry. Since 24 Sep 2026 the site sells one $990 refundable booking
 deposit, and `/pre-order/founder-premium/` 301s to `/pre-order/booking/`. The
 form key stayed `founder-premium` on purpose: it is what `api/lead.js` maps to
 a label, what the notification email says, and what the CRM parser expects.
-Renaming it would break lead capture silently. The $190 path is kept live but
-hidden at Nick's instruction.
+Renaming it would break lead capture silently.
+
+**Offer tiers retired, 27 Sep 2026** (CEO's Option B, Nick approved): no Basic
+Reserve, no Founder Premium, no discounts. Only the label and tier text in
+`api/lead.js` changed ("Booking Deposit ($990)", "Booking deposit"); every email
+field label is unchanged. The retired pages are kept, unserved, in
+`docs/superseded/2026-09-27-offer-tiers/`.
+
+**The interest list** (`interest-list`) is for heating and cooling, hot water,
+states we don't serve yet (anything but VIC and NSW) and NZ. No payment, no
+promise of price or date. It uses the existing path and the existing `leads`
+columns only, because no new column or table is allowed before the CTO's CRM
+ruling (4 Oct 2026):
+
+| Form field | Email label | `leads` column |
+|---|---|---|
+| first / last name, email, phone | as other forms | as other forms |
+| state | `State` | `state` |
+| postcode | `Postcode` | `suburb` (the form column says it is a postcode row) |
+| interest | `Interested in` | `driver` |
+| current system | `Current heating/cooling system` | `heating_system_type` |
+| timeframe | `Timeline` | `timeline` |
+| how they heard | `How did you hear about us` | `referral_source` |
+| consent (required) | `Consent to be contacted` | `newsletter_opt_in` |
+
+Its CRM tags (`interest:heating-cooling`, `interest:hot-water`,
+`interest:unserved-state`, `interest:nz`, plus `source:website`) are computed by
+`listTags()` from state and interest, printed in the email, and re-derivable
+from the row, so nothing stores them yet. A served-state, heating-only signup
+gets no interest tag: the email tells Sales to treat it as a normal lead, and
+the page and autoresponder point them at the quote form. **Lead and pipeline
+counts must exclude `form = 'Interest List'`.**
 
 ## Step by step
 

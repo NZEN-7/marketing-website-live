@@ -32,7 +32,8 @@ var CFG = {
   // -label: keeps processed mail out of the next run.
   QUERY: 'from:(nickz@thermaldawn.com OR noreply@thermaldawn.com) ' +
          'subject:("New website lead" OR "New website message" OR ' +
-         '"New subscriber" OR "New deposit intent") ' +
+         '"New subscriber" OR "New deposit intent" OR ' +
+         '"New interest-list signup") ' +
          '-label:' + 'crm-captured',
 
   CAPTURED_LABEL: 'crm-captured',   // applied after a successful write
@@ -200,15 +201,17 @@ function buildRow_(d, msg) {
     first, last,
     String(d['Email'] || '').toLowerCase(),
     d['Phone'] || '',
-    d['Suburb'] || '',
+    // Interest-list rows have a postcode, not a suburb; no new column
+    // before the CTO's CRM ruling. form = "Interest List" says which.
+    d['Suburb'] || d['Postcode'] || '',
     d['State'] || '',
     d['Solar'] || '',
     d['Battery'] || '',
     d['Current heating/cooling system'] || '',
-    d["What's driving interest"] || '',
+    d["What's driving interest"] || d['Interested in'] || '',
     d['Timeline'] || '',
     d['Comments'] || '',
-    d['Newsletter opt-in'] || '',
+    d['Newsletter opt-in'] || d['Consent to be contacted'] || '',
     'New',                                 // triage_status
     '', '', '', '', '', '', ''             // agent columns, filled on triage
   ].map(csvCell_).join(',');

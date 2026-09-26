@@ -62,7 +62,7 @@ it. Keys: `totalSavedAud`, `gasAvoidedMj`, `co2AvoidedKg` for the fleet;
 `fi:savedAud`, `fi:gasMj`, `fi:co2Kg` for the first install. Honours
 `prefers-reduced-motion`.
 
-**`api/lead.js`.** One function behind all five forms. Validates, screens
+**`api/lead.js`.** One function behind all the forms (five live, one retired key). Validates, screens
 bots, emails a fixed-layout notification, writes a Supabase row, sends an
 autoresponder. See [lead-pipeline.md](lead-pipeline.md).
 

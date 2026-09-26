@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Register Your Interest | Thermal Dawn</title>
+<meta name="description" content="Not gas hydronic, or not in Victoria or New South Wales? Join the Thermal Dawn interest list for heating and cooling, hot water, other states and New Zealand. No payment, no commitment.">
+<link rel="canonical" href="https://www.thermaldawn.com/interest/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Register Your Interest | Thermal Dawn">
+<meta property="og:description" content="Not gas hydronic, or not in Victoria or New South Wales? Join the Thermal Dawn interest list for heating and cooling, hot water, other states and New Zealand. No payment, no commitment.">
+<meta property="og:image" content="https://www.thermaldawn.com/assets/img/og-image.png">
+<meta property="og:url" content="https://www.thermaldawn.com/interest/">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/assets/img/favicon.svg?v=8" type="image/svg+xml">
+<link rel="icon" href="/assets/img/favicon-32.png?v=8" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png?v=8">
+<link rel="preload" href="/assets/fonts/Montserrat-ExtraBold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/Montserrat-Regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/css/style.css?v=47">
+</head>
+<body class="dark">
+<header id="site-header"></header>
+<main>
+  <!-- The free register-interest list (CEO Option B, item 3; Nick approved
+       27 Sep 2026). For heating and cooling, hot water, states we don't serve
+       yet, and NZ. No payment, no promise of price or date: it's the demand
+       signal, not pipeline. Posts form "interest-list" to api/lead.js, which
+       computes the interest:* tags. Not the same page as
+       /pre-order/register-interest/, which is the quote form for homes we
+       can serve today and keeps that URL for the email contract. -->
+
+  <!-- 1. HERO -->
+  <section class="hero hero--plain hero--center">
+    <div class="hero__inner">
+      <div class="wrap">
+        <h1>Register Your Interest</h1>
+        <p class="subhead">Today, Thermal Dawn works with gas hydronic homes in Victoria and New South Wales. If your home is different, say ducted or split-system heating and cooling, or hot water on its own, or you're in another state or New Zealand, join the list and we'll tell you when we can help.</p>
+        <p class="supporting">No payment. No commitment. We won't give you a price or a date until we can stand behind it.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. THE LIST (served homes are pointed at the quote form first) -->
+  <section class="section section--paper2">
+    <div class="wrap narrow">
+      <h2>Join the list</h2>
+      <div class="callout callout--info mb-6">
+        <p class="mb0"><strong>Gas hydronic heating in Victoria or New South Wales?</strong> You don't need the list. <a href="/pre-order/register-interest/">Request a quote</a> for your home, or <a href="/pre-order/booking/">book your system</a>.</p>
+      </div>
+      <form class="form" data-lead-form="interest-list" data-redirect="/thank-you/interest/">
+        <p class="hp"><label>Don't fill this out: <input name="website" tabindex="-1" autocomplete="off"></label></p>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="il-first">First name <span class="req">*</span></label>
+            <input id="il-first" name="first_name" autocomplete="given-name" required>
+          </div>
+          <div class="field">
+            <label for="il-last">Last name</label>
+            <input id="il-last" name="last_name" autocomplete="family-name">
+          </div>
+        </div>
+        <div class="field">
+          <label for="il-email">Email <span class="req">*</span></label>
+          <input id="il-email" name="email" type="email" autocomplete="email" required>
+        </div>
+        <div class="field">
+          <label for="il-phone">Phone <span class="optional">Optional</span></label>
+          <input id="il-phone" name="phone" type="tel" autocomplete="tel">
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="il-state">State <span class="req">*</span></label>
+            <select id="il-state" name="state" required>
+              <option value="">Please select…</option>
+              <option value="VIC">VIC</option>
+              <option value="NSW">NSW</option>
+              <option value="QLD">QLD</option>
+              <option value="SA">SA</option>
+              <option value="WA">WA</option>
+              <option value="TAS">TAS</option>
+              <option value="ACT">ACT</option>
+              <option value="NT">NT</option>
+              <option value="NZ">New Zealand</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="il-postcode">Postcode <span class="req">*</span></label>
+            <input id="il-postcode" name="postcode" autocomplete="postal-code" inputmode="numeric" maxlength="10" required>
+          </div>
+        </div>
+
+        <fieldset class="field field--group">
+          <legend>What are you interested in? <span class="req">*</span></legend>
+          <div class="choices">
+          <label class="choice"><input type="radio" name="interest" value="Heating" required> Heating</label>
+          <label class="choice"><input type="radio" name="interest" value="Heating and cooling"> Heating and cooling</label>
+          <label class="choice"><input type="radio" name="interest" value="Cooling"> Cooling</label>
+          <label class="choice"><input type="radio" name="interest" value="Hot water"> Hot water</label>
+          </div>
+        </fieldset>
+
+        <!-- Shown by the script below when the answers put someone in the
+             booking funnel rather than the list (the CEO's routing rule).
+             They can still join; the email tells Sales to treat it as a lead. -->
+        <div class="callout callout--info" data-served-hint hidden>
+          <p class="mb0"><strong>Good news: we already work in your area.</strong> If your home has gas hydronic heating, <a href="/pre-order/register-interest/">request a quote</a> instead and we'll come back to you with a written proposal.</p>
+        </div>
+
+        <fieldset class="field field--group">
+          <legend>Current heating/cooling system <span class="req">*</span></legend>
+          <div class="choices">
+          <label class="choice"><input type="radio" name="heating" value="Gas hydronic - radiators or underfloor" required> Gas hydronic, radiators or underfloor</label>
+          <label class="choice"><input type="radio" name="heating" value="Gas ducted"> Gas ducted</label>
+          <label class="choice"><input type="radio" name="heating" value="Gas wall heaters / space heaters"> Gas wall heaters / space heaters</label>
+          <label class="choice"><input type="radio" name="heating" value="Ducted reverse cycle (electric)"> Ducted reverse cycle (electric)</label>
+          <label class="choice"><input type="radio" name="heating" value="Split systems only"> Split systems only</label>
+          <label class="choice"><input type="radio" name="heating" value="No heating/cooling system"> No heating/cooling system</label>
+          <label class="choice"><input type="radio" name="heating" value="Other / not sure"> Other / not sure</label>
+          </div>
+        </fieldset>
+
+        <fieldset class="field field--group">
+          <legend>When are you thinking of acting? <span class="req">*</span></legend>
+          <div class="choices">
+          <label class="choice"><input type="radio" name="timeline" value="Now" required> Now</label>
+          <label class="choice"><input type="radio" name="timeline" value="6-12 months"> In 6 to 12 months</label>
+          <label class="choice"><input type="radio" name="timeline" value="Just looking"> Just looking</label>
+          </div>
+        </fieldset>
+
+        <fieldset class="field field--group">
+          <legend>How did you hear about us? <span class="optional">Optional</span></legend>
+          <div class="choices">
+          <label class="choice"><input type="checkbox" name="referral" value="Google or web search"> Google or web search</label>
+          <label class="choice"><input type="checkbox" name="referral" value="Facebook or Instagram"> Facebook or Instagram</label>
+          <label class="choice"><input type="checkbox" name="referral" value="Friend, family or neighbour"> Friend, family or neighbour</label>
+          <label class="choice"><input type="checkbox" name="referral" value="My plumber, electrician or builder"> My plumber, electrician or builder</label>
+          <label class="choice"><input type="checkbox" name="referral" value="An event or expo"> An event or expo</label>
+          <label class="choice"><input type="checkbox" name="referral" value="News, podcast or article"> News, podcast or article</label>
+          <label class="choice"><input type="checkbox" name="referral" value="Other"> Other</label>
+          <input class="choice__other" name="referral_other" data-other-for="referral" aria-label="Tell us how you heard about us" placeholder="Tell us more" hidden>
+          </div>
+        </fieldset>
+
+        <div class="field field--check">
+          <input type="checkbox" id="il-consent" name="consent" data-single required>
+          <label for="il-consent">Thermal Dawn can contact me about this, and send me occasional updates. Unsubscribe any time. <span class="req">*</span></label>
+        </div>
+
+        <p class="form-error" data-form-error hidden></p>
+        <button class="btn btn--primary" type="submit">Join the List <span class="arrow"></span></button>
+      </form>
+    </div>
+  </section>
+
+</main>
+<footer id="site-footer" class="site-footer"></footer>
+<script>
+/* Served-state hint. SERVED must match SERVED_STATES in api/lead.js, which
+   decides the tags; this only decides whether to show the hint. */
+(function () {
+  var SERVED = ["VIC", "NSW"];
+  var form = document.querySelector('form[data-lead-form="interest-list"]');
+  if (!form) return;
+  var hint = form.querySelector("[data-served-hint]");
+  function sync() {
+    var state = form.elements.state.value;
+    var pick = form.querySelector('input[name="interest"]:checked');
+    hint.hidden = !(pick && pick.value === "Heating" && SERVED.indexOf(state) !== -1);
+  }
+  form.addEventListener("change", sync);
+  sync();
+})();
+</script>
+<script src="/assets/js/config.js?v=9" defer></script>
+<script src="/assets/js/site.js?v=16" defer></script>
+<script src="/assets/js/forms.js?v=10" defer></script>
+</body>
+</html>

@@ -33,8 +33,9 @@ to be exported.
   touching `formatNotification()`**: it feeds real generated emails through the
   real CRM parser (`scripts/apps-script/`) and fails on any label drift. When
   the parser changes, re-paste it into the Apps Script project by hand, nothing
-  syncs it (`scripts/apps-script/SETUP.md`). All five forms now post here,
-  deposits included: they write the lead, then hand off to the Stripe Payment
+  syncs it (`scripts/apps-script/SETUP.md`). All forms post here (five live
+  since the interest list, 27 Sep 2026; `basic-reserve` retired), deposits
+  included: they write the lead, then hand off to the Stripe Payment
   Links in `assets/js/config.js`.
 - **Every submission also writes a Supabase row** (`recordLead`, project
   **CRM** `skyequfcoejlhzbyipwt`, `ap-southeast-2`). The email is still sent

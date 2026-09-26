@@ -107,6 +107,31 @@ check(
   }
 );
 
+check(
+  "interest-list, as api/lead.js writes it",
+  lead.formatNotification(lead.parseSubmission({
+    form: "interest-list", first_name: "Alex", last_name: "Sample",
+    email: "alex.list@example.com", phone: "+61400000004", state: "QLD", postcode: "4000",
+    interest: "Heating and cooling", heating: "Split systems only",
+    timeline: "6-12 months", referral: ["An event or expo"], consent: "on",
+  }).data, stamp),
+  {
+    "Form": "Interest List",
+    "First name": "Alex",
+    "Last name": "Sample",
+    "Email": "alex.list@example.com",
+    "Phone": "+61400000004",
+    "State": "QLD",
+    "Postcode": "4000",
+    "Interested in": "Heating and cooling",
+    "Current heating/cooling system": "Split systems only",
+    "Timeline": "6-12 months",
+    "How did you hear about us": "An event or expo",
+    "Consent to be contacted": "Yes",
+    "Tags": "interest:heating-cooling, interest:unserved-state, source:website",
+  }
+);
+
 /* ---- a real Wix body: one run-on line, and List(...) ---- */
 
 check(
@@ -138,7 +163,7 @@ check(
 /* ---- every section header lead.js emits must be known to the parser ---- */
 
 const allForms = ["register-interest", "contact", "subscribe",
-                  "basic-reserve", "founder-premium"];
+                  "basic-reserve", "founder-premium", "interest-list"];
 const seenHeaders = new Set();
 allForms.forEach((f) => {
   const body = lead.formatNotification({
@@ -182,12 +207,26 @@ if (unknown.length) {
 // stops lead capture with no error, which is the failure this file exists for.
 {
   const gs = require("fs").readFileSync(require("path").join(__dirname, "apps-script", "lead-capture.gs"), "utf8");
-  const q = (gs.match(/QUERY:\s*'([^']*)'/) || [])[1] || "";
+  // QUERY is several '...' pieces joined with +; read them all, not just the first.
+  const qExpr = (gs.match(/QUERY:([\s\S]*?),\s*\n\s*CAPTURED_LABEL/) || [])[1] || "";
+  const q = (qExpr.match(/'[^']*'/g) || []).map((p) => p.slice(1, -1)).join("");
   if (q.includes("nickz@thermaldawn.com") && q.includes("noreply@thermaldawn.com")) {
     console.log("ok    capture query accepts both senders (nickz@ and noreply@)");
   } else {
     console.log("FAIL  capture query must list both nickz@ and noreply@: " + q);
     failures++;
+  }
+  // Every subject api/lead.js can send must be in the query, or that form's
+  // emails are never captured. Checked against the real subjects.
+  const subjects = ["register-interest", "contact", "subscribe", "founder-premium", "interest-list"]
+    .map((f) => lead.formatSubject({ form: f, first_name: "A", last_name: "B", name: "A B",
+                                      email: "a@b.c", heating: "h", tier: "t", interest: "i", state: "s" }));
+  const missing = subjects.filter((s) => !q.includes('"' + s.split(":")[0] + '"'));
+  if (missing.length) {
+    console.log("FAIL  capture query misses these subjects: " + missing.join(" | "));
+    failures++;
+  } else {
+    console.log(`ok    capture query covers all ${subjects.length} subject prefixes`);
   }
 }
 

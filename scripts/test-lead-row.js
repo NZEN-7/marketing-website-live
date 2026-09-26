@@ -12,7 +12,7 @@
 */
 "use strict";
 
-const { parseSubmission, leadRow, supabaseAuth } = require("../api/lead.js");
+const { parseSubmission, leadRow, supabaseAuth, listTags } = require("../api/lead.js");
 
 /* Every column on public.leads that leadRow is allowed to write. Captured half
    only: the triage half is the agent's and must stay untouched at capture. */
@@ -43,6 +43,17 @@ const bodies = {
     phone: "0400000000", address: "12 Example St, Testville VIC 3000",
     heating: "Gas hydronic", timeline: "Within 3 months", terms: true,
   },
+  "founder-premium": {
+    form: "founder-premium", first_name: "Casey", last_name: "Example", email: "c@example.com",
+    phone: "0400000000", address: "1 Example Rd, Testville NSW 2000",
+    heating: "Gas hydronic", timeline: "Within 3 months", terms: "on",
+  },
+  // Interest list: no new column, so it must land in existing ones.
+  "interest-list": {
+    form: "interest-list", first_name: "Alex", email: "j@example.com",
+    state: "QLD", postcode: "4000", interest: "Heating and cooling",
+    heating: "Split systems only", timeline: "6-12 months", consent: "on",
+  },
 };
 
 let failed = 0;
@@ -71,6 +82,9 @@ check("register-interest label", rows["register-interest"].form === "Homeowner R
 check("contact label",           rows.contact.form === "Contact Form", rows.contact.form);
 check("subscribe label",         rows.subscribe.form === "Subscribe Form", rows.subscribe.form);
 check("deposit label",           rows["basic-reserve"].form === "Basic Reserve ($190 deposit)", rows["basic-reserve"].form);
+// Option B (27 Sep 2026): one booking deposit, no tier name. Key unchanged.
+check("booking deposit label",   rows["founder-premium"].form === "Booking Deposit ($990)", rows["founder-premium"].form);
+check("interest-list label",     rows["interest-list"].form === "Interest List", rows["interest-list"].form);
 
 // 3. Consent. NULL where the form did not ask; never false.
 check("opt-in true when ticked",   rows.subscribe.newsletter_opt_in === true);
@@ -78,6 +92,7 @@ check("opt-in false when offered but unticked", rows["subscribe-nooptin"].newsle
 check("opt-in NULL on contact",    rows.contact.newsletter_opt_in === null);
 check("opt-in true on register",   rows["register-interest"].newsletter_opt_in === true);
 check("opt-in NULL on deposit",    rows["basic-reserve"].newsletter_opt_in === null);
+check("interest-list consent -> opt-in", rows["interest-list"].newsletter_opt_in === true);
 
 // 4. Empty must be NULL, never the email layer's "-".
 const dashes = Object.entries(rows).flatMap(([k, r]) =>
@@ -96,6 +111,21 @@ check("referral NULL when skipped", rows.contact.referral_source === null, rows.
 check("deposit address captured", rows["basic-reserve"].address === "12 Example St, Testville VIC 3000");
 check("deposit payment_ref captured", /^td-/.test(rows["basic-reserve"].payment_ref || ""));
 check("non-deposit has NULL payment_ref", rows.contact.payment_ref === null);
+
+// 5b. Interest list: existing columns only, tags re-derivable from the row.
+const il = rows["interest-list"];
+check("interest-list postcode -> suburb",  il.suburb === "4000", il.suburb);
+check("interest-list interest -> driver",  il.driver === "Heating and cooling", il.driver);
+check("interest-list current system",      il.heating_system_type === "Split systems only");
+check("interest-list timeframe -> timeline", il.timeline === "6-12 months", il.timeline);
+check("interest-list has no payment_ref",  il.payment_ref === null);
+const T = (state, interest) => listTags({ state, interest }).join(" ");
+check("tag: unserved state + heating-cooling", T("QLD", "Heating and cooling") === "interest:heating-cooling interest:unserved-state", T("QLD", "Heating and cooling"));
+check("tag: NZ is nz, not unserved-state",     T("NZ", "Heating") === "interest:nz", T("NZ", "Heating"));
+check("tag: hot water in a served state",      T("VIC", "Hot water") === "interest:hot-water", T("VIC", "Hot water"));
+check("tag: cooling counts as heating-cooling",T("NSW", "Cooling") === "interest:heating-cooling", T("NSW", "Cooling"));
+check("tag: served + heating only -> none (booking funnel)", T("VIC", "Heating") === "", T("VIC", "Heating"));
+check("interest list without consent rejected", !!parseSubmission({ ...bodies["interest-list"], consent: "" }).error);
 
 // 6. Provenance.
 check("source_site is freevolt", Object.values(rows).every((r) => r.source_site === "freevolt"));

@@ -74,7 +74,9 @@ const FORMS = {
   },
   contact: { label: "Contact Form", required: ["name", "email"], requiredLists: [] },
   subscribe: { label: "Subscribe Form", required: ["email"], requiredLists: [] },
-  // Deposit tiers. These record INTENT: the email is sent immediately before
+  // Deposit forms. "basic-reserve" is retired (CEO Option B, 27 Sep 2026): its
+  // page now redirects to /interest/, so nothing posts it. Kept so a stale,
+  // cached copy of the old page still records rather than erroring. These record INTENT: the email is sent immediately before
   // the visitor is handed to Stripe, so an abandoned checkout still leaves a
   // qualified lead. Stripe remains the source of truth for money.
   "basic-reserve": {
@@ -85,15 +87,53 @@ const FORMS = {
     requiredLists: [],
     requiresTerms: true,
   },
+  // The key stays "founder-premium" (the booking page, forms.js and the Stripe
+  // config all name it), but the offer is no longer a tier: one $990 booking
+  // deposit since the CEO's Option B (Nick, 27 Sep 2026). Only the label and
+  // tier TEXT changed, as ruled; the email field labels did not, so the CRM
+  // parser is unaffected. Older rows say "Founder Premium ($990 deposit)".
   "founder-premium": {
-    label: "Founder Premium ($990 deposit)",
-    tier: "Founder Premium",
+    label: "Booking Deposit ($990)",
+    tier: "Booking deposit",
     amount: "$990",
     required: ["first_name", "last_name", "email", "phone", "address", "heating", "timeline"],
     requiredLists: [],
     requiresTerms: true,
   },
+  // Free register-interest list (CEO Option B, item 4): heating and cooling,
+  // hot water, states we don't serve yet, and NZ. No payment, no promise of
+  // price or date. It is a demand signal, NOT pipeline: the form label is its
+  // own value so lead and pipeline counts can exclude it. No new table or
+  // column until the CTO's CRM ruling (4 Oct): it writes the existing leads
+  // columns, and its interest:* tags are computed from state + interest, so
+  // they can be re-derived from the row at any time (listTags below).
+  "interest-list": {
+    label: "Interest List",
+    required: ["first_name", "email", "state", "postcode", "interest", "heating", "timeline"],
+    requiredLists: [],
+    requiresConsent: true,
+  },
 };
+
+/* States we install in today. Source: the blog's service-area line ("work
+   primarily in Victoria and New South Wales"). Change here and in
+   /interest/'s SERVED list together. */
+const SERVED_STATES = ["VIC", "NSW"];
+
+/** CRM tags for an interest-list signup (CEO ruling, item 4). Pure, so the
+    tags can be recomputed from a stored row. Empty when the person is in a
+    served state and wants heating only: the ruling sends them to the booking
+    funnel, not the list, so Sales treats them as an ordinary lead. */
+function listTags(d) {
+  const tags = [];
+  const interest = String(d.interest || "").toLowerCase();
+  const state = String(d.state || "").toUpperCase();
+  if (interest === "heating and cooling" || interest === "cooling") tags.push("interest:heating-cooling");
+  if (interest === "hot water") tags.push("interest:hot-water");
+  if (state === "NZ") tags.push("interest:nz");
+  else if (state && SERVED_STATES.indexOf(state) === -1) tags.push("interest:unserved-state");
+  return tags;
+}
 
 const isDeposit = (form) => form === "basic-reserve" || form === "founder-premium";
 
@@ -163,13 +203,17 @@ function leadRow(d) {
     last_name: d.last_name || null,
     email: d.email || null,
     phone: d.phone || null,
-    suburb: d.suburb || null,
+    // Interest-list rows carry a postcode here: the list asks for state and
+    // postcode, not suburb, and no column is added before the CRM ruling.
+    // form = "Interest List" says which it is.
+    suburb: d.suburb || d.postcode || null,
     state: d.state || null,
     address: d.address || null,
     solar: d.solar || null,
     battery: d.battery || null,
     heating_system_type: d.heating || null,
-    driver: joinForDb(d.drivers),
+    // Interest-list: what they want (heating and cooling, hot water, ...).
+    driver: joinForDb(d.drivers) || d.interest || null,
     // NULL when the question was skipped. It is optional, so an empty
     // answer is not a claim that they came from nowhere.
     referral_source: joinForDb(d.referral),
@@ -183,7 +227,9 @@ function leadRow(d) {
     newsletter_opt_in:
       d.form === "subscribe" || d.form === "register-interest"
         ? !!d.optin
-        : null,
+        : d.form === "interest-list"
+          ? !!d.consent   // a required tickbox: consent to be contacted
+          : null,
     payment_ref: d.ref || null,
   };
 }
@@ -255,6 +301,21 @@ function parseSubmission(body) {
       terms: body.terms === true || body.terms === "true" || body.terms === "on",
       ref: makeRef(),
     });
+  } else if (form === "interest-list") {
+    Object.assign(data, {
+      first_name: asText(body.first_name, 120),
+      last_name: asText(body.last_name, 120),
+      email: asText(body.email, 200),
+      phone: asText(body.phone, 60),
+      state: asText(body.state, 40),
+      postcode: asText(body.postcode, 20),
+      interest: asText(body.interest, 60),
+      heating: asText(body.heating, 120),
+      timeline: asText(body.timeline, 120),
+      referral: asList(body.referral),
+      consent: body.consent === true || body.consent === "true" || body.consent === "on",
+    });
+    data.tags = listTags(data);
   } else if (form === "contact") {
     Object.assign(data, {
       name: asText(body.name, 200),
@@ -276,6 +337,9 @@ function parseSubmission(body) {
   if (spec.requiresTerms && data.terms !== true) {
     return { error: "The pre-order terms must be accepted" };
   }
+  if (spec.requiresConsent && data.consent !== true) {
+    return { error: "Consent to be contacted is required to join the list" };
+  }
   if (!isEmail(data.email)) return { error: "Invalid email address" };
 
   return { data };
@@ -285,6 +349,44 @@ function parseSubmission(body) {
 
 function formatNotification(d, stamp) {
   const when = stamp || formatTimestamp();
+
+  // Interest list. New labels (Postcode, Interested in, Consent to be
+  // contacted, Tags) and sections (INTEREST, LIST) are in lead-parser.gs;
+  // test:parser round-trips this body. The NOTE is prose, not a label.
+  if (d.form === "interest-list") {
+    const tags = d.tags && d.tags.length ? d.tags : [];
+    return [
+      "Hi Thermal Dawn Team,",
+      "",
+      `Form: ${d.formLabel}`,
+      `Submission Time: ${when}`,
+      "",
+      tags.length
+        ? "NOTE: Register-interest list, not pipeline. Keep it out of lead counts."
+        : "NOTE: Served state, heating only. Treat as a normal lead and invite them to book.",
+      "",
+      "CONTACT",
+      `First name: ${orDash(d.first_name)}`,
+      `Last name: ${orDash(d.last_name)}`,
+      `Email: ${orDash(d.email)}`,
+      `Phone: ${orDash(d.phone)}`,
+      "",
+      "LOCATION",
+      `State: ${orDash(d.state)}`,
+      `Postcode: ${orDash(d.postcode)}`,
+      "",
+      "INTEREST",
+      `Interested in: ${orDash(d.interest)}`,
+      `Current heating/cooling system: ${orDash(d.heating)}`,
+      `Timeline: ${orDash(d.timeline)}`,
+      `How did you hear about us: ${joinList(d.referral)}`,
+      `Consent to be contacted: ${d.consent ? "Yes" : "No"}`,
+      "",
+      "LIST",
+      `Tags: ${joinList(tags.concat(["source:website"]))}`,
+      "",
+    ].join("\n");
+  }
 
   if (d.form === "register-interest") {
     return [
@@ -390,6 +492,11 @@ function formatSubject(d) {
       `New website lead: ${d.first_name} ${d.last_name} · ${d.heating} · ${d.email}`
     );
   }
+  if (d.form === "interest-list") {
+    return stripHeader(
+      `New interest-list signup: ${[d.first_name, d.last_name].filter(Boolean).join(" ")} · ${d.interest} · ${d.state} · ${d.email}`
+    );
+  }
   if (isDeposit(d.form)) {
     return stripHeader(
       `New deposit intent: ${d.first_name} ${d.last_name} · ${d.tier} · ${d.email}`
@@ -405,7 +512,7 @@ function formatSubject(d) {
    no em dashes, no sentence opening with "I", contractions, plain text. */
 // Deposits are excluded on purpose: Stripe sends those receipts, and a second
 // "thanks" from us reads as a duplicate confirmation of a payment.
-const AUTORESPOND = { "register-interest": true, contact: true, subscribe: true };
+const AUTORESPOND = { "register-interest": true, contact: true, subscribe: true, "interest-list": true };
 
 /** First name only, so "Robin Example" greets as "Robin". Falls back to "there". */
 function greetingName(d) {
@@ -436,6 +543,33 @@ function formatAutoresponder(d) {
       // The subscribe form now promises "Unsubscribe any time", and until there
       // is a mailing tool with a real unsubscribe link, this is that mechanism.
       'Want out? Reply with "unsubscribe" and I will take you off the list.',
+      "",
+    ].join("\n");
+  }
+
+  // Interest list: confirm what they joined, and promise nothing about price
+  // or date (CEO ruling, item 1). A served-state, heating-only signup is sent
+  // to the quote form instead, because that is where the ruling routes them.
+  if (d.form === "interest-list") {
+    const served = !(d.tags && d.tags.length);
+    return [
+      `Hi ${greetingName(d)},`,
+      "",
+      served
+        ? "Thanks for registering. Good news: we already install hydronic heating in your area."
+        : "Thanks for registering. You're on the Thermal Dawn interest list.",
+      "",
+      served
+        ? "To get a written quote for your home, fill in the short form here:"
+        : "We don't offer this in your area yet. When we do, you'll hear from us first.",
+      served ? `${SITE}/pre-order/register-interest/` : "There's nothing to pay and nothing you've committed to.",
+      "",
+      `Questions in the meantime? Just reply, or email ${NOTIFY_TO}.`,
+      "",
+      "Nick",
+      "Thermal Dawn",
+      "",
+      'Want off the list? Reply with "unsubscribe" and I will take you off it.',
       "",
     ].join("\n");
   }
@@ -545,7 +679,9 @@ module.exports = async function handler(req, res) {
           replyTo: NOTIFY_TO,
           subject: data.form === "subscribe"
             ? "You're subscribed to Thermal Dawn updates"
-            : "Thanks For Getting in Touch",
+            : data.form === "interest-list"
+              ? "You're on the Thermal Dawn interest list"
+              : "Thanks For Getting in Touch",
           text: formatAutoresponder(data),
         });
       } catch (autoErr) {
@@ -569,3 +705,5 @@ module.exports.formatTimestamp = formatTimestamp;
 module.exports.parseSubmission = parseSubmission;
 module.exports.leadRow = leadRow;
 module.exports.supabaseAuth = supabaseAuth;
+module.exports.listTags = listTags;
+module.exports.SERVED_STATES = SERVED_STATES;

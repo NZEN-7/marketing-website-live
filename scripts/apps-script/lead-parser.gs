@@ -25,7 +25,9 @@ var LEAD_LABELS = [
   'Suburb', 'State', 'Solar', 'Battery', 'Current heating/cooling system',
   "What's driving interest", 'Timeline', 'Comments',
   'How did you hear about us', 'Newsletter opt-in',
-  'Tier', 'Name'
+  'Tier', 'Name',
+  // Interest list (27 Sep 2026)
+  'Postcode', 'Interested in', 'Consent to be contacted', 'Tags'
 ];
 
 /* Section headers sit inline in the run-on body. Without stripping them they
@@ -33,7 +35,7 @@ var LEAD_LABELS = [
    form parsed as "radcliffesimon@gmail.com MESSAGE -" until MESSAGE was added
    here, found by test-lead-parser.js rather than in production.
 
-   This must list EVERY header api/lead.js emits, across all five forms. The
+   This must list EVERY header api/lead.js emits, across all six forms. The
    test asserts exactly that, so adding a form with a new section header fails
    there instead of silently corrupting the field before it.
 
@@ -41,7 +43,8 @@ var LEAD_LABELS = [
    "State: NSW" would lose their values. */
 var LEAD_SECTIONS = [
   'CONTACT', 'LOCATION', 'PROPERTY', 'CURRENT SETUP',
-  'MOTIVATION AND TIMING', 'CONTEXT', 'MESSAGE', 'DEPOSIT'
+  'MOTIVATION AND TIMING', 'CONTEXT', 'MESSAGE', 'DEPOSIT',
+  'INTEREST', 'LIST'
 ];
 
 function leadEsc_(s) {
