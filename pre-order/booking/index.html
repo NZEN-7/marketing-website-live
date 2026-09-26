@@ -44,7 +44,7 @@
         <li><strong>You pay the $990 booking deposit</strong>: that is all that is needed to hold a place in the build schedule.</li>
         <li><strong>We assess your home</strong> from your gas bills, your heating layout, and a site visit or photos.</li>
         <li><strong>We send you a written proposal</strong> with your system, your price and expected timing. Nothing more to pay until you accept it.</li>
-        <li><strong>You accept, and your deposit comes off the price.</strong> $3,000 is due when we confirm your system is in a production order, and the balance on commissioning. Changed your mind before then? The deposit is refunded in full.</li>
+        <li><strong>You accept, and your deposit comes off the price.</strong> $3,000 is due when we confirm your system is in a production order, and the balance on commissioning or 14 days after delivery, whichever is earlier. Changed your mind before then? The deposit is refunded in full.</li>
         <li><strong>Delivery and commissioning</strong>: your licensed installer does the plumbing and electrical, and we commission and monitor the system remotely.</li>
       </ol>
     </div>
@@ -62,7 +62,7 @@
           <li><strong>Refunded in full</strong> if your home isn't suitable, if we can't supply within the timeframe we gave you, or if we withdraw the offer.</li>
           <li><strong>Credited against your system price</strong> when you accept your proposal.</li>
         </ul>
-        <p class="mb0">Systems start from $12,000 including GST for the equipment. Your price depends on your home and is set out in your proposal. The full terms are in the <a href="/pre-order/terms/" data-terms-link>Booking Terms and Conditions</a>.</p>
+        <p class="mb0"><strong>From $12,000 including GST, for the equipment. Installed by your own licensed installer.</strong> Your price depends on your home and is set out in your proposal. The full terms are in the <a href="/pre-order/terms/" data-terms-link>Booking Terms and Conditions</a>.</p>
       </div>
     </div>
   </section>
@@ -77,9 +77,12 @@
            CLAUDE.md). The page was /pre-order/founder-premium/ until 24 Sep
            2026, when the $990 became the single booking deposit; renaming the
            key would silently break lead capture, so only the URL and the copy
-           moved. data-redirect must also keep matching the after-payment
-           redirect configured in the Stripe dashboard. -->
-      <form class="form" data-lead-form="founder-premium" data-stripe-key="founderPremium" data-redirect="/thank-you/founder-premium/">
+           moved. The label the CRM sees is "Booking Deposit ($990)" since the
+           CEO's Option B (27 Sep 2026); the key did not change. data-redirect
+           is the no-Stripe fallback; the Stripe dashboard's after-payment
+           redirect still names /thank-you/founder-premium/, which 301s to
+           /thank-you/booking/ until Nick repoints it. -->
+      <form class="form" data-lead-form="founder-premium" data-stripe-key="founderPremium" data-redirect="/thank-you/booking/">
         <p class="hp"><label>Don't fill this out: <input name="website" tabindex="-1" autocomplete="off"></label></p>
 
         <div class="field">

@@ -96,7 +96,7 @@
     },
     {
       "source": "/pre-order-form/basic-reserve",
-      "destination": "/pre-order/basic-reserve/",
+      "destination": "/interest/",
       "permanent": true
     },
     {
@@ -107,6 +107,21 @@
     {
       "source": "/pre-order/founder-premium",
       "destination": "/pre-order/booking/",
+      "permanent": true
+    },
+    {
+      "source": "/pre-order/basic-reserve",
+      "destination": "/interest/",
+      "permanent": true
+    },
+    {
+      "source": "/thank-you/founder-premium",
+      "destination": "/thank-you/booking/",
+      "permanent": true
+    },
+    {
+      "source": "/thank-you/basic-reserve",
+      "destination": "/thank-you/booking/",
       "permanent": true
     },
     {
@@ -226,7 +241,7 @@
     },
     {
       "source": "/pre-order-form/basic-reserve/",
-      "destination": "/pre-order/basic-reserve/",
+      "destination": "/interest/",
       "permanent": true
     },
     {
@@ -237,6 +252,21 @@
     {
       "source": "/pre-order/founder-premium/",
       "destination": "/pre-order/booking/",
+      "permanent": true
+    },
+    {
+      "source": "/pre-order/basic-reserve/",
+      "destination": "/interest/",
+      "permanent": true
+    },
+    {
+      "source": "/thank-you/founder-premium/",
+      "destination": "/thank-you/booking/",
+      "permanent": true
+    },
+    {
+      "source": "/thank-you/basic-reserve/",
+      "destination": "/thank-you/booking/",
       "permanent": true
     },
     {

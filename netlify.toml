@@ -136,7 +136,7 @@
   status = 301
 [[redirects]]
   from = "/pre-order-form/basic-reserve"
-  to = "/pre-order/basic-reserve/"
+  to = "/interest/"
   status = 301
 [[redirects]]
   from = "/pre-order-form/founder-premium"
@@ -149,6 +149,32 @@
 [[redirects]]
   from = "/pre-order/founder-premium/"
   to = "/pre-order/booking/"
+  status = 301
+# Offer tiers retired 27 Sep 2026 (CEO Option B): Basic Reserve points at the
+# interest list, both deposit thank-yous at the one booking thank-you.
+[[redirects]]
+  from = "/pre-order/basic-reserve"
+  to = "/interest/"
+  status = 301
+[[redirects]]
+  from = "/pre-order/basic-reserve/"
+  to = "/interest/"
+  status = 301
+[[redirects]]
+  from = "/thank-you/founder-premium"
+  to = "/thank-you/booking/"
+  status = 301
+[[redirects]]
+  from = "/thank-you/founder-premium/"
+  to = "/thank-you/booking/"
+  status = 301
+[[redirects]]
+  from = "/thank-you/basic-reserve"
+  to = "/thank-you/booking/"
+  status = 301
+[[redirects]]
+  from = "/thank-you/basic-reserve/"
+  to = "/thank-you/booking/"
   status = 301
 [[redirects]]
   from = "/register"
