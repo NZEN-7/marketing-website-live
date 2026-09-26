@@ -311,7 +311,7 @@ ${v2Svg}
         btnDay: 'Daytime charging', btnNight: 'Evening comfort',
         cards: [
           { title:'Daytime Charging', icon:'\\u2600\\ufe0f', body:'The heat pump charges the store when power is cheapest: your own solar, a free window, or late-night off-peak.', hl:'hl-o' },
-          { title:'23.3 kWh Stored',    icon:'\\u25c9',        body:'The 500L store holds enough heat for an entire evening and overnight, with the heat pump off through the peak.', hl:'' },
+          { title:'25 kWh Stored',    icon:'\\u25c9',        body:'The 500L store holds enough heat for an entire evening and overnight, with the heat pump off through the peak.', hl:'' },
           { title:'Evening Comfort',  icon:'\\u2668\\ufe0f', body:'Heat pump off at sunset. Stored heat flows through radiators and underfloor all evening, through the priciest hours.', hl:'' }
         ]
       },
@@ -321,7 +321,7 @@ ${v2Svg}
         btnDay: 'Daytime charging', btnNight: 'Evening comfort',
         cards: [
           { title:'Daytime Charging', icon:'\\u2600\\ufe0f', body:'The heat pump charges the store when power is cheapest: your own solar, a free window, or late-night off-peak.', hl:'' },
-          { title:'23.3 kWh Stored',    icon:'\\u25c9',        body:'The 500L store holds enough heat for an entire evening and overnight, with the heat pump off through the peak.', hl:'' },
+          { title:'25 kWh Stored',    icon:'\\u25c9',        body:'The 500L store holds enough heat for an entire evening and overnight, with the heat pump off through the peak.', hl:'' },
           { title:'Evening Comfort',  icon:'\\u2668\\ufe0f', body:'Heat pump off at sunset. Stored heat flows through radiators and underfloor all evening, through the priciest hours.', hl:'hl-g' }
         ]
       }
