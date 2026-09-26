@@ -138,7 +138,7 @@ capture gap. Do it once by hand and look at the result before automating it.
 Then open `leads.csv` (download it, or view in Drive; **do not leave it open in
 Sheets**, see the warning below) and check:
 
-- Real names you recognise: Marion Saville, Peter Kershaw, Simon Radcliffe.
+- Names you recognise from recent leads in the CRM.
 - No `qa-` or `deploy-check` rows; those are skipped as tests.
 - `triage_status` is `New` on every row.
 - Emails are lowercased, one row per submission.

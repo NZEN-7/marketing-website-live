@@ -8,12 +8,27 @@ Two image scripts are PowerShell.
 | Script | What it does | When |
 |---|---|---|
 | `serve` | Static server on http://localhost:8080 serving the repo root, so root-relative links resolve (they do not over `file://`) | Any local look. The desktop app's Browser pane uses this via `.claude/launch.json` |
-| `deploy:live` | Force-push `main` to the Vercel mirror. Refuses a dirty tree or a non-main branch | Every committed batch; Nick reviews on live, not local |
+| `deploy:live` | Force-push `main` to the Vercel mirror. Refuses a dirty tree or a non-main branch | **Only on Nick's go** (HOW CODE SESSIONS WORK, 26 Sep 2026). This is the production deploy |
 | `test:email` | Prints all notification emails and the autoresponder with sample data. No credentials, no network | After touching `api/lead.js` |
 | `test:parser` | Feeds the generated emails through the real CRM parser (`scripts/apps-script/lead-parser.gs`), fails on any label drift | **Required** after touching `formatNotification()` |
 | `test:leadrow` | Checks the Supabase row for every form: column names, mapping, nulls | After touching `leadRow()` or adding a field |
 | `copy:dump` | Writes the copy-review pack to `.claude/copy-review/` | Before any copy review |
 | `check:cachebust` | Are the `?v=` numbers newer than the files they point at? | Before committing a CSS or JS change |
+
+## CI on every PR
+
+`.github/workflows/ci.yml` runs on every pull request and every push to `main`.
+It deploys nothing.
+
+| Job | Runs | Expect |
+|---|---|---|
+| `checks` | `npm ci`, the four checks above, then `python tools/check_no_pii.py` | 14 / 6 / 26 / 8 ok, and "no customer identity found" |
+| `secrets` | gitleaks 8.30.1 (checksum-pinned CLI) over the full history | "no leaks found" |
+
+- **PII guard** (`tools/check_no_pii.py`): ported from energy-model on 26 Sep 2026, with the same hashed name list. Retuned for this repo: our own addresses and published number are excepted, `+61` phones are caught, and two public words that collide with a watched name are named in `PUBLIC_WORDS`. Test fixtures use made-up identities on `example.com`, never a real lead's, even to copy a real email's layout. Run it locally with `python tools/check_no_pii.py`.
+- **Pre-commit hook**: `git config core.hooksPath .githooks` runs the same guard before each commit.
+- **False positives** for gitleaks go in `.gitleaksignore`, one fingerprint per line, each with its reason. A real secret is rotated by Nick, never ignored.
+- A red PR is not reviewed. Never skip or weaken a check to get green without saying so in the PR and getting the CTO's OK.
 
 ## Verifying a deploy
 

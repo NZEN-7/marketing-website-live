@@ -14,3 +14,6 @@
 
 # Installed by Vercel at build time from package-lock.json; never committed.
 node_modules/
+
+# Python bytecode from running tools/check_no_pii.py.
+__pycache__/

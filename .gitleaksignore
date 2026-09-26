@@ -1,0 +1,7 @@
+# False positives only, one per line, each with its reason. Never add a real
+# secret here: rotate it (Nick) and say so in the PR instead.
+#
+# CLAUDE.md, 24 Jul 2026: "Fleet keys: totalSavedAud/gasAvoidedMj/co2AvoidedKg"
+# names the public stats endpoint's JSON fields; generic-api-key reads "keys:"
+# followed by a long token as a key. Checked 26 Sep 2026.
+877ca4a868ec22459aa4869f3c1f79d9d22e6ff8:CLAUDE.md:generic-api-key:30

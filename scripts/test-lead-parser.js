@@ -11,8 +11,8 @@
    itself, then parsed, then checked field by field. Rename a label in
    formatNotification() and this fails immediately.
 
-   The Wix sample is a real body from the Marion Saville notification of
-   18 Aug 2026, kept verbatim because it exercises the two things the parser
+   The Wix sample has the exact layout of a real notification of
+   18 Aug 2026, with the identity replaced; it exercises the two things the parser
    exists to survive: one run-on line, and List(...) around a multi-select.
 */
 "use strict";
@@ -47,9 +47,9 @@ check(
   lead.formatNotification({
     form: "register-interest",
     formLabel: "Homeowner Register Interest",
-    first_name: "Nigel", last_name: "Gray",
-    email: "nigeljgray11@gmail.com", phone: "+61416086011",
-    suburb: "Hampton", state: "VIC",
+    first_name: "Alex", last_name: "Sample",
+    email: "alex.sample@example.com", phone: "+61400000001",
+    suburb: "Testville", state: "VIC",
     heating: "Gas wall heaters / space heaters",
     solar: "No", battery: "No",
     drivers: ["Researching for future upgrade", "Bills are too high"],
@@ -59,11 +59,11 @@ check(
   }, stamp),
   {
     "Form": "Homeowner Register Interest",
-    "First name": "Nigel",
-    "Last name": "Gray",
-    "Email": "nigeljgray11@gmail.com",
-    "Phone": "+61416086011",
-    "Suburb": "Hampton",
+    "First name": "Alex",
+    "Last name": "Sample",
+    "Email": "alex.sample@example.com",
+    "Phone": "+61400000001",
+    "Suburb": "Testville",
     "State": "VIC",
     "Solar": "No",
     "Battery": "No",
@@ -94,14 +94,14 @@ check(
   lead.formatNotification({
     form: "contact",
     formLabel: "Contact Form",
-    name: "Simon Radcliffe",
-    email: "radcliffesimon@gmail.com",
+    name: "Sam Example",
+    email: "sam.example@example.com",
     message: "What set points does it run at?",
   }, stamp),
   {
     "Form": "Contact Form",
-    "Name": "Simon Radcliffe",
-    "Email": "radcliffesimon@gmail.com",
+    "Name": "Sam Example",
+    "Email": "sam.example@example.com",
     // bare text under MESSAGE, no label in front of it
     "Comments": "What set points does it run at?",
   }
@@ -112,9 +112,9 @@ check(
 check(
   "Wix register-interest, verbatim from 18 Aug",
   "Hi Thermal Dawn Team,\n\nForm: Homeowner Register Interest    " +
-  "Submission Time: 18 August 2026 at 9:16 pm AEST     CONTACT First name: Marion   " +
-  "Last name: Saville   Email: marionsaville@icloud.com   Phone: +61407188468     " +
-  "LOCATION Suburb: Carlton North   State: VIC     CURRENT SETUP Solar: No   Battery: No   " +
+  "Submission Time: 18 August 2026 at 9:16 pm AEST     CONTACT First name: Riley   " +
+  "Last name: Test   Email: riley.test@example.com   Phone: +61400000002     " +
+  "LOCATION Suburb: North Testville   State: VIC     CURRENT SETUP Solar: No   Battery: No   " +
   "Current heating/cooling system: Gas hydronic - radiators or underfloor     " +
   "MOTIVATION AND TIMING  What's driving interest: Other: Move away from gas but retain " +
   "existing hydronic heating   Timeline: List(12+ months / future planning)     " +
@@ -122,11 +122,11 @@ check(
   "https://thermaldawn.com/so/tr/xxx",
   {
     "Form": "Homeowner Register Interest",
-    "First name": "Marion",
-    "Last name": "Saville",
-    "Email": "marionsaville@icloud.com",
-    "Phone": "+61407188468",
-    "Suburb": "Carlton North",
+    "First name": "Riley",
+    "Last name": "Test",
+    "Email": "riley.test@example.com",
+    "Phone": "+61400000002",
+    "Suburb": "North Testville",
     "State": "VIC",
     "Solar": "No",
     "Battery": "No",

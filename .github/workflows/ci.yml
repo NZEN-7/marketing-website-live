@@ -1,0 +1,68 @@
+# Every PR and every push to main: the four checks, the PII guard and a secret
+# scan (HOW CODE SESSIONS WORK, §3.4). Offline: nothing here needs a secret,
+# the Drive or the network beyond installing the toolchain. Nothing here
+# deploys; the live site still goes out only through `npm run deploy:live`.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install
+        run: npm ci
+
+      - name: Email layout (14 checks)
+        run: npm run test:email
+
+      - name: CRM parser round-trip (6 checks)
+        run: npm run test:parser
+
+      - name: Supabase lead row (26 checks)
+        run: npm run test:leadrow
+
+      - name: Cache-busting (8 assets)
+        run: npm run check:cachebust
+
+      - name: PII guard
+        run: python tools/check_no_pii.py
+
+  secrets:
+    runs-on: ubuntu-latest
+    env:
+      GITLEAKS_VERSION: 8.30.1
+      # From the release's gitleaks_8.30.1_checksums.txt.
+      GITLEAKS_SHA256: 551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # The open-source CLI, not the gitleaks Action (which needs a paid licence for orgs).
+      - name: Install gitleaks
+        run: |
+          f=gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz
+          curl -sSfLO "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/$f"
+          echo "${GITLEAKS_SHA256}  $f" | sha256sum -c -
+          tar -xzf "$f" gitleaks
+
+      - name: Secret scan (full history)
+        run: ./gitleaks git --redact --no-banner -v .

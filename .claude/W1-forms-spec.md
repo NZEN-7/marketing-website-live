@@ -276,8 +276,9 @@ Thermal Dawn
 ## 7. Testing before deploy
 
 1. Local harness (e.g. `node api/test-format.mjs` or a scripts/ file):
-   require the exported formatters, run the three sample payloads (use Nigel
-   Gray's real values from the Wix email as the register-interest sample),
+   require the exported formatters, run the three sample payloads (use the
+   layout of the 6 Jul Wix email, with made-up values, as the
+   register-interest sample),
    print, and eyeball against §6. Arrays must comma-join (no `List(...)`).
 2. Static pages: `npm run serve`, check all three forms render, native
    validation fires, honeypot invisible, keyboard/mobile OK. The POST will

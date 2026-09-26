@@ -637,7 +637,7 @@ Still open after the cutover:
   (runbook step 7).
 - Remove freevolt.com.au from Wix → Domains (runbook step 8, safe now).
 
-The "bluehouse6351@gmail.com / John Doe" submissions (31 Jul ~1 pm) were
+The "John Doe" submissions (a personal gmail address) (31 Jul ~1 pm) were
 Nick's own tests — the phone number on the lead is Nick's. Not Wix, no
 parallel automation. Mystery closed.
 

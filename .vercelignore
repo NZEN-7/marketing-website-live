@@ -12,3 +12,6 @@ scripts
 tools
 package.json
 package-lock.json
+.github
+.githooks
+.gitleaksignore

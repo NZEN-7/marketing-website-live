@@ -382,7 +382,7 @@ function formatSubject(d) {
 // "thanks" from us reads as a duplicate confirmation of a payment.
 const AUTORESPOND = { "register-interest": true, contact: true, subscribe: true };
 
-/** First name only, so "Tim Hamer" greets as "Tim". Falls back to "there". */
+/** First name only, so "Robin Example" greets as "Robin". Falls back to "there". */
 function greetingName(d) {
   var raw = d.first_name || d.name || "";
   var first = String(raw).trim().split(/\s+/)[0];

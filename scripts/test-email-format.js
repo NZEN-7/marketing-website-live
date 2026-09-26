@@ -4,8 +4,9 @@
 
      npm run test:email
 
-   The register-interest sample uses the real values from the 6 Jul 2026 Wix
-   notification (Nigel Gray), so the output is directly comparable. Watch for:
+   The register-interest sample has the shape of the 6 Jul 2026 Wix
+   notification, with made-up values, so the output is directly comparable.
+   Watch for:
      - multi-selects comma-joined, NOT rendered as "List(...)" like Wix did
      - every labelled line present, "-" where a field was left empty
 */
@@ -17,11 +18,11 @@ const stamp = "6 July 2026 at 2:40 pm AEST";
 const samples = [
   {
     form: "register-interest",
-    first_name: "Nigel",
-    last_name: "Gray",
-    email: "nigeljgray11@gmail.com",
-    phone: "+61416086011",
-    suburb: "Hampton",
+    first_name: "Alex",
+    last_name: "Sample",
+    email: "alex.sample@example.com",
+    phone: "+61400000001",
+    suburb: "Testville",
     state: "VIC",
     heating: "Gas wall heaters / space heaters",
     solar: "No",
@@ -29,16 +30,16 @@ const samples = [
     drivers: ["Researching for future upgrade", "Bills are too high"],
     timeline: ["Within 3 months"],
     comments:
-      "Hi am working with Dennis from electrify me to install solar panels and battery and replace our hot water gas heater. We have a seperate gas unit for our hydronic and he suggested I talk to you about potential options to improve this an maybe move to electricytt.",
+      "Hi, we are working with an installer on solar panels and a battery and replacing our gas hot water. We have a seperate gas unit for our hydronic and were told to ask you about options to move that to electricity too.",
   },
-  { form: "contact", name: "Tim Hamer", email: "timhamer842@gmail.com",
+  { form: "contact", name: "Robin Example", email: "robin@example.com",
     message: "Hi Thermaldawn,\nDo you have a showroom in Melbourne please?\nCheers,\nTim." },
   { form: "subscribe", email: "someone@example.com", optin: true },
   {
     form: "founder-premium",
-    first_name: "Tamara", last_name: "de Silva",
-    email: "tamdesilva@example.com", phone: "+61411232755",
-    address: "12 Example St, Caulfield East VIC 3145",
+    first_name: "Casey", last_name: "van Dijk",
+    email: "casey@example.com", phone: "+61400000003",
+    address: "12 Example St, Testville VIC 3000",
     heating: "Gas hydronic - radiators or underfloor",
     timeline: "Within 3 months",
     comments: "Semi detached double brick, 100 years old, new extension.",
@@ -136,7 +137,7 @@ for (const [payload, why] of mustReject) {
 
 // Header injection: a newline in a name must not break the Subject line.
 const inj = lead.parseSubmission({
-  form: "contact", name: "Bad\r\nBcc: attacker@evil.com", email: "a@b.co", message: "x",
+  form: "contact", name: "Bad\r\nBcc: attacker@example.com", email: "a@b.co", message: "x",
 });
 const subject = lead.formatSubject(inj.data);
 console.log(`\n${/[\r\n]/.test(subject) ? "FAIL" : "ok  "}  subject header injection stripped: ${JSON.stringify(subject)}`);
@@ -148,10 +149,10 @@ if (/[\r\n]/.test(subject)) failed++;
 console.log("\n" + "=".repeat(72));
 console.log("AUTORESPONDER");
 console.log("=".repeat(72));
-const auto = lead.parseSubmission({ form: "contact", name: "Tim Hamer", email: "t@example.com", message: "x" });
+const auto = lead.parseSubmission({ form: "contact", name: "Robin Example", email: "t@example.com", message: "x" });
 const autoBody = lead.formatAutoresponder(auto.data);
 console.log(autoBody);
-if (autoBody.indexOf("Hi Tim,") !== 0) {
+if (autoBody.indexOf("Hi Robin,") !== 0) {
   console.error(`!! FAIL: contact autoresponder should greet the first name only, got: ${autoBody.split("\n")[0]}`);
   failed++;
 }

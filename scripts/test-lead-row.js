@@ -25,8 +25,8 @@ const WRITABLE = new Set([
 
 const bodies = {
   "register-interest": {
-    form: "register-interest", first_name: "Nigel", last_name: "Gray",
-    email: "nigeljgray11@gmail.com", phone: "+61416086011", suburb: "Hampton",
+    form: "register-interest", first_name: "Alex", last_name: "Sample",
+    email: "alex.sample@example.com", phone: "+61400000001", suburb: "Testville",
     state: "VIC", heating: "Gas wall heaters / space heaters", solar: "No",
     battery: "No", drivers: ["Bills are too high", "Researching"],
     referral: ["An event or expo", "Friend, family or neighbour"],
@@ -35,12 +35,12 @@ const bodies = {
     // Request a Quote button is what the customer actually agreed to
     optin: "true",
   },
-  contact: { form: "contact", name: "Simon Radcliffe", email: "s@example.com", message: "Got hydronic." },
+  contact: { form: "contact", name: "Sam Example", email: "s@example.com", message: "Got hydronic." },
   subscribe: { form: "subscribe", email: "sub@example.com", optin: "true" },
   "subscribe-nooptin": { form: "subscribe", email: "sub2@example.com" },
   "basic-reserve": {
-    form: "basic-reserve", first_name: "Pat", last_name: "Jessen", email: "p@example.com",
-    phone: "0400000000", address: "12 Example St, Hawthorn VIC 3122",
+    form: "basic-reserve", first_name: "Pat", last_name: "Example", email: "p@example.com",
+    phone: "0400000000", address: "12 Example St, Testville VIC 3000",
     heating: "Gas hydronic", timeline: "Within 3 months", terms: true,
   },
 };
@@ -86,14 +86,14 @@ check("no \"-\" placeholders reach the DB", dashes.length === 0, dashes.join(", 
 check("contact has NULL driver", rows.contact.driver === null);
 
 // 5. Field mapping that differs per form.
-check("contact name -> first_name", rows.contact.first_name === "Simon Radcliffe");
+check("contact name -> first_name", rows.contact.first_name === "Sam Example");
 check("contact message -> comments", rows.contact.comments === "Got hydronic.");
 check("multi-select joined", rows["register-interest"].driver === "Bills are too high, Researching");
 check("referral joined",     rows["register-interest"].referral_source === "An event or expo, Friend, family or neighbour");
 // Optional: skipping it must write NULL, not an empty string, or an
 // unanswered question looks answered.
 check("referral NULL when skipped", rows.contact.referral_source === null, rows.contact.referral_source);
-check("deposit address captured", rows["basic-reserve"].address === "12 Example St, Hawthorn VIC 3122");
+check("deposit address captured", rows["basic-reserve"].address === "12 Example St, Testville VIC 3000");
 check("deposit payment_ref captured", /^td-/.test(rows["basic-reserve"].payment_ref || ""));
 check("non-deposit has NULL payment_ref", rows.contact.payment_ref === null);
 

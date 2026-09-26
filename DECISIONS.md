@@ -128,10 +128,10 @@ Ranked by what it costs to leave them open. Each is also a Notion row.
 ## Carried risks
 
 **The webinar deck states a ten-year equipment warranty.** It is in the slide
-notes for Russell Williams and was presented to the Electrify Boroondara
+notes for the webinar presenter and was presented to the Electrify Boroondara
 hydronic webinar on 18 Aug. Nick's ruling on 19 Aug is that ten years is wrong.
 The website is clean; the deck is not, and it has already been shown. Someone
-needs to decide whether that warrants a correction to Russell before the same
+needs to decide whether that warrants a correction to the presenter before the same
 deck is reused at the Expo on 11 Oct.
 
 **Two backlogs.** Coda and Notion both hold Web items and have drifted. Notion
