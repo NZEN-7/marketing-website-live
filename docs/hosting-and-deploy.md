@@ -71,7 +71,10 @@ The 54 rules cover: the old Wix paths (`/product`, `/pricing`, `/learn`,
 - The domain is still **registered through Wix and renews 3 Nov 2026**. The
   plan is to transfer out before then, rebuilding the zone at the new host and
   verifying it *before* nameservers change. That is the one moment email is
-  genuinely at risk.
+  genuinely at risk. The step-by-step, with every record in the zone as read
+  on 27 Sep 2026, is [runbooks/domain-move.md](runbooks/domain-move.md). Note
+  what it found: there is **no Google Workspace DKIM record**; the only DKIM
+  records are Mailchimp's and Wix's email marketing.
 - Search Console: same domain, same property, history retained. Do not use
   "Change of Address"; that is for moving between domains.
 - The portal is thermal-dawn-platform.vercel.app. `td-platform.vercel.app` is
