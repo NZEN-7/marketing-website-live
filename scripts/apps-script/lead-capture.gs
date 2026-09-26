@@ -25,8 +25,12 @@ var CFG = {
   FILE_NAME: 'leads.csv',
 
   // Gmail search. Sender is the notification address for both streams.
+  // Both senders, because the keys plan (27 Sep 2026) moves api/lead.js from
+  // Nick's mailbox to a send-only noreply@ account. Paste this version into
+  // the Apps Script project BEFORE GMAIL_USER changes in Vercel, or capture
+  // stops without an error. test:parser fails if either sender is dropped.
   // -label: keeps processed mail out of the next run.
-  QUERY: 'from:nickz@thermaldawn.com ' +
+  QUERY: 'from:(nickz@thermaldawn.com OR noreply@thermaldawn.com) ' +
          'subject:("New website lead" OR "New website message" OR ' +
          '"New subscriber" OR "New deposit intent") ' +
          '-label:' + 'crm-captured',

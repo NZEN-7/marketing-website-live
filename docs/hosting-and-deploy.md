@@ -91,6 +91,6 @@ internal file to both.
 | Variable | Used by |
 |---|---|
 | `GMAIL_USER`, `GMAIL_APP_PASSWORD` | `api/lead.js`, SMTP transport for notifications and autoresponders |
-| `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` | `api/lead.js`, the `leads` insert. If unset the insert is skipped and the request still succeeds |
+| `SUPABASE_URL`, and either `SUPABASE_LEADS_KEY` + `SUPABASE_ANON_KEY` (the insert-only `lead_writer` key, preferred) or `SUPABASE_SERVICE_ROLE_KEY` (the old way, until removed) | `api/lead.js`, the `leads` insert; `supabaseAuth()` picks the key. Rollout in `scripts/supabase/README.md`. If none is set the insert is skipped and the request still succeeds |
 
 Nothing else is configured. There is no secret in the repo.

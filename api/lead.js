@@ -116,7 +116,29 @@ function makeRef() {
    never reaches the browser. The form posts here, exactly as it did before. */
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+/** Which key the leads insert uses. Keys plan (CTO, 25-27 Sep 2026):
+    the website should hold a key that can INSERT into public.leads and do
+    nothing else, not the service-role key, which bypasses RLS on every
+    table. SUPABASE_LEADS_KEY is a JWT for the `lead_writer` role
+    (scripts/supabase/), sent as the bearer; the gateway still wants a
+    project key as `apikey`, and the public anon key is the right one.
+
+    Order of preference, so the rollout can happen in any order and a
+    half-configured Vercel never drops a row:
+      1. SUPABASE_LEADS_KEY + SUPABASE_ANON_KEY   the insert-only role
+      2. SUPABASE_SERVICE_ROLE_KEY                 the old way, until removed
+      3. neither                                   skip, loudly
+    Pure, so test:leadrow checks it without credentials. */
+function supabaseAuth(env) {
+  const leads = env.SUPABASE_LEADS_KEY, anon = env.SUPABASE_ANON_KEY;
+  if (leads && anon) return { via: "lead_writer", apikey: anon, bearer: leads };
+  if (env.SUPABASE_SERVICE_ROLE_KEY) {
+    return { via: leads ? "service_role (SUPABASE_ANON_KEY missing)" : "service_role",
+             apikey: env.SUPABASE_SERVICE_ROLE_KEY, bearer: env.SUPABASE_SERVICE_ROLE_KEY };
+  }
+  return null;
+}
 
 /** Multi-selects arrive as arrays; leads stores one readable string.
     Deliberately NOT the joinList above: that one returns "-" for empty, which
@@ -167,12 +189,15 @@ function leadRow(d) {
 }
 
 async function recordLead(d) {
-  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) return "skipped (not configured)";
+  const auth = supabaseAuth(process.env);
+  if (!SUPABASE_URL || !auth) return "skipped (not configured)";
+  // return=minimal matters for lead_writer: it can insert but not read, so
+  // asking for the row back would fail the insert.
   const res = await fetch(`${SUPABASE_URL}/rest/v1/leads`, {
     method: "POST",
     headers: {
-      apikey: SUPABASE_SERVICE_ROLE_KEY,
-      Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+      apikey: auth.apikey,
+      Authorization: `Bearer ${auth.bearer}`,
       "Content-Type": "application/json",
       Prefer: "return=minimal",
     },
@@ -543,3 +568,4 @@ module.exports.formatAutoresponder = formatAutoresponder;
 module.exports.formatTimestamp = formatTimestamp;
 module.exports.parseSubmission = parseSubmission;
 module.exports.leadRow = leadRow;
+module.exports.supabaseAuth = supabaseAuth;

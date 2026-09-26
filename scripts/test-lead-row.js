@@ -12,7 +12,7 @@
 */
 "use strict";
 
-const { parseSubmission, leadRow } = require("../api/lead.js");
+const { parseSubmission, leadRow, supabaseAuth } = require("../api/lead.js");
 
 /* Every column on public.leads that leadRow is allowed to write. Captured half
    only: the triage half is the agent's and must stay untouched at capture. */
@@ -100,6 +100,18 @@ check("non-deposit has NULL payment_ref", rows.contact.payment_ref === null);
 // 6. Provenance.
 check("source_site is freevolt", Object.values(rows).every((r) => r.source_site === "freevolt"));
 check("submitted_at is ISO", !Number.isNaN(Date.parse(rows.contact.submitted_at)));
+
+// 7. Which key the insert uses (keys plan, 27 Sep 2026). Placeholder
+// strings, never real keys.
+const K = { SUPABASE_LEADS_KEY: "leads-jwt", SUPABASE_ANON_KEY: "anon-key", SUPABASE_SERVICE_ROLE_KEY: "service-key" };
+const a1 = supabaseAuth(K);
+check("insert-only key preferred when set", a1.via === "lead_writer" && a1.bearer === "leads-jwt" && a1.apikey === "anon-key", a1.via);
+const a2 = supabaseAuth({ SUPABASE_SERVICE_ROLE_KEY: "service-key" });
+check("service role still works until removed", a2.via === "service_role" && a2.bearer === "service-key", a2.via);
+const a3 = supabaseAuth({ SUPABASE_LEADS_KEY: "leads-jwt", SUPABASE_SERVICE_ROLE_KEY: "service-key" });
+check("leads key without anon key falls back, never half-sends", a3.bearer === "service-key" && a3.apikey === "service-key", a3.via);
+check("leads key alone is not configured", supabaseAuth({ SUPABASE_LEADS_KEY: "leads-jwt" }) === null);
+check("nothing set skips", supabaseAuth({}) === null);
 
 console.log(failed ? `\n${failed} check(s) FAILED.` : "\nAll lead-row checks passed.");
 process.exit(failed ? 1 : 0);

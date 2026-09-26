@@ -177,6 +177,20 @@ if (unknown.length) {
   }
 }
 
+// The capture query must accept both senders while api/lead.js moves from
+// Nick's mailbox to noreply@ (keys plan, 27 Sep 2026). Dropping either one
+// stops lead capture with no error, which is the failure this file exists for.
+{
+  const gs = require("fs").readFileSync(require("path").join(__dirname, "apps-script", "lead-capture.gs"), "utf8");
+  const q = (gs.match(/QUERY:\s*'([^']*)'/) || [])[1] || "";
+  if (q.includes("nickz@thermaldawn.com") && q.includes("noreply@thermaldawn.com")) {
+    console.log("ok    capture query accepts both senders (nickz@ and noreply@)");
+  } else {
+    console.log("FAIL  capture query must list both nickz@ and noreply@: " + q);
+    failures++;
+  }
+}
+
 console.log();
 if (failures) {
   console.log(`${failures} sample(s) failed. If a label changed in ` +
