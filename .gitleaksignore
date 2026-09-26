@@ -1,7 +1,12 @@
 # False positives only, one per line, each with its reason. Never add a real
 # secret here: rotate it (Nick) and say so in the PR instead.
 #
-# CLAUDE.md, 24 Jul 2026: "Fleet keys: totalSavedAud/gasAvoidedMj/co2AvoidedKg"
-# names the public stats endpoint's JSON fields; generic-api-key reads "keys:"
-# followed by a long token as a key. Checked 26 Sep 2026.
+# CLAUDE.md, 24 Jul 2026, line 30: the sentence naming the public stats
+# endpoint's three JSON field names. Rule generic-api-key reads the word
+# before the colon plus the long field list as a key. Checked 26 Sep 2026.
 877ca4a868ec22459aa4869f3c1f79d9d22e6ff8:CLAUDE.md:generic-api-key:30
+#
+# This file, first version (124ccdf), line 4: its comment quoted that same
+# sentence verbatim, so the ignore file tripped the rule it was suppressing.
+# Reworded 27 Sep so it no longer matches; the old line stays in history.
+124ccdfd992dde791662fa8d1bf9ace8ef06c55e:.gitleaksignore:generic-api-key:4
