@@ -115,10 +115,11 @@ const FORMS = {
   },
 };
 
-/* States we install in today. Source: the blog's service-area line ("work
-   primarily in Victoria and New South Wales"). Change here and in
-   /interest/'s SERVED list together. */
-const SERVED_STATES = ["VIC", "NSW"];
+/* States we install in today: VIC and NSW, and the ACT, which sits inside
+   NSW's climate and installer reach (CTO, Re: Web #4, 27 Sep 2026; Nick can
+   overrule). Change here and in /interest/'s SERVED list together;
+   test:leadrow fails if they drift. */
+const SERVED_STATES = ["VIC", "NSW", "ACT"];
 
 /** CRM tags for an interest-list signup (CEO ruling, item 4). Pure, so the
     tags can be recomputed from a stored row. Empty when the person is in a

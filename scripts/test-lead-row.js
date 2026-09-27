@@ -12,7 +12,7 @@
 */
 "use strict";
 
-const { parseSubmission, leadRow, supabaseAuth, listTags } = require("../api/lead.js");
+const { parseSubmission, leadRow, supabaseAuth, listTags, SERVED_STATES } = require("../api/lead.js");
 
 /* Every column on public.leads that leadRow is allowed to write. Captured half
    only: the triage half is the agent's and must stay untouched at capture. */
@@ -125,6 +125,15 @@ check("tag: NZ is nz, not unserved-state",     T("NZ", "Heating") === "interest:
 check("tag: hot water in a served state",      T("VIC", "Hot water") === "interest:hot-water", T("VIC", "Hot water"));
 check("tag: cooling counts as heating-cooling",T("NSW", "Cooling") === "interest:heating-cooling", T("NSW", "Cooling"));
 check("tag: served + heating only -> none (booking funnel)", T("VIC", "Heating") === "", T("VIC", "Heating"));
+check("tag: ACT is served (CTO, 27 Sep)",     T("ACT", "Heating") === "", T("ACT", "Heating"));
+{
+  // The /interest/ page's hint list must match the server's, or the page
+  // tells an ACT visitor one thing and the CRM tags them another.
+  const page = require("fs").readFileSync(require("path").join(__dirname, "..", "interest", "index.html"), "utf8");
+  const m = page.match(/var SERVED = (\[[^\]]*\]);/);
+  const pageList = m ? JSON.parse(m[1]).join(",") : "(not found)";
+  check("interest page SERVED matches SERVED_STATES", pageList === SERVED_STATES.join(","), pageList);
+}
 check("interest list without consent rejected", !!parseSubmission({ ...bodies["interest-list"], consent: "" }).error);
 
 // 6. Provenance.

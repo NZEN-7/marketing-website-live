@@ -35,7 +35,7 @@
     <div class="hero__inner">
       <div class="wrap">
         <h1>Register Your Interest</h1>
-        <p class="subhead">Today, Thermal Dawn works with gas hydronic homes in Victoria and New South Wales. If your home is different, say ducted or split-system heating and cooling, or hot water on its own, or you're in another state or New Zealand, join the list and we'll tell you when we can help.</p>
+        <p class="subhead">Today, Thermal Dawn works with gas hydronic homes in Victoria, New South Wales and the ACT. If your home is different, say ducted or split-system heating and cooling, or hot water on its own, or you're in another state or New Zealand, join the list and we'll tell you when we can help.</p>
         <p class="supporting">No payment. No commitment. We won't give you a price or a date until we can stand behind it.</p>
       </div>
     </div>
@@ -161,7 +161,7 @@
 /* Served-state hint. SERVED must match SERVED_STATES in api/lead.js, which
    decides the tags; this only decides whether to show the hint. */
 (function () {
-  var SERVED = ["VIC", "NSW"];
+  var SERVED = ["VIC", "NSW", "ACT"];
   var form = document.querySelector('form[data-lead-form="interest-list"]');
   if (!form) return;
   var hint = form.querySelector("[data-served-hint]");
