@@ -221,6 +221,15 @@ if (unknown.length) {
   const subjects = ["register-interest", "contact", "subscribe", "founder-premium", "interest-list"]
     .map((f) => lead.formatSubject({ form: f, first_name: "A", last_name: "B", name: "A B",
                                       email: "a@b.c", heating: "h", tier: "t", interest: "i", state: "s" }));
+  // Platform review S1 (28 Sep): the interest list's consent never feeds
+  // the CRM's newsletter column.
+  const rowFn = (gs.match(/function buildRow_\([\s\S]*?\n\}/) || [""])[0];
+  if (rowFn && !/'Consent to be contacted'/.test(rowFn)) {
+    console.log("ok    capture row keeps consent out of the newsletter column");
+  } else {
+    console.log("FAIL  buildRow_ maps 'Consent to be contacted' into a CRM column" + (rowFn ? "" : " (buildRow_ not found)"));
+    failures++;
+  }
   const missing = subjects.filter((s) => !q.includes('"' + s.split(":")[0] + '"'));
   if (missing.length) {
     console.log("FAIL  capture query misses these subjects: " + missing.join(" | "));

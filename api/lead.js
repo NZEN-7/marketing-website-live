@@ -225,12 +225,14 @@ function leadRow(d) {
     // optin=true; recording "No" for the rest would assert a refusal nobody
     // made. The form column carries the basis: a Subscribe Form row is someone
     // who came for the newsletter, a quote row is bundled consent.
+    // The interest list's required tick is consent to be contacted about the
+    // list, not a newsletter opt-in, so it is NULL here too (Platform review
+    // S1, 28 Sep 2026). The email still records it; consent gets its own
+    // column only after the CTO's CRM ruling (4 Oct).
     newsletter_opt_in:
       d.form === "subscribe" || d.form === "register-interest"
         ? !!d.optin
-        : d.form === "interest-list"
-          ? !!d.consent   // a required tickbox: consent to be contacted
-          : null,
+        : null,
     payment_ref: d.ref || null,
   };
 }

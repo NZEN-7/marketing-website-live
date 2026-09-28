@@ -211,7 +211,9 @@ function buildRow_(d, msg) {
     d["What's driving interest"] || d['Interested in'] || '',
     d['Timeline'] || '',
     d['Comments'] || '',
-    d['Newsletter opt-in'] || d['Consent to be contacted'] || '',
+    // Interest-list consent is to be contacted, not a newsletter opt-in, so
+    // it never lands in this column (Platform review S1, 28 Sep 2026).
+    d['Newsletter opt-in'] || '',
     'New',                                 // triage_status
     '', '', '', '', '', '', ''             // agent columns, filled on triage
   ].map(csvCell_).join(',');

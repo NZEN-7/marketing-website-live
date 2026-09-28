@@ -92,7 +92,8 @@ check("opt-in false when offered but unticked", rows["subscribe-nooptin"].newsle
 check("opt-in NULL on contact",    rows.contact.newsletter_opt_in === null);
 check("opt-in true on register",   rows["register-interest"].newsletter_opt_in === true);
 check("opt-in NULL on deposit",    rows["basic-reserve"].newsletter_opt_in === null);
-check("interest-list consent -> opt-in", rows["interest-list"].newsletter_opt_in === true);
+// Platform review S1 (28 Sep): consent to be contacted is not a newsletter opt-in.
+check("interest-list consent is NOT a newsletter opt-in (NULL)", rows["interest-list"].newsletter_opt_in === null, rows["interest-list"].newsletter_opt_in);
 
 // 4. Empty must be NULL, never the email layer's "-".
 const dashes = Object.entries(rows).flatMap(([k, r]) =>

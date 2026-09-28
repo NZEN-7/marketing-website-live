@@ -32,7 +32,7 @@ var LEAD_LABELS = [
 
 /* Section headers sit inline in the run-on body. Without stripping them they
    get swallowed into the value of whichever field precedes them: the contact
-   form parsed as "radcliffesimon@gmail.com MESSAGE -" until MESSAGE was added
+   form parsed as "someone@example.com MESSAGE -" until MESSAGE was added
    here, found by test-lead-parser.js rather than in production.
 
    This must list EVERY header api/lead.js emits, across all six forms. The

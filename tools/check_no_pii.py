@@ -108,7 +108,8 @@ COMPILED = [(re.compile(p, re.I), why) for p, why in STRUCTURAL]
 
 TOKEN = re.compile(r"[A-Za-z]{4,}")
 SCAN_SUFFIXES = {".py", ".mjs", ".js", ".ts", ".json", ".md", ".yaml", ".yml",
-                 ".csv", ".html", ".txt", ".sh"}
+                 ".csv", ".html", ".txt", ".sh",
+                 ".gs", ".toml"}  # .gs: the Apps Script files (Platform review, 28 Sep)
 SKIP_DIRS = {".git", "node_modules", "__pycache__", "_scratchpad-rescue-2026-08-13"}
 
 
