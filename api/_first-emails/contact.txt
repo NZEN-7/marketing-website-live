@@ -1,0 +1,16 @@
+# First email: contact (HANDOVER v2 §3).
+# Source of truth: Sales +/Consumer/Sales Playbook/_Templates/First emails/
+#   HANDOVER - first emails for api-lead.js (v2, two doors).md
+# Sales edits the wording THERE; it is pasted here verbatim. Never edit it here first.
+Subject: Thanks for your message
+Subject-no-name: Thanks for your message
+
+Hi {first_name},
+
+Thanks for your message. I'll get back to you within one working day.
+
+If it's about a system for your own home, it's often quickest to talk. You can book a 15-minute chat here: {booking_link}, or call me on 0432 395 138.
+
+Cheers,
+Nick
+Thermal Dawn

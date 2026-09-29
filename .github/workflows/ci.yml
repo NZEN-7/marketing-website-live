@@ -33,11 +33,17 @@ jobs:
       - name: Email layout (23 checks)
         run: npm run test:email
 
-      - name: CRM parser round-trip and capture query (9 checks)
+      - name: CRM parser round-trip and capture query (10 checks)
         run: npm run test:parser
 
-      - name: Supabase lead row, key selection and interest tags (47 checks)
+      - name: Supabase lead row, key selection and interest tags (49 checks)
         run: npm run test:leadrow
+
+      - name: "First emails: templates, served/unserved rule, rendering (55 checks)"
+        run: npm run test:firstemails
+
+      - name: "Lead handler: order, test routing, code-only logs, bot screens (34 checks)"
+        run: npm run test:handler
 
       - name: Cache-busting (8 assets)
         run: npm run check:cachebust

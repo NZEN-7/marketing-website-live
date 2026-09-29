@@ -1,0 +1,27 @@
+# First email: register-interest, and interest-list when served (HANDOVER v2 §1).
+# Source of truth: Sales +/Consumer/Sales Playbook/_Templates/First emails/
+#   HANDOVER - first emails for api-lead.js (v2, two doors).md
+# Sales edits the wording THERE; it is pasted here verbatim. Never edit it here first.
+# Placeholders: {first_name} {booking_link}. [phone]...[/phone] is sent when the
+# form has a phone number, [no-phone]...[/no-phone] when it has none.
+Subject: Thanks {first_name}, let's talk about your heating
+Subject-no-name: Thanks, let's talk about your heating
+
+Hi {first_name},
+
+Thanks for getting in touch. I'd love to hear about your house and what's got you thinking about moving off gas.
+
+[phone]I'll try to give you a quick call in the next day or two, usually around lunchtime. If you'd rather pick a time that suits you, book a 15-minute chat here: {booking_link}[/phone]
+[no-phone]The easiest next step is a quick 15-minute chat. Pick a time that suits you here: {booking_link}[/no-phone]
+
+If you like to get ahead, three photos help me give you a sharper answer when we talk:
+1. A recent gas bill
+2. The label on your boiler
+3. Your switchboard with the door open
+
+Just reply to this email with them. No pressure if they're not handy.
+
+Cheers,
+Nick
+Thermal Dawn
+0432 395 138

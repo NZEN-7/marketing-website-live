@@ -229,7 +229,9 @@ console.log(ilBody);
   ["no price, no date",              () => !/\$|\b20\d\d\b|within \d|weeks|months/i.test(ilBody)],
   ["honours the unsubscribe promise",() => /unsubscribe/i.test(ilBody)],
   ["no em dash",                     () => !/—/.test(ilBody + ilServed)],
-  ["served + heating -> quote form", () => ilServed.includes("https://www.thermaldawn.com/pre-order/register-interest/")],
+  // Brief 07: a served lead gets HANDOVER §1 (a call, and the booking link),
+  // not the quote-form link today's email carried.
+  ["served -> §1 with booking link", () => /let's talk|15-minute chat/.test(ilServed) && ilServed.includes("https://calendly.com/")],
   ["unserved does not offer a quote",() => !ilBody.includes("/pre-order/register-interest/")],
 ].forEach(([label, fn]) => {
   if (fn()) { console.log(`ok    ${label}`); }

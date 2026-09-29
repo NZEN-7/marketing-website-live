@@ -1,0 +1,19 @@
+# First email: subscribe (HANDOVER v2 §5).
+# Source of truth: Sales +/Consumer/Sales Playbook/_Templates/First emails/
+#   HANDOVER - first emails for api-lead.js (v2, two doors).md
+# Sales edits the wording THERE; it is pasted here verbatim. Never edit it here first.
+# A list email: it is used only once it carries an unsubscribe line (Spam Act;
+# CTO Re: Web #12, A2). Until Sales adds that line to the HANDOVER and it is
+# pasted here, today's subscribe email, which has one, goes instead.
+Subject: Welcome to the Thermal Dawn update
+Subject-no-name: Welcome to the Thermal Dawn update
+
+Hi {first_name},
+
+Thanks for subscribing. About once a month I'll send a short update on what we're building, what we're learning from the homes already running on it, and when we can take on new installs.
+
+If you'd like to talk about your own home in the meantime, just reply to this email.
+
+Cheers,
+Nick
+Thermal Dawn

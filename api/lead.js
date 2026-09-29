@@ -16,12 +16,34 @@
 
 "use strict";
 
+const fs = require("fs");
+const path = require("path");
+const crypto = require("crypto");
+
 const TZ = "Australia/Sydney";
 const NOTIFY_TO = "nickz@thermaldawn.com";
 const CALENDLY = "https://calendly.com/nickz-thermaldawn/30min";
 // Live from 25 Aug 2026. Autoresponders are read outside the site, so links in
 // them have to be absolute.
 const SITE = "https://www.thermaldawn.com";
+
+/* Config read per call, so tests and the Vercel envs can differ (brief 07).
+   - AUTORESPONDER_FROM: the first email's From. Default "Nick at Thermal Dawn"
+     <GMAIL_USER>; the later switch to noreply@ is one env change.
+   - BOOKING_LINK: the {booking_link} in the first emails. Never written into a
+     template; the constant above is only the fallback.
+   - VERCEL_ENV !== "production" (preview, local, tests): EVERY outbound email
+     goes to TEST_RECIPIENT, and nothing is sent if it is unset; no row goes
+     into the production CRM (CTO Re: Web #12, A5). */
+const CRM_PROJECT_REF = "skyequfcoejlhzbyipwt";   // production CRM (CLAUDE.md)
+const isProduction = () => process.env.VERCEL_ENV === "production";
+const bookingLink = () => {
+  const v = String(process.env.BOOKING_LINK || "").trim();
+  return /^https:\/\/\S+$/.test(v) ? v : CALENDLY;
+};
+const autoresponderFrom = () =>
+  stripHeader(process.env.AUTORESPONDER_FROM) ||
+  `"Nick at Thermal Dawn" <${process.env.GMAIL_USER}>`;
 
 /* ---------- small helpers ---------- */
 
@@ -156,7 +178,6 @@ function makeRef() {
    The service-role key bypasses RLS, which is why it is server-side only and
    never reaches the browser. The form posts here, exactly as it did before. */
 
-const SUPABASE_URL = process.env.SUPABASE_URL;
 
 /** Which key the leads insert uses. Keys plan (CTO, 25-27 Sep 2026):
     the website should hold a key that can INSERT into public.leads and do
@@ -237,9 +258,23 @@ function leadRow(d) {
   };
 }
 
+/** An insert failure carries an HTTP status and the Postgres or PostgREST
+    error CODE only (e.g. 23505, PGRST204). The body's message, detail and hint
+    can quote row values, so they are never kept (brief 07, decision 3). */
+class InsertError extends Error {
+  constructor(status, code) {
+    super("insert_failed");
+    this.status = status;
+    this.pgCode = code;
+  }
+}
+
 async function recordLead(d) {
+  const SUPABASE_URL = process.env.SUPABASE_URL;
   const auth = supabaseAuth(process.env);
   if (!SUPABASE_URL || !auth) return "skipped (not configured)";
+  // A preview or local run never writes to the production CRM.
+  if (!isProduction() && SUPABASE_URL.indexOf(CRM_PROJECT_REF) !== -1) return "skipped (non-production)";
   // return=minimal matters for lead_writer: it can insert but not read, so
   // asking for the row back would fail the insert.
   const res = await fetch(`${SUPABASE_URL}/rest/v1/leads`, {
@@ -252,7 +287,11 @@ async function recordLead(d) {
     },
     body: JSON.stringify(leadRow(d)),
   });
-  if (!res.ok) throw new Error(`${res.status} ${(await res.text()).slice(0, 300)}`);
+  if (!res.ok) {
+    let code = "";
+    try { code = String((JSON.parse(await res.text()) || {}).code || ""); } catch (_) { /* not JSON */ }
+    throw new InsertError(res.status, /^[A-Z0-9]{1,12}$/.test(code) ? code : "");
+  }
   return "ok";
 }
 
@@ -511,11 +550,111 @@ function formatSubject(d) {
   return stripHeader(`New subscriber: ${d.email}`);
 }
 
-/* Sent to the customer on register-interest and contact. Voice rules apply:
-   no em dashes, no sentence opening with "I", contractions, plain text. */
-// Deposits are excluded on purpose: Stripe sends those receipts, and a second
-// "thanks" from us reads as a duplicate confirmation of a payment.
+/* ---------- first emails (brief 07) ----------
+   One template per form, in api/_first-emails/, pasted from Sales' HANDOVER
+   (Sales +/Consumer/Sales Playbook/_Templates/First emails/). Wording is
+   edited there first, never here.
+
+   Deposits get none: that form posts BEFORE the Stripe handoff, and Stripe
+   sends the receipt (CTO Re: Web #12, A1). A paid-booking email waits for a
+   Stripe-webhook brief of its own. */
 const AUTORESPOND = { "register-interest": true, contact: true, subscribe: true, "interest-list": true };
+
+/* Unserved (HANDOVER §2) only when CLEARLY unserved: a state outside
+   SERVED_STATES (NZ included), or "Split systems only". Anything else,
+   including a missing or unrecognised value, is served (§1) and gets a call.
+   Not listTags: that one tags served-state cooling and hot-water leads. */
+function isUnservedListLead(d) {
+  if (d.form !== "interest-list") return false;
+  const state = String(d.state || "").trim().toUpperCase();
+  if (state && SERVED_STATES.indexOf(state) === -1) return true;
+  return String(d.heating || "").trim() === "Split systems only";
+}
+
+function templateKey(d) {
+  if (d.form === "interest-list") return isUnservedListLead(d) ? "interest-list-unserved" : "register-interest";
+  if (d.form === "register-interest" || d.form === "contact" || d.form === "subscribe") return d.form;
+  return null;
+}
+
+/* List emails must carry a working unsubscribe (Spam Act; CTO Re: Web #12,
+   A2). Until Sales' line is in the HANDOVER and pasted, the template is not
+   used and today's email, which has one, goes instead. */
+const LIST_TEMPLATES = { subscribe: true, "interest-list-unserved": true };
+
+const TEMPLATE_DIR = path.join(__dirname, "_first-emails");
+const templateCache = {};
+
+/** "# " comment lines, then "Subject:" and "Subject-no-name:", a blank line,
+    then the body. */
+function loadTemplate(key) {
+  if (templateCache[key]) return templateCache[key];
+  const raw = fs.readFileSync(path.join(TEMPLATE_DIR, key + ".txt"), "utf8").replace(/\r\n/g, "\n");
+  const lines = raw.split("\n");
+  let i = 0;
+  while (i < lines.length && lines[i].startsWith("#")) i++;
+  const head = {};
+  for (; i < lines.length && lines[i].trim() !== ""; i++) {
+    const m = lines[i].match(/^(Subject|Subject-no-name):\s*(.*)$/);
+    if (!m) throw new Error(`template ${key}: bad header line ${i + 1}`);
+    head[m[1]] = m[2];
+  }
+  if (!head.Subject) throw new Error(`template ${key}: no Subject`);
+  const t = { key, subject: head.Subject, subjectNoName: head["Subject-no-name"] || head.Subject,
+              body: lines.slice(i + 1).join("\n").replace(/\s+$/, "") + "\n" };
+  templateCache[key] = t;
+  return t;
+}
+
+/** A first name fit to put in a greeting and a Subject: one word, letters,
+    apostrophes and hyphens only. Anything else is dropped for the HANDOVER's
+    no-name greeting, so nothing odd reaches a header or the body. */
+function firstNameFor(d) {
+  const first = String(d.first_name || d.name || "").trim().split(/\s+/)[0] || "";
+  return /^[\p{L}][\p{L}'\u2019-]{0,39}$/u.test(first) ? first : "";
+}
+
+function renderTemplate(t, d) {
+  const name = firstNameFor(d);
+  const hasPhone = !!String(d.phone || "").trim();
+  let body = t.body
+    .replace(/\[phone\]([\s\S]*?)\[\/phone\]\n?/g, hasPhone ? "$1\n" : "")
+    .replace(/\[no-phone\]([\s\S]*?)\[\/no-phone\]\n?/g, hasPhone ? "" : "$1\n")
+    .split("{first_name}").join(name || "there")
+    .split("{booking_link}").join(bookingLink());
+  const subject = stripHeader((name ? t.subject : t.subjectNoName).split("{first_name}").join(name));
+  return { subject, text: body };
+}
+
+/** What the first email to this lead is: {template, subject, text}, or null
+    when this form gets none. Pure apart from reading the template file. */
+function firstEmail(d) {
+  if (!AUTORESPOND[d.form]) return null;
+  const key = templateKey(d);
+  if (!key) return null;
+  const t = loadTemplate(key);
+  if (LIST_TEMPLATES[key] && !/unsubscribe/i.test(t.body)) {
+    return { template: key + " (held: no unsubscribe line yet; today's email sent)",
+             subject: legacySubject(d), text: legacyAutoresponder(d) };
+  }
+  const r = renderTemplate(t, d);
+  return { template: key, subject: r.subject, text: r.text };
+}
+
+/** Kept for the tests and the harness: the text of the first email. */
+function formatAutoresponder(d) {
+  const e = firstEmail(d);
+  return e ? e.text : "";
+}
+
+/* ---- today's autoresponder, kept only for the list emails held above ---- */
+function legacySubject(d) {
+  return d.form === "subscribe"
+    ? "You're subscribed to Thermal Dawn updates"
+    : d.form === "interest-list"
+      ? "You're on the Thermal Dawn interest list"
+      : "Thanks For Getting in Touch";
+}
 
 /** First name only, so "Robin Example" greets as "Robin". Falls back to "there". */
 function greetingName(d) {
@@ -524,7 +663,7 @@ function greetingName(d) {
   return first || "there";
 }
 
-function formatAutoresponder(d) {
+function legacyAutoresponder(d) {
   // A subscriber gave us an email address and nothing else. They have not asked
   // to be sold to, so this confirms what they signed up for and then offers the
   // quote path once, rather than opening with it.
@@ -554,7 +693,8 @@ function formatAutoresponder(d) {
   // or date (CEO ruling, item 1). A served-state, heating-only signup is sent
   // to the quote form instead, because that is where the ruling routes them.
   if (d.form === "interest-list") {
-    const served = !(d.tags && d.tags.length);
+    // Only reached for a held unserved email now (served leads get §1).
+    const served = !isUnservedListLead(d);
     return [
       `Hi ${greetingName(d)},`,
       "",
@@ -601,7 +741,9 @@ function makeTransport() {
   const user = process.env.GMAIL_USER;
   const pass = process.env.GMAIL_APP_PASSWORD;
   if (!user || !pass) {
-    throw new Error("GMAIL_USER / GMAIL_APP_PASSWORD are not set in the environment");
+    const e = new Error("GMAIL_USER / GMAIL_APP_PASSWORD are not set in the environment");
+    e.code = "smtp_env_missing";
+    throw e;
   }
   // Required lazily so the formatters above can be unit-tested without the
   // dependency present.
@@ -616,7 +758,57 @@ function makeTransport() {
 
 /* ---------- handler ---------- */
 
+/* ---------- logging (brief 07, decision 3) ----------
+   A log line carries the form key, a request ID and an error CODE, nothing
+   else: no recipient, name, phone, message, IP, and no Postgres or SMTP
+   message text (both can quote the address or the row). */
+function errorCode(err) {
+  if (!err) return "unknown";
+  if (err instanceof InsertError) return `http_${err.status}${err.pgCode ? "_" + err.pgCode : ""}`;
+  if (err.code === "smtp_env_missing") return "smtp_env_missing";
+  if (Number.isInteger(err.responseCode)) return `smtp_${err.responseCode}`;
+  if (typeof err.code === "string" && /^[A-Z0-9_]{1,24}$/.test(err.code)) return err.code;
+  return "unknown";
+}
+function logEvent(reqId, form, event, code) {
+  console.error(`lead req=${reqId} form=${/^[a-z-]{1,24}$/.test(form || "") ? form : "unknown"} ${event}${code ? " code=" + code : ""}`);
+}
+
+/* ---------- abuse (brief 07) ----------
+   Every submission now gets its email, so the form can send ours to any
+   address. On top of the honeypot and the (now required) page stamp: a modest
+   per-IP cap, per function instance. Instances do not share memory, so this
+   slows a burst rather than enforcing a global limit; a shared store is a new
+   service and was not chosen (CTO Re: Web #12, 7). The IP is never logged. */
+const RATE_WINDOW_MS = 10 * 60 * 1000;
+const RATE_MAX = 10;
+const recentByIp = new Map();
+function clientIp(req) {
+  const h = (req && req.headers) || {};
+  const fwd = String(h["x-forwarded-for"] || h["x-real-ip"] || "").split(",")[0].trim();
+  return fwd || "unknown";
+}
+function rateLimited(ip, now) {
+  const since = now - RATE_WINDOW_MS;
+  const hits = (recentByIp.get(ip) || []).filter((t) => t > since);
+  hits.push(now);
+  recentByIp.set(ip, hits);
+  if (recentByIp.size > 5000) {       // keep the map from growing without bound
+    for (const [k, v] of recentByIp) if (!v.some((t) => t > since)) recentByIp.delete(k);
+  }
+  return hits.length > RATE_MAX;
+}
+
+/** Where an email may go. Production: as addressed. Anywhere else: only
+    TEST_RECIPIENT, and nothing at all when it is unset. */
+function routeTo(addr) {
+  if (isProduction()) return addr;
+  const t = String(process.env.TEST_RECIPIENT || "").trim();
+  return isEmail(t) ? t : null;
+}
+
 module.exports = async function handler(req, res) {
+  const reqId = crypto.randomBytes(4).toString("hex");
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
     return res.status(405).json({ ok: false, error: "Method not allowed" });
@@ -630,11 +822,20 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ ok: false, error: "Invalid request body" });
   }
 
-  // Bot screens. Both return a success shape so a bot learns nothing.
+  // Bot screens. Both return a success shape so a bot learns nothing. The page
+  // stamp is required since brief 07: all five forms send it (assets/js/forms.js).
+  const ts = Number(body.ts);
   const trapped =
     (typeof body.website === "string" && body.website.trim() !== "") ||
-    (Number(body.ts) > 0 && Date.now() - Number(body.ts) < 3000);
-  if (trapped) return res.status(200).json({ ok: true });
+    !(ts > 0) || Date.now() - ts < 3000;
+  if (trapped) {
+    logEvent(reqId, String(body.form || ""), "screened", "bot_trap");
+    return res.status(200).json({ ok: true });
+  }
+  if (rateLimited(clientIp(req), Date.now())) {
+    logEvent(reqId, String(body.form || ""), "screened", "rate_limited");
+    return res.status(429).json({ ok: false, error: "Too many submissions. Please email us directly." });
+  }
 
   const { data, error } = parseSubmission(body);
   if (error) return res.status(400).json({ ok: false, error });
@@ -643,59 +844,67 @@ module.exports = async function handler(req, res) {
     const transport = makeTransport();
     const from = `"Thermal Dawn Website" <${process.env.GMAIL_USER}>`;
 
-    await transport.sendMail({
-      from,
-      to: NOTIFY_TO,
-      replyTo: data.email,
-      subject: formatSubject(data),
-      text: formatNotification(data),
-    });
+    // 1. The notification: the contract and the system of record, so it goes
+    //    FIRST, as it always has (CTO Re: Web #12, A3).
+    const notifyTo = routeTo(NOTIFY_TO);
+    if (notifyTo) {
+      await transport.sendMail({
+        from,
+        to: notifyTo,
+        replyTo: data.email,
+        subject: formatSubject(data),
+        text: formatNotification(data),
+      });
+    } else {
+      logEvent(reqId, data.form, "notification_skipped", "test_recipient_unset");
+    }
 
-    // The email is out and the lead is safe. Everything below is best effort.
+    // 2. The leads insert. The email is out and the lead is safe; everything
+    //    below is best effort.
     //
     // AWAITED deliberately. Returning before this settles lets Vercel freeze or
     // kill the container mid-flight, and the insert vanishes with no error
     // anywhere: passes every local test, drops rows under real traffic.
     // "Non-fatal" and "fire-and-forget" are not the same thing.
     try {
-      await recordLead(data);
+      const r = await recordLead(data);
+      if (r !== "ok") logEvent(reqId, data.form, "insert_skipped", r === "skipped (non-production)" ? "non_production" : "not_configured");
     } catch (leadErr) {
-      // Loud, and never fatal. The lead exists in the inbox either way, which
-      // is the whole reason the email goes first.
-      console.error("Supabase lead insert failed:", leadErr && leadErr.message);
+      logEvent(reqId, data.form, "insert_failed", errorCode(leadErr));
     }
 
-    // Deposits: no autoresponder. Stripe sends the receipt, and the
-    // thank-you page covers what happens next. The client needs the ref so
-    // it can hand it to Stripe as client_reference_id.
+    // Deposits: no first email. Stripe sends the receipt, and the thank-you
+    // page covers what happens next. The client needs the ref so it can hand
+    // it to Stripe as client_reference_id.
     if (isDeposit(data.form)) {
       return res.status(200).json({ ok: true, ref: data.ref });
     }
 
-    // Best effort. The notification above is the contract; a failed
-    // autoresponder must not cost us the lead.
-    if (AUTORESPOND[data.form]) {
-      try {
-        await transport.sendMail({
-          from: `"Nick at Thermal Dawn" <${process.env.GMAIL_USER}>`,
-          to: data.email,
-          replyTo: NOTIFY_TO,
-          subject: data.form === "subscribe"
-            ? "You're subscribed to Thermal Dawn updates"
-            : data.form === "interest-list"
-              ? "You're on the Thermal Dawn interest list"
-              : "Thanks For Getting in Touch",
-          text: formatAutoresponder(data),
-        });
-      } catch (autoErr) {
-        console.error("Autoresponder failed:", autoErr && autoErr.message);
+    // 3. The first email. Best effort: a failure never costs us the lead.
+    const first = firstEmail(data);
+    if (first) {
+      const to = routeTo(data.email);
+      if (!to) {
+        logEvent(reqId, data.form, "first_email_skipped", "test_recipient_unset");
+      } else {
+        try {
+          await transport.sendMail({
+            from: autoresponderFrom(),
+            to,
+            replyTo: NOTIFY_TO,
+            subject: first.subject,
+            text: first.text,
+          });
+        } catch (autoErr) {
+          logEvent(reqId, data.form, "first_email_failed", errorCode(autoErr));
+        }
       }
     }
 
     return res.status(200).json({ ok: true });
   } catch (err) {
-    // Never echo submitted PII back to the client.
-    console.error("Lead notification failed:", err && err.message);
+    // Never echo submitted PII back to the client, and never log it.
+    logEvent(reqId, data.form, "notification_failed", errorCode(err));
     return res.status(500).json({ ok: false, error: "Could not send. Please email us directly." });
   }
 };
@@ -710,3 +919,9 @@ module.exports.leadRow = leadRow;
 module.exports.supabaseAuth = supabaseAuth;
 module.exports.listTags = listTags;
 module.exports.SERVED_STATES = SERVED_STATES;
+module.exports.firstEmail = firstEmail;
+module.exports.isUnservedListLead = isUnservedListLead;
+module.exports.firstNameFor = firstNameFor;
+module.exports.errorCode = errorCode;
+module.exports.InsertError = InsertError;
+module.exports.TEMPLATE_DIR = TEMPLATE_DIR;
