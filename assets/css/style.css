@@ -1425,3 +1425,22 @@ html.js-reveal .reveal.is-in{opacity:1;transform:none;}
   .live-dot::before{animation:none;}
   html.js-reveal .reveal{opacity:1;transform:none;transition:none;}
 }
+
+/* ---- Cost comparison (brief 09, 29 Sep 2026) ---- */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
+table.data tbody th{text-align:left;font-weight:600;padding:13px 16px;border-bottom:1px solid var(--td-line);vertical-align:top;}
+body.dark table.data tbody th{color:#efe6de;border-bottom-color:rgba(255,255,255,.09);}
+/* A row waiting for a figure stays hidden until every [data-figure] cell is
+   filled: adding the figures is what switches it on. */
+table.data tr:has(td[data-figure]:empty){display:none;}
+/* Phones: each row becomes a card, with every value labelled by its column. */
+@media (max-width:640px){
+  table.data--stack{min-width:0;}
+  table.data--stack thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);}
+  table.data--stack tbody tr{display:block;padding:14px 16px;border-bottom:1px solid var(--td-line);}
+  table.data--stack tbody tr:has(td[data-figure]:empty){display:none;}
+  table.data--stack tbody th{display:block;padding:0 0 8px;border:0;font-size:1rem;}
+  table.data--stack tbody td{display:grid;grid-template-columns:minmax(0,9.5rem) 1fr;gap:12px;padding:6px 0;border:0;}
+  table.data--stack tbody td::before{content:attr(data-label);font-weight:600;font-size:.85rem;opacity:.75;}
+  body.dark table.data--stack tbody tr{border-bottom-color:rgba(255,255,255,.09);}
+}
