@@ -39,6 +39,9 @@ jobs:
       - name: Supabase lead row, key selection and interest tags (47 checks)
         run: npm run test:leadrow
 
+      - name: "Form spam screens: page stamp, honeypot, per-IP cap (7 checks)"
+        run: npm run test:spam
+
       - name: "deploy:preview only ever targets preview/ (never main)"
         run: npm run test:deploypreview
 

@@ -616,6 +616,32 @@ function makeTransport() {
 
 /* ---------- handler ---------- */
 
+/* ---------- abuse ----------
+   Every submission emails Nick from his own account, so a flood could fill
+   the inbox, send our "thanks" to any address, and hit Google's sending
+   limit. On top of the honeypot and the (now required) page stamp: a modest
+   per-IP cap, per function instance. Instances do not share memory, so this
+   slows a burst rather than enforcing a global limit. The IP is never
+   logged. (The same code as brief 07's, shipped ahead of it, 30 Sep 2026.) */
+const RATE_WINDOW_MS = 10 * 60 * 1000;
+const RATE_MAX = 10;
+const recentByIp = new Map();
+function clientIp(req) {
+  const h = (req && req.headers) || {};
+  const fwd = String(h["x-forwarded-for"] || h["x-real-ip"] || "").split(",")[0].trim();
+  return fwd || "unknown";
+}
+function rateLimited(ip, now) {
+  const since = now - RATE_WINDOW_MS;
+  const hits = (recentByIp.get(ip) || []).filter((t) => t > since);
+  hits.push(now);
+  recentByIp.set(ip, hits);
+  if (recentByIp.size > 5000) {       // keep the map from growing without bound
+    for (const [k, v] of recentByIp) if (!v.some((t) => t > since)) recentByIp.delete(k);
+  }
+  return hits.length > RATE_MAX;
+}
+
 module.exports = async function handler(req, res) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
@@ -630,11 +656,17 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ ok: false, error: "Invalid request body" });
   }
 
-  // Bot screens. Both return a success shape so a bot learns nothing.
+  // Bot screens. Both return a success shape so a bot learns nothing. The page
+  // stamp is required: all five forms send it (assets/js/forms.js), so a
+  // direct POST without one is a bot.
+  const ts = Number(body.ts);
   const trapped =
     (typeof body.website === "string" && body.website.trim() !== "") ||
-    (Number(body.ts) > 0 && Date.now() - Number(body.ts) < 3000);
+    !(ts > 0) || Date.now() - ts < 3000;
   if (trapped) return res.status(200).json({ ok: true });
+  if (rateLimited(clientIp(req), Date.now())) {
+    return res.status(429).json({ ok: false, error: "Too many submissions. Please email us directly." });
+  }
 
   const { data, error } = parseSubmission(body);
   if (error) return res.status(400).json({ ok: false, error });
