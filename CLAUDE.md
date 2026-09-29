@@ -66,6 +66,10 @@ to be exported.
   `trailingSlash: true` normalises the URL before redirects are matched, so a
   bare `/product` never fires. This silently killed all 18 legacy Wix 301s
   until 25 Aug 2026.
+- **No customer identity in files or commit messages** (standing rule, 28 Sep
+  2026). Enable the hooks once per clone: `git config core.hooksPath .githooks`.
+  `pre-commit` runs `tools/check_no_pii.py` over the tree; `commit-msg` runs it
+  over the message (`--message`). Name customers by TD ref or device_id.
 
 ## Domains (LAUNCHED on thermaldawn.com, 25 Aug 2026)
 - **Live: https://www.thermaldawn.com**, served by Vercel. `www` is canonical;

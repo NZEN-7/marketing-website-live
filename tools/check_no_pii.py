@@ -13,6 +13,7 @@ or phone never goes in, even to reproduce a real email's layout.
     python tools/check_no_pii.py             # scan tracked files, exit 1 on a hit
     python tools/check_no_pii.py --all       # scan the working tree too
     python tools/check_no_pii.py --add NAME  # print the digest for a new surname
+    python tools/check_no_pii.py --message F # a commit message (the commit-msg hook)
 
 WHY THE NAMES ARE HASHED. This guard needs to know the surnames it is hunting,
 which made an earlier version the last file in the repo still carrying customer
@@ -145,19 +146,54 @@ def scan(paths: list[Path], root: Path) -> list[tuple[str, int, str, str]]:
                 hits.append((rel, 0, "customer name in the file path", rel))
                 break
         for i, line in enumerate(text.splitlines(), 1):
-            why = None
-            for tok in TOKEN.findall(line):
-                if is_watched(tok):
-                    why = "customer name"
-                    break
-            if why is None:
-                for rx, w in COMPILED:
-                    if rx.search(line):
-                        why = w
-                        break
+            why = line_hit(line)
             if why:
                 hits.append((rel, i, why, line.strip()[:90]))
     return hits
+
+
+def line_hit(line: str) -> str | None:
+    """The first reason this line carries identity, or None."""
+    for tok in TOKEN.findall(line):
+        if is_watched(tok):
+            return "customer name"
+    for rx, w in COMPILED:
+        if rx.search(line):
+            return w
+    return None
+
+
+# Co-Authored-By trailers carry a noreply@ address; not a customer's.
+NOREPLY = re.compile(r"\bnoreply@[\w.-]+", re.I)
+
+
+def check_message(path: str, show: bool = False) -> int:
+    """The commit-msg hook: the same name list and patterns over a commit
+    message, because the file scan never sees messages. Ported from
+    TD-Platform's check_message (28 Sep 2026, standing rule). Git's comment
+    lines ('#') are skipped; they are not committed. The line itself is only
+    printed with --show, so a name is never echoed into a log."""
+    try:
+        text = Path(path).read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        print("--message needs the commit message file git passes to the hook")
+        return 2
+    hits = []
+    for n, line in enumerate(text.split("\n"), 1):
+        if line.startswith("#"):
+            continue
+        why = line_hit(NOREPLY.sub("", line))
+        if why:
+            hits.append((n, why, line.strip()[:90]))
+    if not hits:
+        return 0
+    print("customer identity in the commit message:\n")
+    for n, why, line in hits:
+        print(f"  line {n}: {why}")
+        if show:
+            print(f"      {line}")
+    print("\nName customers by TD ref or device_id. Re-run with --show to see the lines.")
+    return 1
 
 
 def main() -> int:
@@ -166,8 +202,14 @@ def main() -> int:
     ap.add_argument("--all", action="store_true",
                     help="scan the whole working tree, not just git-tracked files")
     ap.add_argument("--add", metavar="NAME", help="print the digest line for a new name")
+    ap.add_argument("--message", metavar="FILE",
+                    help="check a commit message file instead (the commit-msg hook)")
+    ap.add_argument("--show", action="store_true",
+                    help="with --message, also print the offending lines")
     args = ap.parse_args()
 
+    if args.message is not None:
+        return check_message(args.message, args.show)
     if args.add:
         print(f'    "{digest(args.add)}",   # add this line to WATCHED')
         return 0

@@ -1,0 +1,11 @@
+#!/bin/sh
+# No customer identity in commit messages either. Ported from TD-Platform
+# (CTO Re: Web #6, 28 Sep 2026: a standing rule for every repo).
+# The pre-commit hook scans files; this scans the message git is about to record,
+# with the same hashed name list and patterns (tools/check_no_pii.py --message).
+# Enable with:  git config core.hooksPath .githooks
+python tools/check_no_pii.py --message "$1" || {
+  echo
+  echo "commit blocked: reword the message (your text is kept in .git/COMMIT_EDITMSG)."
+  exit 1
+}
