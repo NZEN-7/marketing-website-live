@@ -31,6 +31,19 @@ Two consequences worth knowing:
 - A deploy takes about half a minute to propagate. Verify by fetching the
   live page, not the local one (see [checks-and-tooling.md](checks-and-tooling.md)).
 
+
+### Previews: `npm run deploy:preview`
+
+Pushes the **checked-out branch** to the mirror as `preview/<branch>`, with the
+same NZEN-7 re-stamp, so Vercel builds a preview deployment and production is
+untouched. `tools/deploy-preview.mjs` takes no arguments (any argument is
+refused), builds the target ref itself, refuses `main`, a detached HEAD, a
+dirty tree and a `deploy` remote that is not the mirror, and calls git without
+a shell. `npm run test:deploypreview` (in CI) checks that it can only ever
+target `refs/heads/preview/`. Because the safety is in the script, a
+permission rule can allow exactly `npm run deploy:preview` and nothing else.
+Preview-only env vars (e.g. brief 07's `TEST_RECIPIENT`) are set by Nick in
+Vercel, on the Preview environment only.
 ## `vercel.json` and `netlify.toml`
 
 They are twins: headers, caching and the redirects are kept identical. Edit one

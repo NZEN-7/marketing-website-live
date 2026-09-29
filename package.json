@@ -10,7 +10,9 @@
     "test:parser": "node scripts/test-lead-parser.js",
     "copy:dump": "node scripts/dump-copy.js",
     "test:leadrow": "node scripts/test-lead-row.js",
-    "check:cachebust": "node scripts/check-cache-bust.js"
+    "check:cachebust": "node scripts/check-cache-bust.js",
+    "deploy:preview": "node tools/deploy-preview.mjs",
+    "test:deploypreview": "node scripts/test-deploy-preview.mjs"
   },
   "dependencies": {
     "nodemailer": "^6.9.15"

@@ -39,6 +39,9 @@ jobs:
       - name: Supabase lead row, key selection and interest tags (47 checks)
         run: npm run test:leadrow
 
+      - name: "deploy:preview only ever targets preview/ (never main)"
+        run: npm run test:deploypreview
+
       - name: Cache-busting (8 assets)
         run: npm run check:cachebust
 
