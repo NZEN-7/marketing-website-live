@@ -147,6 +147,18 @@ const RI = { form: "register-interest", first_name: NAME, last_name: LAST, email
   check("missing SMTP env: no secret name or value dumped", !logs.some((l) => /GMAIL_|not-a-real/.test(l)), logs);
   process.env.GMAIL_APP_PASSWORD = saved;
 
+  // a template that fails to load: the request still succeeds, logged by code
+  const fs = require("fs"), realRead = fs.readFileSync;
+  fs.readFileSync = function (f, ...rest) {
+    if (String(f).includes("_first-emails") && String(f).includes("contact")) throw Object.assign(new Error("ENOENT"), { code: "ENOENT" });
+    return realRead.call(this, f, ...rest);
+  };
+  sent = []; failSend = null;
+  capture(); r = await call({ form: "contact", name: NAME, email: EMAIL, message: "hello" }); release();
+  fs.readFileSync = realRead;
+  check("template unavailable: still 200, notification sent", r.code === 200 && sent.length === 1 && sent[0].to === "nickz@thermaldawn.com", [r.code, sent.length]);
+  check("template unavailable: logged by code, no PII", logs.some((l) => /first_email_failed code=template_unavailable/.test(l)) && piiIn(logs).length === 0, logs);
+
   // ---- 4. abuse screens -----------------------------------------------------
   sent = []; inserts = [];
   const noTs = { method: "POST", body: Object.assign({}, RI), headers: { "x-forwarded-for": "198.51.100.1" } };

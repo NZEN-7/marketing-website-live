@@ -42,7 +42,7 @@ jobs:
       - name: "First emails: templates, served/unserved rule, rendering (55 checks)"
         run: npm run test:firstemails
 
-      - name: "Lead handler: order, test routing, code-only logs, bot screens (34 checks)"
+      - name: "Lead handler: order, test routing, code-only logs, bot screens (36 checks)"
         run: npm run test:handler
 
       - name: "deploy:preview only ever targets preview/ (never main)"

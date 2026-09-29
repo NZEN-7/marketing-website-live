@@ -880,8 +880,12 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({ ok: true, ref: data.ref });
     }
 
-    // 3. The first email. Best effort: a failure never costs us the lead.
-    const first = firstEmail(data);
+    // 3. The first email. Best effort: a failure never costs us the lead,
+    //    including a template that fails to load.
+    let first = null;
+    try { first = firstEmail(data); } catch (tplErr) {
+      logEvent(reqId, data.form, "first_email_failed", "template_unavailable");
+    }
     if (first) {
       const to = routeTo(data.email);
       if (!to) {
