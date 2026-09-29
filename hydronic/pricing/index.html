@@ -227,9 +227,10 @@
        "Australian-made storage" (no source), "Cooling included" (CTO: out until
        an emitter-specific, tested statement exists), "Thermal storage" (the
        evening row covers it), and the $400 to 600 running cost (never reuse).
-       RUNNING-COST ROW: hidden while any [data-figure] cell is empty (CSS
-       :has, in style.css). To switch it on, put the two heat pump figures
-       from claims-register row 33 into those two cells; nothing else changes.
+       RUNNING-COST ROW: on since 30 Sep 2026 with indicative figures (Nick
+       approved; claims register row 33), to be replaced by the energy
+       model's. It hides itself again if either [data-figure] cell is emptied
+       (CSS :has, in style.css).
        PRICE CELLS: the gas and standard heat pump ranges are Sales' drafts,
        live on Nick's ruling of 29 Sep 23:00, unsourced (claims register row
        34). -->
@@ -276,13 +277,13 @@
             <tr class="cost-running">
               <th scope="row">Running cost, typical Victorian home</th>
               <td data-label="Stay on gas">~$1,800/yr</td>
-              <td data-label="Standard heat pump (no storage)" data-figure></td>
-              <td data-label="Thermal Dawn" data-figure></td>
+              <td data-label="Standard heat pump (no storage)" data-figure>~$900&ndash;1,100/yr</td>
+              <td data-label="Thermal Dawn" data-figure>~$600&ndash;750/yr with a cheap or free window</td>
             </tr>
           </tbody>
         </table>
       </div>
-      <p class="micro measure mt-3">Illustrative, not a quote. The standard heat pump has no buffer tank and heats on demand at dawn and dusk, on grid power. Thermal Dawn charges in the cheapest window of the day: your solar, a free power window or overnight off-peak. Gas figures are Sustainability Victoria 2024. Your own figures come in your Heat plan, from your bills.</p>
+      <p class="micro measure mt-3">Illustrative, not a quote. The standard heat pump has no buffer tank and heats on demand at dawn and dusk, on grid power. Thermal Dawn charges in the cheapest window of the day: your solar, a free power window or overnight off-peak. Gas figures are Sustainability Victoria 2024. Your own figures come in your Heat plan, from your bills. Heat pump running costs are indicative, scaled from our energy model of a Victorian home, and will be updated as more homes are modelled.</p>
     </div>
   </section>
 
