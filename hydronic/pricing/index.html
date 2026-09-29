@@ -17,7 +17,7 @@
 <link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png?v=8">
 <link rel="preload" href="/assets/fonts/Montserrat-ExtraBold.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/Montserrat-Regular.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/assets/css/style.css?v=47">
+<link rel="stylesheet" href="/assets/css/style.css?v=48">
 </head>
 <body class="dark">
 <header id="site-header"></header>
@@ -222,33 +222,66 @@
     </div>
   </section>
 
-  <!-- 10. COST COMPARISON: ILLUSTRATIVE ESTIMATE (CTO, 27 Sep: no 15-year row, no measured-day claim) -->
+  <!-- 10. COST COMPARISON: ILLUSTRATIVE ESTIMATE. Brief 09 (CTO, 29 Sep 2026;
+       table by Sales, approach approved by Nick). Removed from the old table:
+       "Australian-made storage" (no source), "Cooling included" (CTO: out until
+       an emitter-specific, tested statement exists), "Thermal storage" (the
+       evening row covers it), and the $400 to 600 running cost (never reuse).
+       RUNNING-COST ROW: hidden while any [data-figure] cell is empty (CSS
+       :has, in style.css). To switch it on, put the two heat pump figures
+       from claims-register row 33 into those two cells; nothing else changes.
+       PRICE CELLS: a dash until the brief carries a source for the gas and
+       standard heat pump ranges. -->
   <section class="section section--dark">
     <div class="wrap">
       <p class="statement">The whole evening ran on <em>heat bought at midday prices.</em></p>
       <h2 class="mt-8">Cost Comparison</h2>
       <p class="list-label mt-3">Illustrative estimate</p>
       <div class="table-wrap mt-5">
-        <table class="data data--win">
+        <table class="data data--win data--stack">
           <thead>
             <tr>
-              <th></th>
-              <th>Stay on gas</th>
-              <th>Standard heat pump</th>
-              <th>Thermal Dawn</th>
+              <th scope="col"><span class="sr-only">Compared</span></th>
+              <th scope="col">Stay on gas</th>
+              <th scope="col">Standard heat pump (no storage)</th>
+              <th scope="col">Thermal Dawn</th>
             </tr>
           </thead>
           <tbody>
-            <tr><td>Gas connection needed</td><td>Yes</td><td>No</td><td>No</td></tr>
-            <tr><td>Australian-made storage</td><td>No</td><td>No</td><td>Yes</td></tr>
-            <tr><td>Cooling included</td><td>No</td><td>Depends</td><td>Yes</td></tr>
-            <tr><td>Thermal storage</td><td>No</td><td>No</td><td>Yes</td></tr>
-            <tr><td>System cost</td><td>$5 to 8k (boiler only)</td><td>$20 to 40k</td><td>Fixed quote at assessment</td></tr>
-            <tr><td>Est. annual running cost</td><td>~$1,800/yr</td><td>~$700/yr (grid)</td><td>~$400 to 600/yr</td></tr>
+            <tr>
+              <th scope="row">Gas connection</th>
+              <td data-label="Stay on gas">Yes</td>
+              <td data-label="Standard heat pump (no storage)">No</td>
+              <td data-label="Thermal Dawn">No</td>
+            </tr>
+            <tr>
+              <th scope="row">Heat for the evening, bought at midday or off-peak prices</th>
+              <td data-label="Stay on gas">No</td>
+              <td data-label="Standard heat pump (no storage)">No: it heats when you need it, at dawn and dusk</td>
+              <td data-label="Thermal Dawn">Yes: it stores the day's heat</td>
+            </tr>
+            <tr>
+              <th scope="row">Follows your solar, battery and cheapest power window</th>
+              <td data-label="Stay on gas">No</td>
+              <td data-label="Standard heat pump (no storage)">Timer at best</td>
+              <td data-label="Thermal Dawn">Yes, automatically. Connects to Home Assistant</td>
+            </tr>
+            <tr>
+              <th scope="row">Price</th>
+              <td data-label="Stay on gas"><span aria-hidden="true">&mdash;</span><span class="sr-only">Not shown</span></td>
+              <td data-label="Standard heat pump (no storage)"><span aria-hidden="true">&mdash;</span><span class="sr-only">Not shown</span></td>
+              <td data-label="Thermal Dawn">From $12,000 including GST, for the equipment; installation depends on the house</td>
+            </tr>
+            <tr class="cost-running">
+              <th scope="row">Running cost, typical Victorian home</th>
+              <td data-label="Stay on gas">~$1,800/yr</td>
+              <td data-label="Standard heat pump (no storage)" data-figure></td>
+              <td data-label="Thermal Dawn" data-figure></td>
+            </tr>
           </tbody>
         </table>
       </div>
-      <p class="micro measure mt-3">An illustrative estimate, not a quote or a measurement: your own figures come from your bills at your site assessment. The standard heat pump figure assumes on-demand heating at dawn and dusk, when there is little solar to use. Thermal Dawn's assumes charging in the cheapest window of the day, whether that is your own solar, a free power window, or overnight off-peak. Gas figures are Sustainability Victoria 2024, as above.</p>
+      <p class="micro measure mt-3">Illustrative, not a quote. The standard heat pump has no buffer tank and heats on demand at dawn and dusk, on grid power. Thermal Dawn charges in the cheapest window of the day: your solar, a free power window or overnight off-peak. Gas figures are Sustainability Victoria 2024. Your own figures come in your Heat plan, from your bills.</p>
     </div>
   </section>
 
