@@ -35,7 +35,6 @@ const SITE = "https://www.thermaldawn.com";
    - VERCEL_ENV !== "production" (preview, local, tests): EVERY outbound email
      goes to TEST_RECIPIENT, and nothing is sent if it is unset; no row goes
      into the production CRM (CTO Re: Web #12, A5). */
-const CRM_PROJECT_REF = "skyequfcoejlhzbyipwt";   // production CRM (CLAUDE.md)
 const isProduction = () => process.env.VERCEL_ENV === "production";
 const bookingLink = () => {
   const v = String(process.env.BOOKING_LINK || "").trim();
@@ -277,8 +276,10 @@ async function recordLead(d) {
   const SUPABASE_URL = process.env.SUPABASE_URL;
   const auth = supabaseAuth(process.env);
   if (!SUPABASE_URL || !auth) return "skipped (not configured)";
-  // A preview or local run never writes to the production CRM.
-  if (!isProduction() && SUPABASE_URL.indexOf(CRM_PROJECT_REF) !== -1) return "skipped (non-production)";
+  // A preview or local run never writes a leads row, whatever SUPABASE_URL
+  // says: a proxy or custom domain for the production project would not carry
+  // its ref (GPT Web B07-N2; the preview-guard rule, folded in 1 Oct).
+  if (!isProduction()) return "skipped (non-production)";
   // return=minimal matters for lead_writer: it can insert but not read, so
   // asking for the row back would fail the insert.
   const res = await fetch(`${SUPABASE_URL}/rest/v1/leads`, {

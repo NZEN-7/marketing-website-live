@@ -39,11 +39,17 @@ jobs:
       - name: Supabase lead row, key selection and interest tags (49 checks)
         run: npm run test:leadrow
 
-      - name: "First emails: templates, served/unserved rule, rendering (55 checks)"
+      - name: "First emails: templates, served/unserved rule, rendering (58 checks)"
         run: npm run test:firstemails
 
-      - name: "Lead handler: order, test routing, code-only logs, bot screens (36 checks)"
+      - name: "Lead handler: order, test routing, code-only logs, bot screens (38 checks)"
         run: npm run test:handler
+
+      - name: "Preview guard: off production, mail to TEST_RECIPIENT only, no insert (16 checks)"
+        run: npm run test:previewguard
+
+      - name: "Form spam screens: page stamp, honeypot, per-IP cap (7 checks)"
+        run: npm run test:spam
 
       - name: "deploy:preview only ever targets preview/ (never main)"
         run: npm run test:deploypreview

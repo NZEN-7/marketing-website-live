@@ -115,7 +115,7 @@ const RI = { form: "register-interest", first_name: NAME, last_name: LAST, email
   check("preview: every email goes to TEST_RECIPIENT only", sent.length === 2 && sent.every((m) => m.to === "nickz+b07@thermaldawn.com"), sent.map((m) => m.to));
   process.env.SUPABASE_URL = "https://staging-not-crm.supabase.co";
   inserts = []; await call(RI);
-  check("preview with non-production Supabase values: the insert runs", inserts.length === 1);
+  check("preview with any other Supabase URL (a proxy, an alias): still no insert (B07-N2)", inserts.length === 0, inserts.length);
   process.env.SUPABASE_URL = "https://skyequfcoejlhzbyipwt.supabase.co";
   delete process.env.VERCEL_ENV;
   sent = []; inserts = []; await call(RI);
@@ -175,6 +175,14 @@ const RI = { form: "register-interest", first_name: NAME, last_name: LAST, email
   release();
   check("per-IP cap: the 11th and 12th in the window are refused (429)", codes.slice(0, 10).every((c) => c === 200) && codes[10] === 429 && codes[11] === 429, codes);
   check("the cap never logs the IP", !logs.some((l) => l.includes("192.0.2.77")), logs.filter((l) => l.includes("192.0.2")));
+
+  // ---- 6. P-S1: nothing but logEvent writes to the logs (codes, never messages) ----
+  const fs2 = require("fs");
+  const src = ["lead.js", "_intake.js"].map((f) => path.join(__dirname, "..", "api", f))
+    .filter((f) => fs2.existsSync(f)).map((f) => fs2.readFileSync(f, "utf8")).join("\n");
+  const writes = src.match(/console\.(log|error|warn|info|debug)\(/g) || [];
+  check("P-S1: the only log write in the lead path is logEvent's one line", writes.length === 1 && /function logEvent[\s\S]{0,200}console\.error\(`lead req=/.test(src), writes);
+  check("P-S1: no error message is ever logged", !/console\.\w+\([^)]*\.message/.test(src));
 
   console.log(failed ? `\n${failed} CHECK(S) FAILED` : "\nAll handler checks passed.");
   process.exit(failed ? 1 : 0);
