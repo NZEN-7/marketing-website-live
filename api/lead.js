@@ -19,6 +19,8 @@
 const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
+// The intake prototype (PRD D13): its own module, so this file's diff stays small.
+const intake = require("./_intake.js");
 
 const TZ = "Australia/Sydney";
 const NOTIFY_TO = "nickz@thermaldawn.com";
@@ -298,6 +300,7 @@ async function recordLead(d) {
 /** Normalise the raw body into a known shape; returns {data} or {error}. */
 function parseSubmission(body) {
   const form = String(body && body.form ? body.form : "").trim();
+  if (form === "intake") return intake.parseIntake(body);
   const spec = FORMS[form];
   if (!spec) return { error: "Unknown form" };
 
@@ -391,6 +394,7 @@ function parseSubmission(body) {
 
 function formatNotification(d, stamp) {
   const when = stamp || formatTimestamp();
+  if (d.form === "intake") return intake.formatIntakeNotification(d, when, d._files);
 
   // Interest list. New labels (Postcode, Interested in, Consent to be
   // contacted, Tags) and sections (INTEREST, LIST) are in lead-parser.gs;
@@ -529,6 +533,7 @@ function formatNotification(d, stamp) {
 }
 
 function formatSubject(d) {
+  if (d.form === "intake") return intake.formatIntakeSubject(d);
   if (d.form === "register-interest") {
     return stripHeader(
       `New website lead: ${d.first_name} ${d.last_name} · ${d.heating} · ${d.email}`
@@ -824,13 +829,22 @@ module.exports = async function handler(req, res) {
 
   // Bot screens. Both return a success shape so a bot learns nothing. The page
   // stamp is required since brief 07: all five forms send it (assets/js/forms.js).
+  // The intake's no-JS long form (SPEC rule 11) is a plain form post with no
+  // page stamp: it relies on the honeypot and the IP cap, and its subject is
+  // tagged [no-JS]. It gets a redirect to the thanks page, not JSON.
+  const ct = String((req.headers && req.headers["content-type"]) || "");
+  const nojsIntake = body.form === "intake" && String(body.nojs) === "1" && /urlencoded|multipart/.test(ct);
+  const reply = (code, json) => {
+    if (nojsIntake && code < 400) { res.setHeader("Location", "/start/thanks/"); return res.status(303).end(); }
+    return res.status(code).json(json);
+  };
   const ts = Number(body.ts);
   const trapped =
     (typeof body.website === "string" && body.website.trim() !== "") ||
-    !(ts > 0) || Date.now() - ts < 3000;
+    (!nojsIntake && (!(ts > 0) || Date.now() - ts < 3000));
   if (trapped) {
     logEvent(reqId, String(body.form || ""), "screened", "bot_trap");
-    return res.status(200).json({ ok: true });
+    return reply(200, { ok: true });
   }
   if (rateLimited(clientIp(req), Date.now())) {
     logEvent(reqId, String(body.form || ""), "screened", "rate_limited");
@@ -839,6 +853,8 @@ module.exports = async function handler(req, res) {
 
   const { data, error } = parseSubmission(body);
   if (error) return res.status(400).json({ ok: false, error });
+  // Intake uploads ride on the notification as attachments (PRD D3).
+  if (data.form === "intake") data._files = intake.intakeAttachments(data);
 
   try {
     const transport = makeTransport();
@@ -854,6 +870,8 @@ module.exports = async function handler(req, res) {
         replyTo: data.email,
         subject: formatSubject(data),
         text: formatNotification(data),
+        attachments: data._files ? data._files.attachments.map((a) =>
+          ({ filename: a.filename, content: a.content, contentType: a.contentType })) : undefined,
       });
     } else {
       logEvent(reqId, data.form, "notification_skipped", "test_recipient_unset");
@@ -866,7 +884,10 @@ module.exports = async function handler(req, res) {
     // kill the container mid-flight, and the insert vanishes with no error
     // anywhere: passes every local test, drops rows under real traffic.
     // "Non-fatal" and "fire-and-forget" are not the same thing.
-    try {
+    // The intake prototype writes no leads row: its columns need the PRD's
+    // migration first (PRD §3.1).
+    if (data.form === "intake") logEvent(reqId, data.form, "insert_skipped", "intake_prototype");
+    else try {
       const r = await recordLead(data);
       if (r !== "ok") logEvent(reqId, data.form, "insert_skipped", r === "skipped (non-production)" ? "non_production" : "not_configured");
     } catch (leadErr) {
@@ -905,7 +926,7 @@ module.exports = async function handler(req, res) {
       }
     }
 
-    return res.status(200).json({ ok: true });
+    return reply(200, { ok: true });
   } catch (err) {
     // Never echo submitted PII back to the client, and never log it.
     logEvent(reqId, data.form, "notification_failed", errorCode(err));

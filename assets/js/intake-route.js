@@ -1,0 +1,114 @@
+/* =========================================================================
+   Thermal Dawn intake: the routing rules (PROTOTYPE, PRD D13)
+   -------------------------------------------------------------------------
+   Pure: given the answers so far and the screen just finished, which screen
+   comes next. Shared by the page (window.TDIntakeRoute) and the tests
+   (require), so the paths in SPEC §1 are checked in CI, not by eye.
+
+   Source: PRDs/Intake form/SPEC - Intake questions and copy.md, rev A.
+   ========================================================================= */
+(function (root) {
+  "use strict";
+
+  var SERVED = ["VIC", "NSW", "ACT"];                 // = SERVED_STATES in api/lead.js
+  var BOILERS = ["boiler_radiators", "boiler_underfloor", "lpg_boiler"];
+  var NON_ICP = ["ducted_gas", "splits", "other"];    // N1 only if these are ALL they picked
+
+  function list(v) { return Array.isArray(v) ? v : (v ? [v] : []); }
+
+  /** State from the postcode, by Australia Post ranges. NZ entries come in
+      as state "OS" from the "not in Australia" link. */
+  function stateFor(pc) {
+    var n = parseInt(String(pc || "").trim(), 10);
+    if (!/^\d{4}$/.test(String(pc || "").trim())) return "";
+    if ((n >= 200 && n <= 299) || (n >= 2600 && n <= 2618) || (n >= 2900 && n <= 2920)) return "ACT";
+    if ((n >= 1000 && n <= 2599) || (n >= 2619 && n <= 2899) || (n >= 2921 && n <= 2999)) return "NSW";
+    if ((n >= 3000 && n <= 3999) || (n >= 8000 && n <= 8999)) return "VIC";
+    if ((n >= 4000 && n <= 4999) || (n >= 9000 && n <= 9999)) return "QLD";
+    if (n >= 5000 && n <= 5999) return "SA";
+    if (n >= 6000 && n <= 6999) return "WA";
+    if (n >= 7000 && n <= 7999) return "TAS";
+    if (n >= 800 && n <= 999) return "NT";
+    return "";
+  }
+
+  function inArea(a) { return SERVED.indexOf(String(a.state || "").toUpperCase()) !== -1; }
+  function hasBoiler(a) { return list(a.heating).some(function (h) { return BOILERS.indexOf(h) !== -1; }); }
+  function notOurProduct(a) {
+    var h = list(a.heating);
+    return h.length > 0 && h.every(function (x) { return NON_ICP.indexOf(x) !== -1; });
+  }
+  function isUrgent(a) { return a.intent === "urgent" || a.boiler_condition === "broken"; }
+
+  /** The route tag for the notification (SPEC §7). */
+  function route(a) {
+    if (a.state && !inArea(a)) return "out-of-area";
+    if (notOurProduct(a)) return "not-our-product";
+    if (a.tenure === "renter") return "renter";
+    if (isUrgent(a)) return "urgent";
+    if (a.intent === "explore") return "explore";
+    return "icp";
+  }
+
+  /** Next screen after `done`, given answers `a`. */
+  function next(done, a) {
+    var intent = a.intent || "fit";                  // no answer on S5 = the full path
+    switch (done) {
+      case "intro": return "S1";
+      case "S1": return "S2";
+      case "S2": return "S3";
+      case "S3": return "S4";
+      case "S4": return String(a.phone || "").trim() ? "S4b" : (inArea(a) ? "S5" : "S6");
+      case "S4b": return inArea(a) ? "S5" : "S6";   // out of area: no intent question, straight to the save
+      case "S5": return "S6";
+      case "S6": return inArea(a) ? "S7" : "O1";      // O1 comes after step 1 is saved
+      case "S7":
+        if (notOurProduct(a)) return "N1";
+        if (intent === "explore") return "MATCH_SHORT";
+        if (intent === "book" || intent === "urgent") return "S9";
+        return hasBoiler(a) ? "S8" : "S9";
+      case "S8": return "S9";
+      case "S9":
+        if (a.tenure === "renter") return "R1";
+        if (isUrgent(a)) return "URGENT";
+        if (intent === "book") return "MATCH";
+        return "S10";
+      case "S10": return "S11";
+      case "S11": return "S12";
+      case "S12": return "S13";
+      case "S13": return "MATCH";
+      case "MATCH": return "S14";                     // "Help us prepare"
+      case "MATCH_SHORT": return "S14";               // "Tell us a bit more"
+      case "S14": return "S15";
+      case "S15": return "S16";
+      case "S16": return "S17";
+      case "S17": return "DONE";
+      default: return null;
+    }
+  }
+
+  /** Step (1-4) a screen belongs to, for the progress bar. */
+  function stepOf(screen) {
+    if (/^S[1-6]b?$/.test(screen) || screen === "intro") return 1;
+    if (/^S(7|8|9|1[0-3])$/.test(screen) || screen === "URGENT" || /^MATCH/.test(screen)) return 2;
+    if (/^S1[4-7]$/.test(screen)) return 3;
+    return 4;
+  }
+
+  /** The 1-2 "why it suits you" lines on the match (SPEC §4), in its order. */
+  function whyLines(a) {
+    var e = list(a.energy), out = [];
+    if (e.indexOf("solar") !== -1) out.push("Your solar can charge the store during the day.");
+    if (["getting_on", "playing_up", "broken"].indexOf(a.boiler_condition) !== -1) out.push("It replaces a boiler you'd otherwise be replacing anyway.");
+    if (list(a.scope).indexOf("hot_water") !== -1) out.push("It can take over your hot water too.");
+    if (e.indexOf("battery") !== -1 || e.indexOf("ev") !== -1) out.push("It works alongside your battery and car charging.");
+    if (e.indexOf("cheap_window") !== -1) out.push("It can charge in your cheap or free window.");
+    return out.slice(0, 2);
+  }
+
+  var api = { SERVED: SERVED, stateFor: stateFor, inArea: inArea, hasBoiler: hasBoiler,
+              notOurProduct: notOurProduct, isUrgent: isUrgent, route: route, next: next,
+              stepOf: stepOf, whyLines: whyLines };
+  if (typeof module !== "undefined" && module.exports) module.exports = api;
+  else root.TDIntakeRoute = api;
+})(this);

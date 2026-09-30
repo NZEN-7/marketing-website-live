@@ -45,6 +45,9 @@ jobs:
       - name: "Lead handler: order, test routing, code-only logs, bot screens (36 checks)"
         run: npm run test:handler
 
+      - name: "Intake prototype: routing, notification order, attachments"
+        run: npm run test:intake
+
       - name: "deploy:preview only ever targets preview/ (never main)"
         run: npm run test:deploypreview
 

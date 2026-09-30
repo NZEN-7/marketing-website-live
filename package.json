@@ -15,7 +15,8 @@
     "test:handler": "node scripts/test-lead-handler.js",
     "check:templates404": "node scripts/check-template-404.js",
     "deploy:preview": "node tools/deploy-preview.mjs",
-    "test:deploypreview": "node scripts/test-deploy-preview.mjs"
+    "test:deploypreview": "node scripts/test-deploy-preview.mjs",
+    "test:intake": "node scripts/test-intake.js"
   },
   "dependencies": {
     "nodemailer": "^6.9.15"
