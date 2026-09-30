@@ -12,7 +12,7 @@
 <link rel="preload" href="/assets/fonts/Montserrat-ExtraBold.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/Montserrat-Regular.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/assets/css/style.css?v=48">
-<link rel="stylesheet" href="/assets/css/intake.css?v=5">
+<link rel="stylesheet" href="/assets/css/intake.css?v=6">
 <script>document.documentElement.classList.add("js");</script>
 </head>
 <body class="dark intake-page">
@@ -26,7 +26,7 @@
 
     <!-- SIDEBAR (PRD IF14): placeholders only for the prototype -->
     <aside class="intake-side" aria-label="About Thermal Dawn">
-      <div class="side-photo" role="img" aria-label="Nick's photo (placeholder)"><span>Nick's photo<br>(placeholder)</span></div>
+      <img class="side-photo" src="/assets/img/nick-headshot-2026-09.jpg" width="180" height="180" alt="Nick, from Thermal Dawn" loading="lazy">
       <p class="side-line">Nick reads every enquiry and calls you himself.</p>
       <p><a class="side-talk" href="mailto:nickz@thermaldawn.com">Talk to Nick</a> <span class="side-email">nickz@thermaldawn.com</span></p>
       <div class="side-ph">Live fleet counters go here (placeholder)</div>
@@ -100,7 +100,7 @@
         </div>
         <p class="iq__err" data-err="phone" hidden>An Australian number, like 0412 345 678.</p>
         <input type="hidden" name="contact_pref" value="" data-contact-pref>
-        <p class="iq__jsonly iq__skip"><button type="button" class="linkbtn" data-skip>Skip for now</button> · <button type="button" class="linkbtn" data-prefer-email>I'd prefer email</button></p>
+        <p class="iq__jsonly iq__skip"><button type="button" class="linkbtn" data-prefer-email>I'd prefer email</button></p>
       </section>
 
       <section class="iq" data-screen="S4b" aria-labelledby="h-S4b">
@@ -150,9 +150,9 @@
         <h2 class="iq__q" id="h-S7">How is your home heated today?</h2>
         <p class="iq__coach">We replace gas and LPG boilers that heat through radiators or underfloor pipes. Pick all that apply.</p>
         <fieldset class="cards" aria-labelledby="h-S7">
-          <label class="card-opt"><input type="checkbox" name="heating" value="boiler_radiators"><span class="card-opt__t">Gas boiler with radiators</span><span class="card-opt__s">Panels on the walls fed by hot water pipes</span><span class="card-opt__tick" aria-hidden="true"></span></label>
-          <label class="card-opt"><input type="checkbox" name="heating" value="boiler_underfloor"><span class="card-opt__t">Gas boiler with underfloor</span><span class="card-opt__s">Hot water pipes in the slab or under the floor</span><span class="card-opt__tick" aria-hidden="true"></span></label>
-          <label class="card-opt"><input type="checkbox" name="heating" value="lpg_boiler"><span class="card-opt__t">LPG boiler</span><span class="card-opt__s">Radiators or underfloor, on bottled gas</span><span class="card-opt__tick" aria-hidden="true"></span></label>
+          <label class="card-opt"><input type="checkbox" name="heating" value="boiler_radiators"><span class="card-opt__t">Gas hydronic with radiators</span><span class="card-opt__s">Panels on the walls fed by hot water pipes</span><span class="card-opt__tick" aria-hidden="true"></span></label>
+          <label class="card-opt"><input type="checkbox" name="heating" value="boiler_underfloor"><span class="card-opt__t">Gas hydronic with underfloor</span><span class="card-opt__s">Hot water pipes in the slab or under the floor</span><span class="card-opt__tick" aria-hidden="true"></span></label>
+          <label class="card-opt"><input type="checkbox" name="heating" value="lpg_boiler"><span class="card-opt__t">LPG hydronic</span><span class="card-opt__s">Radiators or underfloor, on bottled gas</span><span class="card-opt__tick" aria-hidden="true"></span></label>
           <label class="card-opt"><input type="checkbox" name="heating" value="ducted_gas"><span class="card-opt__t">Ducted gas</span><span class="card-opt__s">Warm air through vents in the floor or ceiling</span><span class="card-opt__tick" aria-hidden="true"></span></label>
           <label class="card-opt"><input type="checkbox" name="heating" value="splits"><span class="card-opt__t">Split systems</span><span class="card-opt__s">Wall-mounted reverse-cycle units</span><span class="card-opt__tick" aria-hidden="true"></span></label>
           <label class="card-opt"><input type="checkbox" name="heating" value="other" data-other-toggle><span class="card-opt__t">Something else</span><span class="card-opt__s">Wood, electric panels, a fireplace…</span><span class="card-opt__tick" aria-hidden="true"></span></label>
@@ -259,9 +259,9 @@
           <p class="match-caveat">We'll confirm the design once we've talked and seen your bills.</p>
         </div>
         <div class="match-actions" data-match-actions>
-          <a class="btn btn--primary btn--rect" data-exit="book_chat" data-calendly href="https://calendly.com/nickz-thermaldawn/30min" target="_blank" rel="noopener">Book a 15-minute chat with Nick</a>
+          <button type="button" class="btn btn--primary btn--rect" data-go="S14">Help us prepare: 2 more minutes, all optional</button>
+          <a class="btn btn--ghost-light btn--rect" data-exit="book_chat" data-calendly href="https://calendly.com/nickz-thermaldawn/30min" target="_blank" rel="noopener">Book a 15-minute chat with Nick</a>
           <a class="btn btn--ghost-light btn--rect" data-exit="deposit" href="/pre-order/booking/">Reserve a place: $990 deposit, refundable until your system goes into production</a>
-          <button type="button" class="btn btn--ghost-light btn--rect" data-go="S14">Help us prepare: 2 more minutes, all optional</button>
           <button type="button" class="linkbtn" data-exit="keep_posted">Just keep me posted</button>
         </div>
       </section>
@@ -277,9 +277,9 @@
           <p class="match-caveat">We'll confirm the design once we've talked and seen your bills.</p>
         </div>
         <div class="match-actions">
-          <a class="btn btn--primary btn--rect" data-exit="book_chat" data-calendly href="https://calendly.com/nickz-thermaldawn/30min" target="_blank" rel="noopener">Book a 15-minute chat</a>
-          <button type="button" class="btn btn--ghost-light btn--rect" data-exit="keep_posted">Keep me posted</button>
-          <button type="button" class="linkbtn" data-go="S14">Tell us a bit more</button>
+          <button type="button" class="btn btn--primary btn--rect" data-go="S14">Tell us a bit more</button>
+          <a class="btn btn--ghost-light btn--rect" data-exit="book_chat" data-calendly href="https://calendly.com/nickz-thermaldawn/30min" target="_blank" rel="noopener">Book a 15-minute chat</a>
+          <button type="button" class="linkbtn" data-exit="keep_posted">Keep me posted</button>
         </div>
       </section>
 
@@ -504,6 +504,6 @@
 <footer id="site-footer" class="site-footer"></footer>
 <script src="/assets/js/site.js?v=16" defer></script>
 <script src="/assets/js/intake-route.js?v=1" defer></script>
-<script src="/assets/js/intake.js?v=2" defer></script>
+<script src="/assets/js/intake.js?v=3" defer></script>
 </body>
 </html>

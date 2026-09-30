@@ -82,7 +82,7 @@ check("missing last name is refused", !!lead.parseSubmission(Object.assign({}, b
 check("unknown card values are dropped", lead.parseSubmission(Object.assign({}, base, { heating: ["boiler_radiators", "<script>"] })).data.heating.join() === "boiler_radiators");
 const subj = lead.formatSubject(p.data);
 check("subject: Website lead · name · suburb, state · route · heating · lead_id",
-  subj === `Website lead · Alex Sample · Hawthorn, VIC · icp · Gas boiler with radiators · ${p.data.lead_id}`, subj);
+  subj === `Website lead · Alex Sample · Hawthorn, VIC · icp · Gas hydronic with radiators · ${p.data.lead_id}`, subj);
 check("subject: URGENT first on the urgent route", lead.formatSubject(lead.parseSubmission(Object.assign({}, base, { route: "urgent" })).data).startsWith("URGENT · "));
 check("subject: no CR/LF", !/[\r\n]/.test(lead.formatSubject(lead.parseSubmission(Object.assign({}, base, { first_name: "A\r\nBcc: x@example.com" })).data)));
 const body = lead.formatNotification(p.data, "30 September 2026 at 2:00 pm AEST");

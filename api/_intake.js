@@ -27,7 +27,7 @@ const L = {
             installer: "My installer, plumber or electrician", facebook: "A Facebook group or online forum", event: "An event or expo",
             news: "News, a podcast or an article", other: "Other" },
   call_times: { lunchtime: "Weekdays around lunchtime", after_5: "Weekdays after 5pm", weekends: "Weekends", any: "Any time" },
-  heating: { boiler_radiators: "Gas boiler with radiators", boiler_underfloor: "Gas boiler with underfloor", lpg_boiler: "LPG boiler",
+  heating: { boiler_radiators: "Gas hydronic with radiators", boiler_underfloor: "Gas hydronic with underfloor", lpg_boiler: "LPG hydronic",
              ducted_gas: "Ducted gas", splits: "Split systems", other: "Something else", none: "No heating yet", not_sure: "Not sure" },
   boiler_condition: { working_fine: "Working fine", getting_on: "Getting on a bit", playing_up: "Playing up", broken: "Broken, or about to go", not_sure: "Not sure" },
   boiler_age: { under_5: "Under 5 years", "5_10": "5–10", "10_15": "10–15", over_15: "Over 15", not_sure: "Not sure" },

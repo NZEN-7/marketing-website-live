@@ -128,7 +128,10 @@
     }
     if (id === "S2") return err("email", !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(a.email || ""));
     if (id === "S3") return outsideAU || err("postcode", !/^\d{4}$/.test(a.postcode || ""));
-    if (id === "S4") return !a.phone || err("phone", !PHONE_OK(a.phone));
+    if (id === "S4") {   // no Skip here (Nick): a number, or "I'd prefer email"
+      if (!a.phone && a.contact_pref !== "email") { err("phone", true); $("[name=phone]", form).focus(); return false; }
+      return !a.phone || err("phone", !PHONE_OK(a.phone));
+    }
     return true;
   }
 
@@ -210,6 +213,7 @@
         if (/^image\/(jpeg|png|webp)/.test(blob.type)) { thumb.src = URL.createObjectURL(blob); thumb.hidden = false; }
         drop.hidden = true; done.hidden = false;
         if (later) later.checked = false;
+        var n = $(".upslot__note", slot); if (n) n.hidden = true;
       });
     }
     input.addEventListener("change", function () { take(input.files && input.files[0]); });
@@ -224,7 +228,13 @@
       take(e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]);
     });
     $("[data-remove]", slot).addEventListener("click", function () { clear(); drop.querySelector("input").focus(); });
-    if (later) later.addEventListener("change", function () { if (later.checked && files[key]) clear(); });
+    var note = document.createElement("p"); note.className = "upslot__note"; note.hidden = true;
+    note.textContent = "No problem, you can send it later.";
+    slot.insertBefore(note, later.closest("label"));
+    if (later) later.addEventListener("change", function () {
+      if (later.checked && files[key]) clear();
+      drop.hidden = later.checked || !!files[key]; note.hidden = !later.checked;
+    });
   });
   // A file dropped outside a card must not replace the page.
   ["dragover", "drop"].forEach(function (ev) { window.addEventListener(ev, function (e) { if (!e.target.closest || !e.target.closest("[data-drop]")) e.preventDefault(); }); });
@@ -259,11 +269,9 @@
     ul.hidden = !why.length;
     $$("[data-remote-line]", s).forEach(function (el) { el.hidden = $("[data-remote]", form).value !== "true"; });
     var acts = $("[data-match-actions]", s);
-    if (acts) {   // ready to book: the deposit first (SPEC §4)
+    if (acts) {   // "Help us prepare" leads (Nick, 30 Sep); on ready to book the deposit comes next, before the chat
       var dep = $('[data-exit="deposit"]', acts), chat = $('[data-exit="book_chat"]', acts);
-      var bookFirst = (a.intent === "book");
-      if (bookFirst) { acts.insertBefore(dep, chat); dep.className = "btn btn--primary btn--rect"; chat.className = "btn btn--ghost-light btn--rect"; }
-      else { acts.insertBefore(chat, dep); chat.className = "btn btn--primary btn--rect"; dep.className = "btn btn--ghost-light btn--rect"; }
+      if (a.intent === "book") acts.insertBefore(dep, chat); else acts.insertBefore(chat, dep);
     }
   }
   var CALL = { lunchtime: "weekdays around lunchtime", after_5: "weekdays after 5pm", weekends: "on the weekend", any: "any time" };
