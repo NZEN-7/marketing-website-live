@@ -149,5 +149,10 @@ check("the urgent screen has no plain 'or book a time' (10)", !/>or book a time<
 check("the short match headline ends with a full stop (13)", /id="h-MATCH_SHORT">Here's the short version<span data-first-prefix>, <span data-first><\/span><\/span>\.<\/h2>/.test(page));
 check("S7 coach and N1 say hydronic (Sales' SPEC)", /We replace gas and LPG hydronic heating: a boiler that heats water/.test(page) && /LPG hydronic heating \(a boiler heating radiators/.test(page));
 
+check("SPEC rev B: the sidebar line", /Nick reads every enquiry and gets back to you himself\./.test(page) && !/calls you himself/.test(page));
+check("SPEC rev B: 'Landlord's phone'", /<span>Landlord's phone<\/span>/.test(page) && !/Or their phone/.test(page));
+check("SPEC rev B: the upload-set message promises no email", /One file was too big to send here\. No problem: Nick will be in touch, and you can send it to him then\./.test(page) && !/Reply to the email/.test(visible(page)));
+check("SPEC rev B: the urgent screen and urgent Done lines", /Sorry to hear about the boiler/.test(page) && (page.match(/Nick will try to call you today\. If we miss you, we'll try again tomorrow at lunchtime\./g) || []).length === 2);
+
 console.log(failed ? `\n${failed} CHECK(S) FAILED` : "\nAll intake checks passed.");
 process.exit(failed ? 1 : 0);
