@@ -116,6 +116,7 @@ html:not(.js) .iq{margin:0 0 34px;}
 .match-actions > *{min-width:0;}
 .btn--ghost-light{background:transparent;color:var(--iq-ink);border:1.5px solid rgba(255,255,255,.4);}
 .btn--ghost-light:hover{border-color:var(--td-orange);color:#fff;}
+.intake a.btn--ghost-light,.intake a.btn--ghost-light:visited{color:var(--iq-ink);}   /* a site link colour otherwise wins */
 .btn:focus-visible{outline:3px solid var(--td-orange);outline-offset:3px;}
 .iq-nav{display:flex;gap:12px;justify-content:space-between;margin:28px 0 0;}
 .iq-nav [data-continue]{margin-left:auto;}
