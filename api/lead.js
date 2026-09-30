@@ -614,6 +614,25 @@ function makeTransport() {
   });
 }
 
+/* ---------- preview guard ----------
+   Preview and development deployments run this same handler with the same
+   env, so without a guard a test submission on a preview URL emails a real
+   address and writes a production leads row. Anything that is not
+   VERCEL_ENV=production (preview, development, a local run with it unset):
+   every email goes to TEST_RECIPIENT only, nothing is sent if that is unset,
+   and the leads insert is skipped. Each is logged as a code, never with PII.
+   Production is untouched. (Nick, 30 Sep 2026, ahead of brief 07.) */
+function previewGuard(env) {
+  if (env.VERCEL_ENV === "production") return { live: true, to: null };
+  const to = String(env.TEST_RECIPIENT || "").trim();
+  return { live: false, to: to || null };
+}
+/** Where an email meant for `liveTo` goes: itself live, TEST_RECIPIENT on a
+    preview, or null (don't send) on a preview with no TEST_RECIPIENT. */
+function routeTo(guard, liveTo) {
+  return guard.live ? liveTo : guard.to;
+}
+
 /* ---------- handler ---------- */
 
 /* ---------- abuse ----------
@@ -671,17 +690,24 @@ module.exports = async function handler(req, res) {
   const { data, error } = parseSubmission(body);
   if (error) return res.status(400).json({ ok: false, error });
 
+  const guard = previewGuard(process.env);
+
   try {
     const transport = makeTransport();
     const from = `"Thermal Dawn Website" <${process.env.GMAIL_USER}>`;
 
-    await transport.sendMail({
-      from,
-      to: NOTIFY_TO,
-      replyTo: data.email,
-      subject: formatSubject(data),
-      text: formatNotification(data),
-    });
+    const notifyTo = routeTo(guard, NOTIFY_TO);
+    if (notifyTo) {
+      await transport.sendMail({
+        from,
+        to: notifyTo,
+        replyTo: data.email,
+        subject: formatSubject(data),
+        text: formatNotification(data),
+      });
+    } else {
+      console.log("preview_guard: notification_not_sent_no_test_recipient");
+    }
 
     // The email is out and the lead is safe. Everything below is best effort.
     //
@@ -690,7 +716,8 @@ module.exports = async function handler(req, res) {
     // anywhere: passes every local test, drops rows under real traffic.
     // "Non-fatal" and "fire-and-forget" are not the same thing.
     try {
-      await recordLead(data);
+      if (guard.live) await recordLead(data);
+      else console.log("preview_guard: leads_insert_skipped");
     } catch (leadErr) {
       // Loud, and never fatal. The lead exists in the inbox either way, which
       // is the whole reason the email goes first.
@@ -706,11 +733,14 @@ module.exports = async function handler(req, res) {
 
     // Best effort. The notification above is the contract; a failed
     // autoresponder must not cost us the lead.
-    if (AUTORESPOND[data.form]) {
+    const autoTo = routeTo(guard, data.email);
+    if (AUTORESPOND[data.form] && !autoTo) {
+      console.log("preview_guard: autoresponder_not_sent_no_test_recipient");
+    } else if (AUTORESPOND[data.form]) {
       try {
         await transport.sendMail({
           from: `"Nick at Thermal Dawn" <${process.env.GMAIL_USER}>`,
-          to: data.email,
+          to: autoTo,
           replyTo: NOTIFY_TO,
           subject: data.form === "subscribe"
             ? "You're subscribed to Thermal Dawn updates"
@@ -742,3 +772,5 @@ module.exports.leadRow = leadRow;
 module.exports.supabaseAuth = supabaseAuth;
 module.exports.listTags = listTags;
 module.exports.SERVED_STATES = SERVED_STATES;
+module.exports.previewGuard = previewGuard;
+module.exports.routeTo = routeTo;

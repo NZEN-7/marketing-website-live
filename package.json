@@ -13,7 +13,8 @@
     "check:cachebust": "node scripts/check-cache-bust.js",
     "deploy:preview": "node tools/deploy-preview.mjs",
     "test:deploypreview": "node scripts/test-deploy-preview.mjs",
-    "test:spam": "node scripts/test-spam-guard.js"
+    "test:spam": "node scripts/test-spam-guard.js",
+    "test:previewguard": "node scripts/test-preview-guard.js"
   },
   "dependencies": {
     "nodemailer": "^6.9.15"

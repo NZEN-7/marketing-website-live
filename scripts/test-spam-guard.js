@@ -13,7 +13,8 @@ require.cache[nm] = { id: nm, filename: nm, loaded: true, exports: {
   createTransport: () => ({ sendMail: async (m) => { sent.push(m); } }),
 } };
 global.fetch = async () => ({ ok: true, status: 201, text: async () => "" });
-Object.assign(process.env, { GMAIL_USER: "nickz@thermaldawn.com", GMAIL_APP_PASSWORD: "not-a-real-password" });
+// Live behaviour: off production the preview guard would send nothing (no TEST_RECIPIENT).
+Object.assign(process.env, { GMAIL_USER: "nickz@thermaldawn.com", GMAIL_APP_PASSWORD: "not-a-real-password", VERCEL_ENV: "production" });
 delete process.env.SUPABASE_URL;
 
 const lead = require(path.join(__dirname, "..", "api", "lead.js"));
