@@ -56,6 +56,9 @@ check("interest-list QLD -> §2", key(IL({ state: "QLD" })) === "interest-list-u
 check("interest-list NZ -> §2", key(IL({ state: "NZ" })) === "interest-list-unserved");
 check("interest-list VIC + Split systems only -> §2", key(IL({ state: "VIC", heating: "Split systems only" })) === "interest-list-unserved");
 check("unserved rule: missing state is served", lead.isUnservedListLead({ form: "interest-list", heating: "Gas ducted" }) === false);
+check("unserved rule: an unrecognised state is served (B07-S1)", ["UNKNOWN", "XX", "Victoria", "OS"].every((st) => lead.isUnservedListLead({ form: "interest-list", state: st, heating: "Gas ducted" }) === false));
+check("unserved rule: every known unserved choice on the form is §2", ["QLD", "SA", "WA", "TAS", "NT", "NZ", " qld "].every((st) => key(IL({ state: st })) === "interest-list-unserved"));
+check("unserved rule: served and unserved lists don't overlap", lead.SERVED_STATES.every((st) => lead.UNSERVED_STATES.indexOf(st) === -1));
 check("unserved rule: only for interest-list", lead.isUnservedListLead({ form: "register-interest", state: "QLD" }) === false);
 check("contact -> contact", key(P({ form: "contact", name: "Casey van Dijk", email: "c@example.com", message: "x" })) === "contact");
 check("subscribe -> subscribe", key(P({ form: "subscribe", email: "s@example.com" })) === "subscribe");

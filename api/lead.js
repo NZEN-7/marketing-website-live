@@ -142,6 +142,10 @@ const FORMS = {
    overrule). Change here and in /interest/'s SERVED list together;
    test:leadrow fails if they drift. */
 const SERVED_STATES = ["VIC", "NSW", "ACT"];
+// The interest list's other choices (interest/index.html): known, and not
+// served. Anything outside both lists is unrecognised and gets the served
+// email (brief 07 decision 1; GPT Web B07-S1).
+const UNSERVED_STATES = ["QLD", "SA", "WA", "TAS", "NT", "NZ"];
 
 /** CRM tags for an interest-list signup (CEO ruling, item 4). Pure, so the
     tags can be recomputed from a stored row. Empty when the person is in a
@@ -560,14 +564,14 @@ function formatSubject(d) {
    Stripe-webhook brief of its own. */
 const AUTORESPOND = { "register-interest": true, contact: true, subscribe: true, "interest-list": true };
 
-/* Unserved (HANDOVER §2) only when CLEARLY unserved: a state outside
-   SERVED_STATES (NZ included), or "Split systems only". Anything else,
+/* Unserved (HANDOVER §2) only when CLEARLY unserved: a known unserved state
+   (UNSERVED_STATES, NZ included), or "Split systems only". Anything else,
    including a missing or unrecognised value, is served (§1) and gets a call.
    Not listTags: that one tags served-state cooling and hot-water leads. */
 function isUnservedListLead(d) {
   if (d.form !== "interest-list") return false;
   const state = String(d.state || "").trim().toUpperCase();
-  if (state && SERVED_STATES.indexOf(state) === -1) return true;
+  if (UNSERVED_STATES.indexOf(state) !== -1) return true;
   return String(d.heating || "").trim() === "Split systems only";
 }
 
@@ -923,6 +927,7 @@ module.exports.leadRow = leadRow;
 module.exports.supabaseAuth = supabaseAuth;
 module.exports.listTags = listTags;
 module.exports.SERVED_STATES = SERVED_STATES;
+module.exports.UNSERVED_STATES = UNSERVED_STATES;
 module.exports.firstEmail = firstEmail;
 module.exports.isUnservedListLead = isUnservedListLead;
 module.exports.firstNameFor = firstNameFor;
