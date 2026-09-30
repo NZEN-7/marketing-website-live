@@ -176,6 +176,28 @@ const RI = { form: "register-interest", first_name: NAME, last_name: LAST, email
   check("per-IP cap: the 11th and 12th in the window are refused (429)", codes.slice(0, 10).every((c) => c === 200) && codes[10] === 429 && codes[11] === 429, codes);
   check("the cap never logs the IP", !logs.some((l) => l.includes("192.0.2.77")), logs.filter((l) => l.includes("192.0.2")));
 
+  // ---- 5. the intake: a repeat of the same send is not sent twice (Sales review, 1) ----
+  process.env.VERCEL_ENV = "preview"; process.env.TEST_RECIPIENT = "test-inbox@example.com";
+  const IN = { form: "intake", first_name: NAME, last_name: LAST, email: EMAIL, postcode: "3122", state: "VIC",
+    heating: ["boiler_radiators"], outcome: "completed", lead_id: "il-0123456789" };
+  sent = []; failSend = null;
+  capture(); const i1 = await call(IN); const i2 = await call(IN); release();
+  check("intake: two taps, one notification (both answered 200)", i1.code === 200 && i2.code === 200 && sent.length === 1, [i1.code, i2.code, sent.length]);
+  check("intake: the repeat is logged by code, no PII", logs.some((l) => /screened code=repeat_send/.test(l)) && piiIn(logs).length === 0, logs);
+  check("intake: the notification carries the page's lead ID", /il-0123456789/.test(sent[0].subject), sent[0] && sent[0].subject);
+  sent = [];
+  capture(); await call(Object.assign({}, IN, { lead_id: "il-aaaaaaaaaa", outcome: "urgent_call" }));
+  await call(Object.assign({}, IN, { lead_id: "il-aaaaaaaaaa", outcome: "completed" })); release();
+  check("intake: urgent first, then its details: both sent", sent.length === 2, sent.length);
+  sent = []; failSend = (m, i) => (i === 0 && !failSend.done ? (failSend.done = true, new Error("smtp down")) : null);
+  capture(); const f1 = await call(Object.assign({}, IN, { lead_id: "il-bbbbbbbbbb" }));
+  const f2 = await call(Object.assign({}, IN, { lead_id: "il-bbbbbbbbbb" })); release();
+  check("intake: a failed send can be retried with the same lead ID", f1.code === 500 && f2.code === 200 && sent.length === 1, [f1.code, f2.code, sent.length]);
+  failSend = null;
+  sent = [];
+  capture(); await call(Object.assign({}, IN, { lead_id: "not-an-id" })); await call(Object.assign({}, IN, { lead_id: "not-an-id" })); release();
+  check("intake: a malformed lead ID is replaced, never trusted", sent.length === 2 && !/not-an-id/.test(sent[0].subject), sent.map((m) => m.subject));
+
   console.log(failed ? `\n${failed} CHECK(S) FAILED` : "\nAll handler checks passed.");
   process.exit(failed ? 1 : 0);
 })().catch((e) => { release(); console.error("FAIL  harness crashed:", e && e.stack); process.exit(1); });

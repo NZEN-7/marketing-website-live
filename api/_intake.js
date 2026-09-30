@@ -44,7 +44,7 @@ const L = {
   off_gas: { everything: "Yes, everything off gas", keep_cooktop: "Yes, but keep the gas cooktop", heating_only: "Just the heating for now", not_sure: "Not sure" },
 };
 const SLOTS = { winter_gas_bill: "winter gas bill", boiler_compliance_plate: "boiler compliance plate", switchboard: "switchboard", electricity_bill: "electricity bill" };
-const ROUTES = ["icp", "explore", "urgent", "out-of-area", "not-our-product", "renter"];
+const ROUTES = ["icp", "icp-check", "explore", "urgent", "out-of-area", "not-our-product", "renter"];
 const OUTCOMES = ["completed", "book_chat", "deposit", "keep_posted", "no_thanks", "urgent_call", "urgent_book", "n1_chat", "landlord_share"];
 const SCREENS = /^(intro|S\d{1,2}b?|MATCH|MATCH_SHORT|URGENT|DONE|O1|N1|R1|POSTED)$/;
 
@@ -53,13 +53,16 @@ const ASKED_ON = { phone: "S4", call_times: "S4b", intent: "S5", source: "S6", r
   boiler_condition: "S8", boiler_age: "S8", tenure: "S9", scope: "S10", energy: "S11", winter_gas_bill_band: "S12", timing: "S13",
   timing_note: "S13", storeys: "S14", radiator_band: "S14", underfloor_band: "S14", built_band: "S14", off_gas: "S15", uploads: "S16", notes: "S17" };
 
+const LEAD_ID = /^il-[0-9a-f]{10}$/;
 const pick = (map, v) => (Object.prototype.hasOwnProperty.call(map, v) ? v : "");
 
 function parseIntake(body) {
   const nojs = String(body.nojs) === "1";
   const d = {
     form: "intake", formLabel: "Website Intake (prototype)", nojs,
-    lead_id: "il-" + crypto.randomBytes(5).toString("hex"),
+    // The page makes its lead ID once per visit, so a repeat of the same send
+    // can be recognised (Sales review, 1). Anything else gets a fresh one.
+    lead_id: LEAD_ID.test(String(body.lead_id || "")) ? String(body.lead_id) : "il-" + crypto.randomBytes(5).toString("hex"),
     first_name: clamp(body.first_name, 120), last_name: clamp(body.last_name, 120),
     email: clamp(body.email, 200), phone: clamp(body.phone, 40),
     contact_pref: pick({ phone: 1, email: 1 }, body.contact_pref),
@@ -81,6 +84,7 @@ function parseIntake(body) {
     send_later: list(body.send_later).filter((v) => SLOTS[v]),
     notes: clamp(body.notes, 5000),
     landlord_name: clamp(body.landlord_name, 200), landlord_email: clamp(body.landlord_email, 200),
+    landlord_phone: clamp(body.landlord_phone, 40),
     route: ROUTES.indexOf(body.route) !== -1 ? body.route : "", outcome: OUTCOMES.indexOf(body.outcome) !== -1 ? body.outcome : (nojs ? "completed" : ""),
     rung_reached: ["1", "2", "3", "done"].indexOf(String(body.rung_reached)) !== -1 ? String(body.rung_reached) : (nojs ? "done" : ""),
     last_screen: SCREENS.test(String(body.last_screen || "")) ? String(body.last_screen) : "",
@@ -188,7 +192,7 @@ function formatIntakeNotification(d, when, files) {
     `Uploads: ${upl.length ? upl.join("; ") : ((d.seen || []).indexOf("S16") !== -1 ? "Skipped" : "Not asked")}`,
   ];
   if (files && files.rejected.length) lines.push(`Uploads not attached (type or size): ${files.rejected.join(", ")}`);
-  if (d.landlord_name || d.landlord_email) lines.push("", "LANDLORD", `Name: ${d.landlord_name || "-"}`, `Email: ${d.landlord_email || "-"}`);
+  if (d.landlord_name || d.landlord_email || d.landlord_phone) lines.push("", "LANDLORD", `Name: ${d.landlord_name || "-"}`, `Email: ${d.landlord_email || "-"}`, `Phone: ${d.landlord_phone || "-"}`);
   lines.push("", "ANYTHING ELSE", d.notes || val(d, "notes"), "");
   return lines.join("\n");
 }
@@ -199,4 +203,23 @@ function formatIntakeSubject(d) {
   return oneLine(`${head} · ${d.first_name} ${d.last_name} · ${place} · ${d.route || "-"} · ${heat} · ${d.lead_id}${d.nojs ? " [no-JS]" : ""}`);
 }
 
-module.exports = { parseIntake, formatIntakeNotification, formatIntakeSubject, intakeAttachments, sniff, LABELS: L, SLOTS };
+/* ---- a repeat of the same send (Sales review, 1: two taps, two leads) ----
+   The page locks its buttons after the first tap. This is the backstop: a
+   (lead ID, outcome) pair already sent in the last 30 minutes is answered
+   "ok" and not sent again. An urgent lead's later "Help us prepare" send has
+   a different outcome, so it still goes. Memory is per function instance,
+   like the IP cap; in the real build the leads table's unique lead ID does
+   this across instances. */
+const REPEAT_MS = 30 * 60 * 1000;
+const sentKeys = new Map();
+function claimSend(d, now) {
+  const key = `${d.lead_id}|${d.outcome}`;
+  for (const [k, t] of sentKeys) if (now - t > REPEAT_MS) sentKeys.delete(k);
+  if (sentKeys.has(key)) return false;
+  sentKeys.set(key, now);
+  return true;
+}
+/** A send that failed may be retried. */
+function releaseSend(d) { sentKeys.delete(`${d.lead_id}|${d.outcome}`); }
+
+module.exports = { parseIntake, claimSend, releaseSend, formatIntakeNotification, formatIntakeSubject, intakeAttachments, sniff, LABELS: L, SLOTS };

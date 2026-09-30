@@ -51,8 +51,8 @@ check("fit with 'Broken, or about to go' jumps to URGENT after S9",
 check("no answer on S5 takes the full fit path", walk({ state: "NSW", heating: ["boiler_radiators"] }).endsWith("S13 MATCH"));
 
 // ---- the closes ----
-check("O1: QLD saves step 1 (S6), then closes", walk({ state: "QLD", phone: "" }) === "S1 S2 S3 S4 S6 O1");
-check("O1: outside Australia", walk({ state: "OS" }) === "S1 S2 S3 S4 S6 O1");
+check("O1: QLD goes straight to consent (S6), then closes: no phone or intent", walk({ state: "QLD", phone: "0400000001" }) === "S1 S2 S3 S6 O1");
+check("O1: outside Australia, the same (no AU phone)", walk({ state: "OS" }) === "S1 S2 S3 S6 O1");
 for (const h of [["splits"], ["ducted_gas"], ["other"], ["splits", "ducted_gas"]]) {
   check(`N1: ${h.join("+")} only`, walk({ state: "VIC", intent: "fit", heating: h }).endsWith("S7 N1"));
 }
@@ -60,13 +60,25 @@ for (const h of [["boiler_radiators", "ducted_gas"], ["none"], ["not_sure"], ["s
   check(`must NOT close: ${h.join("+")}`, walk({ state: "VIC", intent: "fit", heating: h }).indexOf("N1") === -1);
 }
 check("R1: renting closes at S9", walk({ state: "NSW", intent: "fit", heating: ["boiler_radiators"], tenure: "renter" }).endsWith("S9 R1"));
-check("'Not sure' never closes", R.route({ state: "VIC", heating: ["not_sure"], boiler_condition: "not_sure" }) === "icp");
+check("'Not sure' never closes; it routes icp-check", R.route({ state: "VIC", heating: ["not_sure"], boiler_condition: "not_sure" }) === "icp-check");
+check("icp-check: 'No heating yet', and nothing picked", R.route({ state: "VIC", heating: ["none"] }) === "icp-check" && R.route({ state: "VIC" }) === "icp-check");
+check("icp: a boiler picked, even alongside 'Not sure'", R.route({ state: "VIC", heating: ["lpg_boiler", "not_sure"] }) === "icp");
+check("the careful match: no boiler picked", R.unconfirmed({ heating: ["not_sure"] }) && R.unconfirmed({ heating: ["none"] }) && !R.unconfirmed({ heating: ["boiler_underfloor"] }));
+check("emitters: LPG alone is 'radiators or underfloor heating'", R.emitters({ heating: ["lpg_boiler"] }) === "radiators or underfloor heating");
+check("emitters: LPG + gas radiators is 'radiators'", R.emitters({ heating: ["lpg_boiler", "boiler_radiators"] }) === "radiators");
+check("emitters: both gas cards", R.emitters({ heating: ["boiler_radiators", "boiler_underfloor"] }) === "radiators and underfloor heating");
 
 // ---- the match's why lines (SPEC §4) ----
 check("why: none of the triggers -> no line", R.whyLines({ energy: ["none"] }).length === 0);
-check("why: solar + older boiler -> those two, in order",
+check("why: older boiler first, then solar",
   JSON.stringify(R.whyLines({ energy: ["solar"], boiler_condition: "getting_on", scope: ["hot_water"] })) ===
-  JSON.stringify(["Your solar can charge the store during the day.", "It replaces a boiler you'd otherwise be replacing anyway."]));
+  JSON.stringify(["It replaces a boiler you'd otherwise be replacing anyway.", "Your solar can charge the store during the day."]));
+check("why: the cheap window outranks the EV (Sales' case)",
+  JSON.stringify(R.whyLines({ energy: ["ev", "cheap_window"], boiler_condition: "playing_up" })) ===
+  JSON.stringify(["It replaces a boiler you'd otherwise be replacing anyway.", "It can charge in your cheap or free window."]));
+check("why: EV alone never mentions a battery", JSON.stringify(R.whyLines({ energy: ["ev"] })) === JSON.stringify(["It works alongside your car charging."]));
+check("why: battery alone", JSON.stringify(R.whyLines({ energy: ["battery"] })) === JSON.stringify(["It works alongside your battery."]));
+check("why: battery and EV", JSON.stringify(R.whyLines({ energy: ["battery", "ev"] })) === JSON.stringify(["It works alongside your battery and car charging."]));
 check("why: at most two lines", R.whyLines({ energy: ["solar", "battery", "cheap_window"], boiler_condition: "broken", scope: ["hot_water"] }).length === 2);
 
 // ---- the server: parse, subject, notification (SPEC §7) ----
@@ -76,6 +88,15 @@ const base = { form: "intake", first_name: "Alex", last_name: "Sample", email: "
 const p = lead.parseSubmission(base);
 check("intake parses with the three required fields", !p.error && p.data.form === "intake", p.error);
 check("a lead_id is issued", /^il-[0-9a-f]{10}$/.test(p.data.lead_id));
+check("the page's own lead_id is kept, so a repeat can be spotted", lead.parseSubmission(Object.assign({}, base, { lead_id: "il-00ff00ff00" })).data.lead_id === "il-00ff00ff00");
+check("a malformed lead_id is replaced", /^il-[0-9a-f]{10}$/.test(lead.parseSubmission(Object.assign({}, base, { lead_id: "il-<x>" })).data.lead_id));
+const k = { lead_id: "il-1111111111", outcome: "completed" };
+check("claimSend: first yes, repeat no, other outcome yes, after release yes",
+  I.claimSend(k, 1000) && !I.claimSend(k, 2000) && I.claimSend(Object.assign({}, k, { outcome: "urgent_call" }), 2000) &&
+  (I.releaseSend(k), I.claimSend(k, 3000)));
+check("claimSend: a repeat after 30 minutes is a new send", I.claimSend(k, 3000 + 31 * 60 * 1000));
+check("icp-check is a route the server keeps", lead.parseSubmission(Object.assign({}, base, { route: "icp-check" })).data.route === "icp-check");
+check("the landlord's phone reaches the notification", /LANDLORD[\s\S]*Phone: 0400 000 002/.test(lead.formatNotification(lead.parseSubmission(Object.assign({}, base, { landlord_phone: "0400 000 002" })).data, "x")));
 check("missing postcode is refused (unless outside Australia)", !!lead.parseSubmission(Object.assign({}, base, { postcode: "" })).error &&
   !lead.parseSubmission(Object.assign({}, base, { postcode: "", state: "OS" })).error);
 check("missing last name is refused", !!lead.parseSubmission(Object.assign({}, base, { last_name: "" })).error);
@@ -115,6 +136,18 @@ check("a non-image with an image name, and an unknown slot, are refused", a.reje
 check("a file over 4 MB is refused", I.intakeAttachments({ uploads: [{ slot: "switchboard", name: "big.jpg",
   data: Buffer.concat([Buffer.from([0xff, 0xd8, 0xff]), Buffer.alloc(4 * 1024 * 1024 + 1)]).toString("base64") }] }).attachments.length === 0);
 check("at most 6 files are considered", lead.parseSubmission(Object.assign({}, base, { uploads: new Array(9).fill({}) })).data.uploads.length === 6);
+
+// ---- the page: promises and copy (Sales review) ----
+const fs = require("fs");
+const page = fs.readFileSync(path.join(__dirname, "..", "start", "index.html"), "utf8");
+const thanks = fs.readFileSync(path.join(__dirname, "..", "start", "thanks", "index.html"), "utf8");
+const visible = (h) => h.replace(/<!--[\s\S]*?-->/g, "");
+check("no 'we've emailed you' promise on either Done (18)", !/emailed you/.test(visible(page)) && !/emailed you/.test(visible(thanks)));
+check("the honeypot has no text and is hidden from screen readers (16)", /<div class="hp" aria-hidden="true"><input [^>]*name="website"[^>]*tabindex="-1"[^>]*aria-hidden="true"><\/div>/.test(page) && !/Leave this empty/.test(page));
+check("S6 has a Skip (12)", /data-screen="S6"[\s\S]*?data-skip[\s\S]*?<\/section>/.test(page.slice(page.indexOf('data-screen="S6"'), page.indexOf('data-screen="S7"'))));
+check("the urgent screen has no plain 'or book a time' (10)", !/>or book a time</.test(page) && /Sorry to hear about the boiler/.test(page));
+check("the short match headline ends with a full stop (13)", /id="h-MATCH_SHORT">Here's the short version<span data-first-prefix>, <span data-first><\/span><\/span>\.<\/h2>/.test(page));
+check("S7 coach and N1 say hydronic (Sales' SPEC)", /We replace gas and LPG hydronic heating: a boiler that heats water/.test(page) && /LPG hydronic heating \(a boiler heating radiators/.test(page));
 
 console.log(failed ? `\n${failed} CHECK(S) FAILED` : "\nAll intake checks passed.");
 process.exit(failed ? 1 : 0);

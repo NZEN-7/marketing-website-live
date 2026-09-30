@@ -19,6 +19,10 @@
   var MAX_FILE = 4 * 1024 * 1024;          // SPEC §2: a single file over 4 MB is "a bit big"
   var MAX_SET = 3.2 * 1024 * 1024;         // raw bytes; base64 + JSON must stay under Vercel's 4.5 MB
   var stamped = Date.now();
+  // One lead ID per visit (Sales review, 1): a repeat of the same send is
+  // recognised by the server and not sent twice.
+  var LEAD_ID = "il-" + Array.prototype.map.call((window.crypto || window.msCrypto).getRandomValues(new Uint8Array(5)),
+    function (b) { return ("0" + b.toString(16)).slice(-2); }).join("");
 
   // ---- postcode STUB (PRD D13). Replaced by the ABS POA-SAL data at build.
   // One remote postcode (2880 Broken Hill, ABS "Remote") for the delivery line.
@@ -41,6 +45,7 @@
   var btnBack = $("[data-back]", form), btnCont = $("[data-continue]", form);
   var sending = $("[data-sending]", form);
   var history = [], seen = {}, current = null, sent = false, files = {}, advanceTimer = null;
+  var busy = null, sentOutcome = "", detailsSent = false;
   var outsideAU = false;
 
   // ---------------------------------------------------------------- answers
@@ -111,11 +116,17 @@
     var radRow = $("[data-rad-row]", form), ufRow = $("[data-uf-row]", form), ufChip = $("[data-uf-only-chip]", form);
     if (radRow) radRow.hidden = !showRad;
     if (ufRow) ufRow.hidden = !showUf;
-    if (ufChip) ufChip.hidden = showUf;          // "Underfloor only" is redundant once the underfloor row shows
+    // "Underfloor only" only when we don't know the emitters (Sales review, 7)
+    if (ufChip) ufChip.hidden = rad || uf || lpg;
+    // R1: "replaces the boiler" only fits when there is one (Sales review, 11)
+    var boiler = R.hasBoiler(a);
+    $$("[data-r1-boiler]", form).forEach(function (el) { el.hidden = !boiler; });
+    $$("[data-r1-house]", form).forEach(function (el) { el.hidden = boiler; });
     [[radRow, showRad], [ufRow, showUf]].forEach(function (x) { if (x[0] && !x[1]) $$("input", x[0]).forEach(function (i) { i.checked = false; }); });
   }
 
   // ---------------------------------------------------------------- validation
+  var EMAIL_OK = function (e) { return /^[^\s@]+@[^\s@.]+(\.[^\s@.]+)*\.[^\s@.]{2,}$/.test(String(e).trim()); };
   var PHONE_OK = function (p) { var d = String(p).replace(/[\s()-]/g, ""); return /^(\+?61|0)[2-478]\d{8}$/.test(d); };
   function err(name, on) { var e = $('[data-err="' + name + '"]', form); if (e) e.hidden = !on; return !on; }
   function valid(id) {
@@ -126,10 +137,15 @@
       if (!ok) { var m = $$("input", screens.S1).filter(function (i) { return !i.value.trim(); })[0]; if (m) m.focus(); }
       return ok;
     }
-    if (id === "S2") return err("email", !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(a.email || ""));
+    if (id === "S2") {
+      var okE = err("email", !EMAIL_OK(a.email || ""));
+      if (!okE) $("[name=email]", form).focus();
+      return okE;
+    }
     if (id === "S3") return outsideAU || err("postcode", !/^\d{4}$/.test(a.postcode || ""));
     if (id === "S4") {   // no Skip here (Nick): a number, or "I'd prefer email"
-      if (!a.phone && a.contact_pref !== "email") { err("phone", true); $("[name=phone]", form).focus(); return false; }
+      err("phone_empty", false); err("phone", false);
+      if (!a.phone && a.contact_pref !== "email") { err("phone_empty", true); $("[name=phone]", form).focus(); return false; }
       return !a.phone || err("phone", !PHONE_OK(a.phone));
     }
     return true;
@@ -209,7 +225,10 @@
         if (blob.size > MAX_FILE) { err("upload_big", true); return; }
         var name = isImg && blob !== f ? f.name.replace(/\.[^.]+$/, "") + ".jpg" : f.name;
         files[key] = { name: name, type: blob.type || f.type, blob: blob, size: blob.size };
-        state.textContent = name + " · " + kb(blob.size);
+        state.textContent = "";
+        var nm = document.createElement("span"); nm.className = "drop__name"; nm.textContent = name;
+        var sz = document.createElement("span"); sz.className = "drop__size"; sz.textContent = kb(blob.size);
+        state.appendChild(nm); state.appendChild(sz);
         if (/^image\/(jpeg|png|webp)/.test(blob.type)) { thumb.src = URL.createObjectURL(blob); thumb.hidden = false; }
         drop.hidden = true; done.hidden = false;
         if (later) later.checked = false;
@@ -260,10 +279,11 @@
   // ---------------------------------------------------------------- match / done
   function renderMatch(s) {
     var a = Object.assign(answers(), { state: stateNow() });
-    var h = a.heating || [];
-    var rad = h.indexOf("boiler_radiators") !== -1 || h.indexOf("lpg_boiler") !== -1;
-    var uf = h.indexOf("boiler_underfloor") !== -1;
-    $$("[data-emitters]", s).forEach(function (el) { el.textContent = rad && uf ? "radiators and underfloor heating" : uf ? "underfloor heating" : rad ? "radiators" : "radiators or underfloor heating"; });
+    // No boiler picked ("Not sure", "No heating yet"): the careful version (Sales review, 4)
+    var check = R.unconfirmed(a);
+    $$("[data-fit-sure]", s).forEach(function (el) { el.hidden = check; });
+    $$("[data-fit-check]", s).forEach(function (el) { el.hidden = !check; });
+    $$("[data-emitters]", s).forEach(function (el) { el.textContent = R.emitters(a); });
     var why = R.whyLines(a), ul = $("[data-why]", s);
     ul.innerHTML = ""; why.forEach(function (w) { var li = document.createElement("li"); li.textContent = w; ul.appendChild(li); });
     ul.hidden = !why.length;
@@ -274,10 +294,27 @@
       if (a.intent === "book") acts.insertBefore(dep, chat); else acts.insertBefore(chat, dep);
     }
   }
-  var CALL = { lunchtime: "weekdays around lunchtime", after_5: "weekdays after 5pm", weekends: "on the weekend", any: "any time" };
+  // "(you said weekdays around lunchtime or after 5pm)" (Sales review, 14)
+  function callPhrase(keys) {
+    if (keys.indexOf("any") !== -1) return "any time";
+    var lunch = keys.indexOf("lunchtime") !== -1, out = [];
+    if (lunch) out.push("weekdays around lunchtime");
+    if (keys.indexOf("after_5") !== -1) out.push(lunch ? "after 5pm" : "weekdays after 5pm");
+    if (keys.indexOf("weekends") !== -1) out.push("weekends");
+    return out.length < 2 ? (out[0] || "") : out.slice(0, -1).join(", ") + " or " + out[out.length - 1];
+  }
   function renderDone() {
-    var ct = (answers().call_times || []).map(function (k) { return CALL[k]; }).filter(Boolean);
-    $("[data-call-times]", form).textContent = ct.length ? " " + ct.join(" or ") : "";
+    var a = Object.assign(answers(), { state: stateNow() });
+    var urgent = R.route(a) === "urgent", byEmail = !urgent && !a.phone && a.contact_pref === "email";
+    var ct = callPhrase(a.call_times || []);
+    $("[data-call-times]", form).textContent = ct ? " (you said " + ct + ")" : "";
+    $("[data-done-call]", form).hidden = urgent || byEmail;       // only promise what happens (Sales review, 2, 3)
+    $("[data-done-email]", form).hidden = !byEmail;
+    $("[data-done-urgent]", form).hidden = !urgent;
+    // Urgent: the details are most useful here, so offer them, once (Sales review, 3)
+    var prep = urgent && sentOutcome === "urgent_call" && !detailsSent;
+    $("[data-done-prepare]", form).hidden = !prep;
+    $("[data-done-book]", form).className = "btn btn--rect " + (prep ? "btn--ghost-light" : "btn--primary");
     if (droppedFile && !$("[data-dropped-note]", screens.DONE)) {
       var p = $('[data-err="upload_set"]', form).cloneNode(true); p.hidden = false; p.setAttribute("data-dropped-note", "");
       screens.DONE.insertBefore(p, $(".match-actions", screens.DONE));
@@ -289,28 +326,43 @@
     var a = answers();
     a.state = stateNow();
     if (a.remote === "true") a.remote = true;
-    a.form = "intake"; a.ts = stamped; a.website = ($("[name=website]", form) || {}).value || "";
+    a.form = "intake"; a.ts = stamped; a.lead_id = LEAD_ID; a.website = ($("[name=website]", form) || {}).value || "";
     a.outcome = outcome; a.last_screen = current; a.seen = Object.keys(seen);
     a.route = R.route(a); a.path = a.intent || "fit";
     a.rung_reached = seen.DONE ? "done" : Object.keys(seen).some(function (k) { return /^S1[4-7]$/.test(k); }) ? "3"
       : Object.keys(seen).some(function (k) { return /^S(7|8|9|1[0-3])$/.test(k); }) ? "2" : "1";
     return a;
   }
+  // Every control that sends, locked while a send is out (Sales review, 1)
+  function lock(on) {
+    [btnCont, btnBack].concat($$("button[data-exit], button[data-go], [data-landlord-share]", form))
+      .forEach(function (b) { b.disabled = on; });
+    form.classList.toggle("is-sending", on);
+  }
   function finish(outcome, then) {
-    if (sent) { if (then) then(); return Promise.resolve(); }
+    if (busy) { busy.then(function () { if (sent && then) then(); }); return busy; }   // a second tap waits for the first
+    // The details from "Help us prepare" go as a second send when an earlier
+    // exit already sent (urgent, or a chat booked from the match)
+    var details = sent && outcome === "completed" && sentOutcome !== "completed" && !detailsSent;
+    if (sent && !details) { if (then) then(); return Promise.resolve(); }
+    lock(true);
     sending.hidden = false; sending.textContent = "Sending…";
-    return packFiles().then(function (up) {
+    busy = packFiles().then(function (up) {
       var body = payload(outcome); body.uploads = up;
       return fetch(ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
     }).then(function (r) {
       if (!r.ok) throw new Error("status " + r.status);
       sent = true; sending.hidden = true;
+      if (details) detailsSent = true; else sentOutcome = outcome;
+      busy = null; lock(false);
       if (outcome === "completed" || outcome === "urgent_call") show("DONE", false);
       if (then) then();
     }).catch(function () {
+      busy = null; lock(false);
       sending.hidden = false;
       sending.innerHTML = 'Could not send. Please email us directly at <a href="mailto:nickz@thermaldawn.com">nickz@thermaldawn.com</a>.';
     });
+    return busy;
   }
 
   // ---------------------------------------------------------------- events
@@ -331,7 +383,8 @@
   });
   var pref = $("[data-prefer-email]", form);
   if (pref) pref.addEventListener("click", function () { $("[data-contact-pref]", form).value = "email"; $("[name=phone]", form).value = ""; go(nextOf("S4")); });
-  $("[name=phone]", form).addEventListener("input", function () { $("[data-contact-pref]", form).value = this.value.trim() ? "phone" : ""; });
+  $("[name=phone]", form).addEventListener("input", function () { $("[data-contact-pref]", form).value = this.value.trim() ? "phone" : ""; err("phone_empty", false); });
+  $("[name=email]", form).addEventListener("input", function () { if (EMAIL_OK(this.value)) err("email", false); });
   form.addEventListener("change", function (e) {
     toggles();
     var s = e.target.closest("[data-screen]");
@@ -356,7 +409,7 @@
         if (!box.hidden) {
           var v = $("[data-urgent-phone-input]", box).value.trim();
           if (!err("urgent_phone", !PHONE_OK(v))) return;
-          $("[name=phone]", form).value = v; seen.S4 = true;
+          $("[name=phone]", form).value = v; $("[data-contact-pref]", form).value = "phone"; seen.S4 = true;
         }
         finish("urgent_call"); return;
       }
@@ -368,9 +421,15 @@
   if (share) share.addEventListener("click", function () {
     var box = $("[data-landlord]", form);
     if (box.hidden) { box.hidden = false; seen.R1 = true; $("input", box).focus(); return; }
-    finish("landlord_share", function () {
+    // Something to share, or it becomes "keep me posted" (Sales review, 11)
+    var em = $("[name=landlord_email]", form).value.trim(), ph = $("[name=landlord_phone]", form).value.trim();
+    if (!err("landlord", !!em && !EMAIL_OK(em))) { $("[name=landlord_email]", form).focus(); return; }
+    var has = !!(em || ph);
+    finish(has ? "landlord_share" : "keep_posted", function () {
       $("[data-close-actions]", screens.R1).hidden = true; box.hidden = true;
-      var p = document.createElement("p"); p.className = "close-body"; p.textContent = "Thanks for thinking of us."; screens.R1.appendChild(p);
+      var p = document.createElement("p"); p.className = "close-body";
+      p.textContent = has ? "Thanks, we'll get in touch with them." : "No worries, we'll keep you posted instead.";
+      screens.R1.appendChild(p);
     });
   });
 

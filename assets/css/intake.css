@@ -133,7 +133,10 @@ html:not(.js) .iq{margin:0 0 34px;}
 .drop__done{display:flex;align-items:center;gap:14px;padding:12px 14px;border:2px solid var(--td-orange);border-radius:var(--radius-sm);background:var(--iq-surface-2);}
 .drop__thumb{width:56px;height:56px;object-fit:cover;border-radius:6px;flex:none;}
 .drop__file{flex:1;min-width:0;color:var(--iq-ink);font-weight:600;overflow-wrap:anywhere;}
-.drop__file::before{content:"✓ ";color:var(--td-orange);}
+.drop__name{display:block;}
+.drop__name::before{content:"✓ ";color:var(--td-orange);}
+.drop__size{display:block;font-weight:400;color:var(--iq-muted);font-size:.9em;}
+.intake .btn:disabled,.intake .linkbtn:disabled{opacity:.55;cursor:wait;}
 .upslot__later{margin-top:10px;}
 .upslot__note{margin:0;padding:14px;border:1px dashed var(--iq-line);border-radius:var(--radius-sm);color:var(--iq-ink);}
 html:not(.js) .drop__done{display:none;}

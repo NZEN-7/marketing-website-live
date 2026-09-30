@@ -39,6 +39,9 @@
     return h.length > 0 && h.every(function (x) { return NON_ICP.indexOf(x) !== -1; });
   }
   function isUrgent(a) { return a.intent === "urgent" || a.boiler_condition === "broken"; }
+  /** No boiler picked ("Not sure", "No heating yet" or nothing): the match
+      says "could be" and the route is icp-check (Sales review, finding 4). */
+  function unconfirmed(a) { return !hasBoiler(a); }
 
   /** The route tag for the notification (SPEC §7). */
   function route(a) {
@@ -47,7 +50,7 @@
     if (a.tenure === "renter") return "renter";
     if (isUrgent(a)) return "urgent";
     if (a.intent === "explore") return "explore";
-    return "icp";
+    return unconfirmed(a) ? "icp-check" : "icp";
   }
 
   /** Next screen after `done`, given answers `a`. */
@@ -57,7 +60,7 @@
       case "intro": return "S1";
       case "S1": return "S2";
       case "S2": return "S3";
-      case "S3": return "S4";
+      case "S3": return inArea(a) ? "S4" : "S6";      // out of area and NZ: no phone or intent, straight to consent (Sales review, 8)
       case "S4": return String(a.phone || "").trim() ? "S4b" : (inArea(a) ? "S5" : "S6");
       case "S4b": return inArea(a) ? "S5" : "S6";   // out of area: no intent question, straight to the save
       case "S5": return "S6";
@@ -95,20 +98,31 @@
     return 4;
   }
 
-  /** The 1-2 "why it suits you" lines on the match (SPEC §4), in its order. */
+  /** The 1-2 "why it suits you" lines on the match (SPEC §4). Order (Sales
+      review, 6): boiler condition, solar, cheap window, hot water, battery/EV. */
   function whyLines(a) {
     var e = list(a.energy), out = [];
-    if (e.indexOf("solar") !== -1) out.push("Your solar can charge the store during the day.");
+    var bat = e.indexOf("battery") !== -1, ev = e.indexOf("ev") !== -1;
     if (["getting_on", "playing_up", "broken"].indexOf(a.boiler_condition) !== -1) out.push("It replaces a boiler you'd otherwise be replacing anyway.");
-    if (list(a.scope).indexOf("hot_water") !== -1) out.push("It can take over your hot water too.");
-    if (e.indexOf("battery") !== -1 || e.indexOf("ev") !== -1) out.push("It works alongside your battery and car charging.");
+    if (e.indexOf("solar") !== -1) out.push("Your solar can charge the store during the day.");
     if (e.indexOf("cheap_window") !== -1) out.push("It can charge in your cheap or free window.");
+    if (list(a.scope).indexOf("hot_water") !== -1) out.push("It can take over your hot water too.");
+    if (bat && ev) out.push("It works alongside your battery and car charging.");
+    else if (bat) out.push("It works alongside your battery.");
+    else if (ev) out.push("It works alongside your car charging.");
     return out.slice(0, 2);
   }
 
+  /** How the match names their heating (Sales review, 5): LPG can be either,
+      so it only says radiators or underfloor when a gas card fixes it. */
+  function emitters(a) {
+    var h = list(a.heating), rad = h.indexOf("boiler_radiators") !== -1, uf = h.indexOf("boiler_underfloor") !== -1;
+    return rad && uf ? "radiators and underfloor heating" : uf ? "underfloor heating" : rad ? "radiators" : "radiators or underfloor heating";
+  }
+
   var api = { SERVED: SERVED, stateFor: stateFor, inArea: inArea, hasBoiler: hasBoiler,
-              notOurProduct: notOurProduct, isUrgent: isUrgent, route: route, next: next,
-              stepOf: stepOf, whyLines: whyLines };
+              notOurProduct: notOurProduct, isUrgent: isUrgent, unconfirmed: unconfirmed, route: route, next: next,
+              stepOf: stepOf, whyLines: whyLines, emitters: emitters };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.TDIntakeRoute = api;
 })(this);

@@ -12,7 +12,7 @@
 <link rel="preload" href="/assets/fonts/Montserrat-ExtraBold.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/Montserrat-Regular.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/assets/css/style.css?v=48">
-<link rel="stylesheet" href="/assets/css/intake.css?v=6">
+<link rel="stylesheet" href="/assets/css/intake.css?v=7">
 <script>document.documentElement.classList.add("js");</script>
 </head>
 <body class="dark intake-page">
@@ -37,7 +37,7 @@
     <form id="intake" class="intake" method="post" action="/api/lead/" novalidate data-intake>
       <input type="hidden" name="form" value="intake">
       <input type="hidden" name="nojs" value="1" data-nojs>
-      <div class="hp" aria-hidden="true"><label>Leave this empty <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+      <div class="hp" aria-hidden="true"><input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"></div>
 
       <!-- progress (JS) -->
       <div class="iq-progress" data-progress hidden>
@@ -98,6 +98,7 @@
         <div class="iq__fields">
           <label class="fld"><span>Phone</span><input type="tel" name="phone" autocomplete="tel" inputmode="tel" maxlength="20"></label>
         </div>
+        <p class="iq__err" data-err="phone_empty" hidden>Add a number so Nick can call, or choose I'd prefer email.</p>
         <p class="iq__err" data-err="phone" hidden>An Australian number, like 0412 345 678.</p>
         <input type="hidden" name="contact_pref" value="" data-contact-pref>
         <p class="iq__jsonly iq__skip"><button type="button" class="linkbtn" data-prefer-email>I'd prefer email</button></p>
@@ -143,12 +144,13 @@
           <p>We'll save your answers so Nick can follow up about your enquiry. <a href="#" class="ph-link" title="Placeholder: the site has no privacy policy page yet">[Privacy policy]</a></p>
           <label class="tick"><input type="checkbox" name="newsletter_opt_in" value="true"> Send me Thermal Dawn's monthly update</label>
         </div>
+        <p class="iq__jsonly iq__skip"><button type="button" class="linkbtn" data-skip>Skip</button></p>
       </section>
 
       <!-- ============ STEP 2: YOUR HOME ============ -->
       <section class="iq" data-screen="S7" aria-labelledby="h-S7">
         <h2 class="iq__q" id="h-S7">How is your home heated today?</h2>
-        <p class="iq__coach">We replace gas and LPG boilers that heat through radiators or underfloor pipes. Pick all that apply.</p>
+        <p class="iq__coach">We replace gas and LPG hydronic heating: a boiler that heats water for radiators or underfloor pipes. Pick all that apply.</p>
         <fieldset class="cards" aria-labelledby="h-S7">
           <label class="card-opt"><input type="checkbox" name="heating" value="boiler_radiators"><span class="card-opt__t">Gas hydronic with radiators</span><span class="card-opt__s">Panels on the walls fed by hot water pipes</span><span class="card-opt__tick" aria-hidden="true"></span></label>
           <label class="card-opt"><input type="checkbox" name="heating" value="boiler_underfloor"><span class="card-opt__t">Gas hydronic with underfloor</span><span class="card-opt__s">Hot water pipes in the slab or under the floor</span><span class="card-opt__tick" aria-hidden="true"></span></label>
@@ -249,10 +251,10 @@
 
       <!-- ============ RESULT SCREENS (JS only) ============ -->
       <section class="iq iq--result iq--jsonly" data-screen="MATCH" aria-labelledby="h-MATCH">
-        <h2 class="iq__q" id="h-MATCH">Looks like a good fit<span data-first-prefix>, <span data-first></span></span>.</h2>
+        <h2 class="iq__q" id="h-MATCH"><span data-fit-sure>Looks like a good fit</span><span data-fit-check hidden>This could be a good fit</span><span data-first-prefix>, <span data-first></span></span>.</h2>
         <div class="match-card">
           <h3>Our match: a Thermal Dawn heat pump with a thermal store</h3>
-          <p>It runs the <span data-emitters>radiators</span> you already have. It charges when power is cheapest and holds the heat for when you need it.</p>
+          <p><span data-fit-sure>It runs the <span data-emitters>radiators</span> you already have.</span><span data-fit-check hidden>It runs through radiators or underfloor heating. We'll check what suits your home when we talk.</span> It charges when power is cheapest and holds the heat for when you need it.</p>
           <ul class="match-why" data-why></ul>
           <p><strong>From $12,000 for the equipment.</strong> Installation depends on the house, by your own licensed installer (we can recommend one).<span data-remote-line hidden> Remote locations carry a delivery cost.</span></p>
           <p>Jobs booked in November are installed in February.</p>
@@ -267,10 +269,10 @@
       </section>
 
       <section class="iq iq--result iq--jsonly" data-screen="MATCH_SHORT" aria-labelledby="h-MATCH_SHORT">
-        <h2 class="iq__q" id="h-MATCH_SHORT">Here's the short version<span data-first-prefix>, <span data-first></span></span></h2>
+        <h2 class="iq__q" id="h-MATCH_SHORT">Here's the short version<span data-first-prefix>, <span data-first></span></span>.</h2>
         <div class="match-card">
           <h3>Our match: a Thermal Dawn heat pump with a thermal store</h3>
-          <p>It runs the <span data-emitters>radiators</span> you already have. It charges when power is cheapest and holds the heat for when you need it.</p>
+          <p><span data-fit-sure>It runs the <span data-emitters>radiators</span> you already have.</span><span data-fit-check hidden>It runs through radiators or underfloor heating. We'll check what suits your home when we talk.</span> It charges when power is cheapest and holds the heat for when you need it.</p>
           <ul class="match-why" data-why></ul>
           <p><strong>From $12,000 for the equipment.</strong> Installation depends on the house, by your own licensed installer (we can recommend one).<span data-remote-line hidden> Remote locations carry a delivery cost.</span></p>
           <p>Jobs booked in November are installed in February.</p>
@@ -284,11 +286,10 @@
       </section>
 
       <section class="iq iq--result iq--jsonly" data-screen="URGENT" aria-labelledby="h-URGENT">
-        <h2 class="iq__q" id="h-URGENT">Sorry to hear the boiler's playing up<span data-first-prefix>, <span data-first></span></span>.</h2>
+        <h2 class="iq__q" id="h-URGENT">Sorry to hear about the boiler<span data-first-prefix>, <span data-first></span></span>.</h2>
         <p class="iq__coach">Nick will try to call you today. If we miss you, we'll try again tomorrow at lunchtime.</p>
         <div class="iq__fields" data-urgent-phone hidden>
           <label class="fld"><span>Phone</span><input type="tel" inputmode="tel" autocomplete="tel" maxlength="20" data-urgent-phone-input></label>
-          <p class="iq__coach">or book a time</p>
         </div>
         <p class="iq__err" data-err="urgent_phone" hidden>An Australian number, like 0412 345 678.</p>
         <div class="match-actions">
@@ -439,13 +440,18 @@
       <section class="iq iq--result iq--jsonly" data-screen="DONE" aria-labelledby="h-DONE">
         <h2 class="iq__q" id="h-DONE">Thanks<span data-first-prefix>, <span data-first></span></span>. You're all set.</h2>
         <p class="done-lead"><strong>What happens next:</strong></p>
+        <!-- Sales review 2, 3, 14, 18: one first line per path. The SPEC's "We've
+             emailed you what happens next, with a link to come back and add
+             anything" returns when brief 07's first email and the resume link exist. -->
         <ol class="done-list">
-          <li>Nick will give you a call<span data-call-times></span> for a quick 15-minute chat. If you'd rather pick a time, <a data-calendly href="https://calendly.com/nickz-thermaldawn/30min" target="_blank" rel="noopener">book one here</a>.</li>
-          <li>We've emailed you what happens next, with a link to come back and add anything.</li>
+          <li data-done-call>Nick will give you a call<span data-call-times></span> for a quick 15-minute chat. If you'd rather pick a time, <a data-calendly href="https://calendly.com/nickz-thermaldawn/30min" target="_blank" rel="noopener">book one here</a>.</li>
+          <li data-done-email hidden>Nick will email you shortly to talk it through. If you'd rather talk, <a data-calendly href="https://calendly.com/nickz-thermaldawn/30min" target="_blank" rel="noopener">book a time here</a>.</li>
+          <li data-done-urgent hidden>Nick will try to call you today. If we miss you, we'll try again tomorrow at lunchtime.</li>
           <li>Anything you skipped, we'll cover when we talk.</li>
         </ol>
         <div class="match-actions">
-          <a class="btn btn--primary btn--rect" data-calendly href="https://calendly.com/nickz-thermaldawn/30min" target="_blank" rel="noopener">Book a 15-minute chat</a>
+          <button type="button" class="btn btn--primary btn--rect" data-go="S14" data-done-prepare hidden>Help us prepare: 2 more minutes, all optional</button>
+          <a class="btn btn--primary btn--rect" data-calendly data-done-book href="https://calendly.com/nickz-thermaldawn/30min" target="_blank" rel="noopener">Book a 15-minute chat</a>
           <a class="btn btn--ghost-light btn--rect" href="/pre-order/booking/">Reserve a place: $990 deposit</a>
         </div>
       </section>
@@ -462,7 +468,7 @@
 
       <section class="iq iq--result iq--jsonly" data-screen="N1" aria-labelledby="h-N1">
         <h2 class="iq__q" id="h-N1">Thanks, that's really helpful.</h2>
-        <p class="close-body">Right now we replace gas and LPG boilers that heat through radiators or underfloor pipes, so we're not the right fit for your home today. We're working on more, and we'd be glad to let you know when that changes.</p>
+        <p class="close-body">Right now we replace gas and LPG hydronic heating (a boiler heating radiators or underfloor pipes), so we're not the right fit for your home today. We're working on more, and we'd be glad to let you know when that changes.</p>
         <div class="match-actions" data-close-actions>
           <button type="button" class="btn btn--primary btn--rect" data-exit="keep_posted">Keep me posted</button>
           <button type="button" class="btn btn--ghost-light btn--rect" data-exit="no_thanks">No thanks</button>
@@ -472,11 +478,13 @@
 
       <section class="iq iq--result iq--jsonly" data-screen="R1" aria-labelledby="h-R1">
         <h2 class="iq__q" id="h-R1">Thanks<span data-first-prefix>, <span data-first></span></span>.</h2>
-        <p class="close-body">Because this replaces the boiler, it's the owner's decision. If you think your landlord would be interested, we're happy to talk to them.</p>
+        <p class="close-body"><span data-r1-boiler>Because this replaces the boiler, it's the owner's decision.</span><span data-r1-house hidden>Because this is a change to the house, it's the owner's decision.</span> If you think your landlord would be interested, we're happy to talk to them.</p>
         <div class="landlord" data-landlord hidden>
           <p class="iq__coach">Only if you're comfortable sharing</p>
           <label class="fld"><span>Landlord's name</span><input type="text" name="landlord_name" maxlength="200"></label>
-          <label class="fld"><span>Landlord's email</span><input type="email" name="landlord_email" maxlength="200"></label>
+          <label class="fld"><span>Landlord's email</span><input type="email" name="landlord_email" maxlength="200" inputmode="email"></label>
+          <label class="fld"><span>Or their phone</span><input type="tel" name="landlord_phone" maxlength="20" inputmode="tel"></label>
+          <p class="iq__err" data-err="landlord" hidden>That email doesn't look quite right. Check for a typo?</p>
         </div>
         <div class="match-actions" data-close-actions>
           <button type="button" class="btn btn--primary btn--rect" data-landlord-share>Share with my landlord</button>
@@ -503,7 +511,7 @@
 </main>
 <footer id="site-footer" class="site-footer"></footer>
 <script src="/assets/js/site.js?v=16" defer></script>
-<script src="/assets/js/intake-route.js?v=1" defer></script>
-<script src="/assets/js/intake.js?v=3" defer></script>
+<script src="/assets/js/intake-route.js?v=2" defer></script>
+<script src="/assets/js/intake.js?v=4" defer></script>
 </body>
 </html>

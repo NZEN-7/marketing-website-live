@@ -854,7 +854,13 @@ module.exports = async function handler(req, res) {
   const { data, error } = parseSubmission(body);
   if (error) return res.status(400).json({ ok: false, error });
   // Intake uploads ride on the notification as attachments (PRD D3).
-  if (data.form === "intake") data._files = intake.intakeAttachments(data);
+  if (data.form === "intake") {
+    if (!intake.claimSend(data, Date.now())) {
+      logEvent(reqId, data.form, "screened", "repeat_send");
+      return reply(200, { ok: true });
+    }
+    data._files = intake.intakeAttachments(data);
+  }
 
   try {
     const transport = makeTransport();
@@ -929,6 +935,7 @@ module.exports = async function handler(req, res) {
     return reply(200, { ok: true });
   } catch (err) {
     // Never echo submitted PII back to the client, and never log it.
+    if (data.form === "intake") intake.releaseSend(data);
     logEvent(reqId, data.form, "notification_failed", errorCode(err));
     return res.status(500).json({ ok: false, error: "Could not send. Please email us directly." });
   }
