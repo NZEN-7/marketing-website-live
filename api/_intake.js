@@ -39,6 +39,7 @@ const L = {
   timing: { asap: "As soon as possible", "3_months": "In the next 3 months", "3_12_months": "In 3 to 12 months", planning: "Just planning ahead" },
   storeys: { single: "Single", double: "Double", split: "Split level", three_plus: "Three or more", not_sure: "Not sure" },
   radiator_band: { "1_5": "1–5", "6_10": "6–10", "11_15": "11–15", "16_plus": "16+", underfloor_only: "Underfloor only", not_sure: "Not sure" },
+  underfloor_band: { one_zone: "One room or zone", part: "Part of the house", most: "Most of the house", whole: "The whole house", not_sure: "Not sure" },
   built_band: { pre_1950: "Before 1950", "1950_1990": "1950–1990", "1990_2010": "1990–2010", post_2010: "After 2010", not_sure: "Not sure" },
   off_gas: { everything: "Yes, everything off gas", keep_cooktop: "Yes, but keep the gas cooktop", heating_only: "Just the heating for now", not_sure: "Not sure" },
 };
@@ -50,7 +51,7 @@ const SCREENS = /^(intro|S\d{1,2}b?|MATCH|MATCH_SHORT|URGENT|DONE|O1|N1|R1|POSTE
 // Which screen asks which key: "Not asked" (screen never shown) vs "Skipped" (shown, no answer).
 const ASKED_ON = { phone: "S4", call_times: "S4b", intent: "S5", source: "S6", referrer: "S6", heating: "S7", heating_other_text: "S7",
   boiler_condition: "S8", boiler_age: "S8", tenure: "S9", scope: "S10", energy: "S11", winter_gas_bill_band: "S12", timing: "S13",
-  timing_note: "S13", storeys: "S14", radiator_band: "S14", built_band: "S14", off_gas: "S15", uploads: "S16", notes: "S17" };
+  timing_note: "S13", storeys: "S14", radiator_band: "S14", underfloor_band: "S14", built_band: "S14", off_gas: "S15", uploads: "S16", notes: "S17" };
 
 const pick = (map, v) => (Object.prototype.hasOwnProperty.call(map, v) ? v : "");
 
@@ -75,6 +76,7 @@ function parseIntake(body) {
     winter_gas_bill_band: pick(L.winter_gas_bill_band, body.winter_gas_bill_band),
     timing: pick(L.timing, body.timing), timing_note: clamp(body.timing_note, 500),
     storeys: pick(L.storeys, body.storeys), radiator_band: pick(L.radiator_band, body.radiator_band),
+    underfloor_band: pick(L.underfloor_band, body.underfloor_band),
     built_band: pick(L.built_band, body.built_band), off_gas: pick(L.off_gas, body.off_gas),
     send_later: list(body.send_later).filter((v) => SLOTS[v]),
     notes: clamp(body.notes, 5000),
@@ -180,6 +182,7 @@ function formatIntakeNotification(d, when, files) {
     "THE DETAILS",
     `Storeys: ${val(d, "storeys", L.storeys)}`,
     `Radiators: ${val(d, "radiator_band", L.radiator_band)}`,
+    `Underfloor covers: ${val(d, "underfloor_band", L.underfloor_band)}`,
     `Built: ${val(d, "built_band", L.built_band)}`,
     `Off gas: ${val(d, "off_gas", L.off_gas)}`,
     `Uploads: ${upl.length ? upl.join("; ") : ((d.seen || []).indexOf("S16") !== -1 ? "Skipped" : "Not asked")}`,

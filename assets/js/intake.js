@@ -104,6 +104,15 @@
     var ref = $("[data-referrer]", form); if (ref) ref.hidden = !(src.indexOf("friend") !== -1 || src.indexOf("installer") !== -1);
     var oth = $("[data-other-text]", form); if (oth) oth.hidden = heat.indexOf("other") === -1;
     var sub = $("[data-suburb-text]", form); if (sub) sub.hidden = outsideAU;
+    // S14 (Nick, 30 Sep): radiators for radiator homes, underfloor area for
+    // underfloor homes, both for both or LPG; radiators when we don't know.
+    var rad = heat.indexOf("boiler_radiators") !== -1, uf = heat.indexOf("boiler_underfloor") !== -1, lpg = heat.indexOf("lpg_boiler") !== -1;
+    var showUf = uf || lpg, showRad = rad || lpg || !uf;
+    var radRow = $("[data-rad-row]", form), ufRow = $("[data-uf-row]", form), ufChip = $("[data-uf-only-chip]", form);
+    if (radRow) radRow.hidden = !showRad;
+    if (ufRow) ufRow.hidden = !showUf;
+    if (ufChip) ufChip.hidden = showUf;          // "Underfloor only" is redundant once the underfloor row shows
+    [[radRow, showRad], [ufRow, showUf]].forEach(function (x) { if (x[0] && !x[1]) $$("input", x[0]).forEach(function (i) { i.checked = false; }); });
   }
 
   // ---------------------------------------------------------------- validation
@@ -174,22 +183,51 @@
       return new Promise(function (res) { c.toBlob(function (b) { res(b || file); }, "image/jpeg", 0.8); });
     }).catch(function () { return file; });     // e.g. HEIC a browser can't decode: send the original if small enough
   }
+  // Each slot is a drop card: drag a file on, or tap to choose (Nick, 30 Sep).
+  // A photo shows a thumbnail; Remove clears the slot.
   $$("[data-slot]", form).forEach(function (slot) {
-    var input = $("[data-file]", slot), state = $("[data-state-text]", slot), key = slot.getAttribute("data-slot");
-    input.addEventListener("change", function () {
-      var f = input.files && input.files[0];
-      delete files[key]; state.textContent = ""; err("upload_big", false);
+    var input = $("[data-file]", slot), drop = $("[data-drop]", slot), done = $("[data-done]", slot);
+    var state = $("[data-state-text]", slot), thumb = $("[data-thumb]", slot), key = slot.getAttribute("data-slot");
+    var later = $("[name=send_later]", slot);
+    function clear() {
+      delete files[key]; input.value = ""; state.textContent = "";
+      if (thumb.src) { URL.revokeObjectURL(thumb.src); thumb.removeAttribute("src"); }
+      thumb.hidden = true; done.hidden = true; drop.hidden = false;
+    }
+    function take(f) {
+      clear(); err("upload_big", false);
       if (!f) return;
-      var isImg = /^image\//.test(f.type), isPdf = f.type === "application/pdf" || /\.pdf$/i.test(f.name);
-      if (!isImg && !isPdf) { input.value = ""; return; }
+      var isImg = /^image\//.test(f.type) || /\.(heic|heif)$/i.test(f.name), isPdf = f.type === "application/pdf" || /\.pdf$/i.test(f.name);
+      var okHere = isPdf ? /pdf/.test(input.accept) : isImg;
+      if (!okHere) { state.textContent = ""; err("upload_big", false); return; }
+      drop.classList.add("is-busy");
       (isImg ? resize(f) : Promise.resolve(f)).then(function (blob) {
-        if (blob.size > MAX_FILE) { input.value = ""; err("upload_big", true); return; }
+        drop.classList.remove("is-busy");
+        if (blob.size > MAX_FILE) { err("upload_big", true); return; }
         var name = isImg && blob !== f ? f.name.replace(/\.[^.]+$/, "") + ".jpg" : f.name;
         files[key] = { name: name, type: blob.type || f.type, blob: blob, size: blob.size };
-        state.textContent = "✓ " + name + " · " + kb(blob.size);
+        state.textContent = name + " · " + kb(blob.size);
+        if (/^image\/(jpeg|png|webp)/.test(blob.type)) { thumb.src = URL.createObjectURL(blob); thumb.hidden = false; }
+        drop.hidden = true; done.hidden = false;
+        if (later) later.checked = false;
       });
+    }
+    input.addEventListener("change", function () { take(input.files && input.files[0]); });
+    ["dragenter", "dragover"].forEach(function (ev) {
+      drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.add("is-over"); });
     });
+    ["dragleave", "dragend"].forEach(function (ev) {
+      drop.addEventListener(ev, function () { drop.classList.remove("is-over"); });
+    });
+    drop.addEventListener("drop", function (e) {
+      e.preventDefault(); drop.classList.remove("is-over");
+      take(e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]);
+    });
+    $("[data-remove]", slot).addEventListener("click", function () { clear(); drop.querySelector("input").focus(); });
+    if (later) later.addEventListener("change", function () { if (later.checked && files[key]) clear(); });
   });
+  // A file dropped outside a card must not replace the page.
+  ["dragover", "drop"].forEach(function (ev) { window.addEventListener(ev, function (e) { if (!e.target.closest || !e.target.closest("[data-drop]")) e.preventDefault(); }); });
   function toBase64(blob) {
     return new Promise(function (res, rej) {
       var r = new FileReader();

@@ -111,6 +111,33 @@ html:not(.js) .iq{margin:0 0 34px;}
 @keyframes iqIn{from{opacity:0;transform:translateX(12px);}to{opacity:1;transform:none;}}
 @keyframes iqBack{from{opacity:0;transform:translateX(-12px);}to{opacity:1;transform:none;}}
 
+/* ---- S16: drop cards (Nick, 30 Sep: "more like Tractor") */
+.uploads{display:grid;gap:18px;}
+.upslot{background:var(--iq-surface);border:1px solid var(--iq-line);border-radius:var(--radius);padding:18px;}
+.upslot__t{margin:0;font-weight:800;color:var(--iq-ink);font-size:1.05rem;}
+.upslot__s{margin:4px 0 14px;color:var(--iq-muted);font-size:.92rem;}
+.drop{position:relative;display:grid;justify-items:center;gap:6px;text-align:center;padding:26px 16px;min-height:132px;
+  border:2px dashed rgba(255,255,255,.22);border-radius:var(--radius-sm);background:rgba(255,255,255,.02);cursor:pointer;
+  transition:border-color .16s var(--iq-ease),background-color .16s var(--iq-ease),transform .16s var(--iq-ease),box-shadow .16s var(--iq-ease);}
+.drop input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;}
+.drop__icon{width:34px;height:34px;border-radius:50%;background:rgba(var(--td-orange-rgb),.15);position:relative;}
+.drop__icon::before{content:"";position:absolute;left:50%;top:9px;width:2px;height:14px;margin-left:-1px;background:var(--td-orange);}
+.drop__icon::after{content:"";position:absolute;left:50%;top:9px;width:9px;height:9px;margin-left:-5px;border:solid var(--td-orange);border-width:2px 0 0 2px;transform:rotate(45deg);}
+.drop__main{color:var(--iq-ink);}
+.drop__main strong{color:var(--td-orange);}
+.drop__meta{color:var(--iq-muted);font-size:.82rem;}
+@media (hover:hover){.drop:hover{border-color:rgba(var(--td-orange-rgb),.7);background:rgba(var(--td-orange-rgb),.06);}}
+.drop:has(input:focus-visible){outline:3px solid var(--td-orange);outline-offset:2px;border-color:var(--td-orange);}
+.drop.is-over{border-color:var(--td-orange);border-style:solid;background:rgba(var(--td-orange-rgb),.1);transform:translateY(-3px);box-shadow:var(--iq-lift);}
+.drop.is-busy{opacity:.6;}
+.drop__done{display:flex;align-items:center;gap:14px;padding:12px 14px;border:2px solid var(--td-orange);border-radius:var(--radius-sm);background:var(--iq-surface-2);}
+.drop__thumb{width:56px;height:56px;object-fit:cover;border-radius:6px;flex:none;}
+.drop__file{flex:1;min-width:0;color:var(--iq-ink);font-weight:600;overflow-wrap:anywhere;}
+.drop__file::before{content:"✓ ";color:var(--td-orange);}
+.upslot__later{margin-top:10px;}
+html:not(.js) .drop__done{display:none;}
+@media (prefers-reduced-motion:reduce){.drop,.drop.is-over{transform:none !important;transition:none !important;}}
+
 /* ---- buttons */
 .intake .btn{white-space:normal;text-align:center;line-height:1.3;justify-content:center;}   /* long SPEC labels wrap instead of overflowing */
 .match-actions > *{min-width:0;}

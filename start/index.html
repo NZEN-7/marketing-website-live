@@ -12,7 +12,7 @@
 <link rel="preload" href="/assets/fonts/Montserrat-ExtraBold.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/Montserrat-Regular.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/assets/css/style.css?v=48">
-<link rel="stylesheet" href="/assets/css/intake.css?v=4">
+<link rel="stylesheet" href="/assets/css/intake.css?v=5">
 <script>document.documentElement.classList.add("js");</script>
 </head>
 <body class="dark intake-page">
@@ -309,14 +309,25 @@
           <label class="card-opt chip"><input type="radio" name="storeys" value="three_plus"><span class="card-opt__t">Three or more</span></label>
           <label class="card-opt chip"><input type="radio" name="storeys" value="not_sure"><span class="card-opt__t">Not sure</span></label>
         </fieldset>
-        <fieldset class="cards cards--chips" aria-labelledby="h-S14b">
+        <!-- Nick, 30 Sep: the row follows S7. Radiators for radiator homes, the
+             underfloor area for underfloor homes, both for both (and for LPG,
+             which can be either). The underfloor row is NEW copy, for Sales. -->
+        <fieldset class="cards cards--chips" aria-labelledby="h-S14b" data-rad-row>
           <legend class="chips-legend" id="h-S14b">Radiators, roughly</legend>
           <label class="card-opt chip"><input type="radio" name="radiator_band" value="1_5"><span class="card-opt__t">1–5</span></label>
           <label class="card-opt chip"><input type="radio" name="radiator_band" value="6_10"><span class="card-opt__t">6–10</span></label>
           <label class="card-opt chip"><input type="radio" name="radiator_band" value="11_15"><span class="card-opt__t">11–15</span></label>
           <label class="card-opt chip"><input type="radio" name="radiator_band" value="16_plus"><span class="card-opt__t">16+</span></label>
-          <label class="card-opt chip"><input type="radio" name="radiator_band" value="underfloor_only"><span class="card-opt__t">Underfloor only</span></label>
+          <label class="card-opt chip" data-uf-only-chip><input type="radio" name="radiator_band" value="underfloor_only"><span class="card-opt__t">Underfloor only</span></label>
           <label class="card-opt chip"><input type="radio" name="radiator_band" value="not_sure"><span class="card-opt__t">Not sure</span></label>
+        </fieldset>
+        <fieldset class="cards cards--chips" aria-labelledby="h-S14u" data-uf-row>
+          <legend class="chips-legend" id="h-S14u">Underfloor heating covers, roughly</legend>
+          <label class="card-opt chip"><input type="radio" name="underfloor_band" value="one_zone"><span class="card-opt__t">One room or zone</span></label>
+          <label class="card-opt chip"><input type="radio" name="underfloor_band" value="part"><span class="card-opt__t">Part of the house</span></label>
+          <label class="card-opt chip"><input type="radio" name="underfloor_band" value="most"><span class="card-opt__t">Most of the house</span></label>
+          <label class="card-opt chip"><input type="radio" name="underfloor_band" value="whole"><span class="card-opt__t">The whole house</span></label>
+          <label class="card-opt chip"><input type="radio" name="underfloor_band" value="not_sure"><span class="card-opt__t">Not sure</span></label>
         </fieldset>
         <fieldset class="cards cards--chips" aria-labelledby="h-S14c">
           <legend class="chips-legend" id="h-S14c">Built</legend>
@@ -348,30 +359,66 @@
           <div class="upslot" data-slot="winter_gas_bill">
             <p class="upslot__t">A recent winter gas bill</p>
             <p class="upslot__s">Shows how much heat your home really uses</p>
-            <label class="upslot__pick iq__jsonly"><input type="file" accept="application/pdf,image/*" data-file> <span>PDF, photo</span></label>
-            <p class="upslot__state" data-state-text aria-live="polite"></p>
-            <label class="tick"><input type="checkbox" name="send_later" value="winter_gas_bill"> I'll send it later</label>
+            <label class="drop" data-drop>
+              <input type="file" accept="application/pdf,image/*" data-file>
+              <span class="drop__icon" aria-hidden="true"></span>
+              <span class="drop__main"><strong>Drop a file here</strong> or tap to choose</span>
+              <span class="drop__meta">PDF, photo · up to 4 MB</span>
+            </label>
+            <div class="drop__done" data-done hidden>
+              <img class="drop__thumb" alt="" data-thumb hidden>
+              <span class="drop__file" data-state-text aria-live="polite"></span>
+              <button type="button" class="linkbtn" data-remove>Remove</button>
+            </div>
+            <label class="tick upslot__later"><input type="checkbox" name="send_later" value="winter_gas_bill"> I'll send it later</label>
           </div>
           <div class="upslot" data-slot="boiler_compliance_plate">
             <p class="upslot__t">The boiler's compliance plate</p>
             <p class="upslot__s">Get close so the writing fills the frame, in good light.</p>
-            <label class="upslot__pick iq__jsonly"><input type="file" accept="image/*" data-file> <span>photo</span></label>
-            <p class="upslot__state" data-state-text aria-live="polite"></p>
-            <label class="tick"><input type="checkbox" name="send_later" value="boiler_compliance_plate"> I'll send it later</label>
+            <label class="drop" data-drop>
+              <input type="file" accept="image/*" data-file>
+              <span class="drop__icon" aria-hidden="true"></span>
+              <span class="drop__main"><strong>Drop a file here</strong> or tap to choose</span>
+              <span class="drop__meta">photo · up to 4 MB</span>
+            </label>
+            <div class="drop__done" data-done hidden>
+              <img class="drop__thumb" alt="" data-thumb hidden>
+              <span class="drop__file" data-state-text aria-live="polite"></span>
+              <button type="button" class="linkbtn" data-remove>Remove</button>
+            </div>
+            <label class="tick upslot__later"><input type="checkbox" name="send_later" value="boiler_compliance_plate"> I'll send it later</label>
           </div>
           <div class="upslot" data-slot="switchboard">
             <p class="upslot__t">Your switchboard, cover open</p>
             <p class="upslot__s">Shows your supply and main switch</p>
-            <label class="upslot__pick iq__jsonly"><input type="file" accept="image/*" data-file> <span>photo</span></label>
-            <p class="upslot__state" data-state-text aria-live="polite"></p>
-            <label class="tick"><input type="checkbox" name="send_later" value="switchboard"> I'll send it later</label>
+            <label class="drop" data-drop>
+              <input type="file" accept="image/*" data-file>
+              <span class="drop__icon" aria-hidden="true"></span>
+              <span class="drop__main"><strong>Drop a file here</strong> or tap to choose</span>
+              <span class="drop__meta">photo · up to 4 MB</span>
+            </label>
+            <div class="drop__done" data-done hidden>
+              <img class="drop__thumb" alt="" data-thumb hidden>
+              <span class="drop__file" data-state-text aria-live="polite"></span>
+              <button type="button" class="linkbtn" data-remove>Remove</button>
+            </div>
+            <label class="tick upslot__later"><input type="checkbox" name="send_later" value="switchboard"> I'll send it later</label>
           </div>
           <div class="upslot" data-slot="electricity_bill">
             <p class="upslot__t">A recent electricity bill</p>
             <p class="upslot__s">Shows your tariff and any cheap window</p>
-            <label class="upslot__pick iq__jsonly"><input type="file" accept="application/pdf,image/*" data-file> <span>PDF, photo</span></label>
-            <p class="upslot__state" data-state-text aria-live="polite"></p>
-            <label class="tick"><input type="checkbox" name="send_later" value="electricity_bill"> I'll send it later</label>
+            <label class="drop" data-drop>
+              <input type="file" accept="application/pdf,image/*" data-file>
+              <span class="drop__icon" aria-hidden="true"></span>
+              <span class="drop__main"><strong>Drop a file here</strong> or tap to choose</span>
+              <span class="drop__meta">PDF, photo · up to 4 MB</span>
+            </label>
+            <div class="drop__done" data-done hidden>
+              <img class="drop__thumb" alt="" data-thumb hidden>
+              <span class="drop__file" data-state-text aria-live="polite"></span>
+              <button type="button" class="linkbtn" data-remove>Remove</button>
+            </div>
+            <label class="tick upslot__later"><input type="checkbox" name="send_later" value="electricity_bill"> I'll send it later</label>
           </div>
         </div>
         <p class="iq__err" data-err="upload_big" hidden>That file's a bit big. Try a photo instead of a scan, or send it later.</p>
@@ -457,6 +504,6 @@
 <footer id="site-footer" class="site-footer"></footer>
 <script src="/assets/js/site.js?v=16" defer></script>
 <script src="/assets/js/intake-route.js?v=1" defer></script>
-<script src="/assets/js/intake.js?v=1" defer></script>
+<script src="/assets/js/intake.js?v=2" defer></script>
 </body>
 </html>
