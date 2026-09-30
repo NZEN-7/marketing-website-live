@@ -13,6 +13,8 @@
 //   - it builds the target itself and refuses anything outside preview/;
 //   - it refuses main, a detached HEAD, a dirty tree, and a `deploy` remote
 //     that is not the mirror;
+//   - it refuses a branch whose api/lead.js lacks the preview guard (off
+//     production, mail to TEST_RECIPIENT only and no leads insert);
 //   - git is called with argument arrays, never through a shell.
 //
 // Usage: npm run deploy:preview      (from the branch to preview)
@@ -42,6 +44,16 @@ export function previewRef(branch) {
   return ref;
 }
 
+/** Does this api/lead.js route mail and skip the leads insert off production?
+    A preview is public and runs with the Preview scope's Gmail and Supabase
+    settings, so a branch without the guard (VERCEL_ENV === "production" and
+    TEST_RECIPIENT) could mail any address or write a production lead
+    (CTO Re #31 item 28). Pure, so it is tested. */
+export function hasPreviewGuard(leadSrc) {
+  const src = String(leadSrc || "");
+  return /VERCEL_ENV\s*===\s*["']production["']/.test(src) && /TEST_RECIPIENT/.test(src);
+}
+
 function git(...args) {
   return execFileSync("git", args, { stdio: ["ignore", "pipe", "pipe"] }).toString().trim();
 }
@@ -58,6 +70,14 @@ function main() {
   const branch = git("rev-parse", "--abbrev-ref", "HEAD");
   let ref;
   try { ref = previewRef(branch); } catch (e) { console.error(e.message); process.exit(1); }
+
+  let lead = "";
+  try { lead = git("show", "HEAD:api/lead.js"); } catch { lead = ""; }
+  if (lead && !hasPreviewGuard(lead)) {
+    console.error("api/lead.js on this branch has no preview guard (VERCEL_ENV / TEST_RECIPIENT): " +
+      "a public preview could send real mail or write a production lead. Rebase onto main first.");
+    process.exit(1);
+  }
 
   let url = "";
   try { url = git("remote", "get-url", "deploy"); } catch { git("remote", "add", "deploy", MIRROR); url = MIRROR; }

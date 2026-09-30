@@ -7,7 +7,8 @@
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
-import { previewRef, PREFIX, MIRROR } from "../tools/deploy-preview.mjs";
+import { readFileSync } from "node:fs";
+import { previewRef, PREFIX, MIRROR, hasPreviewGuard } from "../tools/deploy-preview.mjs";
 
 let failed = 0;
 const check = (label, cond, got) => {
@@ -25,6 +26,13 @@ for (const b of ["main", "master", "HEAD", "", null, "preview-tmp", "deploy-tmp"
 check("every accepted ref starts with the preview prefix", ["b07-first-emails", "b09-cost-table", "x/main"]
   .every((b) => previewRef(b).startsWith(PREFIX)));
 check("the mirror is the NZEN-7 repo", MIRROR === "https://github.com/NZEN-7/marketing-website-live.git");
+
+// The preview guard (CTO Re #31 item 28): an unguarded lead.js is refused.
+const here = path.dirname(fileURLToPath(import.meta.url));
+check("this branch's lead.js has the preview guard", hasPreviewGuard(readFileSync(path.join(here, "..", "api", "lead.js"), "utf8")));
+check("brief 07's spelling counts too", hasPreviewGuard('const isProduction = () => process.env.VERCEL_ENV === "production"; // TEST_RECIPIENT'));
+check("a lead.js with no guard is refused", !hasPreviewGuard('await transport.sendMail({ to: data.email });'));
+check("VERCEL_ENV alone (no test routing) is refused", !hasPreviewGuard('if (process.env.VERCEL_ENV === "production") x();'));
 
 // Any argument is refused before anything else runs (exit 2), so no refspec
 // can be passed through `npm run deploy:preview -- ...`.
