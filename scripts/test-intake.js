@@ -91,6 +91,10 @@ check("notification sections in SPEC §7 order, phone near the top", order.every
 check("'Not sure' shows as such", /Boiler condition: Not sure/.test(body));
 check("a shown-but-empty answer says Skipped", /Energy setup: Skipped/.test(body));
 check("a screen never shown says Not asked", /Storeys: Not asked/.test(body));
+const nj = lead.parseSubmission({ form: "intake", nojs: "1", first_name: "T", last_name: "E", email: "t@example.com", postcode: "3820", heating: ["boiler_underfloor"], tenure: "owner_occupier" }).data;
+check("no-JS: the server works out state and route itself", nj.state === "VIC" && nj.route === "icp", [nj.state, nj.route]);
+check("a completed send reports rung 'done'", lead.parseSubmission(Object.assign({}, base, { rung_reached: "3" })).data.rung_reached === "done");
+check("a page's own state claim is only a hint", lead.parseSubmission(Object.assign({}, base, { state: "QLD" })).data.state === "VIC");
 check("no-JS posts are tagged", lead.formatSubject(lead.parseSubmission(Object.assign({}, base, { nojs: "1" })).data).endsWith("[no-JS]"));
 check("the intake gets no customer first email in the prototype", lead.firstEmail(p.data) === null);
 

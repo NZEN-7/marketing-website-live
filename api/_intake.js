@@ -9,6 +9,9 @@
 "use strict";
 
 const crypto = require("crypto");
+const path = require("path");
+// The same routing rules the page uses (SPEC §1), so no-JS posts get a route too.
+const R = require(path.join(__dirname, "..", "assets", "js", "intake-route.js"));
 
 const clamp = (s, max) => {
   const t = String(s == null ? "" : s).replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, "").trim();
@@ -83,6 +86,11 @@ function parseIntake(body) {
     uploads: Array.isArray(body.uploads) ? body.uploads.slice(0, 6) : [],
   };
   if (nojs) d.seen = Object.values(ASKED_ON);       // the long form shows every question
+  // The server works out state and route itself: the long form has no script
+  // to do it, and a page's own claim is only a hint.
+  if (d.state !== "OS" && /^\d{4}$/.test(d.postcode)) d.state = R.stateFor(d.postcode) || d.state;
+  if (!d.route) d.route = R.route(d);
+  if (d.outcome === "completed") d.rung_reached = "done";
   if (!d.first_name || !d.last_name) return { error: "Missing required field: name" };
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(d.email)) return { error: "Invalid email address" };
   if (d.state !== "OS" && !/^\d{4}$/.test(d.postcode)) return { error: "Missing required field: postcode" };

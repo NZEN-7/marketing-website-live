@@ -362,7 +362,7 @@
   ],
   "functions": {
     "api/lead.js": {
-      "includeFiles": "api/_first-emails/**"
+      "includeFiles": "{api/_first-emails/**,assets/js/intake-route.js}"
     }
   }
 }
