@@ -181,7 +181,7 @@ check("at most 6 files are considered", lead.parseSubmission(Object.assign({}, b
   check("S1-3: CR/LF and whitespace runs collapse in single-line fields", h.first_name === "Alex Email: forged@example.com" && h.last_name === "Sample Phone: 1" &&
     h.suburb === "Hawthorn Lead ID: il-aaaaaaaaaa" && h.referrer === "Bob Heating: x", [h.first_name, h.last_name, h.suburb, h.referrer]);
   const body = lead.formatNotification(h, "x");
-  check("S1-3: no forged label starts a line, and the real Email line is the only one", !/^(Email|Lead ID|Heating|Landlord email): (forged|il-a|x)/m.test(body) &&
+  check("S1-3: no forged label starts a line, and the real Email line is the only one", !/^(Email|Lead ID|Heating|Landlord email): (forged|il-aaaaaaaaaa|x(@|$))/m.test(body) &&
     (body.match(/^Email: /gm) || []).length === 1);
   check("S1-3: the notes keep their own lines (multi-line by design)", lead.parseSubmission(Object.assign({}, base, { notes: "a\nb" })).data.notes === "a\nb");
   check("D6-S3: in the notification, every line of free text after the first is quoted, so none starts a line",
@@ -213,6 +213,26 @@ check("SPEC rev B: the upload-set message promises no email", /One file was too 
 check("SPEC rev B: the urgent screen and urgent Done lines", /Sorry to hear about the boiler/.test(page) && (page.match(/Nick will try to call you today\. If we miss you, we'll try again tomorrow at lunchtime\./g) || []).length === 2);
 
 check("the Dialpad number in the sidebar and footer (SPEC §2), dialable", (page.match(/href="tel:\+61272283430">\(02\) 7228 3430<\/a>/g) || []).length === 2);
+check("the sidebar has no placeholder boxes (Nick, 2 Oct)", !/class="side-ph"|\(placeholder\)/.test(page));
+check("no placeholder privacy link on the intake (Nick, 2 Oct: strip it until there's a policy page)", !/\[Privacy policy\]|class="ph-link"/.test(page));
+{
+  // The button switch (Nick, 2 Oct): "Request a Quote" and the interest list go to /start/;
+  // contact and the $990 booking page stay. The old pages themselves still exist.
+  const { execFileSync } = require("child_process");
+  const files = execFileSync("git", ["ls-files", "*.html", "*.js"], { cwd: path.join(__dirname, "..") }).toString().split(/\r?\n/)
+    .filter((f) => f && !/^(start|docs|feedback|\.claude|scripts|api|tools)\//.test(f));
+  const read = (f) => fs.readFileSync(path.join(__dirname, "..", f), "utf8");
+  const old = files.filter((f) => /href="(\/pre-order\/register-interest\/|\/interest\/)"/.test(read(f)));
+  check("buttons: no site page links to the old quote or interest-list forms", old.length === 0, old);
+  check("buttons: the site links to /start/ from its pages and the shared header", files.filter((f) => /href="\/start\/"/.test(read(f))).length >= 20 && /href="\/start\/"/.test(read("assets/js/site.js")));
+  const vj = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "vercel.json"), "utf8"));
+  const r301 = (vj.redirects || []).find((r) => r.destination === "/start/");
+  check("buttons: /pre-order/register-interest/ 301s to /start/ (its bundled consent retires; CTO Re #41.4)",
+    r301 && r301.statusCode === 301 && new RegExp("^" + r301.source + "$").test("/pre-order/register-interest/") && new RegExp("^" + r301.source + "$").test("/pre-order/register-interest"), r301);
+  const nt = fs.readFileSync(path.join(__dirname, "..", "netlify.toml"), "utf8").replace(/\r/g, "");
+  check("buttons: netlify.toml has the twin 301", nt.includes('from = "/pre-order/register-interest/*"\n  to = "/start/"\n  status = 301'));
+  check("buttons: the old pages still exist, for cached links", fs.existsSync(path.join(__dirname, "..", "pre-order", "register-interest", "index.html")) && fs.existsSync(path.join(__dirname, "..", "interest", "index.html")));
+}
 check("Nick's old mobile is gone from the page", !/432 ?395 ?138/.test(page));
 
 console.log(failed ? `\n${failed} CHECK(S) FAILED` : "\nAll intake checks passed.");
