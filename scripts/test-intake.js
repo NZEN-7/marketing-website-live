@@ -154,5 +154,8 @@ check("SPEC rev B: 'Landlord's phone'", /<span>Landlord's phone<\/span>/.test(pa
 check("SPEC rev B: the upload-set message promises no email", /One file was too big to send here\. No problem: Nick will be in touch, and you can send it to him then\./.test(page) && !/Reply to the email/.test(visible(page)));
 check("SPEC rev B: the urgent screen and urgent Done lines", /Sorry to hear about the boiler/.test(page) && (page.match(/Nick will try to call you today\. If we miss you, we'll try again tomorrow at lunchtime\./g) || []).length === 2);
 
+check("the Dialpad number in the sidebar and footer (SPEC §2), dialable", (page.match(/href="tel:\+61272283430">\(02\) 7228 3430<\/a>/g) || []).length === 2);
+check("Nick's old mobile is gone from the page", !/432 ?395 ?138/.test(page));
+
 console.log(failed ? `\n${failed} CHECK(S) FAILED` : "\nAll intake checks passed.");
 process.exit(failed ? 1 : 0);
