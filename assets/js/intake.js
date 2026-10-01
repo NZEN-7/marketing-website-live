@@ -129,7 +129,27 @@
   // ---------------------------------------------------------------- validation
   var EMAIL_OK = function (e) { return /^[^\s@]+@[^\s@.]+(\.[^\s@.]+)*\.[^\s@.]{2,}$/.test(String(e).trim()); };
   var PHONE_OK = function (p) { var d = String(p).replace(/[\s()-]/g, ""); return /^(\+?61|0)[2-478]\d{8}$/.test(d); };
-  function err(name, on) { var e = $('[data-err="' + name + '"]', form); if (e) e.hidden = !on; return !on; }
+  // An error is announced when it appears (role=alert) and tied to its field
+  // (aria-invalid + aria-describedby), so a screen reader hears it (a11y pass, 2 Oct).
+  var ERR_FIELD = { email: "[name=email]", postcode: "[name=postcode]", phone: "[name=phone]", phone_empty: "[name=phone]",
+    urgent_phone: "[data-urgent-phone-input]", landlord: "[name=landlord_email]" };
+  function err(name, on) {
+    var e = $('[data-err="' + name + '"]', form);
+    if (e) {
+      if (!e.id) e.id = "err-" + name;
+      e.setAttribute("role", "alert");
+      e.hidden = !on;
+      var f = ERR_FIELD[name] && $(ERR_FIELD[name], form);
+      if (f) {
+        var ids = (f.getAttribute("aria-describedby") || "").split(/\s+/).filter(function (x) { return x && x !== e.id; });
+        if (on) ids.push(e.id);
+        if (ids.length) f.setAttribute("aria-describedby", ids.join(" ")); else f.removeAttribute("aria-describedby");
+        var anyOn = ids.some(function (id) { var x = document.getElementById(id); return x && !x.hidden; });
+        if (anyOn) f.setAttribute("aria-invalid", "true"); else f.removeAttribute("aria-invalid");
+      }
+    }
+    return !on;
+  }
   function valid(id) {
     var a = answers();
     if (id === "S1") {
@@ -384,8 +404,16 @@
   btnCont.addEventListener("click", advance);
   btnBack.addEventListener("click", back);
   form.addEventListener("submit", function (e) { e.preventDefault(); advance(); });
+  // Keyboard on single-select screens (a11y pass, 2 Oct): the arrow keys move
+  // the choice without moving on, so every option can be reached; Space or
+  // Enter (or Continue) confirms. A tap or click still moves on after the beat.
+  var kbPick = false;
   form.addEventListener("keydown", function (e) {
-    if (e.key === "Enter" && e.target.tagName === "INPUT" && e.target.type !== "checkbox" && e.target.type !== "radio") { e.preventDefault(); advance(); }
+    var t = e.target, auto = t.type === "radio" && t.closest("[data-auto]");
+    if (auto && /^(Arrow(Up|Down|Left|Right)|Home|End)$/.test(e.key)) { kbPick = true; clearTimeout(advanceTimer); return; }
+    if (auto && e.key === " " && t.checked) { e.preventDefault(); clearTimeout(advanceTimer); advance(); return; }
+    if (auto && e.key === "Enter") { e.preventDefault(); clearTimeout(advanceTimer); advance(); return; }   // same as Continue
+    if (e.key === "Enter" && t.tagName === "INPUT" && t.type !== "checkbox" && t.type !== "radio") { e.preventDefault(); advance(); }
   });
   $$("[data-go]", form).forEach(function (b) { b.addEventListener("click", function () { go(b.getAttribute("data-go")); }); });
   $$("[data-skip]", form).forEach(function (b) {
@@ -405,6 +433,7 @@
     var s = e.target.closest("[data-screen]");
     if (s && s.hasAttribute("data-auto") && e.target.type === "radio") {   // single-select: move on after the beat
       clearTimeout(advanceTimer);
+      if (kbPick) { kbPick = false; return; }                               // an arrow key moved the choice: wait for Enter or Space
       advanceTimer = setTimeout(function () { if (current === s.getAttribute("data-screen")) advance(); }, BEAT_MS);
     }
   });

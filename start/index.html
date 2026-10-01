@@ -359,66 +359,66 @@
         <p class="iq__coach">A phone photo is fine. Nothing here is needed to talk to us or to book.</p>
         <div class="uploads" data-uploads>
           <div class="upslot" data-slot="winter_gas_bill">
-            <p class="upslot__t">A recent winter gas bill</p>
+            <p class="upslot__t" id="up-winter_gas_bill-t">A recent winter gas bill</p>
             <p class="upslot__s">Shows how much heat your home really uses</p>
             <label class="drop" data-drop>
-              <input type="file" accept="application/pdf,image/*" data-file>
+              <input type="file" aria-labelledby="up-winter_gas_bill-t up-winter_gas_bill-how" accept="application/pdf,image/*" data-file>
               <span class="drop__icon" aria-hidden="true"></span>
-              <span class="drop__main"><strong>Drop a file here</strong> or tap to choose</span>
+              <span class="drop__main" id="up-winter_gas_bill-how"><strong>Drop a file here</strong> or tap to choose</span>
               <span class="drop__meta">PDF, photo · up to 4 MB</span>
             </label>
             <div class="drop__done" data-done hidden>
               <img class="drop__thumb" alt="" data-thumb hidden>
               <span class="drop__file" data-state-text aria-live="polite"></span>
-              <button type="button" class="linkbtn" data-remove>Remove</button>
+              <button type="button" class="linkbtn" data-remove aria-label="Remove a recent winter gas bill">Remove</button>
             </div>
             <label class="tick upslot__later"><input type="checkbox" name="send_later" value="winter_gas_bill"> I'll send it later</label>
           </div>
           <div class="upslot" data-slot="boiler_compliance_plate">
-            <p class="upslot__t">The boiler's compliance plate</p>
+            <p class="upslot__t" id="up-boiler_compliance_plate-t">The boiler's compliance plate</p>
             <p class="upslot__s">Get close so the writing fills the frame, in good light.</p>
             <label class="drop" data-drop>
-              <input type="file" accept="image/*" data-file>
+              <input type="file" aria-labelledby="up-boiler_compliance_plate-t up-boiler_compliance_plate-how" accept="image/*" data-file>
               <span class="drop__icon" aria-hidden="true"></span>
-              <span class="drop__main"><strong>Drop a file here</strong> or tap to choose</span>
+              <span class="drop__main" id="up-boiler_compliance_plate-how"><strong>Drop a file here</strong> or tap to choose</span>
               <span class="drop__meta">photo · up to 4 MB</span>
             </label>
             <div class="drop__done" data-done hidden>
               <img class="drop__thumb" alt="" data-thumb hidden>
               <span class="drop__file" data-state-text aria-live="polite"></span>
-              <button type="button" class="linkbtn" data-remove>Remove</button>
+              <button type="button" class="linkbtn" data-remove aria-label="Remove the boiler's compliance plate">Remove</button>
             </div>
             <label class="tick upslot__later"><input type="checkbox" name="send_later" value="boiler_compliance_plate"> I'll send it later</label>
           </div>
           <div class="upslot" data-slot="switchboard">
-            <p class="upslot__t">Your switchboard, cover open</p>
+            <p class="upslot__t" id="up-switchboard-t">Your switchboard, cover open</p>
             <p class="upslot__s">Shows your supply and main switch</p>
             <label class="drop" data-drop>
-              <input type="file" accept="image/*" data-file>
+              <input type="file" aria-labelledby="up-switchboard-t up-switchboard-how" accept="image/*" data-file>
               <span class="drop__icon" aria-hidden="true"></span>
-              <span class="drop__main"><strong>Drop a file here</strong> or tap to choose</span>
+              <span class="drop__main" id="up-switchboard-how"><strong>Drop a file here</strong> or tap to choose</span>
               <span class="drop__meta">photo · up to 4 MB</span>
             </label>
             <div class="drop__done" data-done hidden>
               <img class="drop__thumb" alt="" data-thumb hidden>
               <span class="drop__file" data-state-text aria-live="polite"></span>
-              <button type="button" class="linkbtn" data-remove>Remove</button>
+              <button type="button" class="linkbtn" data-remove aria-label="Remove your switchboard, cover open">Remove</button>
             </div>
             <label class="tick upslot__later"><input type="checkbox" name="send_later" value="switchboard"> I'll send it later</label>
           </div>
           <div class="upslot" data-slot="electricity_bill">
-            <p class="upslot__t">A recent electricity bill</p>
+            <p class="upslot__t" id="up-electricity_bill-t">A recent electricity bill</p>
             <p class="upslot__s">Shows your tariff and any cheap window</p>
             <label class="drop" data-drop>
-              <input type="file" accept="application/pdf,image/*" data-file>
+              <input type="file" aria-labelledby="up-electricity_bill-t up-electricity_bill-how" accept="application/pdf,image/*" data-file>
               <span class="drop__icon" aria-hidden="true"></span>
-              <span class="drop__main"><strong>Drop a file here</strong> or tap to choose</span>
+              <span class="drop__main" id="up-electricity_bill-how"><strong>Drop a file here</strong> or tap to choose</span>
               <span class="drop__meta">PDF, photo · up to 4 MB</span>
             </label>
             <div class="drop__done" data-done hidden>
               <img class="drop__thumb" alt="" data-thumb hidden>
               <span class="drop__file" data-state-text aria-live="polite"></span>
-              <button type="button" class="linkbtn" data-remove>Remove</button>
+              <button type="button" class="linkbtn" data-remove aria-label="Remove a recent electricity bill">Remove</button>
             </div>
             <label class="tick upslot__later"><input type="checkbox" name="send_later" value="electricity_bill"> I'll send it later</label>
           </div>
@@ -513,6 +513,6 @@
 <footer id="site-footer" class="site-footer"></footer>
 <script src="/assets/js/site.js?v=18" defer></script>
 <script src="/assets/js/intake-route.js?v=2" defer></script>
-<script src="/assets/js/intake.js?v=6" defer></script>
+<script src="/assets/js/intake.js?v=7" defer></script>
 </body>
 </html>
