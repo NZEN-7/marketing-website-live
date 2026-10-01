@@ -30,7 +30,6 @@
 .side-line{margin:0;color:var(--iq-ink);font-weight:600;}
 .side-talk{font-weight:800;color:var(--td-orange);}
 .side-email{display:block;font-size:.85rem;color:var(--iq-muted);}
-.side-ph{border:1px dashed var(--iq-line);border-radius:var(--radius-sm);padding:12px;font-size:.82rem;color:var(--iq-muted);}
 .side-offer{margin:0;font-size:.92rem;color:var(--iq-ink);}
 .intake{max-width:720px;min-width:0;}
 
