@@ -96,12 +96,17 @@ function parseIntake(body) {
     uploads: Array.isArray(body.uploads) ? body.uploads.slice(0, 6) : [],
     // Stage 1 has no step-1 save, so the session starts at the page stamp.
     ts_started: Number(body.ts) > 0 ? Number(body.ts) : 0,
+    // The details from "Help us prepare" after an earlier exit already sent:
+    // a second notification, but never a second customer email.
+    followup: body.followup === true || body.followup === "true",
   };
   if (nojs) d.seen = Object.values(ASKED_ON);       // the long form shows every question
   // The server works out state and route itself: the long form has no script
   // to do it, and a page's own claim is only a hint.
   if (d.state !== "OS" && /^\d{4}$/.test(d.postcode)) d.state = R.stateFor(d.postcode) || d.state;
-  if (!d.route) d.route = R.route(d);
+  // Always the server's own route: it picks the customer's email now, so the
+  // page's claim is only ever a hint (GPT Web, intake review).
+  d.route = R.route(d);
   if (d.outcome === "completed") d.rung_reached = "done";
   if (!d.first_name || !d.last_name) return { error: "Missing required field: name", why: "name" };
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(d.email)) return { error: "Invalid email address", why: "email" };
@@ -248,13 +253,25 @@ function settleSend(d, ok, now) {
   seen.settle(!!ok);
 }
 
+/* ---- the customer's first email (CTO Re #30: stage 1, brief 07's templates) ----
+   §2 when the route closes them (O1, N1, R1); §1 on every other route (the
+   match, done and urgent screens). One per lead: a follow-up details send
+   gets none. No resume link until stage 2. */
+const CLOSED = { "out-of-area": 1, "not-our-product": 1, renter: 1 };
+function firstEmailKey(d) {
+  if (d.followup) return null;
+  return CLOSED[d.route] ? "interest-list-unserved" : "register-interest";
+}
+
 /* ---- the leads row (PRD §3.1) ----
    The existing columns, filled the way the old forms fill them, so CRM views
-   read the same. The intake's own columns (lead_id, intent, route,
-   rung_reached, tenure, boiler_condition, ts_started, ts_last, answers) are
-   added only when INTAKE_LEAD_COLUMNS=on, i.e. once Platform has applied the
-   migration: sending a column the table doesn't have fails the insert, and
-   then the old forms' rows would be the next thing to break. */
+   read the same. The intake's own columns, by Platform's names (migration
+   efaf42c: intake_lead_id, intake_event, intent, route, rung_reached, tenure,
+   boiler_condition, ts_started, ts_last, answers), are added only when
+   INTAKE_LEAD_COLUMNS=on, i.e. once the migration is applied: sending a
+   column the table doesn't have fails the insert. leads.lead_id is the live
+   per-row primary key, so the app's lead_id goes in intake_lead_id. */
+const RUNG = { 1: 1, 2: 2, 3: 3, done: 4 };   // rung_reached is an integer column: done = 4 (Platform to confirm)
 const ANSWER_KEYS = ["intent", "source", "referrer", "newsletter_opt_in", "heating", "heating_other_text", "boiler_condition",
   "boiler_age", "tenure", "scope", "energy", "winter_gas_bill_band", "timing", "timing_note", "storeys", "radiator_band",
   "underfloor_band", "built_band", "off_gas", "send_later", "contact_pref", "call_times", "remote", "outcome", "last_screen"];
@@ -288,7 +305,8 @@ function intakeLeadRow(d, env, now) {
     ANSWER_KEYS.forEach((k) => { const v = d[k]; if (Array.isArray(v) ? v.length : (v !== "" && v != null && v !== false)) answers[k] = v; });
     const started = Number(d.ts_started) > 0 ? new Date(Number(d.ts_started)).toISOString() : null;
     Object.assign(row, {
-      lead_id: d.lead_id, intent: d.intent || null, route: d.route || null, rung_reached: d.rung_reached || null,
+      intake_lead_id: d.lead_id, intake_event: "complete",          // stage 1 sends no partials
+      intent: d.intent || null, route: d.route || null, rung_reached: RUNG[d.rung_reached] || null,
       tenure: d.tenure || null, boiler_condition: d.boiler_condition || null,
       ts_started: started, ts_last: at, answers,
     });
@@ -296,4 +314,4 @@ function intakeLeadRow(d, env, now) {
   return row;
 }
 
-module.exports = { parseIntake, claimSend, settleSend, intakeLeadRow, PHONE_OK, formatIntakeNotification, formatIntakeSubject, intakeAttachments, sniff, LABELS: L, SLOTS };
+module.exports = { parseIntake, claimSend, settleSend, intakeLeadRow, firstEmailKey, PHONE_OK, formatIntakeNotification, formatIntakeSubject, intakeAttachments, sniff, LABELS: L, SLOTS };

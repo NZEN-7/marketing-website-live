@@ -284,15 +284,20 @@ async function recordLead(d) {
   if (!isProduction()) return "skipped (non-production)";
   // return=minimal matters for lead_writer: it can insert but not read, so
   // asking for the row back would fail the insert.
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/leads`, {
+  // An intake row with its own columns is one per (intake_lead_id,
+  // intake_event): two instances racing the same send get one row (Platform,
+  // migration efaf42c; GPT Web I-S2).
+  const row = d.form === "intake" ? intake.intakeLeadRow(d, process.env) : leadRow(d);
+  const once = !!row.intake_event;
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/leads` + (once ? "?on_conflict=intake_lead_id,intake_event" : ""), {
     method: "POST",
     headers: {
       apikey: auth.apikey,
       Authorization: `Bearer ${auth.bearer}`,
       "Content-Type": "application/json",
-      Prefer: "return=minimal",
+      Prefer: once ? "return=minimal,resolution=ignore-duplicates" : "return=minimal",
     },
-    body: JSON.stringify(d.form === "intake" ? intake.intakeLeadRow(d, process.env) : leadRow(d)),
+    body: JSON.stringify(row),
   });
   if (!res.ok) {
     let code = "";
@@ -578,7 +583,7 @@ function formatSubject(d) {
    Deposits get none: that form posts BEFORE the Stripe handoff, and Stripe
    sends the receipt (CTO Re: Web #12, A1). A paid-booking email waits for a
    Stripe-webhook brief of its own. */
-const AUTORESPOND = { "register-interest": true, contact: true, subscribe: true, "interest-list": true };
+const AUTORESPOND = { "register-interest": true, contact: true, subscribe: true, "interest-list": true, intake: true };
 
 /* Unserved (HANDOVER §2) only when CLEARLY unserved: a known unserved state
    (UNSERVED_STATES, NZ included), or "Split systems only". Anything else,
@@ -593,6 +598,7 @@ function isUnservedListLead(d) {
 
 function templateKey(d) {
   if (d.form === "interest-list") return isUnservedListLead(d) ? "interest-list-unserved" : "register-interest";
+  if (d.form === "intake") return intake.firstEmailKey(d);
   if (d.form === "register-interest" || d.form === "contact" || d.form === "subscribe") return d.form;
   return null;
 }

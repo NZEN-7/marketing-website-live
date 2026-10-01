@@ -117,7 +117,8 @@ const k = { lead_id: "il-1111111111", outcome: "completed" };
   check("claimSend: a failed send is forgotten, so a retry is new", st(f, 1200) === "new");
   check("claimSend: a done send expires after 30 minutes", st(k, 2000 + 31 * 60 * 1000) === "new");
 }
-check("icp-check is a route the server keeps", lead.parseSubmission(Object.assign({}, base, { route: "icp-check" })).data.route === "icp-check");
+check("icp-check: the server works it out from the answers", lead.parseSubmission(Object.assign({}, base, { heating: ["not_sure"] })).data.route === "icp-check");
+check("the page's own route claim is ignored", lead.parseSubmission(Object.assign({}, base, { route: "renter" })).data.route === "icp");
 check("the landlord's phone reaches the notification, under its own label", /LANDLORD[\s\S]*Landlord phone: 0400 000 002/.test(lead.formatNotification(lead.parseSubmission(Object.assign({}, base, { landlord_phone: "0400 000 002" })).data, "x")));
 check("missing postcode is refused (unless outside Australia)", !!lead.parseSubmission(Object.assign({}, base, { postcode: "" })).error &&
   !lead.parseSubmission(Object.assign({}, base, { postcode: "", state: "OS" })).error);
@@ -126,7 +127,7 @@ check("unknown card values are dropped", lead.parseSubmission(Object.assign({}, 
 const subj = lead.formatSubject(p.data);
 check("subject: Website lead · name · suburb, state · route · heating · lead_id",
   subj === `Website lead · Alex Sample · Hawthorn, VIC · icp · Gas hydronic with radiators · ${p.data.lead_id}`, subj);
-check("subject: URGENT first on the urgent route", lead.formatSubject(lead.parseSubmission(Object.assign({}, base, { route: "urgent" })).data).startsWith("URGENT · "));
+check("subject: URGENT first on the urgent route", lead.formatSubject(lead.parseSubmission(Object.assign({}, base, { intent: "urgent" })).data).startsWith("URGENT · "));
 check("subject: no CR/LF", !/[\r\n]/.test(lead.formatSubject(lead.parseSubmission(Object.assign({}, base, { first_name: "A\r\nBcc: x@example.com" })).data)));
 const body = lead.formatNotification(p.data, "30 September 2026 at 2:00 pm AEST");
 const order = ["Lead ID:", "Rung reached:", "Route:", "CONTACT", "Phone:", "Best time to call:", "LOCATION", "ABOUT THE ENQUIRY", "YOUR HOME", "Heating:", "THE DETAILS", "ANYTHING ELSE"];
@@ -140,7 +141,21 @@ check("a completed send reports rung 'done'", lead.parseSubmission(Object.assign
 check("a page's own state claim is only a hint", lead.parseSubmission(Object.assign({}, base, { state: "QLD" })).data.state === "VIC");
 check("S14's underfloor answer reaches the notification", /Underfloor covers: Most of the house/.test(lead.formatNotification(lead.parseSubmission(Object.assign({}, base, { underfloor_band: "most", seen: base.seen.concat(["S14"]) })).data, "x")));
 check("no-JS posts are tagged", lead.formatSubject(lead.parseSubmission(Object.assign({}, base, { nojs: "1" })).data).endsWith("[no-JS]"));
-check("the intake gets no customer first email in the prototype", lead.firstEmail(p.data) === null);
+// ---- the customer's first email (CTO Re #30): brief 07's templates, one per lead ----
+const fe = (o) => lead.firstEmail(lead.parseSubmission(Object.assign({}, base, o)).data);
+check("first email: a served lead on the match gets §1", fe({}).template === "register-interest" && /^Thanks Alex, let's talk about your heating$/.test(fe({}).subject));
+check("first email: §1 with a phone offers the call", /I'll try to give you a quick call/.test(fe({ phone: "0412 345 678", contact_pref: "phone" }).text));
+check("first email: §1 for 'I'd prefer email' offers the booking instead", /The easiest next step is a quick 15-minute chat/.test(fe({}).text) && !/give you a quick call/.test(fe({}).text));
+check("first email: urgent gets §1", fe({ route: "", intent: "urgent", phone: "0412 345 678", outcome: "urgent_call" }).template === "register-interest");
+check("first email: 'Not sure' heating (icp-check) gets §1", fe({ heating: ["not_sure"] }).template === "register-interest");
+check("first email: O1 out of area gets §2", fe({ postcode: "4000", state: "QLD", outcome: "keep_posted" }).template === "interest-list-unserved");
+check("first email: NZ gets §2", fe({ postcode: "", state: "OS", outcome: "keep_posted" }).template === "interest-list-unserved");
+check("first email: N1 (split systems only) gets §2", fe({ heating: ["splits"], outcome: "keep_posted" }).template === "interest-list-unserved");
+check("first email: R1 (renting) gets §2", fe({ tenure: "renter", outcome: "landlord_share" }).template === "interest-list-unserved");
+check("first email: §2 carries the unsubscribe line", /Reply with "unsubscribe"/.test(fe({ tenure: "renter" }).text));
+check("first email: a follow-up details send gets none", lead.firstEmail(lead.parseSubmission(Object.assign({}, base, { followup: true })).data) === null);
+check("first email: the no-JS long form gets one too", fe({ nojs: "1" }).template === "register-interest");
+check("first email: no resume link yet (stage 2)", !/resume|come back/i.test(fe({}).text));
 
 // ---- attachments (PRD D3) ----
 const pdf = Buffer.concat([Buffer.from("%PDF-1.4\n"), Buffer.alloc(2000, 32)]);

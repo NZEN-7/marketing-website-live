@@ -362,7 +362,7 @@
       }).then(function (j) { if (!j || j.sent !== true) throw new Error("not sent"); });
     }
     busy = packFiles().then(function (up) {
-      var body = payload(outcome); body.uploads = up;
+      var body = payload(outcome); body.uploads = up; body.followup = details;   // details: no second customer email
       return post(body).catch(function () {
         return new Promise(function (r) { setTimeout(r, 1500); }).then(function () { return post(body); });
       });

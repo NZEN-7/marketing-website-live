@@ -180,25 +180,30 @@ const RI = { form: "register-interest", first_name: NAME, last_name: LAST, email
 
   // ---- 5. the intake: a repeat of the same send is not sent twice (Sales review, 1) ----
   process.env.VERCEL_ENV = "preview"; process.env.TEST_RECIPIENT = "test-inbox@example.com";
+  // The intake now sends the customer a first email too (CTO Re #30), so these
+  // count the notifications to Nick; the customer email is checked on its own.
+  const notes = () => sent.filter((m) => /^(Website lead|URGENT) · /.test(m.subject));
+  const firsts = () => sent.filter((m) => !/^(Website lead|URGENT) · /.test(m.subject));
   const IN = { form: "intake", first_name: NAME, last_name: LAST, email: EMAIL, phone: PHONE, postcode: "3122", state: "VIC",
     heating: ["boiler_radiators"], outcome: "completed", lead_id: "il-0123456789" };
   sent = []; failSend = null;
   capture(); const i1 = await call(IN); const i2 = await call(IN); release();
-  check("intake: two taps, one notification (both answered 200)", i1.code === 200 && i2.code === 200 && sent.length === 1, [i1.code, i2.code, sent.length]);
+  check("intake: two taps, one notification (both answered 200)", i1.code === 200 && i2.code === 200 && notes().length === 1, [i1.code, i2.code, notes().length]);
   check("intake: the repeat is logged by code, no PII", logs.some((l) => /screened code=repeat_send/.test(l)) && piiIn(logs).length === 0, logs);
   check("intake: the notification carries the page's lead ID", /il-0123456789/.test(sent[0].subject), sent[0] && sent[0].subject);
   sent = [];
   capture(); await call(Object.assign({}, IN, { lead_id: "il-aaaaaaaaaa", outcome: "urgent_call" }));
-  await call(Object.assign({}, IN, { lead_id: "il-aaaaaaaaaa", outcome: "completed" })); release();
-  check("intake: urgent first, then its details: both sent", sent.length === 2, sent.length);
+  await call(Object.assign({}, IN, { lead_id: "il-aaaaaaaaaa", outcome: "completed", followup: true })); release();
+  check("intake: urgent first, then its details: both notifications sent", notes().length === 2, notes().length);
+  check("intake: but only one customer email (the details are a follow-up)", firsts().length === 1, firsts().map((m) => m.subject));
   sent = []; failSend = (m, i) => (i === 0 && !failSend.done ? (failSend.done = true, new Error("smtp down")) : null);
   capture(); const f1 = await call(Object.assign({}, IN, { lead_id: "il-bbbbbbbbbb" }));
   const f2 = await call(Object.assign({}, IN, { lead_id: "il-bbbbbbbbbb" })); release();
-  check("intake: a failed send can be retried with the same lead ID", f1.code === 500 && f2.code === 200 && sent.length === 1, [f1.code, f2.code, sent.length]);
+  check("intake: a failed send can be retried with the same lead ID", f1.code === 500 && f2.code === 200 && notes().length === 1, [f1.code, f2.code, notes().length]);
   failSend = null;
   sent = [];
   capture(); await call(Object.assign({}, IN, { lead_id: "not-an-id" })); await call(Object.assign({}, IN, { lead_id: "not-an-id" })); release();
-  check("intake: a malformed lead ID is replaced, never trusted", sent.length === 2 && !/not-an-id/.test(sent[0].subject), sent.map((m) => m.subject));
+  check("intake: a malformed lead ID is replaced, never trusted", notes().length === 2 && !/not-an-id/.test(notes()[0].subject), notes().map((m) => m.subject));
 
   // ---- 5b. stage 1: in-flight dedupe, the sent contract, no-JS errors, the row ----
   const json = (r) => r.json || {};
@@ -209,7 +214,7 @@ const RI = { form: "register-interest", first_name: NAME, last_name: LAST, email
   await new Promise((r) => setTimeout(r, 20)); open(); hold = null;
   const [ra, rb] = await Promise.all([pa, pb]); release();
   check("I-S2: concurrent repeat waits for the first send: one email, both sent:true",
-    sent.length === 1 && json(ra).sent === true && json(rb).sent === true, [sent.length, json(ra), json(rb)]);
+    notes().length === 1 && json(ra).sent === true && json(rb).sent === true, [notes().length, json(ra), json(rb)]);
   check("I-S2: the waiting repeat is logged as in flight", logs.some((l) => /screened code=repeat_in_flight/.test(l)), logs);
   sent = []; hold = new Promise((r) => { open = r; });
   failSend = (m, i) => (i === 0 ? new Error("smtp down") : null);
@@ -220,12 +225,12 @@ const RI = { form: "register-interest", first_name: NAME, last_name: LAST, email
   failSend = null;
   const rc2 = await call(Object.assign({}, IN, { lead_id: "il-dddddddddd" })); release();
   check("I-S2: if the first send fails, the waiting repeat fails too (no false success)", ra2.code === 500 && rb2.code === 500, [ra2.code, rb2.code]);
-  check("I-S2: and a later retry sends", rc2.code === 200 && json(rc2).sent === true && sent.length === 1, [rc2.code, sent.length]);
+  check("I-S2: and a later retry sends", rc2.code === 200 && json(rc2).sent === true && notes().length === 1, [rc2.code, notes().length]);
   capture(); const bot = await call(Object.assign({}, IN, { lead_id: "il-eeeeeeeeee", ts: Date.now() })); release();
   check("I-S3: a bot-screened post gets { ok: true } with no sent flag", bot.code === 200 && json(bot).ok === true && json(bot).sent === undefined, json(bot));
   delete process.env.TEST_RECIPIENT; sent = [];
   capture(); const unset = await call(Object.assign({}, IN, { lead_id: "il-ffffffffff" })); release();
-  check("I-S3: nothing sent (no TEST_RECIPIENT) says sent:false", unset.code === 200 && json(unset).sent === false && sent.length === 0, json(unset));
+  check("I-S3: nothing sent (no TEST_RECIPIENT) says sent:false", unset.code === 200 && json(unset).sent === false && notes().length === 0, json(unset));
   process.env.TEST_RECIPIENT = "test-inbox@example.com";
   capture(); const noPhone = await call(Object.assign({}, IN, { lead_id: "il-1212121212", phone: "" })); release();
   check("I-S1: a served lead with no phone and no email choice is refused (400)", noPhone.code === 400, noPhone.code);
@@ -244,10 +249,11 @@ const RI = { form: "register-interest", first_name: NAME, last_name: LAST, email
   capture(); await call(Object.assign({}, IN, { lead_id: "il-5656565656", intent: "urgent", tenure: "owner_occupier" })); release();
   const row2 = inserts[0] && inserts[0].body;
   check("leads row: with INTAKE_LEAD_COLUMNS=on, the §3.1 columns too",
-    row2 && row2.lead_id === "il-5656565656" && row2.intent === "urgent" && row2.route === "urgent" && row2.tenure === "owner_occupier" &&
+    row2 && row2.intake_lead_id === "il-5656565656" && row2.intake_event === "complete" && row2.rung_reached === 4 && !("lead_id" in row2) && row2.intent === "urgent" && row2.route === "urgent" && row2.tenure === "owner_occupier" &&
     typeof row2.answers === "object" && row2.answers.heating && /^\d{4}-/.test(row2.ts_started) && /^\d{4}-/.test(row2.ts_last), row2);
+  check("leads row: an intake row with its columns is inserted once per (intake_lead_id, intake_event)", inserts[0] && /\?on_conflict=intake_lead_id,intake_event$/.test(inserts[0].url), inserts[0] && inserts[0].url);
   inserts = []; capture(); await call(RI); release();
-  check("leads row: the old forms' rows never carry the intake columns", inserts[0] && !("lead_id" in inserts[0].body) && !("answers" in inserts[0].body), inserts[0] && Object.keys(inserts[0].body));
+  check("leads row: the old forms' rows never carry the intake columns", inserts[0] && !("intake_lead_id" in inserts[0].body) && !("answers" in inserts[0].body) && !/on_conflict/.test(inserts[0].url), inserts[0] && Object.keys(inserts[0].body));
   delete process.env.INTAKE_LEAD_COLUMNS; process.env.VERCEL_ENV = "preview";
 
   // ---- 6. P-S1: nothing but logEvent writes to the logs (codes, never messages) ----
