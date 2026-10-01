@@ -20,7 +20,7 @@ and DNS accounts, nameserver changes, the transfer and its payment.*
   them and company email stops, and so does the website's lead email, which is
   the system of record for every form (`api/lead.js`).
 
-## The zone today (public DNS, read 27 Sep 2026 via 8.8.8.8)
+## The zone today (public DNS, read 27 Sep 2026 via 8.8.8.8; updated 1 Oct 2026)
 
 Every one of these is carried across **unchanged**: same name, type and value.
 No clean-up during the move. Pruning is a separate change, later.
@@ -39,25 +39,33 @@ No clean-up during the move. Pruning is a separate change, later.
 | `k3._domainkey` | CNAME | `dkim3.mcsv.net` | DKIM for Mailchimp |
 | `s1._domainkey` | CNAME | `s1._domainkey.thermaldawn.com.s019.ascendbywix.com` | DKIM for Wix's email marketing (SendGrid) |
 | `s2._domainkey` | CNAME | `s2._domainkey.thermaldawn.com.s019.ascendbywix.com` | DKIM for Wix's email marketing (SendGrid) |
+| `sel1._domainkey` | CNAME | `sel1._domainkey.thermaldawn.com.s019.ascendbywix.com` | DKIM for Wix's email marketing (added 1 Oct: seen in Wix's DNS page, confirmed in public DNS) |
+| `sg` | CNAME | `sg.thermaldawn.com.s019.ascendbywix.com` | Wix email marketing (SendGrid) link/return host (added 1 Oct, as above) |
+| `google._domainkey` | TXT | the 2048-bit `v=DKIM1; k=rsa; p=…` key (public; copy it whole from the Wix export or from Google Admin) | **Google Workspace DKIM, live since 1 Oct 2026.** Selector `google` |
 | `@` | A | `76.76.21.21` | Vercel (apex, 308s to www) |
 | `www` | CNAME | `cname.vercel-dns.com` | Vercel (canonical site) |
+| `en` | CNAME | `cname.vercel-dns.com` | Vercel (added 1 Oct, as above; check in Vercel whether it is still used before any later clean-up) |
 
-Also checked and **absent**: AAAA on the apex, CAA, `google._domainkey`.
+Also checked and **absent**: AAAA on the apex, CAA.
 
-**DKIM, read this before the move.** There is **no Google Workspace DKIM
-record**. `google._domainkey` does not exist, so Workspace mail from
-thermaldawn.com is not signed as thermaldawn.com today. The DKIM records that
-do exist belong to Mailchimp and to Wix's email marketing. Carrying "every mail
-record" therefore means carrying those four CNAMEs, and there is no Google DKIM
-key to carry. Turning Google DKIM on is worth doing, but as its own change
-**after** the move has settled, not during it. It is Admin console > Apps >
-Google Workspace > Gmail > Authenticate email: generate, publish the TXT at
-the new host, then start authentication. Tightening DMARC past `p=none` comes
-after that.
+**DKIM, read this before the move.** Google Workspace DKIM has been **on
+since 1 Oct 2026**: `google._domainkey` (TXT) is published, Google Admin shows
+"Authenticating email with DKIM", and an outside-address test passed SPF, DKIM
+(`header.s=google`, thermaldawn.com) and DMARC. **Carry the TXT across whole**:
+the 2048-bit value is long, and some DNS panels split it into quoted chunks,
+which is fine. A missing or truncated record breaks signing on the day of the
+move. The other DKIM records (`k2`, `k3`, `s1`, `s2`, `sel1`) belong to
+Mailchimp and to Wix's email marketing, and are carried unchanged too.
+**After the cut-over:** look up `google._domainkey` against the new
+nameservers, then send one email to an address outside thermaldawn.com and
+check "Show original" for `DKIM: PASS`. Tightening DMARC past `p=none` comes
+after a couple of weeks of clean signed mail.
 
 **Public DNS is not the whole zone.** A lookup can only find names you know to
-ask for. Step 1 exports what Wix actually holds; anything in it that isn't in
-the table above is carried too.
+ask for. Nick's Wix DNS page (1 Oct) showed three names the 27 Sep lookup had
+missed: `sel1._domainkey`, `sg` and `en`. They're in the table now. Step 1
+exports what Wix actually holds; anything in it that isn't in the table above
+is carried too.
 
 ## Choosing the new home (Nick decides)
 
@@ -96,7 +104,7 @@ cleanly on the new nameservers.
    host's nameservers):
 
    ```bash
-   for q in "MX thermaldawn.com" "TXT thermaldawn.com" "TXT _dmarc.thermaldawn.com" "CNAME k2._domainkey.thermaldawn.com" "CNAME k3._domainkey.thermaldawn.com" "CNAME s1._domainkey.thermaldawn.com" "CNAME s2._domainkey.thermaldawn.com" "A thermaldawn.com" "CNAME www.thermaldawn.com"; do set -- $q; echo "== $1 $2"; dig +short "$2" "$1" @NEW-NS; done
+   for q in "MX thermaldawn.com" "TXT thermaldawn.com" "TXT _dmarc.thermaldawn.com" "CNAME k2._domainkey.thermaldawn.com" "CNAME k3._domainkey.thermaldawn.com" "CNAME s1._domainkey.thermaldawn.com" "CNAME s2._domainkey.thermaldawn.com" "CNAME sel1._domainkey.thermaldawn.com" "TXT google._domainkey.thermaldawn.com" "CNAME sg.thermaldawn.com" "CNAME en.thermaldawn.com" "A thermaldawn.com" "CNAME www.thermaldawn.com"; do set -- $q; echo "== $1 $2"; dig +short "$2" "$1" @NEW-NS; done
    ```
 
    Windows alternative: `Resolve-DnsName thermaldawn.com -Type MX -Server NEW-NS`.
@@ -140,8 +148,8 @@ cleanly on the new nameservers.
 
 ### Afterwards (separate changes, not this runbook)
 
-- Turn on Google Workspace DKIM (above), then consider DMARC `p=quarantine`.
-- Decide whether the Wix email-marketing DKIM (`s1`, `s2`) and Mailchimp's
+- Google Workspace DKIM is on (1 Oct); after a couple of weeks of clean signed mail, consider DMARC `p=quarantine`.
+- Decide whether the Wix email-marketing records (`s1`, `s2`, `sel1`, `sg`), `en`, and Mailchimp's
   (`k2`, `k3`) are still used; remove only what nothing sends with.
 - freevolt.com.au (GoDaddy DNS, apex already on Vercel) should redirect to
   thermaldawn.com, set in Vercel's domain settings (see CLAUDE.md).
