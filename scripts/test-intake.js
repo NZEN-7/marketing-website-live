@@ -174,6 +174,23 @@ check("a file over 4 MB is refused", I.intakeAttachments({ uploads: [{ slot: "sw
   data: Buffer.concat([Buffer.from([0xff, 0xd8, 0xff]), Buffer.alloc(4 * 1024 * 1024 + 1)]).toString("base64") }] }).attachments.length === 0);
 check("at most 6 files are considered", lead.parseSubmission(Object.assign({}, base, { uploads: new Array(9).fill({}) })).data.uploads.length === 6);
 
+// ---- S1-3: single-line fields can't start a new line in the notification ----
+{
+  const h = lead.parseSubmission(Object.assign({}, base, { first_name: "Alex\r\nEmail: forged@example.com", last_name: "Sample   Phone: 1",
+    suburb: "Hawthorn\nLead ID: il-aaaaaaaaaa", referrer: "Bob\n\nHeating: x", source: ["friend"], landlord_name: "Pat\nLandlord email: x@example.com" })).data;
+  check("S1-3: CR/LF and whitespace runs collapse in single-line fields", h.first_name === "Alex Email: forged@example.com" && h.last_name === "Sample Phone: 1" &&
+    h.suburb === "Hawthorn Lead ID: il-aaaaaaaaaa" && h.referrer === "Bob Heating: x", [h.first_name, h.last_name, h.suburb, h.referrer]);
+  const body = lead.formatNotification(h, "x");
+  check("S1-3: no forged label starts a line, and the real Email line is the only one", !/^(Email|Lead ID|Heating|Landlord email): (forged|il-a|x)/m.test(body) &&
+    (body.match(/^Email: /gm) || []).length === 1);
+  check("S1-3: the notes keep their own lines (multi-line by design)", lead.parseSubmission(Object.assign({}, base, { notes: "a\nb" })).data.notes === "a\nb");
+  const ri = lead.parseSubmission({ form: "register-interest", first_name: "A\nEmail: forged@example.com", last_name: "B", email: "r@example.com",
+    phone: "0400 000 001", suburb: "X\r\nState: QLD", state: "VIC", heating: "h", solar: "No", battery: "No", drivers: ["a\nb"], timeline: ["Now"],
+    comments: "keep\nlines", optin: "true", ts: 1 }).data;
+  check("S1-3: the old forms collapse their single-line fields too, and keep comments' lines",
+    ri.first_name === "A Email: forged@example.com" && ri.suburb === "X State: QLD" && ri.drivers[0] === "a b" && ri.comments === "keep\nlines", [ri.first_name, ri.suburb, ri.drivers, ri.comments]);
+}
+
 // ---- the page: promises and copy (Sales review) ----
 const fs = require("fs");
 const page = fs.readFileSync(path.join(__dirname, "..", "start", "index.html"), "utf8");

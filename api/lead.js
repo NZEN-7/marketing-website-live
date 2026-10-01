@@ -56,11 +56,16 @@ const clamp = (s, max) => {
   return t.length > max ? t.slice(0, max) : t;
 };
 
-const asText = (v, max = 500) => clamp(v, max);
+/* A single-line field: CR/LF and runs of whitespace collapse to one space, so
+   visitor text can never start a new "Label:" line in the notification the
+   CRM parser reads (GPT Web S1-3). Comments and messages keep their lines
+   (asBody); they sit after every label the parser reads. */
+const asText = (v, max = 500) => clamp(String(v == null ? "" : v).replace(/\s+/g, " "), max);
+const asBody = (v, max = 5000) => clamp(v, max);
 
 const asList = (v, max = 40) =>
   (Array.isArray(v) ? v : v == null || v === "" ? [] : [v])
-    .map((x) => clamp(x, 200))
+    .map((x) => asText(x, 200))
     .filter(Boolean)
     .slice(0, max);
 
@@ -288,14 +293,19 @@ async function recordLead(d) {
   // intake_event): two instances racing the same send get one row (Platform,
   // migration efaf42c; GPT Web I-S2).
   const row = d.form === "intake" ? intake.intakeLeadRow(d, process.env) : leadRow(d);
+  // With its own columns, an intake row asks for itself back, so the handler
+  // knows whether this was the first row for (intake_lead_id, intake_event):
+  // that decides the customer's first email (GPT Web S1-2). Only the id comes
+  // back (select=), never the lead's details.
   const once = !!row.intake_event;
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/leads` + (once ? "?on_conflict=intake_lead_id,intake_event" : ""), {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/leads` +
+      (once ? "?on_conflict=intake_lead_id,intake_event&select=intake_lead_id" : ""), {
     method: "POST",
     headers: {
       apikey: auth.apikey,
       Authorization: `Bearer ${auth.bearer}`,
       "Content-Type": "application/json",
-      Prefer: once ? "return=minimal,resolution=ignore-duplicates" : "return=minimal",
+      Prefer: once ? "return=representation,resolution=ignore-duplicates" : "return=minimal",
     },
     body: JSON.stringify(row),
   });
@@ -303,6 +313,12 @@ async function recordLead(d) {
     let code = "";
     try { code = String((JSON.parse(await res.text()) || {}).code || ""); } catch (_) { /* not JSON */ }
     throw new InsertError(res.status, /^[A-Z0-9]{1,12}$/.test(code) ? code : "");
+  }
+  if (once) {
+    // [] means the unique index already had this (intake_lead_id, intake_event).
+    let rows = null;
+    try { rows = JSON.parse(await res.text()); } catch (_) { rows = null; }
+    return Array.isArray(rows) && rows.length === 0 ? "duplicate" : "inserted";
   }
   return "ok";
 }
@@ -339,7 +355,7 @@ function parseSubmission(body) {
       drivers: asList(body.drivers),
       referral: asList(body.referral),
       timeline: asList(body.timeline),
-      comments: asText(body.comments, 5000),
+      comments: asBody(body.comments, 5000),
     });
   } else if (isDeposit(form)) {
     Object.assign(data, {
@@ -352,7 +368,7 @@ function parseSubmission(body) {
       address: asText(body.address, 300),
       heating: asText(body.heating, 120),
       timeline: asText(body.timeline, 200),
-      comments: asText(body.comments, 5000),
+      comments: asBody(body.comments, 5000),
       terms: body.terms === true || body.terms === "true" || body.terms === "on",
       ref: makeRef(),
     });
@@ -375,7 +391,7 @@ function parseSubmission(body) {
     Object.assign(data, {
       name: asText(body.name, 200),
       email: asText(body.email, 200),
-      message: asText(body.message, 5000),
+      message: asBody(body.message, 5000),
     });
   } else {
     Object.assign(data, {
@@ -925,9 +941,12 @@ module.exports = async function handler(req, res) {
     // "Non-fatal" and "fire-and-forget" are not the same thing.
     // The intake records its row too (PRD §3.1); its own columns wait for
     // INTAKE_LEAD_COLUMNS=on (see intakeLeadRow in _intake.js).
+    let inserted = null;     // the intake's own row: true new, false already there, null unknown
     try {
       const r = await recordLead(data);
-      if (r !== "ok") logEvent(reqId, data.form, "insert_skipped", r === "skipped (non-production)" ? "non_production" : "not_configured");
+      if (r === "inserted") inserted = true;
+      else if (r === "duplicate") { inserted = false; logEvent(reqId, data.form, "insert_skipped", "duplicate_event"); }
+      else if (r !== "ok") logEvent(reqId, data.form, "insert_skipped", r === "skipped (non-production)" ? "non_production" : "not_configured");
     } catch (leadErr) {
       logEvent(reqId, data.form, "insert_failed", errorCode(leadErr));
     }
@@ -942,7 +961,13 @@ module.exports = async function handler(req, res) {
     // 3. The first email. Best effort: a failure never costs us the lead,
     //    including a template that fails to load.
     let first = null;
-    try { first = firstEmail(data); } catch (tplErr) {
+    // The intake: one customer email per lead, whatever the page claims (GPT
+    // Web S1-2). The database decides when it can (a new `complete` row); when
+    // it can't (off production, columns not on yet, insert failed), a
+    // per-lead claim in memory does.
+    const mayEmail = data.form !== "intake" ? true
+      : inserted !== null ? inserted : intake.claimFirstEmail(data, Date.now());
+    try { if (mayEmail) first = firstEmail(data); } catch (tplErr) {
       logEvent(reqId, data.form, "first_email_failed", "template_unavailable");
     }
     if (first) {

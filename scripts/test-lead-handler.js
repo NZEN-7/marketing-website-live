@@ -27,8 +27,15 @@ require.cache[nm] = { id: nm, filename: nm, loaded: true, exports: {
 } };
 let inserts = [];
 let insertReply = { status: 201, body: "" };
+const pgSeen = new Set();        // the unique index on (intake_lead_id, intake_event)
 global.fetch = async (url, opts) => {
-  inserts.push({ url, body: JSON.parse(opts.body) });
+  const body = JSON.parse(opts.body);
+  inserts.push({ url, body, prefer: opts.headers && opts.headers.Prefer });
+  if (/on_conflict=intake_lead_id,intake_event/.test(url) && insertReply.status < 300) {
+    const k = body.intake_lead_id + "|" + body.intake_event, fresh = !pgSeen.has(k);
+    pgSeen.add(k);
+    return { ok: true, status: 201, text: async () => JSON.stringify(fresh ? [{ intake_lead_id: body.intake_lead_id }] : []) };
+  }
   return { ok: insertReply.status < 300, status: insertReply.status, text: async () => insertReply.body };
 };
 
@@ -251,7 +258,7 @@ const RI = { form: "register-interest", first_name: NAME, last_name: LAST, email
   check("leads row: with INTAKE_LEAD_COLUMNS=on, the §3.1 columns too",
     row2 && row2.intake_lead_id === "il-5656565656" && row2.intake_event === "complete" && row2.rung_reached === 4 && !("lead_id" in row2) && row2.intent === "urgent" && row2.route === "urgent" && row2.tenure === "owner_occupier" &&
     typeof row2.answers === "object" && row2.answers.heating && /^\d{4}-/.test(row2.ts_started) && /^\d{4}-/.test(row2.ts_last), row2);
-  check("leads row: an intake row with its columns is inserted once per (intake_lead_id, intake_event)", inserts[0] && /\?on_conflict=intake_lead_id,intake_event$/.test(inserts[0].url), inserts[0] && inserts[0].url);
+  check("leads row: an intake row with its columns is inserted once per (intake_lead_id, intake_event)", inserts[0] && /\?on_conflict=intake_lead_id,intake_event&select=intake_lead_id$/.test(inserts[0].url) && inserts[0].prefer === "return=representation,resolution=ignore-duplicates", inserts[0] && inserts[0].url);
   // Migration rev 2 (e7bf423): the values its checks accept.
   inserts = []; capture(); await call(Object.assign({}, IN, { lead_id: "il-7878787878", outcome: "urgent_call" }));
   await call(Object.assign({}, IN, { lead_id: "il-7878787878", outcome: "completed", followup: true })); release();
@@ -261,6 +268,30 @@ const RI = { form: "register-interest", first_name: NAME, last_name: LAST, email
     /^il-[0-9a-f]{10}$/.test(x.body.intake_lead_id) && ["partial", "complete", "details"].indexOf(x.body.intake_event) !== -1 &&
     (x.body.rung_reached === null || (Number.isInteger(x.body.rung_reached) && x.body.rung_reached >= 1 && x.body.rung_reached <= 4)) &&
     x.body.answers && typeof x.body.answers === "object" && !Array.isArray(x.body.answers)), inserts.map((x) => x.body));
+  // ---- S1-2: one customer email per lead, whatever the page sends ----
+  // Production, columns on: the database's answer decides.
+  sent = []; inserts = []; capture();
+  await call(Object.assign({}, IN, { lead_id: "il-9a9a9a9a9a", outcome: "urgent_call" }));
+  await call(Object.assign({}, IN, { lead_id: "il-9a9a9a9a9a", outcome: "keep_posted" }));   // no followup flag
+  release();
+  check("S1-2 production: a different outcome, no followup flag: second notification, no second customer email",
+    notes().length === 2 && firsts().length === 1, [notes().length, firsts().map((m) => m.subject)]);
+  check("S1-2 production: the duplicate is logged by code", logs.some((l) => /insert_skipped code=duplicate_event/.test(l)), logs);
+  // Production, insert fails: the per-lead claim decides.
+  sent = []; insertReply = { status: 503, body: "" }; capture();
+  await call(Object.assign({}, IN, { lead_id: "il-8b8b8b8b8b", outcome: "urgent_call" }));
+  await call(Object.assign({}, IN, { lead_id: "il-8b8b8b8b8b", outcome: "keep_posted" }));
+  release(); insertReply = { status: 201, body: "" };
+  check("S1-2 production, insert failing: one customer email, by the per-lead claim", notes().length === 2 && firsts().length === 1, [notes().length, firsts().length]);
+  delete process.env.INTAKE_LEAD_COLUMNS; process.env.VERCEL_ENV = "preview";
+  // Off production (no insert): the per-lead claim, keyed per lead, not per outcome.
+  sent = []; capture();
+  await call(Object.assign({}, IN, { lead_id: "il-7c7c7c7c7c", outcome: "book_chat" }));
+  await call(Object.assign({}, IN, { lead_id: "il-7c7c7c7c7c", outcome: "completed" }));       // no followup flag
+  release();
+  check("S1-2 off production: a different outcome, no followup flag: no second customer email", notes().length === 2 && firsts().length === 1, [notes().length, firsts().length]);
+  process.env.VERCEL_ENV = "production"; process.env.INTAKE_LEAD_COLUMNS = "on";
+
   inserts = []; capture(); await call(RI); release();
   check("leads row: the old forms' rows never carry the intake columns", inserts[0] && !("intake_lead_id" in inserts[0].body) && !("answers" in inserts[0].body) && !/on_conflict/.test(inserts[0].url), inserts[0] && Object.keys(inserts[0].body));
   delete process.env.INTAKE_LEAD_COLUMNS; process.env.VERCEL_ENV = "preview";

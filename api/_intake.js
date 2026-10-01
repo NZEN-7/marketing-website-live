@@ -19,7 +19,11 @@ const clamp = (s, max) => {
   return t.length > max ? t.slice(0, max) : t;
 };
 const oneLine = (s) => String(s || "").replace(/[\r\n]+/g, " ").trim();
-const list = (v, max = 12) => (Array.isArray(v) ? v : v ? [v] : []).map((x) => clamp(x, 60)).filter(Boolean).slice(0, max);
+/* A single-line field: CR/LF and runs of whitespace collapse to one space, so
+   no visitor text can start a "Label:" line in the notification (GPT Web S1-3).
+   Only the free-text notes keep their lines; they're parsed last, under ANYTHING ELSE. */
+const line = (s, max) => clamp(String(s == null ? "" : s).replace(/\s+/g, " "), max);
+const list = (v, max = 12) => (Array.isArray(v) ? v : v ? [v] : []).map((x) => line(x, 60)).filter(Boolean).slice(0, max);
 
 // Card values -> the card titles people saw (SPEC rev A). Unknown values are dropped.
 const L = {
@@ -66,29 +70,29 @@ function parseIntake(body) {
     // The page makes its lead ID once per visit, so a repeat of the same send
     // can be recognised (Sales review, 1). Anything else gets a fresh one.
     lead_id: LEAD_ID.test(String(body.lead_id || "")) ? String(body.lead_id) : "il-" + crypto.randomBytes(5).toString("hex"),
-    first_name: clamp(body.first_name, 120), last_name: clamp(body.last_name, 120),
-    email: clamp(body.email, 200), phone: clamp(body.phone, 40),
+    first_name: line(body.first_name, 120), last_name: line(body.last_name, 120),
+    email: line(body.email, 200), phone: line(body.phone, 40),
     // The long form's "I'd prefer email" box posts prefer_email=1.
     contact_pref: pick({ phone: 1, email: 1 }, body.contact_pref) || ([].concat(body.prefer_email || []).indexOf("1") !== -1 ? "email" : ""),
     call_times: list(body.call_times).filter((v) => L.call_times[v]),
-    postcode: clamp(body.postcode, 4).replace(/\D/g, ""), suburb: clamp(body.suburb, 120),
-    state: clamp(body.state, 3).toUpperCase(), remote: body.remote === true || body.remote === "true",
+    postcode: clamp(body.postcode, 4).replace(/\D/g, ""), suburb: line(body.suburb, 120),
+    state: line(body.state, 3).toUpperCase(), remote: body.remote === true || body.remote === "true",
     intent: pick(L.intent, body.intent),
-    source: list(body.source).filter((v) => L.source[v]), referrer: clamp(body.referrer, 200),
+    source: list(body.source).filter((v) => L.source[v]), referrer: line(body.referrer, 200),
     newsletter_opt_in: body.newsletter_opt_in === true || body.newsletter_opt_in === "true",
-    heating: list(body.heating).filter((v) => L.heating[v]), heating_other_text: clamp(body.heating_other_text, 300),
+    heating: list(body.heating).filter((v) => L.heating[v]), heating_other_text: line(body.heating_other_text, 300),
     boiler_condition: pick(L.boiler_condition, body.boiler_condition), boiler_age: pick(L.boiler_age, body.boiler_age),
     tenure: pick(L.tenure, body.tenure),
     scope: list(body.scope).filter((v) => L.scope[v]), energy: list(body.energy).filter((v) => L.energy[v]),
     winter_gas_bill_band: pick(L.winter_gas_bill_band, body.winter_gas_bill_band),
-    timing: pick(L.timing, body.timing), timing_note: clamp(body.timing_note, 500),
+    timing: pick(L.timing, body.timing), timing_note: line(body.timing_note, 500),
     storeys: pick(L.storeys, body.storeys), radiator_band: pick(L.radiator_band, body.radiator_band),
     underfloor_band: pick(L.underfloor_band, body.underfloor_band),
     built_band: pick(L.built_band, body.built_band), off_gas: pick(L.off_gas, body.off_gas),
     send_later: list(body.send_later).filter((v) => SLOTS[v]),
     notes: clamp(body.notes, 5000),
-    landlord_name: clamp(body.landlord_name, 200), landlord_email: clamp(body.landlord_email, 200),
-    landlord_phone: clamp(body.landlord_phone, 40),
+    landlord_name: line(body.landlord_name, 200), landlord_email: line(body.landlord_email, 200),
+    landlord_phone: line(body.landlord_phone, 40),
     route: ROUTES.indexOf(body.route) !== -1 ? body.route : "", outcome: OUTCOMES.indexOf(body.outcome) !== -1 ? body.outcome : (nojs ? "completed" : ""),
     rung_reached: ["1", "2", "3", "done"].indexOf(String(body.rung_reached)) !== -1 ? String(body.rung_reached) : (nojs ? "done" : ""),
     last_screen: SCREENS.test(String(body.last_screen || "")) ? String(body.last_screen) : "",
@@ -245,6 +249,18 @@ function claimSend(d, now) {
   sends.set(key, { pending, settle });
   return { status: "new" };
 }
+/* One customer email per lead when the database can't say (off production,
+   columns off, insert failed): per lead ID, not per outcome (GPT Web S1-2).
+   Per instance, so in production the leads row's unique index is the rule. */
+const FIRST_MS = 24 * 60 * 60 * 1000;
+const emailed = new Map();
+function claimFirstEmail(d, now) {
+  for (const [k, t] of emailed) if (now - t > FIRST_MS) emailed.delete(k);
+  if (emailed.has(d.lead_id)) return false;
+  emailed.set(d.lead_id, now);
+  return true;
+}
+
 /** The claimed send finished: remember a success, forget a failure. */
 function settleSend(d, ok, now) {
   const key = keyOf(d), seen = sends.get(key);
@@ -318,4 +334,4 @@ function intakeLeadRow(d, env, now) {
   return row;
 }
 
-module.exports = { parseIntake, claimSend, settleSend, intakeLeadRow, firstEmailKey, PHONE_OK, formatIntakeNotification, formatIntakeSubject, intakeAttachments, sniff, LABELS: L, SLOTS };
+module.exports = { parseIntake, claimSend, settleSend, claimFirstEmail, intakeLeadRow, firstEmailKey, PHONE_OK, formatIntakeNotification, formatIntakeSubject, intakeAttachments, sniff, LABELS: L, SLOTS };

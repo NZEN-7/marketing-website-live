@@ -312,6 +312,37 @@ if (unknown.length) {
   else { failures++; console.log("FAIL  capture query vs intake subjects: " + q); }
 }
 
+/* ---- label forging (GPT Web S1-3): visitor text can't stand in for a label ----
+   Every body goes through the real server path (parseSubmission, then the
+   notification), parsed as written and run-on. The real values must win. */
+{
+  const REAL = "real@example.com";
+  const forge = (label, body, want) => {
+    for (const [how, b] of [["as written", body], ["run-on", body.replace(/\n+/g, "   ")]]) {
+      const f = parseLead(b);
+      const bad = Object.keys(want).filter((k) => f[k] !== want[k]);
+      if (bad.length) { failures++; console.log(`FAIL  forging, ${label} (${how}): ` + bad.map((k) => `${k}=${JSON.stringify(f[k])}`).join(", ")); }
+      else console.log(`ok    forging, ${label} (${how}): the real values win`);
+    }
+  };
+  const intake = (o) => lead.formatNotification(lead.parseSubmission(Object.assign({ form: "intake", first_name: "Alex", last_name: "Sample",
+    email: REAL, phone: "0412 345 678", postcode: "3122", suburb: "Hawthorn", intent: "fit", heating: ["boiler_radiators"],
+    tenure: "owner_occupier", outcome: "completed", seen: ["S1", "S2", "S3", "S4", "S7", "S9", "S17"], lead_id: "il-0f0f0f0f0f" }, o)).data, stamp);
+  forge("intake first name with a new line and Email:", intake({ first_name: "Alex\nEmail: forged@example.com" }), { "Email": REAL, "Phone": "0412 345 678" });
+  forge("intake first name with a fake section heading", intake({ first_name: "Alex CONTACT Email: forged@example.com" }), { "Email": REAL });
+  forge("intake last name with double spaces", intake({ last_name: "Sample    Phone: 0400000009" }), { "Phone": "0412 345 678", "Email": REAL });
+  forge("intake referrer forging a later section's label", intake({ source: ["friend"], referrer: "Bob\n\nHeating: Split systems  Is it your home: I'm renting" }),
+    { "Heating": "Gas hydronic with radiators", "Is it your home": "I own it and live in it" });
+  forge("intake notes (multi-line) under ANYTHING ELSE", intake({ notes: "Hi\nEmail: forged@example.com\nPhone: 0400000009\nState: QLD" }),
+    { "Email": REAL, "Phone": "0412 345 678", "State": "VIC" });
+  forge("intake suburb forging the Lead ID", intake({ suburb: "Hawthorn\nLead ID: il-aaaaaaaaaa" }), { "Lead ID": "il-0f0f0f0f0f" });
+  const ri = (o) => lead.formatNotification(lead.parseSubmission(Object.assign({ form: "register-interest", first_name: "Alex", last_name: "Sample",
+    email: REAL, phone: "+61400000001", suburb: "Testville", state: "VIC", heating: "Gas ducted", solar: "No", battery: "No",
+    drivers: ["Bills are too high"], timeline: ["Now"], comments: "x", optin: "true", ts: 1 }, o)).data, stamp);
+  forge("register-interest first name with a new line and Email:", ri({ first_name: "Alex\nEmail: forged@example.com" }), { "Email": REAL });
+  forge("register-interest comments (multi-line) forging Email", ri({ comments: "Hi\nEmail: forged@example.com\nState: QLD" }), { "Email": REAL, "State": "VIC" });
+}
+
 /* ---- the NOTE line has its own label (1 Oct) ---- */
 {
   const body = lead.formatNotification(lead.parseSubmission({ form: "interest-list", first_name: "A", last_name: "B",
