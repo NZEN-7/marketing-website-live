@@ -8,6 +8,7 @@
 //
 // Usage: npm run deploy:live
 import { execSync } from 'node:child_process';
+import { unconfirmedInRepo } from './release-guards.mjs';
 
 const MIRROR = 'https://github.com/NZEN-7/marketing-website-live.git';
 const sh = (cmd) => execSync(cmd, { stdio: 'pipe' }).toString().trim();
@@ -19,6 +20,16 @@ if (sh('git status --porcelain') !== '') {
 const branch = sh('git rev-parse --abbrev-ref HEAD');
 if (branch !== 'main') {
   console.error(`on ${branch} — deploy from main`);
+  process.exit(1);
+}
+
+// Wording still waiting on a decision never goes live (CTO Re #39).
+const unconfirmed = unconfirmedInRepo();
+if (unconfirmed.length) {
+  console.error('"TO CONFIRM" is still in served files; settle the wording first:
+  ' +
+    unconfirmed.map((h) => `${h.file}:${h.line}`).join('
+  '));
   process.exit(1);
 }
 

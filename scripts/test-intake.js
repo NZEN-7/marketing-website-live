@@ -213,6 +213,15 @@ check("SPEC rev B: the upload-set message promises no email", /One file was too 
 check("SPEC rev B: the urgent screen and urgent Done lines", /Sorry to hear about the boiler/.test(page) && (page.match(/Nick will try to call you today\. If we miss you, we'll try again tomorrow at lunchtime\./g) || []).length === 2);
 
 check("the Dialpad number in the sidebar and footer (SPEC §2), dialable", (page.match(/href="tel:\+61272283430">\(02\) 7228 3430<\/a>/g) || []).length === 2);
+{
+  // The privacy page (CTO Re #39-40): its own page, linked from every footer and from /start/.
+  const priv = fs.readFileSync(path.join(__dirname, "..", "privacy", "index.html"), "utf8");
+  const site = fs.readFileSync(path.join(__dirname, "..", "assets", "js", "site.js"), "utf8");
+  check("privacy: /privacy/ exists, with its sections and the providers table", /<h1>Privacy Policy<\/h1>/.test(priv) && (priv.match(/<h2>/g) || []).length >= 10 && /<td>Supabase<\/td>/.test(priv));
+  check("privacy: no TO CONFIRM, no placeholder", !/TO CONFIRM|placeholder/i.test(priv.replace(/<!--[\s\S]*?-->/g, "")));
+  check("privacy: the shared footer links to it (every page)", /'<a href="\/privacy\/">Privacy<\/a>'/.test(site));
+  check("privacy: /start/'s consent line and footer link to it, with no placeholder left", (page.match(/<a href="\/privacy\/">Privacy policy<\/a>/g) || []).length === 2 && !/\[Privacy policy\]|class="ph-link"/.test(page));
+}
 check("the sidebar has no placeholder boxes (Nick, 2 Oct)", !/class="side-ph"|\(placeholder\)/.test(page));
 check("no placeholder privacy link on the intake (Nick, 2 Oct: strip it until there's a policy page)", !/\[Privacy policy\]|class="ph-link"/.test(page));
 {
@@ -233,6 +242,27 @@ check("no placeholder privacy link on the intake (Nick, 2 Oct: strip it until th
   check("buttons: netlify.toml has the twin 301", nt.includes('from = "/pre-order/register-interest/*"\n  to = "/start/"\n  status = 301'));
   check("buttons: the old pages still exist, for cached links", fs.existsSync(path.join(__dirname, "..", "pre-order", "register-interest", "index.html")) && fs.existsSync(path.join(__dirname, "..", "interest", "index.html")));
 }
+{
+  // Click-to-load videos (CTO Re #41.1): no page loads YouTube until play.
+  const pages = ["index.html", "mission/index.html", "hydronic/how-it-works/index.html"].map((f) => fs.readFileSync(path.join(__dirname, "..", f), "utf8"));
+  check("videos: no YouTube iframe on page load", pages.every((h) => !/<iframe[^>]+youtube/i.test(h)));
+  check("videos: a play button with the video id, a no-JS link, and video.js", pages.every((h) => /<button type="button" class="video__play" data-yt="[A-Za-z0-9_-]{11}"/.test(h) && /<noscript><a class="video__fallback" href="https:\/\/www\.youtube\.com\/watch\?v=/.test(h) && /\/assets\/js\/video\.js\?v=\d+/.test(h)));
+  check("videos: video.js injects the youtube-nocookie player only on click", /addEventListener\("click"/.test(fs.readFileSync(path.join(__dirname, "..", "assets", "js", "video.js"), "utf8")) && /youtube-nocookie\.com\/embed\//.test(fs.readFileSync(path.join(__dirname, "..", "assets", "js", "video.js"), "utf8")));
+}
+{
+  // No third-party fonts on any page or in any animation a page embeds (CTO Re #41.1).
+  const { execFileSync } = require("child_process");
+  const root = path.join(__dirname, "..");
+  const pagesAll = execFileSync("git", ["ls-files", "*.html"], { cwd: root }).toString().split(/\r?\n/)
+    .filter((f) => f && !/^(docs|feedback|\.claude|scripts|tools|assets)\//.test(f));
+  const embedded = new Set();
+  pagesAll.forEach((f) => (fs.readFileSync(path.join(root, f), "utf8").match(/src="\/assets\/animations\/[^"?]+/g) || []).forEach((m) => embedded.add(m.slice(6))));
+  const offenders = pagesAll.concat([...embedded]).filter((f) => /fonts\.(googleapis|gstatic)\.com/.test(fs.readFileSync(path.join(root, f.replace(/^\//, "")), "utf8")));
+  check("fonts: no page and no embedded animation loads Google Fonts", embedded.size >= 3 && offenders.length === 0, offenders);
+  check("fonts: DM Mono is self-hosted", fs.existsSync(path.join(root, "assets", "fonts", "DMMono-Medium.woff2")));
+}
+check("updates are 'occasional', not 'monthly' (Nick, 2 Oct): the /start/ box and the homepage Subscribe line", /<input type="checkbox" name="newsletter_opt_in" value="true"> Send me Thermal Dawn's occasional email updates<\/label>/.test(page) && /Subscribe for occasional email updates/.test(fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8")) && !/monthly/i.test(page));
+check("the notification keeps its parsed label 'Monthly update'", /Monthly update: /.test(lead.formatNotification(lead.parseSubmission(Object.assign({}, base)).data, "x")));
 check("Nick's old mobile is gone from the page", !/432 ?395 ?138/.test(page));
 
 console.log(failed ? `\n${failed} CHECK(S) FAILED` : "\nAll intake checks passed.");
