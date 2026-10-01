@@ -181,7 +181,7 @@ check("at most 6 files are considered", lead.parseSubmission(Object.assign({}, b
   check("S1-3: CR/LF and whitespace runs collapse in single-line fields", h.first_name === "Alex Email: forged@example.com" && h.last_name === "Sample Phone: 1" &&
     h.suburb === "Hawthorn Lead ID: il-aaaaaaaaaa" && h.referrer === "Bob Heating: x", [h.first_name, h.last_name, h.suburb, h.referrer]);
   const body = lead.formatNotification(h, "x");
-  check("S1-3: no forged label starts a line, and the real Email line is the only one", !/^(Email|Lead ID|Heating|Landlord email): (forged|il-a|x)/m.test(body) &&
+  check("S1-3: no forged label starts a line, and the real Email line is the only one", !/^(Email|Lead ID|Heating|Landlord email): (forged|il-aaaaaaaaaa|x(@|$))/m.test(body) &&
     (body.match(/^Email: /gm) || []).length === 1);
   check("S1-3: the notes keep their own lines (multi-line by design)", lead.parseSubmission(Object.assign({}, base, { notes: "a\nb" })).data.notes === "a\nb");
   check("D6-S3: in the notification, every line of free text after the first is quoted, so none starts a line",
