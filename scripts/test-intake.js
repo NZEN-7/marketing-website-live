@@ -222,6 +222,26 @@ check("the Dialpad number in the sidebar and footer (SPEC §2), dialable", (page
   check("privacy: the shared footer links to it (every page)", /'<a href="\/privacy\/">Privacy<\/a>'/.test(site));
   check("privacy: /start/'s consent line and footer link to it, with no placeholder left", (page.match(/<a href="\/privacy\/">Privacy policy<\/a>/g) || []).length === 2 && !/\[Privacy policy\]|class="ph-link"/.test(page));
 }
+check("the sidebar has no placeholder boxes (Nick, 2 Oct)", !/class="side-ph"|\(placeholder\)/.test(page));
+check("no placeholder privacy link on the intake (Nick, 2 Oct: strip it until there's a policy page)", !/\[Privacy policy\]|class="ph-link"/.test(page));
+{
+  // The button switch (Nick, 2 Oct): "Request a Quote" and the interest list go to /start/;
+  // contact and the $990 booking page stay. The old pages themselves still exist.
+  const { execFileSync } = require("child_process");
+  const files = execFileSync("git", ["ls-files", "*.html", "*.js"], { cwd: path.join(__dirname, "..") }).toString().split(/\r?\n/)
+    .filter((f) => f && !/^(start|docs|feedback|\.claude|scripts|api|tools)\//.test(f));
+  const read = (f) => fs.readFileSync(path.join(__dirname, "..", f), "utf8");
+  const old = files.filter((f) => /href="(\/pre-order\/register-interest\/|\/interest\/)"/.test(read(f)));
+  check("buttons: no site page links to the old quote or interest-list forms", old.length === 0, old);
+  check("buttons: the site links to /start/ from its pages and the shared header", files.filter((f) => /href="\/start\/"/.test(read(f))).length >= 20 && /href="\/start\/"/.test(read("assets/js/site.js")));
+  const vj = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "vercel.json"), "utf8"));
+  const r301 = (vj.redirects || []).find((r) => r.destination === "/start/");
+  check("buttons: /pre-order/register-interest/ 301s to /start/ (its bundled consent retires; CTO Re #41.4)",
+    r301 && r301.statusCode === 301 && new RegExp("^" + r301.source + "$").test("/pre-order/register-interest/") && new RegExp("^" + r301.source + "$").test("/pre-order/register-interest"), r301);
+  const nt = fs.readFileSync(path.join(__dirname, "..", "netlify.toml"), "utf8").replace(/\r/g, "");
+  check("buttons: netlify.toml has the twin 301", nt.includes('from = "/pre-order/register-interest/*"\n  to = "/start/"\n  status = 301'));
+  check("buttons: the old pages still exist, for cached links", fs.existsSync(path.join(__dirname, "..", "pre-order", "register-interest", "index.html")) && fs.existsSync(path.join(__dirname, "..", "interest", "index.html")));
+}
 check("Nick's old mobile is gone from the page", !/432 ?395 ?138/.test(page));
 
 console.log(failed ? `\n${failed} CHECK(S) FAILED` : "\nAll intake checks passed.");
