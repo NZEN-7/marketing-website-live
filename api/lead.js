@@ -730,7 +730,7 @@ function legacyAutoresponder(d) {
     "Keen to talk sooner? Book a call at a time that suits you:",
     CALENDLY,
     "",
-    "Or call Nick direct on +61 432 395 138.",
+    "Or call Nick direct on (02) 7228 3430.",
     "",
     "Keen to chat.",
     "",

@@ -9,7 +9,7 @@ Hi {first_name},
 
 Thanks for your message. I'll get back to you within one working day.
 
-If it's about a system for your own home, it's often quickest to talk. You can book a 15-minute chat here: {booking_link}, or call me on 0432 395 138.
+If it's about a system for your own home, it's often quickest to talk. You can book a 15-minute chat here: {booking_link}, or call me on (02) 7228 3430.
 
 Cheers,
 Nick
