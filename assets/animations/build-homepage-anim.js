@@ -120,7 +120,6 @@ const out = `<!DOCTYPE html>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Thermal Dawn, Energy Flow</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@500;600&display=swap" rel="stylesheet"/>
 <style>
 /* ─────────────────────────────────────────────────────────────────────
    GENERATED FILE, do not hand-edit.
@@ -156,6 +155,9 @@ svg { display: block; width: 100%; height: auto; overflow: hidden; }
    loaded (the webfont link only fetches DM Mono + Inter), so all the
    chrome fell back to generic sans-serif. Use the site's self-hosted
    Montserrat instead; the in-SVG technical readouts stay mono. */
+/* DM Mono is self-hosted, like Montserrat: no request to Google Fonts (privacy page; CTO Re #41.1).
+   It only comes in 500, so 600 uses the same face, as Google served it. */
+@font-face{font-family:"DM Mono";src:url("/assets/fonts/DMMono-Medium.woff2") format("woff2");font-weight:500 600;font-display:swap;}
 @font-face{font-family:"Montserrat";src:url("/assets/fonts/Montserrat-Regular.woff2") format("woff2");font-weight:400;font-display:swap;}
 @font-face{font-family:"Montserrat";src:url("/assets/fonts/Montserrat-SemiBold.woff2") format("woff2");font-weight:600;font-display:swap;}
 @font-face{font-family:"Montserrat";src:url("/assets/fonts/Montserrat-Bold.woff2") format("woff2");font-weight:700;font-display:swap;}
