@@ -394,6 +394,18 @@ function parseSubmission(body) {
 
 /* ---------- email bodies (the contract) ---------- */
 
+/* The interest list's NOTE says what the customer actually got (CTO Re
+   Web #31, item 24): the same rule that picks the first email, so the two
+   never disagree. Internal only; prose, not a parser label. */
+function listNote(d) {
+  if (!isUnservedListLead(d)) return "NOTE: Sent §1, served: treat as a normal lead and invite them to book.";
+  const state = String(d.state || "").trim().toUpperCase();
+  const reason = state === "NZ" ? "New Zealand"
+    : UNSERVED_STATES.indexOf(state) !== -1 ? `${state} is outside our area`
+    : "split systems only";
+  return `NOTE: Sent §2, interest list: not a fit (${reason}); not pipeline, keep it out of lead counts.`;
+}
+
 function formatNotification(d, stamp) {
   const when = stamp || formatTimestamp();
 
@@ -408,9 +420,7 @@ function formatNotification(d, stamp) {
       `Form: ${d.formLabel}`,
       `Submission Time: ${when}`,
       "",
-      tags.length
-        ? "NOTE: Register-interest list, not pipeline. Keep it out of lead counts."
-        : "NOTE: Served state, heating only. Treat as a normal lead and invite them to book.",
+      listNote(d),
       "",
       "CONTACT",
       `First name: ${orDash(d.first_name)}`,
