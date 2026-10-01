@@ -3,8 +3,8 @@
 #   HANDOVER - first emails for api-lead.js (v2, two doors).md
 # Sales edits the wording THERE; it is pasted here verbatim. Never edit it here first.
 # Sent when the state is outside SERVED_STATES (NZ included) or heating is
-# "Split systems only". A list email: it is used only once it carries an
-# unsubscribe line; until then today's interest-list email goes instead.
+# "Split systems only". A list email: it carries the unsubscribe line, added
+# to the HANDOVER by Sales on 1 Oct 2026 and pasted here (CTO Re #25).
 Subject: Thanks for your interest in Thermal Dawn
 Subject-no-name: Thanks for your interest in Thermal Dawn
 
@@ -19,3 +19,5 @@ There's nothing you need to do in the meantime. If you have a question, just rep
 Cheers,
 Nick
 Thermal Dawn
+
+Rather not hear from us? Reply with "unsubscribe" and I'll take you off the list.

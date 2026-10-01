@@ -2,9 +2,9 @@
 # Source of truth: Sales +/Consumer/Sales Playbook/_Templates/First emails/
 #   HANDOVER - first emails for api-lead.js (v2, two doors).md
 # Sales edits the wording THERE; it is pasted here verbatim. Never edit it here first.
-# A list email: it is used only once it carries an unsubscribe line (Spam Act;
-# CTO Re: Web #12, A2). Until Sales adds that line to the HANDOVER and it is
-# pasted here, today's subscribe email, which has one, goes instead.
+# A list email: it carries the unsubscribe line (Spam Act; CTO Re: Web #12, A2),
+# added to the HANDOVER by Sales on 1 Oct 2026 and pasted here (CTO Re #25).
+# lead.js still refuses it, and sends today's email, if the line ever goes.
 Subject: Welcome to the Thermal Dawn update
 Subject-no-name: Welcome to the Thermal Dawn update
 
@@ -17,3 +17,5 @@ If you'd like to talk about your own home in the meantime, just reply to this em
 Cheers,
 Nick
 Thermal Dawn
+
+Don't want these updates? Reply with "unsubscribe" and I'll take you off the list.

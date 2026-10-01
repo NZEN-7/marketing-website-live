@@ -39,7 +39,7 @@ jobs:
       - name: Supabase lead row, key selection and interest tags (49 checks)
         run: npm run test:leadrow
 
-      - name: "First emails: templates, served/unserved rule, rendering (58 checks)"
+      - name: "First emails: templates, served/unserved rule, rendering (71 checks)"
         run: npm run test:firstemails
 
       - name: "Lead handler: order, test routing, code-only logs, bot screens (44 checks)"

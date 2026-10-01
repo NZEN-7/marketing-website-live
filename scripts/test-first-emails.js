@@ -58,7 +58,32 @@ check("interest-list VIC + Split systems only -> §2", key(IL({ state: "VIC", he
 check("unserved rule: missing state is served", lead.isUnservedListLead({ form: "interest-list", heating: "Gas ducted" }) === false);
 check("unserved rule: an unrecognised state is served (B07-S1)", ["UNKNOWN", "XX", "Victoria", "OS"].every((st) => lead.isUnservedListLead({ form: "interest-list", state: st, heating: "Gas ducted" }) === false));
 check("unserved rule: every known unserved choice on the form is §2", ["QLD", "SA", "WA", "TAS", "NT", "NZ", " qld "].every((st) => key(IL({ state: st })) === "interest-list-unserved"));
-check("unserved rule: served and unserved lists don't overlap", lead.SERVED_STATES.every((st) => lead.UNSERVED_STATES.indexOf(st) === -1));
+check("unserved rule: served and unserved lists don't overlap", lead.SERVED_STATES.every((st) => lead.UNSERVED_STATES.indexOf(st) === -1));
+// The notification's NOTE says what the customer got (CTO Re Web #31, item 24).
+const note = (o) => (lead.formatNotification(lead.parseSubmission(Object.assign({ form: "interest-list", first_name: "A", last_name: "B",
+  email: "a@example.com", postcode: "3000", interest: "Heating", heating: "Gas ducted", timeline: "Now", consent: "on", ts: 1 }, o)).data, "x")
+  .split("\n").find((l) => l.startsWith("NOTE:")) || "");
+const sent = (o) => key(IL(o)) === "interest-list-unserved" ? "§2" : "§1";
+check("NOTE: VIC + split systems says §2, split systems only", note({ state: "VIC", heating: "Split systems only" }) === "NOTE: Sent §2, interest list: not a fit (split systems only); not pipeline, keep it out of lead counts.", note({ state: "VIC", heating: "Split systems only" }));
+check("NOTE: QLD says §2, outside our area", note({ state: "QLD", postcode: "4000" }) === "NOTE: Sent §2, interest list: not a fit (QLD is outside our area); not pipeline, keep it out of lead counts.");
+check("NOTE: NZ says §2, New Zealand", note({ state: "NZ", postcode: "1010" }) === "NOTE: Sent §2, interest list: not a fit (New Zealand); not pipeline, keep it out of lead counts.", note({ state: "NZ", postcode: "1010" }));
+check("NOTE: NSW + heating and cooling says §1, invite them to book", note({ state: "NSW", postcode: "2000", interest: "Heating and cooling" }) === "NOTE: Sent §1, served: treat as a normal lead and invite them to book.");
+check("NOTE always matches the email sent", [{ state: "VIC" }, { state: "NSW", interest: "Heating and cooling" }, { state: "ACT", interest: "Hot water" },
+  { state: "QLD" }, { state: "NZ", postcode: "1010" }, { state: "VIC", heating: "Split systems only" }, { state: "WA", heating: "Split systems only" }]
+  .every((o) => note(o).includes("Sent " + sent(o))));
+// The Apps Script parser reads the new NOTE as it read the old one: it rides on
+// "Submission Time" (kept in the CSV only as a human cross-check; capture takes
+// the time from the message date) and never reaches a data field.
+{
+  const { parseLead } = require(path.join(__dirname, "apps-script", "lead-parser.gs"));
+  const ok = [{ state: "VIC", heating: "Split systems only" }, { state: "NSW", postcode: "2000", interest: "Heating and cooling" }, { state: "QLD", postcode: "4000" }].every((o) => {
+    const d = lead.parseSubmission(Object.assign({ form: "interest-list", first_name: "A", last_name: "B", email: "a@example.com",
+      postcode: "3000", interest: "Heating", heating: "Gas ducted", timeline: "Now", consent: "on", ts: 1 }, o)).data;
+    const f = parseLead(lead.formatNotification(d, "1 October 2026 at 11:40 am AEST"));
+    return Object.keys(f).every((k) => k === "Submission Time" || !/NOTE|pipeline|Sent §/.test(f[k])) && f.State === o.state;
+  });
+  check("parser: the NOTE never reaches a data field (only the Submission Time cross-check)", ok);
+}
 check("unserved rule: only for interest-list", lead.isUnservedListLead({ form: "register-interest", state: "QLD" }) === false);
 check("contact -> contact", key(P({ form: "contact", name: "Casey van Dijk", email: "c@example.com", message: "x" })) === "contact");
 check("subscribe -> subscribe", key(P({ form: "subscribe", email: "s@example.com" })) === "subscribe");
@@ -104,6 +129,18 @@ for (const [label, e] of [["subscribe", sub], ["interest-list §2", un]]) {
   check(`${label}: the email that goes has an unsubscribe line`, /unsubscribe/i.test(e.text));
   check(`${label}: held (today's email) exactly while the template has no line`, /held/.test(e.template) === !templateHasLine, e.template);
 }
+
+// ---- 5. HANDOVER v2, rev 1 Oct (CTO Re #25): the real wording ships, nothing held ----
+const SUB_LINE = `Don't want these updates? Reply with "unsubscribe" and I'll take you off the list.`;
+const UN_LINE = `Rather not hear from us? Reply with "unsubscribe" and I'll take you off the list.`;
+check("§5 subscribe: its own template, not held", sub.template === "subscribe", sub.template);
+check("§5 subscribe: Sales' unsubscribe line, last, after the sign-off", sub.text.trim().endsWith("Thermal Dawn\n\n" + SUB_LINE), sub.text.slice(-160));
+check("§2 unserved: its own template, not held", un.template === "interest-list-unserved", un.template);
+check("§2 unserved: Sales' unsubscribe line, last, after the sign-off", un.text.trim().endsWith("Thermal Dawn\n\n" + UN_LINE), un.text.slice(-160));
+check("§1 signs off with the Dialpad number", lead.firstEmail(P(RI)).text.trim().endsWith("Thermal Dawn\n(02) 7228 3430"));
+check("contact gives the Dialpad number", lead.firstEmail(P({ form: "contact", name: "Casey", email: "c@example.com", message: "x" })).text.includes("or call me on (02) 7228 3430."));
+check("Nick's mobile is in no first email", [P(RI), IL({}), IL({ state: "QLD" }), P({ form: "subscribe", email: "s@example.com" }),
+  P({ form: "contact", name: "Casey", email: "c@example.com", message: "x" })].every((d) => !/432 ?395 ?138/.test(lead.firstEmail(d).text)));
 
 console.log(failed ? `\n${failed} CHECK(S) FAILED` : "\nAll first-email checks passed.");
 process.exit(failed ? 1 : 0);
