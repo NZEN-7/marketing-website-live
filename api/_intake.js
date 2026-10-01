@@ -215,7 +215,8 @@ function formatIntakeNotification(d, when, files) {
   if (files && files.rejected.length) lines.push(`Uploads not attached (type or size): ${files.rejected.join(", ")}`);
   // Own labels, so the parser never mistakes them for the lead's own Email or Phone.
   if (d.landlord_name || d.landlord_email || d.landlord_phone) lines.push("", "LANDLORD", `Landlord name: ${d.landlord_name || "-"}`, `Landlord email: ${d.landlord_email || "-"}`, `Landlord phone: ${d.landlord_phone || "-"}`);
-  lines.push("", "ANYTHING ELSE", d.notes || val(d, "notes"), "");
+  // Lines after the first are quoted "> ", so no typed line can pass for a label (D6-S3).
+  lines.push("", "ANYTHING ELSE", d.notes ? String(d.notes).split(/\r?\n/).join("\n> ") : val(d, "notes"), "");
   return lines.join("\n");
 }
 function formatIntakeSubject(d) {
@@ -249,9 +250,9 @@ function claimSend(d, now) {
   sends.set(key, { pending, settle });
   return { status: "new" };
 }
-/* One customer email per lead when the database can't say (off production,
-   columns off, insert failed): per lead ID, not per outcome (GPT Web S1-2).
-   Per instance, so in production the leads row's unique index is the rule. */
+/* One customer email per lead OFF PRODUCTION, where nothing is inserted:
+   per lead ID, not per outcome (GPT Web S1-2). In production the leads
+   row's unique index is the only rule, and no answer means no email (D6-S1). */
 const FIRST_MS = 24 * 60 * 60 * 1000;
 const emailed = new Map();
 function claimFirstEmail(d, now) {

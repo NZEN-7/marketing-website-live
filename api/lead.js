@@ -62,6 +62,11 @@ const clamp = (s, max) => {
    (asBody); they sit after every label the parser reads. */
 const asText = (v, max = 500) => clamp(String(v == null ? "" : v).replace(/\s+/g, " "), max);
 const asBody = (v, max = 5000) => clamp(v, max);
+/* Multi-line free text in the notification: every line after the first is
+   quoted with "> ", so nothing a visitor types can start a line the CRM
+   parser would read as a label (GPT Web D6-S3). lead-parser.gs strips the
+   marks back out. */
+const quoteLines = (t) => String(t).split(/\r?\n/).join("\n> ");
 
 const asList = (v, max = 40) =>
   (Array.isArray(v) ? v : v == null || v === "" ? [] : [v])
@@ -316,9 +321,13 @@ async function recordLead(d) {
   }
   if (once) {
     // [] means the unique index already had this (intake_lead_id, intake_event).
+    // Only an empty list or exactly our one row is an answer (GPT Web D6-S2);
+    // anything else (bad JSON, null, an object, another id) is unknown.
     let rows = null;
     try { rows = JSON.parse(await res.text()); } catch (_) { rows = null; }
-    return Array.isArray(rows) && rows.length === 0 ? "duplicate" : "inserted";
+    if (Array.isArray(rows) && rows.length === 0) return "duplicate";
+    if (Array.isArray(rows) && rows.length === 1 && rows[0] && rows[0].intake_lead_id === row.intake_lead_id) return "inserted";
+    return "unknown";
   }
   return "ok";
 }
@@ -497,7 +506,7 @@ function formatNotification(d, stamp) {
       `Timeline: ${joinList(d.timeline)}`,
       "",
       "CONTEXT",
-      `Comments: ${orDash(d.comments)}`,
+      `Comments: ${quoteLines(orDash(d.comments))}`,
       `How did you hear about us: ${joinList(d.referral)}`,
       `Newsletter opt-in: ${d.optin ? "Yes" : "No"}`,
       "",
@@ -530,7 +539,7 @@ function formatNotification(d, stamp) {
       `Timeline: ${orDash(d.timeline)}`,
       "",
       "CONTEXT",
-      `Comments: ${orDash(d.comments)}`,
+      `Comments: ${quoteLines(orDash(d.comments))}`,
       "",
       "DEPOSIT",
       `Tier: ${orDash(d.tier)}`,
@@ -553,7 +562,7 @@ function formatNotification(d, stamp) {
       `Email: ${orDash(d.email)}`,
       "",
       "MESSAGE",
-      orDash(d.message),
+      quoteLines(orDash(d.message)),
       "",
     ].join("\n");
   }
@@ -946,6 +955,7 @@ module.exports = async function handler(req, res) {
       const r = await recordLead(data);
       if (r === "inserted") inserted = true;
       else if (r === "duplicate") { inserted = false; logEvent(reqId, data.form, "insert_skipped", "duplicate_event"); }
+      else if (r === "unknown") logEvent(reqId, data.form, "insert_unconfirmed", "unexpected_reply");
       else if (r !== "ok") logEvent(reqId, data.form, "insert_skipped", r === "skipped (non-production)" ? "non_production" : "not_configured");
     } catch (leadErr) {
       logEvent(reqId, data.form, "insert_failed", errorCode(leadErr));
@@ -962,11 +972,13 @@ module.exports = async function handler(req, res) {
     //    including a template that fails to load.
     let first = null;
     // The intake: one customer email per lead, whatever the page claims (GPT
-    // Web S1-2). The database decides when it can (a new `complete` row); when
-    // it can't (off production, columns not on yet, insert failed), a
-    // per-lead claim in memory does.
+    // Web S1-2). In production only the database can say so: a new
+    // `complete` row. If it can't (insert failed, columns off, a reply we
+    // can't read), no customer email: fail closed (D6-S1). The notification
+    // has already gone, so Nick still has the lead. Off production, where
+    // nothing is inserted, a per-lead claim in memory stands in.
     const mayEmail = data.form !== "intake" ? true
-      : inserted !== null ? inserted : intake.claimFirstEmail(data, Date.now());
+      : isProduction() ? inserted === true : intake.claimFirstEmail(data, Date.now());
     try { if (mayEmail) first = firstEmail(data); } catch (tplErr) {
       logEvent(reqId, data.form, "first_email_failed", "template_unavailable");
     }

@@ -341,6 +341,17 @@ if (unknown.length) {
     drivers: ["Bills are too high"], timeline: ["Now"], comments: "x", optin: "true", ts: 1 }, o)).data, stamp);
   forge("register-interest first name with a new line and Email:", ri({ first_name: "Alex\nEmail: forged@example.com" }), { "Email": REAL });
   forge("register-interest comments (multi-line) forging Email", ri({ comments: "Hi\nEmail: forged@example.com\nState: QLD" }), { "Email": REAL, "State": "VIC" });
+  // D6-S3: a label that comes AFTER Comments in the old form, forged from inside Comments.
+  const riB = ri({ comments: "Line one\nHow did you hear about us: Forged source\nNewsletter opt-in: No", referral: ["An event or expo"] });
+  forge("register-interest comments forging a LATER label (D6-S3)", riB, { "How did you hear about us": "An event or expo", "Newsletter opt-in": "Yes" });
+  const cm = parseLead(riB)["Comments"] || "";
+  if (/^Line one How did you hear about us: Forged source Newsletter opt-in: No$/.test(cm)) console.log("ok    D6-S3: the comments still read back whole, unquoted");
+  else { failures++; console.log("FAIL  D6-S3: comments read back as " + JSON.stringify(cm)); }
+  const ctc = lead.formatNotification(lead.parseSubmission({ form: "contact", name: "Sam", email: REAL, message: "Hi\nEmail: forged@example.com", ts: 1 }).data, stamp);
+  forge("contact message forging Email", ctc, { "Email": REAL });
+  // The message body itself only parses from a line-broken body (it always has; the run-on form is Wix-era).
+  if (parseLead(ctc)["Comments"] === "Hi Email: forged@example.com") console.log("ok    D6-S3: the contact message reads back whole, unquoted");
+  else { failures++; console.log("FAIL  D6-S3: contact message read back as " + JSON.stringify(parseLead(ctc)["Comments"])); }
 }
 
 /* ---- the NOTE line has its own label (1 Oct) ---- */

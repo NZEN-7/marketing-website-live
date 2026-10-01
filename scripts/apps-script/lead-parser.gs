@@ -110,7 +110,7 @@ function leadMessageBody_(body) {
   // form too, which is how Gmail hands the body over.
   if (!m) m = String(body).match(/(?:^|\s)ANYTHING ELSE\s+([\s\S]*)$/);
   if (!m) return '';
-  var v = m[1].replace(/\s+/g, ' ').trim();
+  var v = m[1].replace(/(^|\n|\s{2,})> ?/g, '$1').replace(/\s+/g, ' ').trim();
   return (v === '-' || v === 'Not asked' || v === 'Skipped') ? '' : v;
 }
 
@@ -151,7 +151,8 @@ function parseLead(body) {
     var re = new RegExp(AT + leadEsc_(label) + '[ \\t]*:[ \\t]*([\\s\\S]*?)(?=' + stop + '|$)');
     var m = from.match(re);
     if (m) {
-      var v = leadClean_(m[1]);
+      // A multi-line value's later lines arrive quoted "> " (D6-S3); unquote.
+      var v = leadClean_(String(m[1]).replace(/\n> ?/g, '\n'));
       if (v) out[label] = v;
     }
   }

@@ -28,10 +28,12 @@ require.cache[nm] = { id: nm, filename: nm, loaded: true, exports: {
 let inserts = [];
 let insertReply = { status: 201, body: "" };
 const pgSeen = new Set();        // the unique index on (intake_lead_id, intake_event)
+let pgOdd = null;                // a raw reply body to return instead (D6-S2 cases)
 global.fetch = async (url, opts) => {
   const body = JSON.parse(opts.body);
   inserts.push({ url, body, prefer: opts.headers && opts.headers.Prefer });
   if (/on_conflict=intake_lead_id,intake_event/.test(url) && insertReply.status < 300) {
+    if (pgOdd !== null) { const t = pgOdd; return { ok: true, status: 201, text: async () => t }; }
     const k = body.intake_lead_id + "|" + body.intake_event, fresh = !pgSeen.has(k);
     pgSeen.add(k);
     return { ok: true, status: 201, text: async () => JSON.stringify(fresh ? [{ intake_lead_id: body.intake_lead_id }] : []) };
@@ -277,12 +279,33 @@ const RI = { form: "register-interest", first_name: NAME, last_name: LAST, email
   check("S1-2 production: a different outcome, no followup flag: second notification, no second customer email",
     notes().length === 2 && firsts().length === 1, [notes().length, firsts().map((m) => m.subject)]);
   check("S1-2 production: the duplicate is logged by code", logs.some((l) => /insert_skipped code=duplicate_event/.test(l)), logs);
-  // Production, insert fails: the per-lead claim decides.
+  // D6-S1: production fails closed. The insert fails: notifications, no customer email.
   sent = []; insertReply = { status: 503, body: "" }; capture();
   await call(Object.assign({}, IN, { lead_id: "il-8b8b8b8b8b", outcome: "urgent_call" }));
   await call(Object.assign({}, IN, { lead_id: "il-8b8b8b8b8b", outcome: "keep_posted" }));
   release(); insertReply = { status: 201, body: "" };
-  check("S1-2 production, insert failing: one customer email, by the per-lead claim", notes().length === 2 && firsts().length === 1, [notes().length, firsts().length]);
+  check("D6-S1 production, insert failing: both notifications, no customer email", notes().length === 2 && firsts().length === 0, [notes().length, firsts().length]);
+  // ...then the database recovers: the first row that lands sends the one email, and no more.
+  sent = []; capture();
+  await call(Object.assign({}, IN, { lead_id: "il-8b8b8b8b8b", outcome: "completed" }));
+  await call(Object.assign({}, IN, { lead_id: "il-8b8b8b8b8b", outcome: "book_chat" }));
+  release();
+  check("D6-S1 after recovery: one customer email from the first row that lands, and no second", notes().length === 2 && firsts().length === 1, [notes().length, firsts().length]);
+  // Columns off in production: not configured, so no customer email either.
+  delete process.env.INTAKE_LEAD_COLUMNS; sent = []; capture();
+  await call(Object.assign({}, IN, { lead_id: "il-6d6d6d6d6d", outcome: "completed" })); release();
+  check("D6-S1 production, INTAKE_LEAD_COLUMNS off: notification, no customer email", notes().length === 1 && firsts().length === 0, [notes().length, firsts().length]);
+  process.env.INTAKE_LEAD_COLUMNS = "on";
+  // D6-S2: only exactly our one row is "new"; anything odd is unknown and sends nothing.
+  const odd = [["malformed JSON", "[{"], ["null", "null"], ["an object", JSON.stringify({ intake_lead_id: "il-5e5e5e5e5e" })],
+               ["a mismatched id", JSON.stringify([{ intake_lead_id: "il-0000000000" }])], ["two rows", JSON.stringify([{ intake_lead_id: "il-5e5e5e5e5e" }, { intake_lead_id: "il-5e5e5e5e5e" }])],
+               ["a row without the id", "[{}]"]];
+  for (const [n, [what, reply]] of odd.entries()) {
+    sent = []; pgOdd = reply; capture();
+    await call(Object.assign({}, IN, { lead_id: "il-5e5e5e5e5" + n, outcome: "completed" })); release(); pgOdd = null;
+    check(`D6-S2 a reply of ${what}: notification, no customer email, logged as unconfirmed`,
+      notes().length === 1 && firsts().length === 0 && logs.some((l) => /insert_unconfirmed code=unexpected_reply/.test(l)), [notes().length, firsts().length]);
+  }
   delete process.env.INTAKE_LEAD_COLUMNS; process.env.VERCEL_ENV = "preview";
   // Off production (no insert): the per-lead claim, keyed per lead, not per outcome.
   sent = []; capture();

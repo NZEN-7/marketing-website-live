@@ -184,6 +184,10 @@ check("at most 6 files are considered", lead.parseSubmission(Object.assign({}, b
   check("S1-3: no forged label starts a line, and the real Email line is the only one", !/^(Email|Lead ID|Heating|Landlord email): (forged|il-a|x)/m.test(body) &&
     (body.match(/^Email: /gm) || []).length === 1);
   check("S1-3: the notes keep their own lines (multi-line by design)", lead.parseSubmission(Object.assign({}, base, { notes: "a\nb" })).data.notes === "a\nb");
+  check("D6-S3: in the notification, every line of free text after the first is quoted, so none starts a line",
+    /\nANYTHING ELSE\na\n> Email: x\n> b/.test(lead.formatNotification(lead.parseSubmission(Object.assign({}, base, { notes: "a\nEmail: x\nb" })).data, "x")) &&
+    /Comments: one\n> Phone: 1\n/.test(lead.formatNotification(lead.parseSubmission({ form: "register-interest", first_name: "A", last_name: "B", email: "r@example.com",
+      phone: "0400000001", suburb: "X", state: "VIC", heating: "h", solar: "No", battery: "No", drivers: ["a"], timeline: ["Now"], comments: "one\nPhone: 1", optin: "true", ts: 1 }).data, "x")));
   const ri = lead.parseSubmission({ form: "register-interest", first_name: "A\nEmail: forged@example.com", last_name: "B", email: "r@example.com",
     phone: "0400 000 001", suburb: "X\r\nState: QLD", state: "VIC", heating: "h", solar: "No", battery: "No", drivers: ["a\nb"], timeline: ["Now"],
     comments: "keep\nlines", optin: "true", ts: 1 }).data;
