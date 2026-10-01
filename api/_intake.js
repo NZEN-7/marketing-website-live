@@ -216,7 +216,7 @@ function formatIntakeNotification(d, when, files) {
   // Own labels, so the parser never mistakes them for the lead's own Email or Phone.
   if (d.landlord_name || d.landlord_email || d.landlord_phone) lines.push("", "LANDLORD", `Landlord name: ${d.landlord_name || "-"}`, `Landlord email: ${d.landlord_email || "-"}`, `Landlord phone: ${d.landlord_phone || "-"}`);
   // Lines after the first are quoted "> ", so no typed line can pass for a label (D6-S3).
-  lines.push("", "ANYTHING ELSE", d.notes ? String(d.notes).split(/\r?\n/).join("\n> ") : val(d, "notes"), "");
+  lines.push("", "ANYTHING ELSE", d.notes ? String(d.notes).split(/\r?\n/).map((l) => l.replace(/[^\S\n]+/g, " ").trim()).join("\n> ") : val(d, "notes"), "");
   return lines.join("\n");
 }
 function formatIntakeSubject(d) {

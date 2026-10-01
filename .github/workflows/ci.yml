@@ -33,7 +33,7 @@ jobs:
       - name: Email layout (23 checks)
         run: npm run test:email
 
-      - name: CRM parser round-trip and capture query (46 checks)
+      - name: CRM parser round-trip and capture query (52 checks)
         run: npm run test:parser
 
       - name: Supabase lead row, key selection and interest tags (49 checks)

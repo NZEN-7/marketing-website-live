@@ -344,6 +344,12 @@ if (unknown.length) {
   // D6-S3: a label that comes AFTER Comments in the old form, forged from inside Comments.
   const riB = ri({ comments: "Line one\nHow did you hear about us: Forged source\nNewsletter opt-in: No", referral: ["An event or expo"] });
   forge("register-interest comments forging a LATER label (D6-S3)", riB, { "How did you hear about us": "An event or expo", "Newsletter opt-in": "Yes" });
+  // The residual (GPT Web §7): two spaces inside Comments, on the label's own line.
+  forge("register-interest comments with a 2-space run-on boundary (D6-S3 residual)",
+    ri({ comments: "Hi  Newsletter opt-in: No", referral: ["An event or expo"] }), { "Newsletter opt-in": "Yes", "How did you hear about us": "An event or expo" });
+  forge("register-interest comments, tabs and a later line with spaces",
+    ri({ comments: "Hi\t\tNewsletter opt-in: No\n   How did you hear about us:  Forged" , referral: ["An event or expo"] }), { "Newsletter opt-in": "Yes", "How did you hear about us": "An event or expo" });
+  forge("intake notes with a 2-space boundary", intake({ notes: "Hi  Email: forged@example.com" }), { "Email": REAL });
   const cm = parseLead(riB)["Comments"] || "";
   if (/^Line one How did you hear about us: Forged source Newsletter opt-in: No$/.test(cm)) console.log("ok    D6-S3: the comments still read back whole, unquoted");
   else { failures++; console.log("FAIL  D6-S3: comments read back as " + JSON.stringify(cm)); }

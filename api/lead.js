@@ -66,7 +66,9 @@ const asBody = (v, max = 5000) => clamp(v, max);
    quoted with "> ", so nothing a visitor types can start a line the CRM
    parser would read as a label (GPT Web D6-S3). lead-parser.gs strips the
    marks back out. */
-const quoteLines = (t) => String(t).split(/\r?\n/).join("\n> ");
+// Each line also has its runs of spaces collapsed, so typed text can never
+// hold the parser's 2+ space run-on boundary either (D6-S3 residual).
+const quoteLines = (t) => String(t).split(/\r?\n/).map((l) => l.replace(/[^\S\n]+/g, " ").trim()).join("\n> ");
 
 const asList = (v, max = 40) =>
   (Array.isArray(v) ? v : v == null || v === "" ? [] : [v])
