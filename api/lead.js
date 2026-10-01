@@ -19,6 +19,8 @@
 const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
+// The intake prototype (PRD D13): its own module, so this file's diff stays small.
+const intake = require("./_intake.js");
 
 const TZ = "Australia/Sydney";
 const NOTIFY_TO = "nickz@thermaldawn.com";
@@ -54,11 +56,23 @@ const clamp = (s, max) => {
   return t.length > max ? t.slice(0, max) : t;
 };
 
-const asText = (v, max = 500) => clamp(v, max);
+/* A single-line field: CR/LF and runs of whitespace collapse to one space, so
+   visitor text can never start a new "Label:" line in the notification the
+   CRM parser reads (GPT Web S1-3). Comments and messages keep their lines
+   (asBody); they sit after every label the parser reads. */
+const asText = (v, max = 500) => clamp(String(v == null ? "" : v).replace(/\s+/g, " "), max);
+const asBody = (v, max = 5000) => clamp(v, max);
+/* Multi-line free text in the notification: every line after the first is
+   quoted with "> ", so nothing a visitor types can start a line the CRM
+   parser would read as a label (GPT Web D6-S3). lead-parser.gs strips the
+   marks back out. */
+// Each line also has its runs of spaces collapsed, so typed text can never
+// hold the parser's 2+ space run-on boundary either (D6-S3 residual).
+const quoteLines = (t) => String(t).split(/\r?\n/).map((l) => l.replace(/[^\S\n]+/g, " ").trim()).join("\n> ");
 
 const asList = (v, max = 40) =>
   (Array.isArray(v) ? v : v == null || v === "" ? [] : [v])
-    .map((x) => clamp(x, 200))
+    .map((x) => asText(x, 200))
     .filter(Boolean)
     .slice(0, max);
 
@@ -282,20 +296,40 @@ async function recordLead(d) {
   if (!isProduction()) return "skipped (non-production)";
   // return=minimal matters for lead_writer: it can insert but not read, so
   // asking for the row back would fail the insert.
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/leads`, {
+  // An intake row with its own columns is one per (intake_lead_id,
+  // intake_event): two instances racing the same send get one row (Platform,
+  // migration efaf42c; GPT Web I-S2).
+  const row = d.form === "intake" ? intake.intakeLeadRow(d, process.env) : leadRow(d);
+  // With its own columns, an intake row asks for itself back, so the handler
+  // knows whether this was the first row for (intake_lead_id, intake_event):
+  // that decides the customer's first email (GPT Web S1-2). Only the id comes
+  // back (select=), never the lead's details.
+  const once = !!row.intake_event;
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/leads` +
+      (once ? "?on_conflict=intake_lead_id,intake_event&select=intake_lead_id" : ""), {
     method: "POST",
     headers: {
       apikey: auth.apikey,
       Authorization: `Bearer ${auth.bearer}`,
       "Content-Type": "application/json",
-      Prefer: "return=minimal",
+      Prefer: once ? "return=representation,resolution=ignore-duplicates" : "return=minimal",
     },
-    body: JSON.stringify(leadRow(d)),
+    body: JSON.stringify(row),
   });
   if (!res.ok) {
     let code = "";
     try { code = String((JSON.parse(await res.text()) || {}).code || ""); } catch (_) { /* not JSON */ }
     throw new InsertError(res.status, /^[A-Z0-9]{1,12}$/.test(code) ? code : "");
+  }
+  if (once) {
+    // [] means the unique index already had this (intake_lead_id, intake_event).
+    // Only an empty list or exactly our one row is an answer (GPT Web D6-S2);
+    // anything else (bad JSON, null, an object, another id) is unknown.
+    let rows = null;
+    try { rows = JSON.parse(await res.text()); } catch (_) { rows = null; }
+    if (Array.isArray(rows) && rows.length === 0) return "duplicate";
+    if (Array.isArray(rows) && rows.length === 1 && rows[0] && rows[0].intake_lead_id === row.intake_lead_id) return "inserted";
+    return "unknown";
   }
   return "ok";
 }
@@ -303,6 +337,7 @@ async function recordLead(d) {
 /** Normalise the raw body into a known shape; returns {data} or {error}. */
 function parseSubmission(body) {
   const form = String(body && body.form ? body.form : "").trim();
+  if (form === "intake") return intake.parseIntake(body);
   const spec = FORMS[form];
   if (!spec) return { error: "Unknown form" };
 
@@ -331,7 +366,7 @@ function parseSubmission(body) {
       drivers: asList(body.drivers),
       referral: asList(body.referral),
       timeline: asList(body.timeline),
-      comments: asText(body.comments, 5000),
+      comments: asBody(body.comments, 5000),
     });
   } else if (isDeposit(form)) {
     Object.assign(data, {
@@ -344,7 +379,7 @@ function parseSubmission(body) {
       address: asText(body.address, 300),
       heating: asText(body.heating, 120),
       timeline: asText(body.timeline, 200),
-      comments: asText(body.comments, 5000),
+      comments: asBody(body.comments, 5000),
       terms: body.terms === true || body.terms === "true" || body.terms === "on",
       ref: makeRef(),
     });
@@ -367,7 +402,7 @@ function parseSubmission(body) {
     Object.assign(data, {
       name: asText(body.name, 200),
       email: asText(body.email, 200),
-      message: asText(body.message, 5000),
+      message: asBody(body.message, 5000),
     });
   } else {
     Object.assign(data, {
@@ -408,6 +443,7 @@ function listNote(d) {
 
 function formatNotification(d, stamp) {
   const when = stamp || formatTimestamp();
+  if (d.form === "intake") return intake.formatIntakeNotification(d, when, d._files);
 
   // Interest list. New labels (Postcode, Interested in, Consent to be
   // contacted, Tags) and sections (INTEREST, LIST) are in lead-parser.gs;
@@ -472,7 +508,7 @@ function formatNotification(d, stamp) {
       `Timeline: ${joinList(d.timeline)}`,
       "",
       "CONTEXT",
-      `Comments: ${orDash(d.comments)}`,
+      `Comments: ${quoteLines(orDash(d.comments))}`,
       `How did you hear about us: ${joinList(d.referral)}`,
       `Newsletter opt-in: ${d.optin ? "Yes" : "No"}`,
       "",
@@ -505,7 +541,7 @@ function formatNotification(d, stamp) {
       `Timeline: ${orDash(d.timeline)}`,
       "",
       "CONTEXT",
-      `Comments: ${orDash(d.comments)}`,
+      `Comments: ${quoteLines(orDash(d.comments))}`,
       "",
       "DEPOSIT",
       `Tier: ${orDash(d.tier)}`,
@@ -528,7 +564,7 @@ function formatNotification(d, stamp) {
       `Email: ${orDash(d.email)}`,
       "",
       "MESSAGE",
-      orDash(d.message),
+      quoteLines(orDash(d.message)),
       "",
     ].join("\n");
   }
@@ -544,6 +580,7 @@ function formatNotification(d, stamp) {
 }
 
 function formatSubject(d) {
+  if (d.form === "intake") return intake.formatIntakeSubject(d);
   if (d.form === "register-interest") {
     return stripHeader(
       `New website lead: ${d.first_name} ${d.last_name} · ${d.heating} · ${d.email}`
@@ -573,7 +610,7 @@ function formatSubject(d) {
    Deposits get none: that form posts BEFORE the Stripe handoff, and Stripe
    sends the receipt (CTO Re: Web #12, A1). A paid-booking email waits for a
    Stripe-webhook brief of its own. */
-const AUTORESPOND = { "register-interest": true, contact: true, subscribe: true, "interest-list": true };
+const AUTORESPOND = { "register-interest": true, contact: true, subscribe: true, "interest-list": true, intake: true };
 
 /* Unserved (HANDOVER §2) only when CLEARLY unserved: a known unserved state
    (UNSERVED_STATES, NZ included), or "Split systems only". Anything else,
@@ -588,6 +625,7 @@ function isUnservedListLead(d) {
 
 function templateKey(d) {
   if (d.form === "interest-list") return isUnservedListLead(d) ? "interest-list-unserved" : "register-interest";
+  if (d.form === "intake") return intake.firstEmailKey(d);
   if (d.form === "register-interest" || d.form === "contact" || d.form === "subscribe") return d.form;
   return null;
 }
@@ -839,13 +877,24 @@ module.exports = async function handler(req, res) {
 
   // Bot screens. Both return a success shape so a bot learns nothing. The page
   // stamp is required since brief 07: all five forms send it (assets/js/forms.js).
+  // The intake's no-JS long form (SPEC rule 11) is a plain form post with no
+  // page stamp: it relies on the honeypot and the IP cap, and its subject is
+  // tagged [no-JS]. It gets a redirect to the thanks page, not JSON.
+  const ct = String((req.headers && req.headers["content-type"]) || "");
+  const nojsIntake = body.form === "intake" && String(body.nojs) === "1" && /urlencoded|multipart/.test(ct);
+  const reply = (code, json) => {
+    if (nojsIntake && code < 400) { res.setHeader("Location", "/start/thanks/"); return res.status(303).end(); }
+    // The long form gets a page, not JSON, when something's missing (GPT Web I-S1).
+    if (nojsIntake && code === 400) { res.setHeader("Location", "/start/check/"); return res.status(303).end(); }
+    return res.status(code).json(json);
+  };
   const ts = Number(body.ts);
   const trapped =
     (typeof body.website === "string" && body.website.trim() !== "") ||
-    !(ts > 0) || Date.now() - ts < 3000;
+    (!nojsIntake && (!(ts > 0) || Date.now() - ts < 3000));
   if (trapped) {
     logEvent(reqId, String(body.form || ""), "screened", "bot_trap");
-    return res.status(200).json({ ok: true });
+    return reply(200, { ok: true });
   }
   if (rateLimited(clientIp(req), Date.now())) {
     logEvent(reqId, String(body.form || ""), "screened", "rate_limited");
@@ -853,7 +902,25 @@ module.exports = async function handler(req, res) {
   }
 
   const { data, error } = parseSubmission(body);
-  if (error) return res.status(400).json({ ok: false, error });
+  if (error) return reply(400, { ok: false, error });
+  // The intake: one send per (lead ID, outcome), and a repeat waits for the
+  // first one's result (GPT Web I-S2). `sent: true` only when the
+  // notification really went (I-S3): the bot screens above answer a bare
+  // { ok: true }, so the page can tell the difference.
+  if (data.form === "intake") {
+    const claim = intake.claimSend(data, Date.now());
+    if (claim.status === "done") {
+      logEvent(reqId, data.form, "screened", "repeat_send");
+      return reply(200, { ok: true, sent: true });
+    }
+    if (claim.status === "pending") {
+      logEvent(reqId, data.form, "screened", "repeat_in_flight");
+      return (await claim.result) ? reply(200, { ok: true, sent: true })
+        : res.status(500).json({ ok: false, error: "Could not send. Please email us directly." });
+    }
+    // Intake uploads ride on the notification as attachments (PRD D3).
+    data._files = intake.intakeAttachments(data);
+  }
 
   try {
     const transport = makeTransport();
@@ -869,6 +936,8 @@ module.exports = async function handler(req, res) {
         replyTo: data.email,
         subject: formatSubject(data),
         text: formatNotification(data),
+        attachments: data._files ? data._files.attachments.map((a) =>
+          ({ filename: a.filename, content: a.content, contentType: a.contentType })) : undefined,
       });
     } else {
       logEvent(reqId, data.form, "notification_skipped", "test_recipient_unset");
@@ -881,9 +950,15 @@ module.exports = async function handler(req, res) {
     // kill the container mid-flight, and the insert vanishes with no error
     // anywhere: passes every local test, drops rows under real traffic.
     // "Non-fatal" and "fire-and-forget" are not the same thing.
+    // The intake records its row too (PRD §3.1); its own columns wait for
+    // INTAKE_LEAD_COLUMNS=on (see intakeLeadRow in _intake.js).
+    let inserted = null;     // the intake's own row: true new, false already there, null unknown
     try {
       const r = await recordLead(data);
-      if (r !== "ok") logEvent(reqId, data.form, "insert_skipped", r === "skipped (non-production)" ? "non_production" : "not_configured");
+      if (r === "inserted") inserted = true;
+      else if (r === "duplicate") { inserted = false; logEvent(reqId, data.form, "insert_skipped", "duplicate_event"); }
+      else if (r === "unknown") logEvent(reqId, data.form, "insert_unconfirmed", "unexpected_reply");
+      else if (r !== "ok") logEvent(reqId, data.form, "insert_skipped", r === "skipped (non-production)" ? "non_production" : "not_configured");
     } catch (leadErr) {
       logEvent(reqId, data.form, "insert_failed", errorCode(leadErr));
     }
@@ -898,7 +973,15 @@ module.exports = async function handler(req, res) {
     // 3. The first email. Best effort: a failure never costs us the lead,
     //    including a template that fails to load.
     let first = null;
-    try { first = firstEmail(data); } catch (tplErr) {
+    // The intake: one customer email per lead, whatever the page claims (GPT
+    // Web S1-2). In production only the database can say so: a new
+    // `complete` row. If it can't (insert failed, columns off, a reply we
+    // can't read), no customer email: fail closed (D6-S1). The notification
+    // has already gone, so Nick still has the lead. Off production, where
+    // nothing is inserted, a per-lead claim in memory stands in.
+    const mayEmail = data.form !== "intake" ? true
+      : isProduction() ? inserted === true : intake.claimFirstEmail(data, Date.now());
+    try { if (mayEmail) first = firstEmail(data); } catch (tplErr) {
       logEvent(reqId, data.form, "first_email_failed", "template_unavailable");
     }
     if (first) {
@@ -920,9 +1003,14 @@ module.exports = async function handler(req, res) {
       }
     }
 
-    return res.status(200).json({ ok: true });
+    if (data.form === "intake") {
+      intake.settleSend(data, !!notifyTo);
+      return reply(200, { ok: true, sent: !!notifyTo });
+    }
+    return reply(200, { ok: true });
   } catch (err) {
     // Never echo submitted PII back to the client, and never log it.
+    if (data.form === "intake") intake.settleSend(data, false);
     logEvent(reqId, data.form, "notification_failed", errorCode(err));
     return res.status(500).json({ ok: false, error: "Could not send. Please email us directly." });
   }

@@ -30,10 +30,14 @@ var CFG = {
   // the Apps Script project BEFORE GMAIL_USER changes in Vercel, or capture
   // stops without an error. test:parser fails if either sender is dropped.
   // -label: keeps processed mail out of the next run.
+  // The intake (stage 1, 1 Oct 2026) sends "Website lead · ..." or, on the
+  // urgent path, "URGENT · ...". URGENT alone is too loose a word to match, so
+  // it is paired with the intake's form line in the body.
   QUERY: 'from:(nickz@thermaldawn.com OR noreply@thermaldawn.com) ' +
-         'subject:("New website lead" OR "New website message" OR ' +
+         '{subject:("New website lead" OR "New website message" OR ' +
          '"New subscriber" OR "New deposit intent" OR ' +
-         '"New interest-list signup") ' +
+         '"New interest-list signup" OR "Website lead") ' +
+         '(subject:URGENT "Form: Website Intake")} ' +
          '-label:' + 'crm-captured',
 
   CAPTURED_LABEL: 'crm-captured',   // applied after a successful write
@@ -186,37 +190,51 @@ function buildRow_(d, msg) {
   var submitted = Utilities.formatDate(msg.getDate(), CFG.TIMEZONE, "yyyy-MM-dd'T'HH:mm:ssXXX");
   var body = msg.getPlainBody() || '';
   var site = /thermaldawn\.com\/so\/tr|wix/i.test(body) ? 'wix' : 'freevolt';
+  // The intake carries its own lead_id (il-...), so an urgent lead's first
+  // send and its later details share one id here, as in the leads table.
+  var id = d['Lead ID'] || Utilities.getUuid().slice(0, 8);
+  return [id, now, submitted, msg.getId()].concat(rowCells_(d, site)).map(csvCell_).join(',');
+}
 
+/* The data columns, from the parsed fields. Pure, so test:parser checks the
+   CRM row each form lands as, the intake included. */
+function rowCells_(d, site) {
+  var intake = /^Website Intake/.test(d['Form'] || '');
+  // The intake writes "Skipped" or "Not asked" rather than leaving a blank in
+  // the email; in the CRM a blank is the honest value.
+  var v = function (k) {
+    var x = d[k] || '';
+    return (intake && (x === 'Skipped' || x === 'Not asked' || x === '-')) ? '' : x;
+  };
   var name = d['Name'] || '';
   var first = d['First name'] || (name ? name.split(' ')[0] : '');
   var last  = d['Last name']  || (name ? name.split(' ').slice(1).join(' ') : '');
+  var energy = v('Energy setup');
+  var has = function (word) { return energy ? (energy.indexOf(word) !== -1 ? 'Yes' : 'No') : ''; };
 
   return [
-    Utilities.getUuid().slice(0, 8),      // lead_id
-    now,                                   // captured_at
-    submitted,                             // submitted_at
-    msg.getId(),                           // gmail_message_id
     d['Form'] || '',                       // form
     site,                                  // source_site
     first, last,
     String(d['Email'] || '').toLowerCase(),
-    d['Phone'] || '',
+    v('Phone'),
     // Interest-list rows have a postcode, not a suburb; no new column
     // before the CTO's CRM ruling. form = "Interest List" says which.
-    d['Suburb'] || d['Postcode'] || '',
-    d['State'] || '',
-    d['Solar'] || '',
-    d['Battery'] || '',
-    d['Current heating/cooling system'] || '',
-    d["What's driving interest"] || d['Interested in'] || '',
-    d['Timeline'] || '',
+    v('Suburb') || v('Postcode'),
+    v('State'),
+    intake ? has('Rooftop solar') : (d['Solar'] || ''),
+    intake ? has('A home battery') : (d['Battery'] || ''),
+    intake ? v('Heating') : (d['Current heating/cooling system'] || ''),
+    intake ? v('What brings you here') : (d["What's driving interest"] || d['Interested in'] || ''),
+    intake ? v('Timing') : (d['Timeline'] || ''),
     d['Comments'] || '',
     // Interest-list consent is to be contacted, not a newsletter opt-in, so
-    // it never lands in this column (Platform review S1, 28 Sep 2026).
-    d['Newsletter opt-in'] || '',
+    // it never lands in this column (Platform review S1, 28 Sep 2026). The
+    // intake asks for the monthly update as its own box.
+    intake ? v('Monthly update') : (d['Newsletter opt-in'] || ''),
     'New',                                 // triage_status
     '', '', '', '', '', '', ''             // agent columns, filled on triage
-  ].map(csvCell_).join(',');
+  ];
 }
 
 function appendRows_(file, rows) {
@@ -255,5 +273,5 @@ function showHeartbeat() {
 /* Apps Script ignores this; Node uses it so the CSV round-trip is testable.
    See scripts/test-lead-parser.js. */
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { csvCell_: csvCell_, csvRow_: csvRow_, isTest_: isTest_ };
+  module.exports = { csvCell_: csvCell_, csvRow_: csvRow_, isTest_: isTest_, rowCells_: rowCells_, CFG: CFG };
 }

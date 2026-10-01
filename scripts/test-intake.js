@@ -1,0 +1,219 @@
+/* The intake prototype (PRD D13): the routing table (SPEC §1), the server's
+   parse and notification (SPEC §7), and the attachment rule (PRD D3).
+   No credentials, no network.
+
+     npm run test:intake
+*/
+"use strict";
+
+const path = require("path");
+const R = require(path.join(__dirname, "..", "assets", "js", "intake-route.js"));
+const I = require(path.join(__dirname, "..", "api", "_intake.js"));
+const lead = require(path.join(__dirname, "..", "api", "lead.js"));
+
+let failed = 0;
+const check = (label, cond, got) => {
+  if (cond) console.log(`ok    ${label}`);
+  else { console.error(`FAIL  ${label}${got !== undefined ? ": " + JSON.stringify(got) : ""}`); failed++; }
+};
+
+/** Walk the routing table from S1, answering from `a`, until a result screen. */
+function walk(a) {
+  const out = [];
+  let s = "S1";
+  for (let i = 0; i < 30 && s; i++) {
+    out.push(s);
+    if (/^(MATCH|MATCH_SHORT|URGENT|O1|N1|R1|DONE)$/.test(s)) break;
+    s = R.next(s, a);
+  }
+  return out.join(" ");
+}
+const VIC = { state: "VIC", phone: "0400000001" };
+
+// ---- the paths (SPEC §1) ----
+check("state: 3121 VIC, 2000 NSW, 2600 ACT, 2880 NSW, 4000 QLD, 0800 NT",
+  R.stateFor("3121") === "VIC" && R.stateFor("2000") === "NSW" && R.stateFor("2600") === "ACT" &&
+  R.stateFor("2880") === "NSW" && R.stateFor("4000") === "QLD" && R.stateFor("0800") === "NT");
+check("fit, boiler: S1..S6, S7, S8, S9, S10-S13, MATCH",
+  walk(Object.assign({ intent: "fit", heating: ["boiler_radiators"], tenure: "owner_occupier" }, VIC)) ===
+  "S1 S2 S3 S4 S4b S5 S6 S7 S8 S9 S10 S11 S12 S13 MATCH", walk(Object.assign({ intent: "fit", heating: ["boiler_radiators"] }, VIC)));
+check("fit, no boiler picked: S8 is not shown",
+  walk({ state: "VIC", intent: "fit", heating: ["none"] }) === "S1 S2 S3 S4 S5 S6 S7 S9 S10 S11 S12 S13 MATCH");
+check("S4b only with a phone number", walk({ state: "VIC", intent: "explore", heating: ["not_sure"] }).indexOf("S4b") === -1);
+check("ready to book: only S7 and S9, then MATCH",
+  walk(Object.assign({ intent: "book", heating: ["boiler_underfloor"], tenure: "owner_occupier" }, VIC)) === "S1 S2 S3 S4 S4b S5 S6 S7 S9 MATCH");
+check("just exploring: S7, then the short match",
+  walk(Object.assign({ intent: "explore", heating: ["boiler_radiators"] }, VIC)) === "S1 S2 S3 S4 S4b S5 S6 S7 MATCH_SHORT");
+check("urgent: S7, S9, then URGENT",
+  walk(Object.assign({ intent: "urgent", heating: ["lpg_boiler"], tenure: "owner_occupier" }, VIC)) === "S1 S2 S3 S4 S4b S5 S6 S7 S9 URGENT");
+check("fit with 'Broken, or about to go' jumps to URGENT after S9",
+  walk(Object.assign({ intent: "fit", heating: ["boiler_radiators"], boiler_condition: "broken", tenure: "owner_occupier" }, VIC)).endsWith("S8 S9 URGENT"));
+check("no answer on S5 takes the full fit path", walk({ state: "NSW", heating: ["boiler_radiators"] }).endsWith("S13 MATCH"));
+
+// ---- the closes ----
+check("O1: QLD goes straight to consent (S6), then closes: no phone or intent", walk({ state: "QLD", phone: "0400000001" }) === "S1 S2 S3 S6 O1");
+check("O1: outside Australia, the same (no AU phone)", walk({ state: "OS" }) === "S1 S2 S3 S6 O1");
+for (const h of [["splits"], ["ducted_gas"], ["other"], ["splits", "ducted_gas"]]) {
+  check(`N1: ${h.join("+")} only`, walk({ state: "VIC", intent: "fit", heating: h }).endsWith("S7 N1"));
+}
+for (const h of [["boiler_radiators", "ducted_gas"], ["none"], ["not_sure"], ["splits", "not_sure"]]) {
+  check(`must NOT close: ${h.join("+")}`, walk({ state: "VIC", intent: "fit", heating: h }).indexOf("N1") === -1);
+}
+check("R1: renting closes at S9", walk({ state: "NSW", intent: "fit", heating: ["boiler_radiators"], tenure: "renter" }).endsWith("S9 R1"));
+check("'Not sure' never closes; it routes icp-check", R.route({ state: "VIC", heating: ["not_sure"], boiler_condition: "not_sure" }) === "icp-check");
+check("icp-check: 'No heating yet', and nothing picked", R.route({ state: "VIC", heating: ["none"] }) === "icp-check" && R.route({ state: "VIC" }) === "icp-check");
+check("icp: a boiler picked, even alongside 'Not sure'", R.route({ state: "VIC", heating: ["lpg_boiler", "not_sure"] }) === "icp");
+check("the careful match: no boiler picked", R.unconfirmed({ heating: ["not_sure"] }) && R.unconfirmed({ heating: ["none"] }) && !R.unconfirmed({ heating: ["boiler_underfloor"] }));
+check("emitters: LPG alone is 'radiators or underfloor heating'", R.emitters({ heating: ["lpg_boiler"] }) === "radiators or underfloor heating");
+check("emitters: LPG + gas radiators is 'radiators'", R.emitters({ heating: ["lpg_boiler", "boiler_radiators"] }) === "radiators");
+check("emitters: both gas cards", R.emitters({ heating: ["boiler_radiators", "boiler_underfloor"] }) === "radiators and underfloor heating");
+
+// ---- the match's why lines (SPEC §4) ----
+check("why: none of the triggers -> no line", R.whyLines({ energy: ["none"] }).length === 0);
+check("why: older boiler first, then solar",
+  JSON.stringify(R.whyLines({ energy: ["solar"], boiler_condition: "getting_on", scope: ["hot_water"] })) ===
+  JSON.stringify(["It replaces a boiler you'd otherwise be replacing anyway.", "Your solar can charge the store during the day."]));
+check("why: the cheap window outranks the EV (Sales' case)",
+  JSON.stringify(R.whyLines({ energy: ["ev", "cheap_window"], boiler_condition: "playing_up" })) ===
+  JSON.stringify(["It replaces a boiler you'd otherwise be replacing anyway.", "It can charge in your cheap or free window."]));
+check("why: EV alone never mentions a battery", JSON.stringify(R.whyLines({ energy: ["ev"] })) === JSON.stringify(["It works alongside your car charging."]));
+check("why: battery alone", JSON.stringify(R.whyLines({ energy: ["battery"] })) === JSON.stringify(["It works alongside your battery."]));
+check("why: battery and EV", JSON.stringify(R.whyLines({ energy: ["battery", "ev"] })) === JSON.stringify(["It works alongside your battery and car charging."]));
+check("why: at most two lines", R.whyLines({ energy: ["solar", "battery", "cheap_window"], boiler_condition: "broken", scope: ["hot_water"] }).length === 2);
+
+// ---- the server: parse, subject, notification (SPEC §7) ----
+const base = { form: "intake", first_name: "Alex", last_name: "Sample", email: "alex@example.com", contact_pref: "email", postcode: "3122",
+  suburb: "Hawthorn", state: "VIC", intent: "fit", heating: ["boiler_radiators"], boiler_condition: "not_sure", route: "icp",
+  outcome: "completed", rung_reached: "done", last_screen: "S17", seen: ["S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8", "S9", "S10", "S11", "S12", "S13", "MATCH"] };
+const p = lead.parseSubmission(base);
+check("intake parses with the three required fields", !p.error && p.data.form === "intake", p.error);
+check("a lead_id is issued", /^il-[0-9a-f]{10}$/.test(p.data.lead_id));
+// ---- stage 1, I-S1: phone-or-email on the server (rule 5 / D16) ----
+const ps = (o) => lead.parseSubmission(Object.assign({}, base, { contact_pref: "" }, o));
+check("I-S1: served, no phone, no email choice: refused, why=phone", ps({}).error && ps({}).why === "phone", ps({}));
+check("I-S1: served, chose email: accepted", !ps({ contact_pref: "email" }).error);
+check("I-S1: served, a valid AU phone: accepted", !ps({ phone: "0412 345 678" }).error && !ps({ phone: "+61 2 7228 3430" }).error);
+check("I-S1: served, a malformed phone: refused", ps({ phone: "12" }).why === "phone" && ps({ phone: "12", contact_pref: "email" }).why === "phone");
+check("I-S1: out of area (QLD) and NZ are never asked", !ps({ postcode: "4000", state: "QLD" }).error && !ps({ postcode: "", state: "OS" }).error);
+check("I-S1: the no-JS long form is held to it too", ps({ nojs: "1" }).why === "phone");
+check("I-S1: the long form's 'I'd prefer email' box counts as choosing email", !ps({ nojs: "1", prefer_email: "1" }).error &&
+  ps({ nojs: "1", prefer_email: "1" }).data.contact_pref === "email");
+check("the long form has that box, hidden when the stepper runs", /<label class="tick iq__nojsonly"><input type="checkbox" name="prefer_email" value="1"> I'd prefer email<\/label>/.test(require("fs").readFileSync(path.join(__dirname, "..", "start", "index.html"), "utf8")));
+check("the no-JS error page exists and says nothing was sent", /Nothing has been sent yet/.test(require("fs").readFileSync(path.join(__dirname, "..", "start", "check", "index.html"), "utf8")));
+check("the form label is the live one", p.data.formLabel === "Website Intake");
+check("the page's own lead_id is kept, so a repeat can be spotted", lead.parseSubmission(Object.assign({}, base, { lead_id: "il-00ff00ff00" })).data.lead_id === "il-00ff00ff00");
+check("a malformed lead_id is replaced", /^il-[0-9a-f]{10}$/.test(lead.parseSubmission(Object.assign({}, base, { lead_id: "il-<x>" })).data.lead_id));
+const k = { lead_id: "il-1111111111", outcome: "completed" };
+{
+  const st = (d, t) => I.claimSend(d, t).status;
+  const a = st(k, 1000), b = st(k, 1500);                       // second while the first is in flight
+  I.settleSend(k, true, 2000);
+  const c = st(k, 2500);                                        // after it was sent
+  const u = st(Object.assign({}, k, { outcome: "urgent_call" }), 2500);
+  check("claimSend: new, then pending while in flight, then done once sent; another outcome is new",
+    a === "new" && b === "pending" && c === "done" && u === "new", [a, b, c, u]);
+  const f = { lead_id: "il-2222222222", outcome: "completed" };
+  st(f, 1000); I.settleSend(f, false);
+  check("claimSend: a failed send is forgotten, so a retry is new", st(f, 1200) === "new");
+  check("claimSend: a done send expires after 30 minutes", st(k, 2000 + 31 * 60 * 1000) === "new");
+}
+check("icp-check: the server works it out from the answers", lead.parseSubmission(Object.assign({}, base, { heating: ["not_sure"] })).data.route === "icp-check");
+check("the page's own route claim is ignored", lead.parseSubmission(Object.assign({}, base, { route: "renter" })).data.route === "icp");
+check("the landlord's phone reaches the notification, under its own label", /LANDLORD[\s\S]*Landlord phone: 0400 000 002/.test(lead.formatNotification(lead.parseSubmission(Object.assign({}, base, { landlord_phone: "0400 000 002" })).data, "x")));
+check("missing postcode is refused (unless outside Australia)", !!lead.parseSubmission(Object.assign({}, base, { postcode: "" })).error &&
+  !lead.parseSubmission(Object.assign({}, base, { postcode: "", state: "OS" })).error);
+check("missing last name is refused", !!lead.parseSubmission(Object.assign({}, base, { last_name: "" })).error);
+check("unknown card values are dropped", lead.parseSubmission(Object.assign({}, base, { heating: ["boiler_radiators", "<script>"] })).data.heating.join() === "boiler_radiators");
+const subj = lead.formatSubject(p.data);
+check("subject: Website lead · name · suburb, state · route · heating · lead_id",
+  subj === `Website lead · Alex Sample · Hawthorn, VIC · icp · Gas hydronic with radiators · ${p.data.lead_id}`, subj);
+check("subject: URGENT first on the urgent route", lead.formatSubject(lead.parseSubmission(Object.assign({}, base, { intent: "urgent" })).data).startsWith("URGENT · "));
+check("subject: no CR/LF", !/[\r\n]/.test(lead.formatSubject(lead.parseSubmission(Object.assign({}, base, { first_name: "A\r\nBcc: x@example.com" })).data)));
+const body = lead.formatNotification(p.data, "30 September 2026 at 2:00 pm AEST");
+const order = ["Lead ID:", "Rung reached:", "Route:", "CONTACT", "Phone:", "Best time to call:", "LOCATION", "ABOUT THE ENQUIRY", "YOUR HOME", "Heating:", "THE DETAILS", "ANYTHING ELSE"];
+check("notification sections in SPEC §7 order, phone near the top", order.every((k, i) => i === 0 || body.indexOf(order[i - 1]) < body.indexOf(k)));
+check("'Not sure' shows as such", /Boiler condition: Not sure/.test(body));
+check("a shown-but-empty answer says Skipped", /Energy setup: Skipped/.test(body));
+check("a screen never shown says Not asked", /Storeys: Not asked/.test(body));
+const nj = lead.parseSubmission({ form: "intake", nojs: "1", first_name: "T", last_name: "E", email: "t@example.com", phone: "0412 345 678", postcode: "3820", heating: ["boiler_underfloor"], tenure: "owner_occupier" }).data;
+check("no-JS: the server works out state and route itself", nj.state === "VIC" && nj.route === "icp", [nj.state, nj.route]);
+check("a completed send reports rung 'done'", lead.parseSubmission(Object.assign({}, base, { rung_reached: "3" })).data.rung_reached === "done");
+check("a page's own state claim is only a hint", lead.parseSubmission(Object.assign({}, base, { state: "QLD" })).data.state === "VIC");
+check("S14's underfloor answer reaches the notification", /Underfloor covers: Most of the house/.test(lead.formatNotification(lead.parseSubmission(Object.assign({}, base, { underfloor_band: "most", seen: base.seen.concat(["S14"]) })).data, "x")));
+check("no-JS posts are tagged", lead.formatSubject(lead.parseSubmission(Object.assign({}, base, { nojs: "1" })).data).endsWith("[no-JS]"));
+// ---- the customer's first email (CTO Re #30): brief 07's templates, one per lead ----
+const fe = (o) => lead.firstEmail(lead.parseSubmission(Object.assign({}, base, o)).data);
+check("first email: a served lead on the match gets §1", fe({}).template === "register-interest" && /^Thanks Alex, let's talk about your heating$/.test(fe({}).subject));
+check("first email: §1 with a phone offers the call", /I'll try to give you a quick call/.test(fe({ phone: "0412 345 678", contact_pref: "phone" }).text));
+check("first email: §1 for 'I'd prefer email' offers the booking instead", /The easiest next step is a quick 15-minute chat/.test(fe({}).text) && !/give you a quick call/.test(fe({}).text));
+check("first email: urgent gets §1", fe({ route: "", intent: "urgent", phone: "0412 345 678", outcome: "urgent_call" }).template === "register-interest");
+check("first email: 'Not sure' heating (icp-check) gets §1", fe({ heating: ["not_sure"] }).template === "register-interest");
+check("first email: O1 out of area gets §2", fe({ postcode: "4000", state: "QLD", outcome: "keep_posted" }).template === "interest-list-unserved");
+check("first email: NZ gets §2", fe({ postcode: "", state: "OS", outcome: "keep_posted" }).template === "interest-list-unserved");
+check("first email: N1 (split systems only) gets §2", fe({ heating: ["splits"], outcome: "keep_posted" }).template === "interest-list-unserved");
+check("first email: R1 (renting) gets §2", fe({ tenure: "renter", outcome: "landlord_share" }).template === "interest-list-unserved");
+check("first email: §2 carries the unsubscribe line", /Reply with "unsubscribe"/.test(fe({ tenure: "renter" }).text));
+check("first email: a follow-up details send gets none", lead.firstEmail(lead.parseSubmission(Object.assign({}, base, { followup: true })).data) === null);
+check("first email: the no-JS long form gets one too", fe({ nojs: "1" }).template === "register-interest");
+check("first email: no resume link yet (stage 2)", !/resume|come back/i.test(fe({}).text));
+
+// ---- attachments (PRD D3) ----
+const pdf = Buffer.concat([Buffer.from("%PDF-1.4\n"), Buffer.alloc(2000, 32)]);
+const jpg = Buffer.concat([Buffer.from([0xff, 0xd8, 0xff, 0xe0]), Buffer.alloc(3000, 1)]);
+const exe = Buffer.from("MZ\x90\x00 not an image");
+const a = I.intakeAttachments({ uploads: [
+  { slot: "winter_gas_bill", name: "bill.pdf", data: pdf.toString("base64") },
+  { slot: "boiler_compliance_plate", name: "IMG_1234.HEIC", data: jpg.toString("base64") },
+  { slot: "switchboard", name: "switch.jpg", data: exe.toString("base64") },
+  { slot: "nope", name: "x.pdf", data: pdf.toString("base64") },
+] });
+check("PDF and JPEG attach, by their first bytes", a.attachments.length === 2 && a.attachments[0].contentType === "application/pdf" && a.attachments[1].contentType === "image/jpeg");
+check("attachments are named by slot", a.attachments[0].filename === "winter gas bill - bill.pdf" && a.attachments[1].filename === "boiler compliance plate - IMG_1234.jpg", a.attachments.map((x) => x.filename));
+check("a non-image with an image name, and an unknown slot, are refused", a.rejected.length === 2, a.rejected);
+check("a file over 4 MB is refused", I.intakeAttachments({ uploads: [{ slot: "switchboard", name: "big.jpg",
+  data: Buffer.concat([Buffer.from([0xff, 0xd8, 0xff]), Buffer.alloc(4 * 1024 * 1024 + 1)]).toString("base64") }] }).attachments.length === 0);
+check("at most 6 files are considered", lead.parseSubmission(Object.assign({}, base, { uploads: new Array(9).fill({}) })).data.uploads.length === 6);
+
+// ---- S1-3: single-line fields can't start a new line in the notification ----
+{
+  const h = lead.parseSubmission(Object.assign({}, base, { first_name: "Alex\r\nEmail: forged@example.com", last_name: "Sample   Phone: 1",
+    suburb: "Hawthorn\nLead ID: il-aaaaaaaaaa", referrer: "Bob\n\nHeating: x", source: ["friend"], landlord_name: "Pat\nLandlord email: x@example.com" })).data;
+  check("S1-3: CR/LF and whitespace runs collapse in single-line fields", h.first_name === "Alex Email: forged@example.com" && h.last_name === "Sample Phone: 1" &&
+    h.suburb === "Hawthorn Lead ID: il-aaaaaaaaaa" && h.referrer === "Bob Heating: x", [h.first_name, h.last_name, h.suburb, h.referrer]);
+  const body = lead.formatNotification(h, "x");
+  check("S1-3: no forged label starts a line, and the real Email line is the only one", !/^(Email|Lead ID|Heating|Landlord email): (forged|il-a|x)/m.test(body) &&
+    (body.match(/^Email: /gm) || []).length === 1);
+  check("S1-3: the notes keep their own lines (multi-line by design)", lead.parseSubmission(Object.assign({}, base, { notes: "a\nb" })).data.notes === "a\nb");
+  check("D6-S3: in the notification, every line of free text after the first is quoted, so none starts a line",
+    /\nANYTHING ELSE\na\n> Email: x\n> b/.test(lead.formatNotification(lead.parseSubmission(Object.assign({}, base, { notes: "a\nEmail: x\nb" })).data, "x")) &&
+    /Comments: one\n> Phone: 1\n/.test(lead.formatNotification(lead.parseSubmission({ form: "register-interest", first_name: "A", last_name: "B", email: "r@example.com",
+      phone: "0400000001", suburb: "X", state: "VIC", heating: "h", solar: "No", battery: "No", drivers: ["a"], timeline: ["Now"], comments: "one\nPhone: 1", optin: "true", ts: 1 }).data, "x")));
+  const ri = lead.parseSubmission({ form: "register-interest", first_name: "A\nEmail: forged@example.com", last_name: "B", email: "r@example.com",
+    phone: "0400 000 001", suburb: "X\r\nState: QLD", state: "VIC", heating: "h", solar: "No", battery: "No", drivers: ["a\nb"], timeline: ["Now"],
+    comments: "keep\nlines", optin: "true", ts: 1 }).data;
+  check("S1-3: the old forms collapse their single-line fields too, and keep comments' lines",
+    ri.first_name === "A Email: forged@example.com" && ri.suburb === "X State: QLD" && ri.drivers[0] === "a b" && ri.comments === "keep\nlines", [ri.first_name, ri.suburb, ri.drivers, ri.comments]);
+}
+
+// ---- the page: promises and copy (Sales review) ----
+const fs = require("fs");
+const page = fs.readFileSync(path.join(__dirname, "..", "start", "index.html"), "utf8");
+const thanks = fs.readFileSync(path.join(__dirname, "..", "start", "thanks", "index.html"), "utf8");
+const visible = (h) => h.replace(/<!--[\s\S]*?-->/g, "");
+check("no 'we've emailed you' promise on either Done (18)", !/emailed you/.test(visible(page)) && !/emailed you/.test(visible(thanks)));
+check("the honeypot has no text and is hidden from screen readers (16)", /<div class="hp" aria-hidden="true"><input [^>]*name="website"[^>]*tabindex="-1"[^>]*aria-hidden="true"><\/div>/.test(page) && !/Leave this empty/.test(page));
+check("S6 has a Skip (12)", /data-screen="S6"[\s\S]*?data-skip[\s\S]*?<\/section>/.test(page.slice(page.indexOf('data-screen="S6"'), page.indexOf('data-screen="S7"'))));
+check("the urgent screen has no plain 'or book a time' (10)", !/>or book a time</.test(page) && /Sorry to hear about the boiler/.test(page));
+check("the short match headline ends with a full stop (13)", /id="h-MATCH_SHORT">Here's the short version<span data-first-prefix>, <span data-first><\/span><\/span>\.<\/h2>/.test(page));
+check("S7 coach and N1 say hydronic (Sales' SPEC)", /We replace gas and LPG hydronic heating: a boiler that heats water/.test(page) && /LPG hydronic heating \(a boiler heating radiators/.test(page));
+
+check("SPEC rev B: the sidebar line", /Nick reads every enquiry and gets back to you himself\./.test(page) && !/calls you himself/.test(page));
+check("SPEC rev B: 'Landlord's phone'", /<span>Landlord's phone<\/span>/.test(page) && !/Or their phone/.test(page));
+check("SPEC rev B: the upload-set message promises no email", /One file was too big to send here\. No problem: Nick will be in touch, and you can send it to him then\./.test(page) && !/Reply to the email/.test(visible(page)));
+check("SPEC rev B: the urgent screen and urgent Done lines", /Sorry to hear about the boiler/.test(page) && (page.match(/Nick will try to call you today\. If we miss you, we'll try again tomorrow at lunchtime\./g) || []).length === 2);
+
+check("the Dialpad number in the sidebar and footer (SPEC §2), dialable", (page.match(/href="tel:\+61272283430">\(02\) 7228 3430<\/a>/g) || []).length === 2);
+check("Nick's old mobile is gone from the page", !/432 ?395 ?138/.test(page));
+
+console.log(failed ? `\n${failed} CHECK(S) FAILED` : "\nAll intake checks passed.");
+process.exit(failed ? 1 : 0);

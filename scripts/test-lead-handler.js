@@ -15,9 +15,11 @@ const path = require("path");
 // ---- fakes: nodemailer and fetch --------------------------------------------
 let sent = [];
 let failSend = null;              // (msg, index) => Error | null
+let hold = null;                  // a promise every sendMail waits on (concurrency tests)
 const nm = require.resolve("nodemailer");
 require.cache[nm] = { id: nm, filename: nm, loaded: true, exports: {
   createTransport: () => ({ sendMail: async (m) => {
+    if (hold) await hold;
     const e = failSend && failSend(m, sent.length);
     if (e) throw e;
     sent.push(m);
@@ -25,8 +27,17 @@ require.cache[nm] = { id: nm, filename: nm, loaded: true, exports: {
 } };
 let inserts = [];
 let insertReply = { status: 201, body: "" };
+const pgSeen = new Set();        // the unique index on (intake_lead_id, intake_event)
+let pgOdd = null;                // a raw reply body to return instead (D6-S2 cases)
 global.fetch = async (url, opts) => {
-  inserts.push({ url, body: JSON.parse(opts.body) });
+  const body = JSON.parse(opts.body);
+  inserts.push({ url, body, prefer: opts.headers && opts.headers.Prefer });
+  if (/on_conflict=intake_lead_id,intake_event/.test(url) && insertReply.status < 300) {
+    if (pgOdd !== null) { const t = pgOdd; return { ok: true, status: 201, text: async () => t }; }
+    const k = body.intake_lead_id + "|" + body.intake_event, fresh = !pgSeen.has(k);
+    pgSeen.add(k);
+    return { ok: true, status: 201, text: async () => JSON.stringify(fresh ? [{ intake_lead_id: body.intake_lead_id }] : []) };
+  }
   return { ok: insertReply.status < 300, status: insertReply.status, text: async () => insertReply.body };
 };
 
@@ -175,6 +186,138 @@ const RI = { form: "register-interest", first_name: NAME, last_name: LAST, email
   release();
   check("per-IP cap: the 11th and 12th in the window are refused (429)", codes.slice(0, 10).every((c) => c === 200) && codes[10] === 429 && codes[11] === 429, codes);
   check("the cap never logs the IP", !logs.some((l) => l.includes("192.0.2.77")), logs.filter((l) => l.includes("192.0.2")));
+
+  // ---- 5. the intake: a repeat of the same send is not sent twice (Sales review, 1) ----
+  process.env.VERCEL_ENV = "preview"; process.env.TEST_RECIPIENT = "test-inbox@example.com";
+  // The intake now sends the customer a first email too (CTO Re #30), so these
+  // count the notifications to Nick; the customer email is checked on its own.
+  const notes = () => sent.filter((m) => /^(Website lead|URGENT) · /.test(m.subject));
+  const firsts = () => sent.filter((m) => !/^(Website lead|URGENT) · /.test(m.subject));
+  const IN = { form: "intake", first_name: NAME, last_name: LAST, email: EMAIL, phone: PHONE, postcode: "3122", state: "VIC",
+    heating: ["boiler_radiators"], outcome: "completed", lead_id: "il-0123456789" };
+  sent = []; failSend = null;
+  capture(); const i1 = await call(IN); const i2 = await call(IN); release();
+  check("intake: two taps, one notification (both answered 200)", i1.code === 200 && i2.code === 200 && notes().length === 1, [i1.code, i2.code, notes().length]);
+  check("intake: the repeat is logged by code, no PII", logs.some((l) => /screened code=repeat_send/.test(l)) && piiIn(logs).length === 0, logs);
+  check("intake: the notification carries the page's lead ID", /il-0123456789/.test(sent[0].subject), sent[0] && sent[0].subject);
+  sent = [];
+  capture(); await call(Object.assign({}, IN, { lead_id: "il-aaaaaaaaaa", outcome: "urgent_call" }));
+  await call(Object.assign({}, IN, { lead_id: "il-aaaaaaaaaa", outcome: "completed", followup: true })); release();
+  check("intake: urgent first, then its details: both notifications sent", notes().length === 2, notes().length);
+  check("intake: but only one customer email (the details are a follow-up)", firsts().length === 1, firsts().map((m) => m.subject));
+  sent = []; failSend = (m, i) => (i === 0 && !failSend.done ? (failSend.done = true, new Error("smtp down")) : null);
+  capture(); const f1 = await call(Object.assign({}, IN, { lead_id: "il-bbbbbbbbbb" }));
+  const f2 = await call(Object.assign({}, IN, { lead_id: "il-bbbbbbbbbb" })); release();
+  check("intake: a failed send can be retried with the same lead ID", f1.code === 500 && f2.code === 200 && notes().length === 1, [f1.code, f2.code, notes().length]);
+  failSend = null;
+  sent = [];
+  capture(); await call(Object.assign({}, IN, { lead_id: "not-an-id" })); await call(Object.assign({}, IN, { lead_id: "not-an-id" })); release();
+  check("intake: a malformed lead ID is replaced, never trusted", notes().length === 2 && !/not-an-id/.test(notes()[0].subject), notes().map((m) => m.subject));
+
+  // ---- 5b. stage 1: in-flight dedupe, the sent contract, no-JS errors, the row ----
+  const json = (r) => r.json || {};
+  sent = []; failSend = null;
+  let open; hold = new Promise((r) => { open = r; });
+  capture();
+  const pa = call(Object.assign({}, IN, { lead_id: "il-cccccccccc" })), pb = call(Object.assign({}, IN, { lead_id: "il-cccccccccc" }));
+  await new Promise((r) => setTimeout(r, 20)); open(); hold = null;
+  const [ra, rb] = await Promise.all([pa, pb]); release();
+  check("I-S2: concurrent repeat waits for the first send: one email, both sent:true",
+    notes().length === 1 && json(ra).sent === true && json(rb).sent === true, [notes().length, json(ra), json(rb)]);
+  check("I-S2: the waiting repeat is logged as in flight", logs.some((l) => /screened code=repeat_in_flight/.test(l)), logs);
+  sent = []; hold = new Promise((r) => { open = r; });
+  failSend = (m, i) => (i === 0 ? new Error("smtp down") : null);
+  capture();
+  const fa = call(Object.assign({}, IN, { lead_id: "il-dddddddddd" })), fb = call(Object.assign({}, IN, { lead_id: "il-dddddddddd" }));
+  await new Promise((r) => setTimeout(r, 20)); open(); hold = null;
+  const [ra2, rb2] = await Promise.all([fa, fb]);
+  failSend = null;
+  const rc2 = await call(Object.assign({}, IN, { lead_id: "il-dddddddddd" })); release();
+  check("I-S2: if the first send fails, the waiting repeat fails too (no false success)", ra2.code === 500 && rb2.code === 500, [ra2.code, rb2.code]);
+  check("I-S2: and a later retry sends", rc2.code === 200 && json(rc2).sent === true && notes().length === 1, [rc2.code, notes().length]);
+  capture(); const bot = await call(Object.assign({}, IN, { lead_id: "il-eeeeeeeeee", ts: Date.now() })); release();
+  check("I-S3: a bot-screened post gets { ok: true } with no sent flag", bot.code === 200 && json(bot).ok === true && json(bot).sent === undefined, json(bot));
+  delete process.env.TEST_RECIPIENT; sent = [];
+  capture(); const unset = await call(Object.assign({}, IN, { lead_id: "il-ffffffffff" })); release();
+  check("I-S3: nothing sent (no TEST_RECIPIENT) says sent:false", unset.code === 200 && json(unset).sent === false && notes().length === 0, json(unset));
+  process.env.TEST_RECIPIENT = "test-inbox@example.com";
+  capture(); const noPhone = await call(Object.assign({}, IN, { lead_id: "il-1212121212", phone: "" })); release();
+  check("I-S1: a served lead with no phone and no email choice is refused (400)", noPhone.code === 400, noPhone.code);
+  const nojsReq = { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded", "x-forwarded-for": "203.0.113.201" },
+    body: Object.assign({}, IN, { nojs: "1", phone: "" }) };
+  const nojsRes = { code: 0, headers: {}, status(c) { this.code = c; return this; }, json() { return this; }, end() { return this; }, setHeader(k, v) { this.headers[k] = v; } };
+  capture(); await lead(nojsReq, nojsRes); release();
+  check("I-S1: the long form gets its own page for that (303 to /start/check/)", nojsRes.code === 303 && nojsRes.headers.Location === "/start/check/", [nojsRes.code, nojsRes.headers]);
+  // The row, in production with fakes: off by default, then on.
+  process.env.VERCEL_ENV = "production"; inserts = []; sent = [];
+  capture(); await call(Object.assign({}, IN, { lead_id: "il-3434343434", intent: "urgent", tenure: "owner_occupier" })); release();
+  const row1 = inserts[0] && inserts[0].body;
+  check("leads row: the intake is recorded, existing columns only while the flag is off",
+    row1 && row1.form === "Website Intake" && row1.email === EMAIL && !("lead_id" in row1) && !("answers" in row1), row1);
+  process.env.INTAKE_LEAD_COLUMNS = "on"; inserts = [];
+  capture(); await call(Object.assign({}, IN, { lead_id: "il-5656565656", intent: "urgent", tenure: "owner_occupier" })); release();
+  const row2 = inserts[0] && inserts[0].body;
+  check("leads row: with INTAKE_LEAD_COLUMNS=on, the §3.1 columns too",
+    row2 && row2.intake_lead_id === "il-5656565656" && row2.intake_event === "complete" && row2.rung_reached === 4 && !("lead_id" in row2) && row2.intent === "urgent" && row2.route === "urgent" && row2.tenure === "owner_occupier" &&
+    typeof row2.answers === "object" && row2.answers.heating && /^\d{4}-/.test(row2.ts_started) && /^\d{4}-/.test(row2.ts_last), row2);
+  check("leads row: an intake row with its columns is inserted once per (intake_lead_id, intake_event)", inserts[0] && /\?on_conflict=intake_lead_id,intake_event&select=intake_lead_id$/.test(inserts[0].url) && inserts[0].prefer === "return=representation,resolution=ignore-duplicates", inserts[0] && inserts[0].url);
+  // Migration rev 2 (e7bf423): the values its checks accept.
+  inserts = []; capture(); await call(Object.assign({}, IN, { lead_id: "il-7878787878", outcome: "urgent_call" }));
+  await call(Object.assign({}, IN, { lead_id: "il-7878787878", outcome: "completed", followup: true })); release();
+  const evs = inserts.map((x) => x.body.intake_event);
+  check("leads row: urgent then details are two events, complete then details", JSON.stringify(evs) === JSON.stringify(["complete", "details"]), evs);
+  check("leads row: every value fits rev 2's checks (il- + 10 hex, event set, rung 1-4, answers an object)", inserts.length === 2 && inserts.every((x) =>
+    /^il-[0-9a-f]{10}$/.test(x.body.intake_lead_id) && ["partial", "complete", "details"].indexOf(x.body.intake_event) !== -1 &&
+    (x.body.rung_reached === null || (Number.isInteger(x.body.rung_reached) && x.body.rung_reached >= 1 && x.body.rung_reached <= 4)) &&
+    x.body.answers && typeof x.body.answers === "object" && !Array.isArray(x.body.answers)), inserts.map((x) => x.body));
+  // ---- S1-2: one customer email per lead, whatever the page sends ----
+  // Production, columns on: the database's answer decides.
+  sent = []; inserts = []; capture();
+  await call(Object.assign({}, IN, { lead_id: "il-9a9a9a9a9a", outcome: "urgent_call" }));
+  await call(Object.assign({}, IN, { lead_id: "il-9a9a9a9a9a", outcome: "keep_posted" }));   // no followup flag
+  release();
+  check("S1-2 production: a different outcome, no followup flag: second notification, no second customer email",
+    notes().length === 2 && firsts().length === 1, [notes().length, firsts().map((m) => m.subject)]);
+  check("S1-2 production: the duplicate is logged by code", logs.some((l) => /insert_skipped code=duplicate_event/.test(l)), logs);
+  // D6-S1: production fails closed. The insert fails: notifications, no customer email.
+  sent = []; insertReply = { status: 503, body: "" }; capture();
+  await call(Object.assign({}, IN, { lead_id: "il-8b8b8b8b8b", outcome: "urgent_call" }));
+  await call(Object.assign({}, IN, { lead_id: "il-8b8b8b8b8b", outcome: "keep_posted" }));
+  release(); insertReply = { status: 201, body: "" };
+  check("D6-S1 production, insert failing: both notifications, no customer email", notes().length === 2 && firsts().length === 0, [notes().length, firsts().length]);
+  // ...then the database recovers: the first row that lands sends the one email, and no more.
+  sent = []; capture();
+  await call(Object.assign({}, IN, { lead_id: "il-8b8b8b8b8b", outcome: "completed" }));
+  await call(Object.assign({}, IN, { lead_id: "il-8b8b8b8b8b", outcome: "book_chat" }));
+  release();
+  check("D6-S1 after recovery: one customer email from the first row that lands, and no second", notes().length === 2 && firsts().length === 1, [notes().length, firsts().length]);
+  // Columns off in production: not configured, so no customer email either.
+  delete process.env.INTAKE_LEAD_COLUMNS; sent = []; capture();
+  await call(Object.assign({}, IN, { lead_id: "il-6d6d6d6d6d", outcome: "completed" })); release();
+  check("D6-S1 production, INTAKE_LEAD_COLUMNS off: notification, no customer email", notes().length === 1 && firsts().length === 0, [notes().length, firsts().length]);
+  process.env.INTAKE_LEAD_COLUMNS = "on";
+  // D6-S2: only exactly our one row is "new"; anything odd is unknown and sends nothing.
+  const odd = [["malformed JSON", "[{"], ["null", "null"], ["an object", JSON.stringify({ intake_lead_id: "il-5e5e5e5e5e" })],
+               ["a mismatched id", JSON.stringify([{ intake_lead_id: "il-0000000000" }])], ["two rows", JSON.stringify([{ intake_lead_id: "il-5e5e5e5e5e" }, { intake_lead_id: "il-5e5e5e5e5e" }])],
+               ["a row without the id", "[{}]"]];
+  for (const [n, [what, reply]] of odd.entries()) {
+    sent = []; pgOdd = reply; capture();
+    await call(Object.assign({}, IN, { lead_id: "il-5e5e5e5e5" + n, outcome: "completed" })); release(); pgOdd = null;
+    check(`D6-S2 a reply of ${what}: notification, no customer email, logged as unconfirmed`,
+      notes().length === 1 && firsts().length === 0 && logs.some((l) => /insert_unconfirmed code=unexpected_reply/.test(l)), [notes().length, firsts().length]);
+  }
+  delete process.env.INTAKE_LEAD_COLUMNS; process.env.VERCEL_ENV = "preview";
+  // Off production (no insert): the per-lead claim, keyed per lead, not per outcome.
+  sent = []; capture();
+  await call(Object.assign({}, IN, { lead_id: "il-7c7c7c7c7c", outcome: "book_chat" }));
+  await call(Object.assign({}, IN, { lead_id: "il-7c7c7c7c7c", outcome: "completed" }));       // no followup flag
+  release();
+  check("S1-2 off production: a different outcome, no followup flag: no second customer email", notes().length === 2 && firsts().length === 1, [notes().length, firsts().length]);
+  process.env.VERCEL_ENV = "production"; process.env.INTAKE_LEAD_COLUMNS = "on";
+
+  inserts = []; capture(); await call(RI); release();
+  check("leads row: the old forms' rows never carry the intake columns", inserts[0] && !("intake_lead_id" in inserts[0].body) && !("answers" in inserts[0].body) && !/on_conflict/.test(inserts[0].url), inserts[0] && Object.keys(inserts[0].body));
+  delete process.env.INTAKE_LEAD_COLUMNS; process.env.VERCEL_ENV = "preview";
 
   // ---- 6. P-S1: nothing but logEvent writes to the logs (codes, never messages) ----
   const fs2 = require("fs");

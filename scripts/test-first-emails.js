@@ -80,9 +80,9 @@ check("NOTE always matches the email sent", [{ state: "VIC" }, { state: "NSW", i
     const d = lead.parseSubmission(Object.assign({ form: "interest-list", first_name: "A", last_name: "B", email: "a@example.com",
       postcode: "3000", interest: "Heating", heating: "Gas ducted", timeline: "Now", consent: "on", ts: 1 }, o)).data;
     const f = parseLead(lead.formatNotification(d, "1 October 2026 at 11:40 am AEST"));
-    return Object.keys(f).every((k) => k === "Submission Time" || !/NOTE|pipeline|Sent §/.test(f[k])) && f.State === o.state;
+    return /^Sent §/.test(f.NOTE || "") && !/NOTE|Sent §/.test(f["Submission Time"] || "") && Object.keys(f).every((k) => k === "NOTE" || !/NOTE|pipeline|Sent §/.test(f[k])) && f.State === o.state;
   });
-  check("parser: the NOTE never reaches a data field (only the Submission Time cross-check)", ok);
+  check("parser: the NOTE parses as its own field and reaches no other (its own label since 1 Oct)", ok);
 }
 check("unserved rule: only for interest-list", lead.isUnservedListLead({ form: "register-interest", state: "QLD" }) === false);
 check("contact -> contact", key(P({ form: "contact", name: "Casey van Dijk", email: "c@example.com", message: "x" })) === "contact");

@@ -239,6 +239,136 @@ if (unknown.length) {
   }
 }
 
+/* ---- the intake (stage 1, GPT Web I-B1): normal, urgent and no-JS ----
+   Each body is the one api/lead.js really sends, parsed twice: as written
+   (lines) and as Gmail hands it over (one run-on line). Then the CRM row it
+   lands as, through the same rowCells_ the Apps Script runs. */
+{
+  const intakeBody = (o) => {
+    const p = lead.parseSubmission(Object.assign({ form: "intake", first_name: "Alex", last_name: "Sample",
+      email: "alex.sample@example.com", phone: "0412 345 678", postcode: "3122", suburb: "Hawthorn",
+      intent: "fit", heating: ["boiler_radiators"], boiler_condition: "getting_on", tenure: "owner_occupier",
+      energy: ["solar", "ev"], timing: "3_months", source: ["search"], newsletter_opt_in: true,
+      notes: "Upstairs gets too hot, and the boiler is in a tight cupboard.", outcome: "completed",
+      seen: ["S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8", "S9", "S10", "S11", "S12", "S13", "MATCH", "S14", "S15", "S16", "S17"],
+      lead_id: "il-0a1b2c3d4e" }, o));
+    if (p.error) throw new Error("fixture refused: " + p.error);
+    return { d: p.data, body: lead.formatNotification(p.data, stamp), subject: lead.formatSubject(p.data) };
+  };
+  const runOn = (b) => b.replace(/\n+/g, "   ");
+  const cases = [
+    ["intake, normal (fit, all answered)", intakeBody({}), {
+      "Form": "Website Intake", "Lead ID": "il-0a1b2c3d4e", "Route": "icp", "First name": "Alex", "Last name": "Sample",
+      "Email": "alex.sample@example.com", "Phone": "0412 345 678", "Postcode": "3122", "Suburb": "Hawthorn", "State": "VIC",
+      "Heating": "Gas hydronic with radiators", "Boiler condition": "Getting on a bit", "Is it your home": "I own it and live in it",
+      "Energy setup": "Rooftop solar, An electric vehicle", "Timing": "In the next 3 months", "Monthly update": "Yes",
+      "Comments": "Upstairs gets too hot, and the boiler is in a tight cupboard." },
+      ["Website Intake", "freevolt", "Alex", "Sample", "alex.sample@example.com", "0412 345 678", "Hawthorn", "VIC",
+       "Yes", "No", "Gas hydronic with radiators", "Help me work out if it fits my home", "In the next 3 months",
+       "Upstairs gets too hot, and the boiler is in a tight cupboard.", "Yes", "New"]],
+    ["intake, urgent (no answers past S9)", intakeBody({ intent: "urgent", boiler_condition: "", energy: [], timing: "", notes: "",
+      source: [], newsletter_opt_in: false, outcome: "urgent_call", seen: ["S1", "S2", "S3", "S4", "S5", "S6", "S7", "S9", "URGENT"], lead_id: "il-9f8e7d6c5b" }), {
+      "Form": "Website Intake", "Lead ID": "il-9f8e7d6c5b", "Route": "urgent", "Phone": "0412 345 678", "Email": "alex.sample@example.com",
+      "Heating": "Gas hydronic with radiators", "Energy setup": "Not asked", "Timing": "Not asked" },
+      ["Website Intake", "freevolt", "Alex", "Sample", "alex.sample@example.com", "0412 345 678", "Hawthorn", "VIC",
+       "", "", "Gas hydronic with radiators", "My boiler's broken or failing", "", "", "No", "New"]],
+    ["intake, no-JS long form (email preferred)", intakeBody({ nojs: "1", phone: "", contact_pref: "email", lead_id: "", outcome: "" }), {
+      "Form": "Website Intake [no-JS]", "Route": "icp", "Phone": "Skipped", "Contact preference": "email",
+      "Heating": "Gas hydronic with radiators", "Comments": "Upstairs gets too hot, and the boiler is in a tight cupboard." },
+      ["Website Intake [no-JS]", "freevolt", "Alex", "Sample", "alex.sample@example.com", "", "Hawthorn", "VIC",
+       "Yes", "No", "Gas hydronic with radiators", "Help me work out if it fits my home", "In the next 3 months",
+       "Upstairs gets too hot, and the boiler is in a tight cupboard.", "Yes", "New"]],
+  ];
+  for (const [label, c, want, row] of cases) {
+    check(label + ", as written", c.body, want);
+    check(label + ", run-on as Gmail sends it", runOn(c.body), want);
+    const got = capture.rowCells_(parseLead(runOn(c.body)), "freevolt").slice(0, row.length);
+    if (JSON.stringify(got) !== JSON.stringify(row)) {
+      failures++;
+      console.log(`FAIL  ${label}: the CRM row\n          expected: ${JSON.stringify(row)}\n          got:      ${JSON.stringify(got)}`);
+    } else console.log(`ok    ${label}: lands as the right CRM row`);
+  }
+  const noSub = intakeBody({ suburb: "" });
+  const ns = capture.rowCells_(parseLead(runOn(noSub.body)), "freevolt")[6];
+  if (ns === "3122") console.log("ok    intake with no suburb: the CRM row takes the postcode, never \"-\"");
+  else { failures++; console.log("FAIL  intake with no suburb gives suburb cell " + JSON.stringify(ns)); }
+  // The landlord's details never shadow the lead's own.
+  const r1 = intakeBody({ tenure: "renter", landlord_name: "Pat Owner", landlord_email: "owner@example.com", landlord_phone: "0400 000 002",
+    outcome: "landlord_share" });
+  check("intake R1: the landlord's details stay under their own labels", runOn(r1.body), {
+    "Email": "alex.sample@example.com", "Phone": "0412 345 678", "Landlord name": "Pat Owner",
+    "Landlord email": "owner@example.com", "Landlord phone": "0400 000 002" });
+  // Every intake section header is known to the parser.
+  const hs = (cases[0][1].body + "\n" + r1.body).match(/^[A-Z][A-Z &]{3,}$/gm) || [];
+  const unk = [...new Set(hs.map((h) => h.trim()))].filter((h) => LEAD_SECTIONS.indexOf(h) === -1);
+  if (unk.length) { failures++; console.log("FAIL  intake section headers not known to the parser: " + unk.join(", ")); }
+  else console.log(`ok    all ${new Set(hs).size} intake section headers known to the parser`);
+  // The capture query takes the intake's subjects, and only paired with its form line for URGENT.
+  const q = capture.CFG.QUERY;
+  const ok = /"Website lead"/.test(q) && /\(subject:URGENT "Form: Website Intake"\)/.test(q) &&
+    cases[0][1].subject.startsWith("Website lead · ") && cases[1][1].subject.startsWith("URGENT · ") &&
+    cases[1][1].body.includes("Form: Website Intake") && cases[2][1].subject.startsWith("Website lead · ");
+  if (ok) console.log("ok    capture query takes the intake's normal, urgent and no-JS subjects");
+  else { failures++; console.log("FAIL  capture query vs intake subjects: " + q); }
+}
+
+/* ---- label forging (GPT Web S1-3): visitor text can't stand in for a label ----
+   Every body goes through the real server path (parseSubmission, then the
+   notification), parsed as written and run-on. The real values must win. */
+{
+  const REAL = "real@example.com";
+  const forge = (label, body, want) => {
+    for (const [how, b] of [["as written", body], ["run-on", body.replace(/\n+/g, "   ")]]) {
+      const f = parseLead(b);
+      const bad = Object.keys(want).filter((k) => f[k] !== want[k]);
+      if (bad.length) { failures++; console.log(`FAIL  forging, ${label} (${how}): ` + bad.map((k) => `${k}=${JSON.stringify(f[k])}`).join(", ")); }
+      else console.log(`ok    forging, ${label} (${how}): the real values win`);
+    }
+  };
+  const intake = (o) => lead.formatNotification(lead.parseSubmission(Object.assign({ form: "intake", first_name: "Alex", last_name: "Sample",
+    email: REAL, phone: "0412 345 678", postcode: "3122", suburb: "Hawthorn", intent: "fit", heating: ["boiler_radiators"],
+    tenure: "owner_occupier", outcome: "completed", seen: ["S1", "S2", "S3", "S4", "S7", "S9", "S17"], lead_id: "il-0f0f0f0f0f" }, o)).data, stamp);
+  forge("intake first name with a new line and Email:", intake({ first_name: "Alex\nEmail: forged@example.com" }), { "Email": REAL, "Phone": "0412 345 678" });
+  forge("intake first name with a fake section heading", intake({ first_name: "Alex CONTACT Email: forged@example.com" }), { "Email": REAL });
+  forge("intake last name with double spaces", intake({ last_name: "Sample    Phone: 0400000009" }), { "Phone": "0412 345 678", "Email": REAL });
+  forge("intake referrer forging a later section's label", intake({ source: ["friend"], referrer: "Bob\n\nHeating: Split systems  Is it your home: I'm renting" }),
+    { "Heating": "Gas hydronic with radiators", "Is it your home": "I own it and live in it" });
+  forge("intake notes (multi-line) under ANYTHING ELSE", intake({ notes: "Hi\nEmail: forged@example.com\nPhone: 0400000009\nState: QLD" }),
+    { "Email": REAL, "Phone": "0412 345 678", "State": "VIC" });
+  forge("intake suburb forging the Lead ID", intake({ suburb: "Hawthorn\nLead ID: il-aaaaaaaaaa" }), { "Lead ID": "il-0f0f0f0f0f" });
+  const ri = (o) => lead.formatNotification(lead.parseSubmission(Object.assign({ form: "register-interest", first_name: "Alex", last_name: "Sample",
+    email: REAL, phone: "+61400000001", suburb: "Testville", state: "VIC", heating: "Gas ducted", solar: "No", battery: "No",
+    drivers: ["Bills are too high"], timeline: ["Now"], comments: "x", optin: "true", ts: 1 }, o)).data, stamp);
+  forge("register-interest first name with a new line and Email:", ri({ first_name: "Alex\nEmail: forged@example.com" }), { "Email": REAL });
+  forge("register-interest comments (multi-line) forging Email", ri({ comments: "Hi\nEmail: forged@example.com\nState: QLD" }), { "Email": REAL, "State": "VIC" });
+  // D6-S3: a label that comes AFTER Comments in the old form, forged from inside Comments.
+  const riB = ri({ comments: "Line one\nHow did you hear about us: Forged source\nNewsletter opt-in: No", referral: ["An event or expo"] });
+  forge("register-interest comments forging a LATER label (D6-S3)", riB, { "How did you hear about us": "An event or expo", "Newsletter opt-in": "Yes" });
+  // The residual (GPT Web §7): two spaces inside Comments, on the label's own line.
+  forge("register-interest comments with a 2-space run-on boundary (D6-S3 residual)",
+    ri({ comments: "Hi  Newsletter opt-in: No", referral: ["An event or expo"] }), { "Newsletter opt-in": "Yes", "How did you hear about us": "An event or expo" });
+  forge("register-interest comments, tabs and a later line with spaces",
+    ri({ comments: "Hi\t\tNewsletter opt-in: No\n   How did you hear about us:  Forged" , referral: ["An event or expo"] }), { "Newsletter opt-in": "Yes", "How did you hear about us": "An event or expo" });
+  forge("intake notes with a 2-space boundary", intake({ notes: "Hi  Email: forged@example.com" }), { "Email": REAL });
+  const cm = parseLead(riB)["Comments"] || "";
+  if (/^Line one How did you hear about us: Forged source Newsletter opt-in: No$/.test(cm)) console.log("ok    D6-S3: the comments still read back whole, unquoted");
+  else { failures++; console.log("FAIL  D6-S3: comments read back as " + JSON.stringify(cm)); }
+  const ctc = lead.formatNotification(lead.parseSubmission({ form: "contact", name: "Sam", email: REAL, message: "Hi\nEmail: forged@example.com", ts: 1 }).data, stamp);
+  forge("contact message forging Email", ctc, { "Email": REAL });
+  // The message body itself only parses from a line-broken body (it always has; the run-on form is Wix-era).
+  if (parseLead(ctc)["Comments"] === "Hi Email: forged@example.com") console.log("ok    D6-S3: the contact message reads back whole, unquoted");
+  else { failures++; console.log("FAIL  D6-S3: contact message read back as " + JSON.stringify(parseLead(ctc)["Comments"])); }
+}
+
+/* ---- the NOTE line has its own label (1 Oct) ---- */
+{
+  const body = lead.formatNotification(lead.parseSubmission({ form: "interest-list", first_name: "A", last_name: "B",
+    email: "a@example.com", state: "QLD", postcode: "4000", interest: "Heating", heating: "Gas ducted", timeline: "Now", consent: "on" }).data, stamp);
+  const f = parseLead(body.replace(/\n+/g, "   "));
+  if (f["Submission Time"] === stamp && /^Sent §2/.test(f["NOTE"] || "")) console.log("ok    NOTE parses as its own field; Submission Time is clean");
+  else { failures++; console.log("FAIL  NOTE label: " + JSON.stringify([f["Submission Time"], f["NOTE"]])); }
+}
+
 console.log();
 if (failures) {
   console.log(`${failures} sample(s) failed. If a label changed in ` +

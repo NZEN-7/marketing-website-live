@@ -95,8 +95,10 @@ STRUCTURAL = [
     # fixtures' placeholder and is not a real service number. The company's
     # own published mobile (in the autoresponder and the forms spec) is ours,
     # not a customer's, so it is excepted by number.
-    (r"\b0[45](?!00[\s-]?000[\s-]?0|32[\s-]?395[\s-]?138)\d{2}[\s-]?\d{3}[\s-]?\d{3}\b", "mobile number"),
-    (r"\+61[\s-]?4(?!00[\s-]?000[\s-]?0|32[\s-]?395[\s-]?138)\d{2}[\s-]?\d{3}[\s-]?\d{3}\b", "mobile number"),
+    # 0412 345 678 is the example number in the intake SPEC's error copy
+    # ("An Australian number, like 0412 345 678."), excepted by number.
+    (r"\b0[45](?!00[\s-]?000[\s-]?0|32[\s-]?395[\s-]?138|12[\s-]?345[\s-]?678)\d{2}[\s-]?\d{3}[\s-]?\d{3}\b", "mobile number"),
+    (r"\+61[\s-]?4(?!00[\s-]?000[\s-]?0|32[\s-]?395[\s-]?138|12[\s-]?345[\s-]?678)\d{2}[\s-]?\d{3}[\s-]?\d{3}\b", "mobile number"),
 ]
 
 # PORT: tokens that collide with a watched digest but are, on this site, public
