@@ -261,6 +261,8 @@ check("no placeholder privacy link on the intake (Nick, 2 Oct: strip it until th
   check("fonts: no page and no embedded animation loads Google Fonts", embedded.size >= 3 && offenders.length === 0, offenders);
   check("fonts: DM Mono is self-hosted", fs.existsSync(path.join(root, "assets", "fonts", "DMMono-Medium.woff2")));
 }
+check("updates are 'occasional', not 'monthly' (Nick, 2 Oct): the /start/ box and the homepage Subscribe line", /<input type="checkbox" name="newsletter_opt_in" value="true"> Send me Thermal Dawn's occasional email updates<\/label>/.test(page) && /Subscribe for occasional email updates/.test(fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8")) && !/monthly/i.test(page));
+check("the notification keeps its parsed label 'Monthly update'", /Monthly update: /.test(lead.formatNotification(lead.parseSubmission(Object.assign({}, base)).data, "x")));
 check("Nick's old mobile is gone from the page", !/432 ?395 ?138/.test(page));
 
 console.log(failed ? `\n${failed} CHECK(S) FAILED` : "\nAll intake checks passed.");
