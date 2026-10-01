@@ -1,0 +1,23 @@
+# First email: interest-list, unserved (HANDOVER v2 §2).
+# Source of truth: Sales +/Consumer/Sales Playbook/_Templates/First emails/
+#   HANDOVER - first emails for api-lead.js (v2, two doors).md
+# Sales edits the wording THERE; it is pasted here verbatim. Never edit it here first.
+# Sent when the state is outside SERVED_STATES (NZ included) or heating is
+# "Split systems only". A list email: it carries the unsubscribe line, added
+# to the HANDOVER by Sales on 1 Oct 2026 and pasted here (CTO Re #25).
+Subject: Thanks for your interest in Thermal Dawn
+Subject-no-name: Thanks for your interest in Thermal Dawn
+
+Hi {first_name},
+
+Thanks for putting your name down.
+
+Right now we replace gas boilers in homes with hydronic heating (radiators or heating in the slab) in Victoria, New South Wales and the ACT. We can't help with your home just yet, but we're working on it, and I'll write to you when we can.
+
+There's nothing you need to do in the meantime. If you have a question, just reply to this email.
+
+Cheers,
+Nick
+Thermal Dawn
+
+Rather not hear from us? Reply with "unsubscribe" and I'll take you off the list.

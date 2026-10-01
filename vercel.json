@@ -359,5 +359,10 @@
       "destination": "/blog/old-gas-boiler-removal-electrification/",
       "permanent": true
     }
-  ]
+  ],
+  "functions": {
+    "api/lead.js": {
+      "includeFiles": "api/_first-emails/**"
+    }
+  }
 }

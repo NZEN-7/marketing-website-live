@@ -289,3 +289,10 @@
   to = "/404.html"
   status = 404
   force = true
+
+# First-email templates ship inside the lead function (brief 07); never served.
+[[redirects]]
+  from = "/api/_first-emails/*"
+  to = "/404.html"
+  status = 404
+  force = true

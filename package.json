@@ -11,9 +11,13 @@
     "copy:dump": "node scripts/dump-copy.js",
     "test:leadrow": "node scripts/test-lead-row.js",
     "check:cachebust": "node scripts/check-cache-bust.js",
+    "test:firstemails": "node scripts/test-first-emails.js",
+    "test:handler": "node scripts/test-lead-handler.js",
+    "check:templates404": "node scripts/check-template-404.js",
     "deploy:preview": "node tools/deploy-preview.mjs",
     "test:deploypreview": "node scripts/test-deploy-preview.mjs",
-    "test:spam": "node scripts/test-spam-guard.js"
+    "test:spam": "node scripts/test-spam-guard.js",
+    "test:previewguard": "node scripts/test-preview-guard.js"
   },
   "dependencies": {
     "nodemailer": "^6.9.15"

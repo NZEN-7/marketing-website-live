@@ -57,8 +57,9 @@ counts must exclude `form = 'Interest List'`.**
    the form key and a honeypot field, and POSTs JSON to `/api/lead`. On any
    failure it shows an error with a `mailto:` fallback.
 2. **`api/lead.js`.** `parseSubmission()` clamps and normalises every field.
-   Obvious bots (honeypot filled, missing email) get a quiet 200 and nothing
-   else happens.
+   Obvious bots (honeypot filled, no page stamp `ts`, or a stamp under 3 s
+   old) get a quiet 200 and nothing else happens. A per-IP cap (10 in 10
+   minutes, per function instance, IP never logged) returns 429.
 3. **The notification email, first.** `formatNotification()` writes a
    plain-text email with fixed section headings and field labels, and
    `makeTransport()` sends it over SMTP from Nick's Google Workspace account
@@ -71,8 +72,18 @@ counts must exclude `form = 'Interest List'`.**
    The table is inbound only: as submitted, free text, never edited. Two
    columns are human-written (`filed_to_contact_id`, `notes`); everything else
    is the form.
-5. **Autoresponder.** `formatAutoresponder()` sends the customer a short
-   acknowledgement from "Nick at Thermal Dawn", with absolute links.
+5. **The first email** (brief 07, 29 Sep 2026). `firstEmail()` picks one
+   template per form from `api/_first-emails/`, pasted verbatim from Sales'
+   HANDOVER (`Sales +/Consumer/Sales Playbook/_Templates/First emails/`;
+   wording is edited there first, never here). It goes from
+   `AUTORESPONDER_FROM` (default "Nick at Thermal Dawn" <`GMAIL_USER`>) with
+   Reply-To `nickz@thermaldawn.com`, over the same transport; the booking link
+   is `BOOKING_LINK`. Interest-list leads get the unserved template only when
+   clearly unserved (a state outside `SERVED_STATES`, or "Split systems
+   only"). Deposits get none: that form posts before the Stripe handoff. A
+   list email (subscribe, unserved) is held on today's wording until its
+   template carries an unsubscribe line. Best effort: a failure never fails
+   the request.
 6. **Browser, again.** `forms.js` reads the response and redirects: to the
    thank-you page, or, for a deposit, to the Stripe link from `config.js`.
    Stripe's own after-payment redirect brings them back to `/thank-you/...`.
@@ -112,6 +123,17 @@ tests.
 - Subjects are headers: user input is stripped of newlines before it goes in
   one. Every field is length-clamped.
 - Credentials live only in Vercel environment variables.
+- **Logs carry a request ID, the form key and an error code, nothing else**
+  (brief 07): no recipient, name, phone, message or IP, and no Postgres or
+  SMTP message text, which can quote them. `npm run test:handler` forces each
+  failure and checks.
+- **Off production** (`VERCEL_ENV` not `production`: previews, local runs,
+  tests) every email goes only to `TEST_RECIPIENT`, nothing is sent if it is
+  unset, and no row is written to the production CRM. Test emails never go by
+  submitting the live site's forms.
+- The templates ship inside the function (`vercel.json` `includeFiles`) and
+  return 404 as pages; `npm run check:templates404 -- <host>` proves it on a
+  deployment.
 - The Supabase key is the service-role key, used server-side only, and the
   insert is the only operation.
 
