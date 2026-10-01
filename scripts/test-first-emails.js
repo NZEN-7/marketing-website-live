@@ -130,5 +130,17 @@ for (const [label, e] of [["subscribe", sub], ["interest-list §2", un]]) {
   check(`${label}: held (today's email) exactly while the template has no line`, /held/.test(e.template) === !templateHasLine, e.template);
 }
 
+// ---- 5. HANDOVER v2, rev 1 Oct (CTO Re #25): the real wording ships, nothing held ----
+const SUB_LINE = `Don't want these updates? Reply with "unsubscribe" and I'll take you off the list.`;
+const UN_LINE = `Rather not hear from us? Reply with "unsubscribe" and I'll take you off the list.`;
+check("§5 subscribe: its own template, not held", sub.template === "subscribe", sub.template);
+check("§5 subscribe: Sales' unsubscribe line, last, after the sign-off", sub.text.trim().endsWith("Thermal Dawn\n\n" + SUB_LINE), sub.text.slice(-160));
+check("§2 unserved: its own template, not held", un.template === "interest-list-unserved", un.template);
+check("§2 unserved: Sales' unsubscribe line, last, after the sign-off", un.text.trim().endsWith("Thermal Dawn\n\n" + UN_LINE), un.text.slice(-160));
+check("§1 signs off with the Dialpad number", lead.firstEmail(P(RI)).text.trim().endsWith("Thermal Dawn\n(02) 7228 3430"));
+check("contact gives the Dialpad number", lead.firstEmail(P({ form: "contact", name: "Casey", email: "c@example.com", message: "x" })).text.includes("or call me on (02) 7228 3430."));
+check("Nick's mobile is in no first email", [P(RI), IL({}), IL({ state: "QLD" }), P({ form: "subscribe", email: "s@example.com" }),
+  P({ form: "contact", name: "Casey", email: "c@example.com", message: "x" })].every((d) => !/432 ?395 ?138/.test(lead.firstEmail(d).text)));
+
 console.log(failed ? `\n${failed} CHECK(S) FAILED` : "\nAll first-email checks passed.");
 process.exit(failed ? 1 : 0);

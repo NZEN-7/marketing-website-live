@@ -192,18 +192,19 @@ if (!noName.error) {
 if (/—/.test(autoBody)) { console.error("!! FAIL: em dash in customer-facing copy"); failed++; }
 if (/\n\s*I\s/.test(autoBody)) { console.error("!! FAIL: sentence starts with I"); failed++; }
 
-/* Subscribe autoresponder. A subscriber gives an email and nothing else, so it
-   has to greet without a name, and it must not promise a reply that nobody
-   owes them: this is a confirmation, not an enquiry. */
+/* Subscribe autoresponder: HANDOVER v2 §5 since 1 Oct (CTO Re #25). A
+   subscriber gives an email and nothing else, so it has to greet without a
+   name, and it must not promise a reply that nobody owes them: this is a
+   confirmation, not an enquiry. Replies reach nickz@ through Reply-To. */
 const sub = lead.parseSubmission({ form: "subscribe", email: "s@example.com", optin: "true" });
 const subBody = lead.formatAutoresponder(sub.data);
 console.log("\n" + "-".repeat(72) + "\nSUBSCRIBE\n" + "-".repeat(72));
 console.log(subBody);
 [
   ["greets without a name",          () => subBody.indexOf("Hi there,") === 0],
-  ["confirms the subscription",      () => /You've subscribed/.test(subBody)],
-  ["absolute quote-form link",       () => subBody.includes("https://www.thermaldawn.com/pre-order/register-interest/")],
-  ["offers the sales address",       () => subBody.includes("nickz@thermaldawn.com")],
+  ["confirms the subscription",      () => /Thanks for subscribing/.test(subBody)],
+  ["invites a reply (to nickz@)",    () => /just reply to this email/i.test(subBody)],
+  ["no link to chase",               () => !/https?:\/\//.test(subBody)],
   ["honours the unsubscribe promise",() => /unsubscribe/i.test(subBody)],
   ["no em dash",                     () => !/—/.test(subBody)],
   ["does not promise a reply",       () => !/back to you/i.test(subBody)],
@@ -212,9 +213,8 @@ console.log(subBody);
   else { console.error(`!! FAIL: subscribe autoresponder ${label}`); failed++; }
 });
 
-/* Interest-list autoresponder. It must promise no price and no date (CEO
-   ruling), and a served-state, heating-only signup is pointed at the quote
-   form, because the ruling routes them to the booking funnel. */
+/* Interest-list autoresponder: HANDOVER v2 §2 (unserved) and §1 (served)
+   since 1 Oct. It must promise no price and no date (CEO ruling). */
 const il = lead.parseSubmission({ form: "interest-list", first_name: "Alex", email: "j@example.com",
   state: "NZ", postcode: "6011", interest: "Hot water", heating: "x", timeline: "Just looking", consent: "on" });
 const ilBody = lead.formatAutoresponder(il.data);
@@ -225,7 +225,7 @@ console.log("\n" + "-".repeat(72) + "\nINTEREST LIST\n" + "-".repeat(72));
 console.log(ilBody);
 [
   ["greets the first name",          () => ilBody.indexOf("Hi Alex,") === 0],
-  ["confirms the list",              () => /interest list/.test(ilBody)],
+  ["confirms the sign-up",           () => /Thanks for putting your name down/.test(ilBody)],
   ["no price, no date",              () => !/\$|\b20\d\d\b|within \d|weeks|months/i.test(ilBody)],
   ["honours the unsubscribe promise",() => /unsubscribe/i.test(ilBody)],
   ["no em dash",                     () => !/—/.test(ilBody + ilServed)],
