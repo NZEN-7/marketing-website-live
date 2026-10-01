@@ -37,7 +37,6 @@ const SITE = "https://www.thermaldawn.com";
    - VERCEL_ENV !== "production" (preview, local, tests): EVERY outbound email
      goes to TEST_RECIPIENT, and nothing is sent if it is unset; no row goes
      into the production CRM (CTO Re: Web #12, A5). */
-const CRM_PROJECT_REF = "skyequfcoejlhzbyipwt";   // production CRM (CLAUDE.md)
 const isProduction = () => process.env.VERCEL_ENV === "production";
 const bookingLink = () => {
   const v = String(process.env.BOOKING_LINK || "").trim();
@@ -144,6 +143,10 @@ const FORMS = {
    overrule). Change here and in /interest/'s SERVED list together;
    test:leadrow fails if they drift. */
 const SERVED_STATES = ["VIC", "NSW", "ACT"];
+// The interest list's other choices (interest/index.html): known, and not
+// served. Anything outside both lists is unrecognised and gets the served
+// email (brief 07 decision 1; GPT Web B07-S1).
+const UNSERVED_STATES = ["QLD", "SA", "WA", "TAS", "NT", "NZ"];
 
 /** CRM tags for an interest-list signup (CEO ruling, item 4). Pure, so the
     tags can be recomputed from a stored row. Empty when the person is in a
@@ -275,8 +278,10 @@ async function recordLead(d) {
   const SUPABASE_URL = process.env.SUPABASE_URL;
   const auth = supabaseAuth(process.env);
   if (!SUPABASE_URL || !auth) return "skipped (not configured)";
-  // A preview or local run never writes to the production CRM.
-  if (!isProduction() && SUPABASE_URL.indexOf(CRM_PROJECT_REF) !== -1) return "skipped (non-production)";
+  // A preview or local run never writes a leads row, whatever SUPABASE_URL
+  // says: a proxy or custom domain for the production project would not carry
+  // its ref (GPT Web B07-N2; the preview-guard rule, folded in 1 Oct).
+  if (!isProduction()) return "skipped (non-production)";
   // return=minimal matters for lead_writer: it can insert but not read, so
   // asking for the row back would fail the insert.
   const res = await fetch(`${SUPABASE_URL}/rest/v1/leads`, {
@@ -565,14 +570,14 @@ function formatSubject(d) {
    Stripe-webhook brief of its own. */
 const AUTORESPOND = { "register-interest": true, contact: true, subscribe: true, "interest-list": true };
 
-/* Unserved (HANDOVER §2) only when CLEARLY unserved: a state outside
-   SERVED_STATES (NZ included), or "Split systems only". Anything else,
+/* Unserved (HANDOVER §2) only when CLEARLY unserved: a known unserved state
+   (UNSERVED_STATES, NZ included), or "Split systems only". Anything else,
    including a missing or unrecognised value, is served (§1) and gets a call.
    Not listTags: that one tags served-state cooling and hot-water leads. */
 function isUnservedListLead(d) {
   if (d.form !== "interest-list") return false;
   const state = String(d.state || "").trim().toUpperCase();
-  if (state && SERVED_STATES.indexOf(state) === -1) return true;
+  if (UNSERVED_STATES.indexOf(state) !== -1) return true;
   return String(d.heating || "").trim() === "Split systems only";
 }
 
@@ -730,7 +735,7 @@ function legacyAutoresponder(d) {
     "Keen to talk sooner? Book a call at a time that suits you:",
     CALENDLY,
     "",
-    "Or call Nick direct on +61 432 395 138.",
+    "Or call Nick direct on (02) 7228 3430.",
     "",
     "Keen to chat.",
     "",
@@ -951,6 +956,7 @@ module.exports.leadRow = leadRow;
 module.exports.supabaseAuth = supabaseAuth;
 module.exports.listTags = listTags;
 module.exports.SERVED_STATES = SERVED_STATES;
+module.exports.UNSERVED_STATES = UNSERVED_STATES;
 module.exports.firstEmail = firstEmail;
 module.exports.isUnservedListLead = isUnservedListLead;
 module.exports.firstNameFor = firstNameFor;

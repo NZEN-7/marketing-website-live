@@ -13,6 +13,9 @@
 //   - it builds the target itself and refuses anything outside preview/;
 //   - it refuses main, a detached HEAD, a dirty tree, and a `deploy` remote
 //     that is not the mirror;
+//   - it refuses a branch whose api/lead.js lacks the preview guard (off
+//     production, mail to TEST_RECIPIENT only and no leads insert), or whose
+//     api/lead.js can't be read (fail closed);
 //   - git is called with argument arrays, never through a shell.
 //
 // Usage: npm run deploy:preview      (from the branch to preview)
@@ -42,6 +45,76 @@ export function previewRef(branch) {
   return ref;
 }
 
+/** Blank out comments (keeping strings, so "https://" survives), so a guard
+    that exists only in a comment doesn't count. Good enough for our own
+    source; not a JavaScript parser. */
+export function stripComments(src) {
+  let out = "", i = 0;
+  while (i < src.length) {
+    const c = src[i], d = src[i + 1];
+    if (c === "/" && d === "*") { const j = src.indexOf("*/", i + 2); i = j < 0 ? src.length : j + 2; out += " "; continue; }
+    if (c === "/" && d === "/") { while (i < src.length && src[i] !== "\n") i++; continue; }
+    if (c === '"' || c === "'" || c === "`") {
+      let j = i + 1;
+      while (j < src.length && src[j] !== c) j += src[j] === "\\" ? 2 : 1;
+      out += src.slice(i, j + 1); i = j + 1; continue;
+    }
+    out += c; i++;
+  }
+  return out;
+}
+
+/** The body of `function name(...) { ... }`, by brace matching, or "". */
+function fnBody(src, name) {
+  const m = new RegExp("function\\s+" + name + "\\s*\\([^)]*\\)\\s*\\{").exec(src);
+  if (!m) return "";
+  let depth = 1, i = m.index + m[0].length;
+  const start = i;
+  for (; i < src.length && depth; i++) { if (src[i] === "{") depth++; else if (src[i] === "}") depth--; }
+  return src.slice(start, i - 1);
+}
+
+/** What stops this api/lead.js being safe on a public preview (GPT Web P-S2).
+    An empty list means the guard is in place. A preview runs with the Preview
+    scope's Gmail and Supabase settings, so a branch without the guard could
+    mail any address or write a production lead (CTO Re #31 item 28).
+    Checks, on the source with comments removed:
+      1. the source is there at all (missing or unreadable fails closed);
+      2. routeTo() exists, is gated on production, and falls back to TEST_RECIPIENT;
+      3. every sendMail({...}) sends to a routeTo() result;
+      4. recordLead() returns before any fetch() when not in production.
+    A heuristic over our own code, not a proof: test:handler and
+    test:previewguard exercise the real behaviour in CI. Pure, so it is tested. */
+export function previewGuardProblems(leadSrc) {
+  const raw = String(leadSrc || "");
+  if (!raw.trim()) return ["api/lead.js is missing or empty"];
+  const src = stripComments(raw);
+  const problems = [];
+  const prodTest = /isProduction\(\)|VERCEL_ENV\s*===\s*["']production["']/;
+  const isProd = fnBody(src, "isProduction") || (/const\s+isProduction\s*=\s*\(\)\s*=>([^;]*);/.exec(src) || [])[1] || "";
+  if (isProd && !/VERCEL_ENV\s*===\s*["']production["']/.test(isProd)) problems.push("isProduction() doesn't test VERCEL_ENV === \"production\"");
+  const route = fnBody(src, "routeTo");
+  if (!route) problems.push("no routeTo()");
+  else if (!prodTest.test(route) || !/TEST_RECIPIENT/.test(route)) problems.push("routeTo() isn't gated on production with a TEST_RECIPIENT fallback");
+  const routed = new Set((src.match(/(?:const|let|var)\s+(\w+)\s*=\s*routeTo\(/g) || []).map((d) => d.replace(/^(?:const|let|var)\s+/, "").replace(/\s*=.*$/, "")));
+  const calls = src.split(/\.sendMail\(\s*\{/).slice(1);
+  if (!calls.length) problems.push("no sendMail() call found");
+  calls.forEach((c, n) => {
+    const to = /(?:^|[,{\s])to\s*(?::\s*([^,\n}]+)|(?=[,\n}]))/.exec(c.slice(0, 600));
+    const v = to ? (to[1] || "to").trim() : "";
+    if (!(/^routeTo\(/.test(v) || routed.has(v))) problems.push(`sendMail #${n + 1} sends to ${v || "an unknown address"}, not a routeTo() result`);
+  });
+  const rec = fnBody(src, "recordLead");
+  if (!rec) problems.push("no recordLead()");
+  else {
+    const guard = /if\s*\(\s*!\s*isProduction\(\)\s*\)\s*return\b/.exec(rec);
+    const fetchAt = rec.indexOf("fetch(");
+    if (!guard || (fetchAt !== -1 && guard.index > fetchAt)) problems.push("recordLead() doesn't return before fetch() off production");
+  }
+  return problems;
+}
+export function hasPreviewGuard(leadSrc) { return previewGuardProblems(leadSrc).length === 0; }
+
 function git(...args) {
   return execFileSync("git", args, { stdio: ["ignore", "pipe", "pipe"] }).toString().trim();
 }
@@ -58,6 +131,15 @@ function main() {
   const branch = git("rev-parse", "--abbrev-ref", "HEAD");
   let ref;
   try { ref = previewRef(branch); } catch (e) { console.error(e.message); process.exit(1); }
+
+  let lead = "";
+  try { lead = git("show", "HEAD:api/lead.js"); } catch { lead = ""; }
+  const problems = previewGuardProblems(lead);        // missing source fails closed
+  if (problems.length) {
+    console.error("api/lead.js on this branch isn't safe on a public preview (it could send real mail or " +
+      "write a production lead):\n  - " + problems.join("\n  - "));
+    process.exit(1);
+  }
 
   let url = "";
   try { url = git("remote", "get-url", "deploy"); } catch { git("remote", "add", "deploy", MIRROR); url = MIRROR; }
