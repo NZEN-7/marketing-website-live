@@ -252,6 +252,15 @@ const RI = { form: "register-interest", first_name: NAME, last_name: LAST, email
     row2 && row2.intake_lead_id === "il-5656565656" && row2.intake_event === "complete" && row2.rung_reached === 4 && !("lead_id" in row2) && row2.intent === "urgent" && row2.route === "urgent" && row2.tenure === "owner_occupier" &&
     typeof row2.answers === "object" && row2.answers.heating && /^\d{4}-/.test(row2.ts_started) && /^\d{4}-/.test(row2.ts_last), row2);
   check("leads row: an intake row with its columns is inserted once per (intake_lead_id, intake_event)", inserts[0] && /\?on_conflict=intake_lead_id,intake_event$/.test(inserts[0].url), inserts[0] && inserts[0].url);
+  // Migration rev 2 (e7bf423): the values its checks accept.
+  inserts = []; capture(); await call(Object.assign({}, IN, { lead_id: "il-7878787878", outcome: "urgent_call" }));
+  await call(Object.assign({}, IN, { lead_id: "il-7878787878", outcome: "completed", followup: true })); release();
+  const evs = inserts.map((x) => x.body.intake_event);
+  check("leads row: urgent then details are two events, complete then details", JSON.stringify(evs) === JSON.stringify(["complete", "details"]), evs);
+  check("leads row: every value fits rev 2's checks (il- + 10 hex, event set, rung 1-4, answers an object)", inserts.length === 2 && inserts.every((x) =>
+    /^il-[0-9a-f]{10}$/.test(x.body.intake_lead_id) && ["partial", "complete", "details"].indexOf(x.body.intake_event) !== -1 &&
+    (x.body.rung_reached === null || (Number.isInteger(x.body.rung_reached) && x.body.rung_reached >= 1 && x.body.rung_reached <= 4)) &&
+    x.body.answers && typeof x.body.answers === "object" && !Array.isArray(x.body.answers)), inserts.map((x) => x.body));
   inserts = []; capture(); await call(RI); release();
   check("leads row: the old forms' rows never carry the intake columns", inserts[0] && !("intake_lead_id" in inserts[0].body) && !("answers" in inserts[0].body) && !/on_conflict/.test(inserts[0].url), inserts[0] && Object.keys(inserts[0].body));
   delete process.env.INTAKE_LEAD_COLUMNS; process.env.VERCEL_ENV = "preview";

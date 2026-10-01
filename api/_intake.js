@@ -270,8 +270,10 @@ function firstEmailKey(d) {
    boiler_condition, ts_started, ts_last, answers), are added only when
    INTAKE_LEAD_COLUMNS=on, i.e. once the migration is applied: sending a
    column the table doesn't have fails the insert. leads.lead_id is the live
-   per-row primary key, so the app's lead_id goes in intake_lead_id. */
-const RUNG = { 1: 1, 2: 2, 3: 3, done: 4 };   // rung_reached is an integer column: done = 4 (Platform to confirm)
+   per-row primary key, so the app's lead_id goes in intake_lead_id. Types
+   and checks as migration rev 2 (e7bf423): intake_lead_id text il-+10 hex,
+   intake_event partial|complete|details, rung_reached 1-4. */
+const RUNG = { 1: 1, 2: 2, 3: 3, done: 4 };   // rung_reached is 1-4, 4 = done (migration rev 2, e7bf423)
 const ANSWER_KEYS = ["intent", "source", "referrer", "newsletter_opt_in", "heating", "heating_other_text", "boiler_condition",
   "boiler_age", "tenure", "scope", "energy", "winter_gas_bill_band", "timing", "timing_note", "storeys", "radiator_band",
   "underfloor_band", "built_band", "off_gas", "send_later", "contact_pref", "call_times", "remote", "outcome", "last_screen"];
@@ -305,7 +307,9 @@ function intakeLeadRow(d, env, now) {
     ANSWER_KEYS.forEach((k) => { const v = d[k]; if (Array.isArray(v) ? v.length : (v !== "" && v != null && v !== false)) answers[k] = v; });
     const started = Number(d.ts_started) > 0 ? new Date(Number(d.ts_started)).toISOString() : null;
     Object.assign(row, {
-      intake_lead_id: d.lead_id, intake_event: "complete",          // stage 1 sends no partials
+      // Stage 1 sends no partials; a later "Help us prepare" send is its own
+      // event, so the unique (intake_lead_id, intake_event) index keeps both rows.
+      intake_lead_id: d.lead_id, intake_event: d.followup ? "details" : "complete",
       intent: d.intent || null, route: d.route || null, rung_reached: RUNG[d.rung_reached] || null,
       tenure: d.tenure || null, boiler_condition: d.boiler_condition || null,
       ts_started: started, ts_last: at, answers,
