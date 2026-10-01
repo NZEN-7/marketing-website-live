@@ -18,6 +18,21 @@
 <link rel="preload" href="/assets/fonts/Montserrat-ExtraBold.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/Montserrat-Regular.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/assets/css/style.css?v=49">
+<style>
+/* Legal-text layout for this page only (Nick, 2 Oct): one even column, smaller
+   type, plain bullets. Inline so no other page's styles or versions change. */
+.hero--legal h1{font-size:clamp(1.9rem,4.2vw,2.6rem);}
+body.dark .section .article.legal{max-width:720px;margin:0 auto;font-size:.95rem;line-height:1.7;}
+body.dark .section .article.legal p,body.dark .section .article.legal ul{max-width:none!important;margin-left:0!important;margin-right:0!important;}
+body.dark .section .article.legal>p:first-of-type{font-size:inherit;}
+body.dark .section .article.legal .article-meta{font-size:.85rem;margin-bottom:1.4em;}
+body.dark .section .article.legal h2{font-size:1.2rem;line-height:1.3;letter-spacing:0;margin:2.1em 0 .55em;}
+body.dark .section .article.legal ul{list-style:none!important;padding-left:0!important;margin-top:.4em;margin-bottom:1em;}
+body.dark .section .article.legal ul>li{position:relative;padding-left:1.25em!important;margin:.4em 0;}
+body.dark .section .article.legal ul>li::before{display:block!important;content:"";position:absolute;left:.2em;top:.72em;width:5px;height:5px;border-radius:50%;background:var(--td-orange);}
+body.dark .section .article.legal .table-wrap{font-size:.9rem;margin:1.2em 0 1.4em;}
+@media (max-width:520px){body.dark .section .article.legal{font-size:.92rem;}}
+</style>
 </head>
 <body class="dark">
 <!-- Copy: Mailbox/Web Designer attachments/DRAFT - Privacy policy (2 Oct 2026).md,
@@ -26,7 +41,7 @@
 <header id="site-header"></header>
 <main>
 
-  <section class="hero hero--plain">
+  <section class="hero hero--plain hero--legal">
     <div class="hero__inner">
       <div class="wrap">
         <h1>Privacy Policy</h1>
@@ -36,7 +51,7 @@
 
   <section class="section">
     <div class="wrap narrow">
-      <article class="article">
+      <article class="article legal">
         <p class="article-meta">Last updated: 2 October 2026</p>
         <p>Thermal Dawn is a trading name of Freevolt Pty Ltd (ABN 47 682 866 913). We design and install heat pump heating and hot water systems for homes in Victoria, New South Wales and the ACT. This page explains what we collect about you, why, who else handles it, and how to reach us about it. We've written it plainly on purpose. If something isn't clear, ask us.</p>
         <h2>The short version</h2>
