@@ -82,21 +82,43 @@ check("why: battery and EV", JSON.stringify(R.whyLines({ energy: ["battery", "ev
 check("why: at most two lines", R.whyLines({ energy: ["solar", "battery", "cheap_window"], boiler_condition: "broken", scope: ["hot_water"] }).length === 2);
 
 // ---- the server: parse, subject, notification (SPEC §7) ----
-const base = { form: "intake", first_name: "Alex", last_name: "Sample", email: "alex@example.com", postcode: "3122",
+const base = { form: "intake", first_name: "Alex", last_name: "Sample", email: "alex@example.com", contact_pref: "email", postcode: "3122",
   suburb: "Hawthorn", state: "VIC", intent: "fit", heating: ["boiler_radiators"], boiler_condition: "not_sure", route: "icp",
   outcome: "completed", rung_reached: "done", last_screen: "S17", seen: ["S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8", "S9", "S10", "S11", "S12", "S13", "MATCH"] };
 const p = lead.parseSubmission(base);
 check("intake parses with the three required fields", !p.error && p.data.form === "intake", p.error);
 check("a lead_id is issued", /^il-[0-9a-f]{10}$/.test(p.data.lead_id));
+// ---- stage 1, I-S1: phone-or-email on the server (rule 5 / D16) ----
+const ps = (o) => lead.parseSubmission(Object.assign({}, base, { contact_pref: "" }, o));
+check("I-S1: served, no phone, no email choice: refused, why=phone", ps({}).error && ps({}).why === "phone", ps({}));
+check("I-S1: served, chose email: accepted", !ps({ contact_pref: "email" }).error);
+check("I-S1: served, a valid AU phone: accepted", !ps({ phone: "0412 345 678" }).error && !ps({ phone: "+61 2 7228 3430" }).error);
+check("I-S1: served, a malformed phone: refused", ps({ phone: "12" }).why === "phone" && ps({ phone: "12", contact_pref: "email" }).why === "phone");
+check("I-S1: out of area (QLD) and NZ are never asked", !ps({ postcode: "4000", state: "QLD" }).error && !ps({ postcode: "", state: "OS" }).error);
+check("I-S1: the no-JS long form is held to it too", ps({ nojs: "1" }).why === "phone");
+check("I-S1: the long form's 'I'd prefer email' box counts as choosing email", !ps({ nojs: "1", prefer_email: "1" }).error &&
+  ps({ nojs: "1", prefer_email: "1" }).data.contact_pref === "email");
+check("the long form has that box, hidden when the stepper runs", /<label class="tick iq__nojsonly"><input type="checkbox" name="prefer_email" value="1"> I'd prefer email<\/label>/.test(require("fs").readFileSync(path.join(__dirname, "..", "start", "index.html"), "utf8")));
+check("the no-JS error page exists and says nothing was sent", /Nothing has been sent yet/.test(require("fs").readFileSync(path.join(__dirname, "..", "start", "check", "index.html"), "utf8")));
+check("the form label is the live one", p.data.formLabel === "Website Intake");
 check("the page's own lead_id is kept, so a repeat can be spotted", lead.parseSubmission(Object.assign({}, base, { lead_id: "il-00ff00ff00" })).data.lead_id === "il-00ff00ff00");
 check("a malformed lead_id is replaced", /^il-[0-9a-f]{10}$/.test(lead.parseSubmission(Object.assign({}, base, { lead_id: "il-<x>" })).data.lead_id));
 const k = { lead_id: "il-1111111111", outcome: "completed" };
-check("claimSend: first yes, repeat no, other outcome yes, after release yes",
-  I.claimSend(k, 1000) && !I.claimSend(k, 2000) && I.claimSend(Object.assign({}, k, { outcome: "urgent_call" }), 2000) &&
-  (I.releaseSend(k), I.claimSend(k, 3000)));
-check("claimSend: a repeat after 30 minutes is a new send", I.claimSend(k, 3000 + 31 * 60 * 1000));
+{
+  const st = (d, t) => I.claimSend(d, t).status;
+  const a = st(k, 1000), b = st(k, 1500);                       // second while the first is in flight
+  I.settleSend(k, true, 2000);
+  const c = st(k, 2500);                                        // after it was sent
+  const u = st(Object.assign({}, k, { outcome: "urgent_call" }), 2500);
+  check("claimSend: new, then pending while in flight, then done once sent; another outcome is new",
+    a === "new" && b === "pending" && c === "done" && u === "new", [a, b, c, u]);
+  const f = { lead_id: "il-2222222222", outcome: "completed" };
+  st(f, 1000); I.settleSend(f, false);
+  check("claimSend: a failed send is forgotten, so a retry is new", st(f, 1200) === "new");
+  check("claimSend: a done send expires after 30 minutes", st(k, 2000 + 31 * 60 * 1000) === "new");
+}
 check("icp-check is a route the server keeps", lead.parseSubmission(Object.assign({}, base, { route: "icp-check" })).data.route === "icp-check");
-check("the landlord's phone reaches the notification", /LANDLORD[\s\S]*Phone: 0400 000 002/.test(lead.formatNotification(lead.parseSubmission(Object.assign({}, base, { landlord_phone: "0400 000 002" })).data, "x")));
+check("the landlord's phone reaches the notification, under its own label", /LANDLORD[\s\S]*Landlord phone: 0400 000 002/.test(lead.formatNotification(lead.parseSubmission(Object.assign({}, base, { landlord_phone: "0400 000 002" })).data, "x")));
 check("missing postcode is refused (unless outside Australia)", !!lead.parseSubmission(Object.assign({}, base, { postcode: "" })).error &&
   !lead.parseSubmission(Object.assign({}, base, { postcode: "", state: "OS" })).error);
 check("missing last name is refused", !!lead.parseSubmission(Object.assign({}, base, { last_name: "" })).error);
@@ -112,7 +134,7 @@ check("notification sections in SPEC §7 order, phone near the top", order.every
 check("'Not sure' shows as such", /Boiler condition: Not sure/.test(body));
 check("a shown-but-empty answer says Skipped", /Energy setup: Skipped/.test(body));
 check("a screen never shown says Not asked", /Storeys: Not asked/.test(body));
-const nj = lead.parseSubmission({ form: "intake", nojs: "1", first_name: "T", last_name: "E", email: "t@example.com", postcode: "3820", heating: ["boiler_underfloor"], tenure: "owner_occupier" }).data;
+const nj = lead.parseSubmission({ form: "intake", nojs: "1", first_name: "T", last_name: "E", email: "t@example.com", phone: "0412 345 678", postcode: "3820", heating: ["boiler_underfloor"], tenure: "owner_occupier" }).data;
 check("no-JS: the server works out state and route itself", nj.state === "VIC" && nj.route === "icp", [nj.state, nj.route]);
 check("a completed send reports rung 'done'", lead.parseSubmission(Object.assign({}, base, { rung_reached: "3" })).data.rung_reached === "done");
 check("a page's own state claim is only a hint", lead.parseSubmission(Object.assign({}, base, { state: "QLD" })).data.state === "VIC");

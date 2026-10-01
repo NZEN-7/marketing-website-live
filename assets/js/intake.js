@@ -15,6 +15,7 @@
   if (!form || !window.TDIntakeRoute) return;
   var R = window.TDIntakeRoute;
   var ENDPOINT = "/api/lead/";
+  var FLOOR_MS = 3500;                     // the server screens anything under 3 s from page load (GPT Web I-S3)
   var BEAT_MS = 280;                       // SPEC rule 13: the beat before auto-advance
   var MAX_FILE = 4 * 1024 * 1024;          // SPEC §2: a single file over 4 MB is "a bit big"
   var MAX_SET = 3.2 * 1024 * 1024;         // raw bytes; base64 + JSON must stay under Vercel's 4.5 MB
@@ -347,11 +348,25 @@
     if (sent && !details) { if (then) then(); return Promise.resolve(); }
     lock(true);
     sending.hidden = false; sending.textContent = "Sending…";
+    // Delivered means the server said `sent: true` (GPT Web I-S3): a bot
+    // screen answers a bare { ok: true }, so that counts as not sent and is
+    // tried once more. The first try waits out the 3 s floor, so a quick,
+    // honest person is never screened.
+    function post(body) {
+      var wait = Math.max(0, stamped + FLOOR_MS - Date.now());
+      return new Promise(function (r) { setTimeout(r, wait); }).then(function () {
+        return fetch(ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+      }).then(function (r) {
+        if (!r.ok) throw new Error("status " + r.status);
+        return r.json().catch(function () { return {}; });
+      }).then(function (j) { if (!j || j.sent !== true) throw new Error("not sent"); });
+    }
     busy = packFiles().then(function (up) {
       var body = payload(outcome); body.uploads = up;
-      return fetch(ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-    }).then(function (r) {
-      if (!r.ok) throw new Error("status " + r.status);
+      return post(body).catch(function () {
+        return new Promise(function (r) { setTimeout(r, 1500); }).then(function () { return post(body); });
+      });
+    }).then(function () {
       sent = true; sending.hidden = true;
       if (details) detailsSent = true; else sentOutcome = outcome;
       busy = null; lock(false);

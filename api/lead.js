@@ -292,7 +292,7 @@ async function recordLead(d) {
       "Content-Type": "application/json",
       Prefer: "return=minimal",
     },
-    body: JSON.stringify(leadRow(d)),
+    body: JSON.stringify(d.form === "intake" ? intake.intakeLeadRow(d, process.env) : leadRow(d)),
   });
   if (!res.ok) {
     let code = "";
@@ -851,6 +851,8 @@ module.exports = async function handler(req, res) {
   const nojsIntake = body.form === "intake" && String(body.nojs) === "1" && /urlencoded|multipart/.test(ct);
   const reply = (code, json) => {
     if (nojsIntake && code < 400) { res.setHeader("Location", "/start/thanks/"); return res.status(303).end(); }
+    // The long form gets a page, not JSON, when something's missing (GPT Web I-S1).
+    if (nojsIntake && code === 400) { res.setHeader("Location", "/start/check/"); return res.status(303).end(); }
     return res.status(code).json(json);
   };
   const ts = Number(body.ts);
@@ -867,13 +869,23 @@ module.exports = async function handler(req, res) {
   }
 
   const { data, error } = parseSubmission(body);
-  if (error) return res.status(400).json({ ok: false, error });
-  // Intake uploads ride on the notification as attachments (PRD D3).
+  if (error) return reply(400, { ok: false, error });
+  // The intake: one send per (lead ID, outcome), and a repeat waits for the
+  // first one's result (GPT Web I-S2). `sent: true` only when the
+  // notification really went (I-S3): the bot screens above answer a bare
+  // { ok: true }, so the page can tell the difference.
   if (data.form === "intake") {
-    if (!intake.claimSend(data, Date.now())) {
+    const claim = intake.claimSend(data, Date.now());
+    if (claim.status === "done") {
       logEvent(reqId, data.form, "screened", "repeat_send");
-      return reply(200, { ok: true });
+      return reply(200, { ok: true, sent: true });
     }
+    if (claim.status === "pending") {
+      logEvent(reqId, data.form, "screened", "repeat_in_flight");
+      return (await claim.result) ? reply(200, { ok: true, sent: true })
+        : res.status(500).json({ ok: false, error: "Could not send. Please email us directly." });
+    }
+    // Intake uploads ride on the notification as attachments (PRD D3).
     data._files = intake.intakeAttachments(data);
   }
 
@@ -905,10 +917,9 @@ module.exports = async function handler(req, res) {
     // kill the container mid-flight, and the insert vanishes with no error
     // anywhere: passes every local test, drops rows under real traffic.
     // "Non-fatal" and "fire-and-forget" are not the same thing.
-    // The intake prototype writes no leads row: its columns need the PRD's
-    // migration first (PRD §3.1).
-    if (data.form === "intake") logEvent(reqId, data.form, "insert_skipped", "intake_prototype");
-    else try {
+    // The intake records its row too (PRD §3.1); its own columns wait for
+    // INTAKE_LEAD_COLUMNS=on (see intakeLeadRow in _intake.js).
+    try {
       const r = await recordLead(data);
       if (r !== "ok") logEvent(reqId, data.form, "insert_skipped", r === "skipped (non-production)" ? "non_production" : "not_configured");
     } catch (leadErr) {
@@ -947,10 +958,14 @@ module.exports = async function handler(req, res) {
       }
     }
 
+    if (data.form === "intake") {
+      intake.settleSend(data, !!notifyTo);
+      return reply(200, { ok: true, sent: !!notifyTo });
+    }
     return reply(200, { ok: true });
   } catch (err) {
     // Never echo submitted PII back to the client, and never log it.
-    if (data.form === "intake") intake.releaseSend(data);
+    if (data.form === "intake") intake.settleSend(data, false);
     logEvent(reqId, data.form, "notification_failed", errorCode(err));
     return res.status(500).json({ ok: false, error: "Could not send. Please email us directly." });
   }

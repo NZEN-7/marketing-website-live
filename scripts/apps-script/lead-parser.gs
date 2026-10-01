@@ -27,7 +27,21 @@ var LEAD_LABELS = [
   'How did you hear about us', 'Newsletter opt-in',
   'Tier', 'Name',
   // Interest list (27 Sep 2026)
-  'Postcode', 'Interested in', 'Consent to be contacted', 'Tags'
+  'Postcode', 'Interested in', 'Consent to be contacted', 'Tags',
+  // The NOTE line (interest list, deposits) as a label of its own (1 Oct),
+  // so it stops riding on the end of "Submission Time".
+  'NOTE',
+  // The intake, form key "intake" (stage 1, 1 Oct 2026). Its own labels for
+  // the landlord ("Landlord email", not "Email"), so they never shadow the
+  // lead's. Order doesn't matter: each label is matched where it first occurs.
+  'Lead ID', 'Rung reached', 'Route', 'Path', 'Ended on',
+  'Best time to call', 'Contact preference', 'Remote delivery',
+  'What brings you here', 'How you heard', 'Who should we thank', 'Monthly update',
+  'Heating', 'Heating, something else', 'Boiler condition', 'Boiler age',
+  'Is it your home', 'Cover', 'Energy setup', 'Winter gas bill', 'Timing',
+  'Anything driving the timing', 'Storeys', 'Radiators', 'Underfloor covers',
+  'Built', 'Off gas', 'Uploads', 'Uploads not attached (type or size)',
+  'Landlord name', 'Landlord email', 'Landlord phone'
 ];
 
 /* Section headers sit inline in the run-on body. Without stripping them they
@@ -44,7 +58,9 @@ var LEAD_LABELS = [
 var LEAD_SECTIONS = [
   'CONTACT', 'LOCATION', 'PROPERTY', 'CURRENT SETUP',
   'MOTIVATION AND TIMING', 'CONTEXT', 'MESSAGE', 'DEPOSIT',
-  'INTEREST', 'LIST'
+  'INTEREST', 'LIST',
+  // The intake (stage 1, 1 Oct 2026)
+  'ABOUT THE ENQUIRY', 'YOUR HOME', 'THE DETAILS', 'ANYTHING ELSE', 'LANDLORD'
 ];
 
 function leadEsc_(s) {
@@ -70,9 +86,13 @@ function leadClean_(v) {
 function leadMessageBody_(body) {
   var m = String(body).match(
     /(?:^|\n)\s*MESSAGE\s*\n([\s\S]*?)(?=\n\s*[A-Z][A-Z &]{3,}\s*\n|$)/);
+  // The intake's ANYTHING ELSE works the same way, and it is always the last
+  // section, so its text runs to the end of the body. Matched on the run-on
+  // form too, which is how Gmail hands the body over.
+  if (!m) m = String(body).match(/(?:^|\s)ANYTHING ELSE\s+([\s\S]*)$/);
   if (!m) return '';
   var v = m[1].replace(/\s+/g, ' ').trim();
-  return (v === '-') ? '' : v;
+  return (v === '-' || v === 'Not asked' || v === 'Skipped') ? '' : v;
 }
 
 /**

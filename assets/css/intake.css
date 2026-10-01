@@ -38,6 +38,7 @@
 html:not(.js) .iq--jsonly,html:not(.js) .iq__jsonly,html:not(.js) .iq-progress{display:none !important;}
 html:not(.js) .iq{margin:0 0 34px;}
 .js .iq__nojs-submit{display:none;}
+.js .iq__nojsonly{display:none;}
 .js .intake.is-stepped .iq{display:none;}
 .js .intake.is-stepped .iq.is-current{display:block;}
 .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;}

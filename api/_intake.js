@@ -1,10 +1,11 @@
 /* =========================================================================
-   The intake (form key "intake"): parse, notify, attach. PROTOTYPE (PRD D13)
+   The intake (form key "intake"): parse, notify, attach, record. STAGE 1
+   (PRD rev A.3 §7)
    -------------------------------------------------------------------------
    Required by api/lead.js; not a route (underscore). One submit at the end:
    one notification to nickz@ (TEST_RECIPIENT off production) in SPEC §7
-   order, with any uploads attached (PRD D3). No leads insert, no customer
-   email, no saves: those are phase 1, after the PRD is approved.
+   order, with any uploads attached (PRD D3), and one `leads` row (§3.1).
+   Stage 2 adds intake_sessions, per-screen saves and the resume link.
    ========================================================================= */
 "use strict";
 
@@ -54,18 +55,21 @@ const ASKED_ON = { phone: "S4", call_times: "S4b", intent: "S5", source: "S6", r
   timing_note: "S13", storeys: "S14", radiator_band: "S14", underfloor_band: "S14", built_band: "S14", off_gas: "S15", uploads: "S16", notes: "S17" };
 
 const LEAD_ID = /^il-[0-9a-f]{10}$/;
+// The page's own check (assets/js/intake.js), so both agree on what's valid.
+const PHONE_OK = (p) => /^(\+?61|0)[2-478]\d{8}$/.test(String(p).replace(/[\s()-]/g, ""));
 const pick = (map, v) => (Object.prototype.hasOwnProperty.call(map, v) ? v : "");
 
 function parseIntake(body) {
   const nojs = String(body.nojs) === "1";
   const d = {
-    form: "intake", formLabel: "Website Intake (prototype)", nojs,
+    form: "intake", formLabel: "Website Intake", nojs,
     // The page makes its lead ID once per visit, so a repeat of the same send
     // can be recognised (Sales review, 1). Anything else gets a fresh one.
     lead_id: LEAD_ID.test(String(body.lead_id || "")) ? String(body.lead_id) : "il-" + crypto.randomBytes(5).toString("hex"),
     first_name: clamp(body.first_name, 120), last_name: clamp(body.last_name, 120),
     email: clamp(body.email, 200), phone: clamp(body.phone, 40),
-    contact_pref: pick({ phone: 1, email: 1 }, body.contact_pref),
+    // The long form's "I'd prefer email" box posts prefer_email=1.
+    contact_pref: pick({ phone: 1, email: 1 }, body.contact_pref) || ([].concat(body.prefer_email || []).indexOf("1") !== -1 ? "email" : ""),
     call_times: list(body.call_times).filter((v) => L.call_times[v]),
     postcode: clamp(body.postcode, 4).replace(/\D/g, ""), suburb: clamp(body.suburb, 120),
     state: clamp(body.state, 3).toUpperCase(), remote: body.remote === true || body.remote === "true",
@@ -90,6 +94,8 @@ function parseIntake(body) {
     last_screen: SCREENS.test(String(body.last_screen || "")) ? String(body.last_screen) : "",
     seen: list(body.seen, 40).filter((s) => SCREENS.test(s)),
     uploads: Array.isArray(body.uploads) ? body.uploads.slice(0, 6) : [],
+    // Stage 1 has no step-1 save, so the session starts at the page stamp.
+    ts_started: Number(body.ts) > 0 ? Number(body.ts) : 0,
   };
   if (nojs) d.seen = Object.values(ASKED_ON);       // the long form shows every question
   // The server works out state and route itself: the long form has no script
@@ -97,9 +103,15 @@ function parseIntake(body) {
   if (d.state !== "OS" && /^\d{4}$/.test(d.postcode)) d.state = R.stateFor(d.postcode) || d.state;
   if (!d.route) d.route = R.route(d);
   if (d.outcome === "completed") d.rung_reached = "done";
-  if (!d.first_name || !d.last_name) return { error: "Missing required field: name" };
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(d.email)) return { error: "Invalid email address" };
-  if (d.state !== "OS" && !/^\d{4}$/.test(d.postcode)) return { error: "Missing required field: postcode" };
+  if (!d.first_name || !d.last_name) return { error: "Missing required field: name", why: "name" };
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(d.email)) return { error: "Invalid email address", why: "email" };
+  if (d.state !== "OS" && !/^\d{4}$/.test(d.postcode)) return { error: "Missing required field: postcode", why: "postcode" };
+  // Rule 5 / D16 on the server too (GPT Web I-S1): a served lead gives an
+  // Australian phone or chooses email. Out of area and NZ are never asked.
+  if (R.inArea(d)) {
+    if (d.phone && !PHONE_OK(d.phone)) return { error: "Invalid phone number", why: "phone" };
+    if (!d.phone && d.contact_pref !== "email") return { error: "Missing required field: phone, or choose email", why: "phone" };
+  }
   return { data: d };
 }
 
@@ -192,7 +204,8 @@ function formatIntakeNotification(d, when, files) {
     `Uploads: ${upl.length ? upl.join("; ") : ((d.seen || []).indexOf("S16") !== -1 ? "Skipped" : "Not asked")}`,
   ];
   if (files && files.rejected.length) lines.push(`Uploads not attached (type or size): ${files.rejected.join(", ")}`);
-  if (d.landlord_name || d.landlord_email || d.landlord_phone) lines.push("", "LANDLORD", `Name: ${d.landlord_name || "-"}`, `Email: ${d.landlord_email || "-"}`, `Phone: ${d.landlord_phone || "-"}`);
+  // Own labels, so the parser never mistakes them for the lead's own Email or Phone.
+  if (d.landlord_name || d.landlord_email || d.landlord_phone) lines.push("", "LANDLORD", `Landlord name: ${d.landlord_name || "-"}`, `Landlord email: ${d.landlord_email || "-"}`, `Landlord phone: ${d.landlord_phone || "-"}`);
   lines.push("", "ANYTHING ELSE", d.notes || val(d, "notes"), "");
   return lines.join("\n");
 }
@@ -203,23 +216,84 @@ function formatIntakeSubject(d) {
   return oneLine(`${head} · ${d.first_name} ${d.last_name} · ${place} · ${d.route || "-"} · ${heat} · ${d.lead_id}${d.nojs ? " [no-JS]" : ""}`);
 }
 
-/* ---- a repeat of the same send (Sales review, 1: two taps, two leads) ----
-   The page locks its buttons after the first tap. This is the backstop: a
-   (lead ID, outcome) pair already sent in the last 30 minutes is answered
-   "ok" and not sent again. An urgent lead's later "Help us prepare" send has
-   a different outcome, so it still goes. Memory is per function instance,
-   like the IP cap; in the real build the leads table's unique lead ID does
-   this across instances. */
+/* ---- a repeat of the same send (Sales review 1; GPT Web I-S2) ----
+   The page locks its buttons after the first tap. This is the backstop, per
+   (lead ID, outcome):
+     - first time:   "new", and the caller sends;
+     - while that send is in flight: "pending", with a promise of its result,
+       so a repeat waits instead of claiming success early;
+     - once it was sent (within 30 minutes): "done";
+     - a send that failed is forgotten, so a retry sends.
+   An urgent lead's later "Help us prepare" send has a different outcome, so
+   it still goes. Memory is per function instance, like the IP cap; stage 2's
+   intake_sessions (unique lead ID) makes it hold across instances. */
 const REPEAT_MS = 30 * 60 * 1000;
-const sentKeys = new Map();
+const sends = new Map();   // key -> { done: ms } | { pending: Promise<boolean>, settle }
+const keyOf = (d) => `${d.lead_id}|${d.outcome}`;
 function claimSend(d, now) {
-  const key = `${d.lead_id}|${d.outcome}`;
-  for (const [k, t] of sentKeys) if (now - t > REPEAT_MS) sentKeys.delete(k);
-  if (sentKeys.has(key)) return false;
-  sentKeys.set(key, now);
-  return true;
+  for (const [k, v] of sends) if (v.done && now - v.done > REPEAT_MS) sends.delete(k);
+  const key = keyOf(d), seen = sends.get(key);
+  if (seen && seen.done) return { status: "done" };
+  if (seen && seen.pending) return { status: "pending", result: seen.pending };
+  let settle;
+  const pending = new Promise((r) => { settle = r; });
+  sends.set(key, { pending, settle });
+  return { status: "new" };
 }
-/** A send that failed may be retried. */
-function releaseSend(d) { sentKeys.delete(`${d.lead_id}|${d.outcome}`); }
+/** The claimed send finished: remember a success, forget a failure. */
+function settleSend(d, ok, now) {
+  const key = keyOf(d), seen = sends.get(key);
+  if (!seen || !seen.settle) return;
+  if (ok) sends.set(key, { done: now || Date.now() }); else sends.delete(key);
+  seen.settle(!!ok);
+}
 
-module.exports = { parseIntake, claimSend, releaseSend, formatIntakeNotification, formatIntakeSubject, intakeAttachments, sniff, LABELS: L, SLOTS };
+/* ---- the leads row (PRD §3.1) ----
+   The existing columns, filled the way the old forms fill them, so CRM views
+   read the same. The intake's own columns (lead_id, intent, route,
+   rung_reached, tenure, boiler_condition, ts_started, ts_last, answers) are
+   added only when INTAKE_LEAD_COLUMNS=on, i.e. once Platform has applied the
+   migration: sending a column the table doesn't have fails the insert, and
+   then the old forms' rows would be the next thing to break. */
+const ANSWER_KEYS = ["intent", "source", "referrer", "newsletter_opt_in", "heating", "heating_other_text", "boiler_condition",
+  "boiler_age", "tenure", "scope", "energy", "winter_gas_bill_band", "timing", "timing_note", "storeys", "radiator_band",
+  "underfloor_band", "built_band", "off_gas", "send_later", "contact_pref", "call_times", "remote", "outcome", "last_screen"];
+function intakeLeadRow(d, env, now) {
+  const at = new Date(now || Date.now()).toISOString();
+  const has = (k) => (d.energy || []).indexOf(k) !== -1;
+  const row = {
+    submitted_at: at,
+    form: d.formLabel,
+    source_site: "freevolt",
+    first_name: d.first_name || null,
+    last_name: d.last_name || null,
+    email: d.email || null,
+    phone: d.phone || null,
+    suburb: d.suburb || d.postcode || null,
+    state: d.state || null,
+    address: null,
+    solar: d.energy.length ? (has("solar") ? "Yes" : "No") : null,
+    battery: d.energy.length ? (has("battery") ? "Yes" : "No") : null,
+    heating_system_type: d.heating.length ? d.heating.map((h) => L.heating[h]).join(", ") : null,
+    driver: d.intent ? L.intent[d.intent] : null,
+    referral_source: d.source.length ? d.source.map((s) => L.source[s]).join(", ") : null,
+    timeline: d.timing ? L.timing[d.timing] : null,
+    comments: d.notes || null,
+    // The intake asks for the monthly update as its own unticked box (S6).
+    newsletter_opt_in: !!d.newsletter_opt_in,
+    payment_ref: null,
+  };
+  if (String((env || {}).INTAKE_LEAD_COLUMNS || "").trim() === "on") {
+    const answers = {};
+    ANSWER_KEYS.forEach((k) => { const v = d[k]; if (Array.isArray(v) ? v.length : (v !== "" && v != null && v !== false)) answers[k] = v; });
+    const started = Number(d.ts_started) > 0 ? new Date(Number(d.ts_started)).toISOString() : null;
+    Object.assign(row, {
+      lead_id: d.lead_id, intent: d.intent || null, route: d.route || null, rung_reached: d.rung_reached || null,
+      tenure: d.tenure || null, boiler_condition: d.boiler_condition || null,
+      ts_started: started, ts_last: at, answers,
+    });
+  }
+  return row;
+}
+
+module.exports = { parseIntake, claimSend, settleSend, intakeLeadRow, PHONE_OK, formatIntakeNotification, formatIntakeSubject, intakeAttachments, sniff, LABELS: L, SLOTS };

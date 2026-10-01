@@ -12,7 +12,7 @@
 <link rel="preload" href="/assets/fonts/Montserrat-ExtraBold.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/Montserrat-Regular.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/assets/css/style.css?v=48">
-<link rel="stylesheet" href="/assets/css/intake.css?v=7">
+<link rel="stylesheet" href="/assets/css/intake.css?v=8">
 <script>document.documentElement.classList.add("js");</script>
 </head>
 <body class="dark intake-page">
@@ -102,6 +102,8 @@
         <p class="iq__err" data-err="phone" hidden>An Australian number, like 0412 345 678.</p>
         <input type="hidden" name="contact_pref" value="" data-contact-pref>
         <p class="iq__jsonly iq__skip"><button type="button" class="linkbtn" data-prefer-email>I'd prefer email</button></p>
+        <!-- The long form can't run the button above, so it gets the same choice as a box (GPT Web I-S1). -->
+        <label class="tick iq__nojsonly"><input type="checkbox" name="prefer_email" value="1"> I'd prefer email</label>
       </section>
 
       <section class="iq" data-screen="S4b" aria-labelledby="h-S4b">
@@ -512,6 +514,6 @@
 <footer id="site-footer" class="site-footer"></footer>
 <script src="/assets/js/site.js?v=16" defer></script>
 <script src="/assets/js/intake-route.js?v=2" defer></script>
-<script src="/assets/js/intake.js?v=4" defer></script>
+<script src="/assets/js/intake.js?v=5" defer></script>
 </body>
 </html>

@@ -15,9 +15,11 @@ const path = require("path");
 // ---- fakes: nodemailer and fetch --------------------------------------------
 let sent = [];
 let failSend = null;              // (msg, index) => Error | null
+let hold = null;                  // a promise every sendMail waits on (concurrency tests)
 const nm = require.resolve("nodemailer");
 require.cache[nm] = { id: nm, filename: nm, loaded: true, exports: {
   createTransport: () => ({ sendMail: async (m) => {
+    if (hold) await hold;
     const e = failSend && failSend(m, sent.length);
     if (e) throw e;
     sent.push(m);
@@ -178,7 +180,7 @@ const RI = { form: "register-interest", first_name: NAME, last_name: LAST, email
 
   // ---- 5. the intake: a repeat of the same send is not sent twice (Sales review, 1) ----
   process.env.VERCEL_ENV = "preview"; process.env.TEST_RECIPIENT = "test-inbox@example.com";
-  const IN = { form: "intake", first_name: NAME, last_name: LAST, email: EMAIL, postcode: "3122", state: "VIC",
+  const IN = { form: "intake", first_name: NAME, last_name: LAST, email: EMAIL, phone: PHONE, postcode: "3122", state: "VIC",
     heating: ["boiler_radiators"], outcome: "completed", lead_id: "il-0123456789" };
   sent = []; failSend = null;
   capture(); const i1 = await call(IN); const i2 = await call(IN); release();
@@ -197,6 +199,56 @@ const RI = { form: "register-interest", first_name: NAME, last_name: LAST, email
   sent = [];
   capture(); await call(Object.assign({}, IN, { lead_id: "not-an-id" })); await call(Object.assign({}, IN, { lead_id: "not-an-id" })); release();
   check("intake: a malformed lead ID is replaced, never trusted", sent.length === 2 && !/not-an-id/.test(sent[0].subject), sent.map((m) => m.subject));
+
+  // ---- 5b. stage 1: in-flight dedupe, the sent contract, no-JS errors, the row ----
+  const json = (r) => r.json || {};
+  sent = []; failSend = null;
+  let open; hold = new Promise((r) => { open = r; });
+  capture();
+  const pa = call(Object.assign({}, IN, { lead_id: "il-cccccccccc" })), pb = call(Object.assign({}, IN, { lead_id: "il-cccccccccc" }));
+  await new Promise((r) => setTimeout(r, 20)); open(); hold = null;
+  const [ra, rb] = await Promise.all([pa, pb]); release();
+  check("I-S2: concurrent repeat waits for the first send: one email, both sent:true",
+    sent.length === 1 && json(ra).sent === true && json(rb).sent === true, [sent.length, json(ra), json(rb)]);
+  check("I-S2: the waiting repeat is logged as in flight", logs.some((l) => /screened code=repeat_in_flight/.test(l)), logs);
+  sent = []; hold = new Promise((r) => { open = r; });
+  failSend = (m, i) => (i === 0 ? new Error("smtp down") : null);
+  capture();
+  const fa = call(Object.assign({}, IN, { lead_id: "il-dddddddddd" })), fb = call(Object.assign({}, IN, { lead_id: "il-dddddddddd" }));
+  await new Promise((r) => setTimeout(r, 20)); open(); hold = null;
+  const [ra2, rb2] = await Promise.all([fa, fb]);
+  failSend = null;
+  const rc2 = await call(Object.assign({}, IN, { lead_id: "il-dddddddddd" })); release();
+  check("I-S2: if the first send fails, the waiting repeat fails too (no false success)", ra2.code === 500 && rb2.code === 500, [ra2.code, rb2.code]);
+  check("I-S2: and a later retry sends", rc2.code === 200 && json(rc2).sent === true && sent.length === 1, [rc2.code, sent.length]);
+  capture(); const bot = await call(Object.assign({}, IN, { lead_id: "il-eeeeeeeeee", ts: Date.now() })); release();
+  check("I-S3: a bot-screened post gets { ok: true } with no sent flag", bot.code === 200 && json(bot).ok === true && json(bot).sent === undefined, json(bot));
+  delete process.env.TEST_RECIPIENT; sent = [];
+  capture(); const unset = await call(Object.assign({}, IN, { lead_id: "il-ffffffffff" })); release();
+  check("I-S3: nothing sent (no TEST_RECIPIENT) says sent:false", unset.code === 200 && json(unset).sent === false && sent.length === 0, json(unset));
+  process.env.TEST_RECIPIENT = "test-inbox@example.com";
+  capture(); const noPhone = await call(Object.assign({}, IN, { lead_id: "il-1212121212", phone: "" })); release();
+  check("I-S1: a served lead with no phone and no email choice is refused (400)", noPhone.code === 400, noPhone.code);
+  const nojsReq = { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded", "x-forwarded-for": "203.0.113.201" },
+    body: Object.assign({}, IN, { nojs: "1", phone: "" }) };
+  const nojsRes = { code: 0, headers: {}, status(c) { this.code = c; return this; }, json() { return this; }, end() { return this; }, setHeader(k, v) { this.headers[k] = v; } };
+  capture(); await lead(nojsReq, nojsRes); release();
+  check("I-S1: the long form gets its own page for that (303 to /start/check/)", nojsRes.code === 303 && nojsRes.headers.Location === "/start/check/", [nojsRes.code, nojsRes.headers]);
+  // The row, in production with fakes: off by default, then on.
+  process.env.VERCEL_ENV = "production"; inserts = []; sent = [];
+  capture(); await call(Object.assign({}, IN, { lead_id: "il-3434343434", intent: "urgent", tenure: "owner_occupier" })); release();
+  const row1 = inserts[0] && inserts[0].body;
+  check("leads row: the intake is recorded, existing columns only while the flag is off",
+    row1 && row1.form === "Website Intake" && row1.email === EMAIL && !("lead_id" in row1) && !("answers" in row1), row1);
+  process.env.INTAKE_LEAD_COLUMNS = "on"; inserts = [];
+  capture(); await call(Object.assign({}, IN, { lead_id: "il-5656565656", intent: "urgent", tenure: "owner_occupier" })); release();
+  const row2 = inserts[0] && inserts[0].body;
+  check("leads row: with INTAKE_LEAD_COLUMNS=on, the §3.1 columns too",
+    row2 && row2.lead_id === "il-5656565656" && row2.intent === "urgent" && row2.route === "urgent" && row2.tenure === "owner_occupier" &&
+    typeof row2.answers === "object" && row2.answers.heating && /^\d{4}-/.test(row2.ts_started) && /^\d{4}-/.test(row2.ts_last), row2);
+  inserts = []; capture(); await call(RI); release();
+  check("leads row: the old forms' rows never carry the intake columns", inserts[0] && !("lead_id" in inserts[0].body) && !("answers" in inserts[0].body), inserts[0] && Object.keys(inserts[0].body));
+  delete process.env.INTAKE_LEAD_COLUMNS; process.env.VERCEL_ENV = "preview";
 
   // ---- 6. P-S1: nothing but logEvent writes to the logs (codes, never messages) ----
   const fs2 = require("fs");
