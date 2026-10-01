@@ -242,6 +242,13 @@ check("no placeholder privacy link on the intake (Nick, 2 Oct: strip it until th
   check("buttons: netlify.toml has the twin 301", nt.includes('from = "/pre-order/register-interest/*"\n  to = "/start/"\n  status = 301'));
   check("buttons: the old pages still exist, for cached links", fs.existsSync(path.join(__dirname, "..", "pre-order", "register-interest", "index.html")) && fs.existsSync(path.join(__dirname, "..", "interest", "index.html")));
 }
+{
+  // Click-to-load videos (CTO Re #41.1): no page loads YouTube until play.
+  const pages = ["index.html", "mission/index.html", "hydronic/how-it-works/index.html"].map((f) => fs.readFileSync(path.join(__dirname, "..", f), "utf8"));
+  check("videos: no YouTube iframe on page load", pages.every((h) => !/<iframe[^>]+youtube/i.test(h)));
+  check("videos: a play button with the video id, a no-JS link, and video.js", pages.every((h) => /<button type="button" class="video__play" data-yt="[A-Za-z0-9_-]{11}"/.test(h) && /<noscript><a class="video__fallback" href="https:\/\/www\.youtube\.com\/watch\?v=/.test(h) && /\/assets\/js\/video\.js\?v=\d+/.test(h)));
+  check("videos: video.js injects the youtube-nocookie player only on click", /addEventListener\("click"/.test(fs.readFileSync(path.join(__dirname, "..", "assets", "js", "video.js"), "utf8")) && /youtube-nocookie\.com\/embed\//.test(fs.readFileSync(path.join(__dirname, "..", "assets", "js", "video.js"), "utf8")));
+}
 check("Nick's old mobile is gone from the page", !/432 ?395 ?138/.test(page));
 
 console.log(failed ? `\n${failed} CHECK(S) FAILED` : "\nAll intake checks passed.");
