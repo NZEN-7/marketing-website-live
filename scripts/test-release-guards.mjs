@@ -29,5 +29,14 @@ check("this repo, as committed, has no TO CONFIRM in anything served", repo.leng
 const live = readFileSync(path.join(root, "tools", "deploy-live.mjs"), "utf8");
 check("deploy:live runs the guard before it pushes", /unconfirmedInRepo\(\)/.test(live) && live.indexOf("unconfirmedInRepo()") < live.indexOf("git push deploy"));
 
+// The deploy scripts must at least parse: a text check alone let a broken
+// string literal through on 2 Oct, and deploy:live crashed before pushing.
+import { execFileSync } from "node:child_process";
+for (const f of ["tools/deploy-live.mjs", "tools/deploy-preview.mjs", "tools/release-guards.mjs"]) {
+  let ok = true;
+  try { execFileSync(process.execPath, ["--check", path.join(root, f)], { stdio: "pipe" }); } catch { ok = false; }
+  check(`${f} parses (node --check)`, ok);
+}
+
 console.log(failed ? `\n${failed} CHECK(S) FAILED` : "\nAll release-guard checks passed.");
 process.exit(failed ? 1 : 0);

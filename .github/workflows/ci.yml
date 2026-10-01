@@ -51,7 +51,7 @@ jobs:
       - name: "Preview guard: off production, mail to TEST_RECIPIENT only, no insert (16 checks)"
         run: npm run test:previewguard
 
-      - name: "Release guards: no TO CONFIRM in anything served (8 checks)"
+      - name: "Release guards: no TO CONFIRM in anything served, scripts parse (11 checks)"
         run: npm run test:releaseguards
 
       - name: "Form spam screens: page stamp, honeypot, per-IP cap (7 checks)"

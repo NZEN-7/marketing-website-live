@@ -26,10 +26,8 @@ if (branch !== 'main') {
 // Wording still waiting on a decision never goes live (CTO Re #39).
 const unconfirmed = unconfirmedInRepo();
 if (unconfirmed.length) {
-  console.error('"TO CONFIRM" is still in served files; settle the wording first:
-  ' +
-    unconfirmed.map((h) => `${h.file}:${h.line}`).join('
-  '));
+  console.error('"TO CONFIRM" is still in served files; settle the wording first:\n  ' +
+    unconfirmed.map((h) => `${h.file}:${h.line}`).join('\n  '));
   process.exit(1);
 }
 
