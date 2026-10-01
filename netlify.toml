@@ -298,6 +298,21 @@
   force = true
 
 # The intake module is required by the lead function; never served.
+# The old register-interest form retires into the intake (CTO Re #41.4):
+# its bundled "you agree to receive updates" consent must not outlive step 5.
+# Twin of the vercel.json redirect. The form key stays accepted by api/lead.js.
+[[redirects]]
+  from = "/pre-order/register-interest"
+  to = "/start/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/pre-order/register-interest/*"
+  to = "/start/"
+  status = 301
+  force = true
+
 [[redirects]]
   from = "/api/_intake.js"
   to = "/404.html"

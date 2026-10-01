@@ -70,6 +70,11 @@
       "permanent": true
     },
     {
+      "source": "/pre-order/register-interest(/.*)?",
+      "destination": "/start/",
+      "statusCode": 301
+    },
+    {
       "source": "/hydronic-overview",
       "destination": "/hydronic/",
       "permanent": true
