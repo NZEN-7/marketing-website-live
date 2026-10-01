@@ -21,7 +21,10 @@
 <style>
 /* Legal-text layout for this page only (Nick, 2 Oct): one even column, smaller
    type, plain bullets. Inline so no other page's styles or versions change. */
-.hero--legal h1{font-size:clamp(1.9rem,4.2vw,2.6rem);}
+.hero--legal .wrap{max-width:720px;}
+.hero--legal .hero__inner{padding-bottom:0!important;}
+.hero--legal h1{font-size:clamp(1.9rem,4.2vw,2.6rem);margin-bottom:0;}
+.section--legal{padding-top:clamp(18px,3vw,32px)!important;}
 body.dark .section .article.legal{max-width:720px;margin:0 auto;font-size:.95rem;line-height:1.7;}
 body.dark .section .article.legal p,body.dark .section .article.legal ul{max-width:none!important;margin-left:0!important;margin-right:0!important;}
 body.dark .section .article.legal>p:first-of-type{font-size:inherit;}
@@ -49,7 +52,7 @@ body.dark .section .article.legal .table-wrap{font-size:.9rem;margin:1.2em 0 1.4
     </div>
   </section>
 
-  <section class="section">
+  <section class="section section--legal">
     <div class="wrap narrow">
       <article class="article legal">
         <p class="article-meta">Last updated: 2 October 2026</p>
