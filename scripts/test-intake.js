@@ -213,6 +213,15 @@ check("SPEC rev B: the upload-set message promises no email", /One file was too 
 check("SPEC rev B: the urgent screen and urgent Done lines", /Sorry to hear about the boiler/.test(page) && (page.match(/Nick will try to call you today\. If we miss you, we'll try again tomorrow at lunchtime\./g) || []).length === 2);
 
 check("the Dialpad number in the sidebar and footer (SPEC §2), dialable", (page.match(/href="tel:\+61272283430">\(02\) 7228 3430<\/a>/g) || []).length === 2);
+{
+  // The privacy page (CTO Re #39-40): its own page, linked from every footer and from /start/.
+  const priv = fs.readFileSync(path.join(__dirname, "..", "privacy", "index.html"), "utf8");
+  const site = fs.readFileSync(path.join(__dirname, "..", "assets", "js", "site.js"), "utf8");
+  check("privacy: /privacy/ exists, with its sections and the providers table", /<h1>Privacy Policy<\/h1>/.test(priv) && (priv.match(/<h2>/g) || []).length >= 10 && /<td>Supabase<\/td>/.test(priv));
+  check("privacy: no TO CONFIRM, no placeholder", !/TO CONFIRM|placeholder/i.test(priv.replace(/<!--[\s\S]*?-->/g, "")));
+  check("privacy: the shared footer links to it (every page)", /'<a href="\/privacy\/">Privacy<\/a>'/.test(site));
+  check("privacy: /start/'s consent line and footer link to it, with no placeholder left", (page.match(/<a href="\/privacy\/">Privacy policy<\/a>/g) || []).length === 2 && !/\[Privacy policy\]|class="ph-link"/.test(page));
+}
 check("Nick's old mobile is gone from the page", !/432 ?395 ?138/.test(page));
 
 console.log(failed ? `\n${failed} CHECK(S) FAILED` : "\nAll intake checks passed.");

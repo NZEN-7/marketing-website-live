@@ -60,6 +60,7 @@
         '<a href="/blog/">Blog</a>' +
         '<a href="/pre-order/">Reserve</a>' +
         '<a href="/contact/">Contact</a>' +
+        '<a href="/privacy/">Privacy</a>' +
       '</nav>' +
       // TODO: add the unit/street number once confirmed (currently suburb-level only).
       '<address class="footer-address">Thermal Dawn, Hornsby, NSW 2077</address>' +
