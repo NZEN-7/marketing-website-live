@@ -33,9 +33,9 @@
              email conversation, so the quote request is the only front door
              the header offers. Still reachable from the footer and from the
              pricing and pre-order pages. */
-          '<li class="nav__cta-mob"><a href="/pre-order/register-interest/" data-nav="/pre-order/register-interest/">Request a Quote</a></li>' +
+          '<li class="nav__cta-mob"><a href="/start/" data-nav="/pre-order/register-interest/">Request a Quote</a></li>' +
         '</ul>' +
-        '<a class="btn btn--primary btn--sm nav__cta" href="/pre-order/register-interest/" data-nav="/pre-order/register-interest/">Request a Quote</a>' +
+        '<a class="btn btn--primary btn--sm nav__cta" href="/start/" data-nav="/pre-order/register-interest/">Request a Quote</a>' +
       '</nav>' +
     '</div>';
 
