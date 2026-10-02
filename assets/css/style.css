@@ -1471,10 +1471,10 @@ body.dark .legal-title{font-size:clamp(1.9rem,4.2vw,2.6rem);}
 @media print{
 body.legal-page,body.legal-page .section,body.legal-page .hero,body.legal-page .site-footer{background:#fff!important;}
 body.legal-page,body.legal-page *{color:#000!important;text-shadow:none!important;box-shadow:none!important;}
-body.legal-page #site-header,body.legal-page .footer-center__logo,body.legal-page .footer-social,body.legal-page .footer-links{display:none!important;}
+body.legal-page #site-header,body.legal-page .btn,body.legal-page .footer-center__logo,body.legal-page .footer-social,body.legal-page .footer-links{display:none!important;}
 body.legal-page .section,body.legal-page .hero__inner{padding-top:0!important;}
 body.legal-page .section .article.legal{max-width:none;font-size:11pt;}
-body.legal-page .article.legal ul>li::before{background:#000!important;}
+body.legal-page .article.legal ul>li::before{content:"2";background:none!important;width:auto;height:auto;border-radius:0;top:0;left:.1em;}
 body.legal-page .table-wrap,body.legal-page .table-wrap th,body.legal-page .table-wrap td{border-color:#888!important;}
 body.legal-page a{text-decoration:underline;}
 body.legal-page h2{break-after:avoid;}
