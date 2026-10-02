@@ -294,13 +294,12 @@ check("the notification keeps its parsed label 'Monthly update'", /Monthly updat
     ["pre-order/terms/index.html", "privacy/index.html"].every((f) => /<body class="dark legal-page">/.test(read(f))) &&
     /@media print\{\r?\nbody\.legal-page,body\.legal-page \.section[^\n]*\{background:#fff!important;\}/.test(css) && /body\.legal-page #site-header[^{]*\{display:none!important;\}/.test(css));
   check("a11y: the desktop Hydronic submenu opens on keyboard focus, so Tab reaches its links (e2e finding, 3 Oct)", /\.nav__has-sub:hover \.nav__sub,\.nav__has-sub:focus-within \.nav__sub\{opacity:1;visibility:visible;/.test(css));
-  // Design trial B (Nick, 2 Oct): page-scoped, so it must stay on its two pages until Nick extends it.
+  // Calmer headings and cards are the site defaults (Nick, 3 Oct): trial B promoted, its page classes retired.
   const bodyOf = (f) => (read(f).match(/<body class="([^"]*)"/) || [])[1] || "";
-  const trialPages = fs.readdirSync(root, { recursive: true }).filter((f) => /index\.html$/.test(f) && !/^(node_modules|docs)[\/]/.test(f));
-  check("trial B: calmer headings on how-it-works and pricing only; sharper cards on pricing only",
-    bodyOf("hydronic/how-it-works/index.html") === "dark trial-calm" && bodyOf("hydronic/pricing/index.html") === "dark trial-calm trial-cards" &&
-    trialPages.filter((f) => /trial-(calm|cards)/.test(bodyOf(f))).length === 2 &&
-    /body\.dark\.trial-calm h2\{font-weight:700;/.test(css) && /body\.dark\.trial-cards \.card\{border-radius:6px;padding:20px;/.test(css));
+  const sitePages = fs.readdirSync(root, { recursive: true }).filter((f) => /index\.html$/.test(f) && !/^(node_modules|docs)[\\/]/.test(f));
+  check("design: calmer headings and sharper cards are site defaults; no page carries the retired trial classes",
+    sitePages.length > 20 && sitePages.every((f) => !/trial-(calm|cards)/.test(bodyOf(f))) && !/trial-(calm|cards)/.test(css) &&
+    /body h2\{font-weight:700;font-size:clamp\(1\.55rem,3\.4vw,2rem\);line-height:1\.25;/.test(css) && /\.card\{border-radius:6px;padding:20px;box-shadow:none;\}/.test(css));
 }
 check("Nick's old mobile is gone from the page", !/432 ?395 ?138/.test(page));
 
