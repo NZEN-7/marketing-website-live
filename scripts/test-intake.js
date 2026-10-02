@@ -263,6 +263,18 @@ check("no placeholder privacy link on the intake (Nick, 2 Oct: strip it until th
 }
 check("updates are 'occasional', not 'monthly' (Nick, 2 Oct): the /start/ box and the homepage Subscribe line", /<input type="checkbox" name="newsletter_opt_in" value="true"> Send me Thermal Dawn's occasional email updates<\/label>/.test(page) && /Subscribe for occasional email updates/.test(fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8")) && !/monthly/i.test(page));
 check("the notification keeps its parsed label 'Monthly update'", /Monthly update: /.test(lead.formatNotification(lead.parseSubmission(Object.assign({}, base)).data, "x")));
+{
+  // The accessibility pass (2 Oct). Behaviour was checked by keyboard in a real browser;
+  // these pin the code that does it.
+  const js = fs.readFileSync(path.join(__dirname, "..", "assets", "js", "intake.js"), "utf8");
+  check("a11y: arrow keys on a single-select screen move the choice without moving on", /Arrow\(Up\|Down\|Left\|Right\)\|Home\|End/.test(js) && /if \(kbPick\) \{ kbPick = false; return; \}/.test(js));
+  check("a11y: Space on the chosen card, or Enter, moves on", /e\.key === " " && t\.checked/.test(js) && /auto && e\.key === "Enter"/.test(js));
+  check("a11y: errors are announced (role=alert) and tied to their field (aria-invalid, aria-describedby)", /setAttribute\("role", "alert"\)/.test(js) && /aria-invalid/.test(js) && /aria-describedby/.test(js));
+  const slots = page.match(/<div class="upslot" data-slot="[a-z_]+">/g) || [];
+  check("a11y: each upload input is named by its slot, and each Remove says what it removes",
+    slots.length === 4 && (page.match(/<input type="file" aria-labelledby="up-[a-z_]+-t up-[a-z_]+-how"/g) || []).length === 4 &&
+    (page.match(/data-remove aria-label="Remove [^"]+"/g) || []).length === 4);
+}
 check("Nick's old mobile is gone from the page", !/432 ?395 ?138/.test(page));
 
 console.log(failed ? `\n${failed} CHECK(S) FAILED` : "\nAll intake checks passed.");
