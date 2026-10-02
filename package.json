@@ -19,9 +19,14 @@
     "test:intake": "node scripts/test-intake.js",
     "test:spam": "node scripts/test-spam-guard.js",
     "test:previewguard": "node scripts/test-preview-guard.js",
-    "test:releaseguards": "node scripts/test-release-guards.mjs"
+    "test:releaseguards": "node scripts/test-release-guards.mjs",
+    "test:e2e": "node scripts/test-site-e2e.cjs --suite local",
+    "test:e2e:url": "node scripts/test-site-e2e.cjs --suite url --url"
   },
   "dependencies": {
     "nodemailer": "^6.9.15"
+  },
+  "devDependencies": {
+    "playwright": "1.62.1"
   }
 }
