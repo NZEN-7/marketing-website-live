@@ -289,6 +289,13 @@ check("the notification keeps its parsed label 'Monthly update'", /Monthly updat
     /<article class="article legal">/.test(read("privacy/index.html")) && !/<style>/.test(read("privacy/index.html")) && /\.article\.legal\{max-width:720px/.test(css));
   check("win 3: the homepage price and installer line is body text, not micro", /<p class="measure" style="margin:0 auto 18px">From \$12,000 for the equipment/.test(read("index.html")));
   check("win 4: no static (non-link) card lifts on hover", ["hydronic/pricing/index.html", "intelligence/index.html"].every((f) => !/<(div|section|article)[^>]*class="[^"]*card--lift/.test(read(f))));
+  // Design trial B (Nick, 2 Oct): page-scoped, so it must stay on its two pages until Nick extends it.
+  const bodyOf = (f) => (read(f).match(/<body class="([^"]*)"/) || [])[1] || "";
+  const trialPages = fs.readdirSync(root, { recursive: true }).filter((f) => /index\.html$/.test(f) && !/^(node_modules|docs)[\/]/.test(f));
+  check("trial B: calmer headings on how-it-works and pricing only; sharper cards on pricing only",
+    bodyOf("hydronic/how-it-works/index.html") === "dark trial-calm" && bodyOf("hydronic/pricing/index.html") === "dark trial-calm trial-cards" &&
+    trialPages.filter((f) => /trial-(calm|cards)/.test(bodyOf(f))).length === 2 &&
+    /body\.dark\.trial-calm h2\{font-weight:700;/.test(css) && /body\.dark\.trial-cards \.card\{border-radius:6px;padding:20px;/.test(css));
 }
 check("Nick's old mobile is gone from the page", !/432 ?395 ?138/.test(page));
 
