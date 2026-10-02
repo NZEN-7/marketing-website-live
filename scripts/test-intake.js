@@ -243,14 +243,12 @@ check("no placeholder privacy link on the intake (Nick, 2 Oct: strip it until th
   check("buttons: the old pages still exist, for cached links", fs.existsSync(path.join(__dirname, "..", "pre-order", "register-interest", "index.html")) && fs.existsSync(path.join(__dirname, "..", "interest", "index.html")));
 }
 {
-  // Click-to-load videos (CTO Re #41.1): no page loads YouTube until play.
+  // YouTube embeds, rolled back from click-to-load (Nick, 2 Oct): the plain youtube-nocookie player,
+  // and the privacy page says so.
   const pages = ["index.html", "mission/index.html", "hydronic/how-it-works/index.html"].map((f) => fs.readFileSync(path.join(__dirname, "..", f), "utf8"));
-  check("videos: no YouTube iframe on page load", pages.every((h) => !/<iframe[^>]+youtube/i.test(h)));
-  check("videos: a play button with the video id, a no-JS link, and video.js", pages.every((h) => /<button type="button" class="video__play" data-yt="[A-Za-z0-9_-]{11}"/.test(h) && /<noscript><a class="video__fallback" href="https:\/\/www\.youtube\.com\/watch\?v=/.test(h) && /\/assets\/js\/video\.js\?v=\d+/.test(h)));
-  check("videos: video.js injects the youtube-nocookie player only on click", /addEventListener\("click"/.test(fs.readFileSync(path.join(__dirname, "..", "assets", "js", "video.js"), "utf8")) && /youtube-nocookie\.com\/embed\//.test(fs.readFileSync(path.join(__dirname, "..", "assets", "js", "video.js"), "utf8")));
-  check("videos: the poster is the video's own thumbnail, self-hosted (no ytimg or Google request before play)",
-    pages.every((h) => { const ids = [...h.matchAll(/data-yt="([A-Za-z0-9_-]{11})"[^>]*><img class="video__thumb" src="\/assets\/img\/video\/([A-Za-z0-9_-]{11})\.webp"/g)];
-      return ids.length > 0 && ids.every((m) => m[1] === m[2] && fs.existsSync(path.join(__dirname, "..", "assets", "img", "video", m[2] + ".webp"))) && !/ytimg\.com|img\.youtube\.com/.test(h); }));
+  check("videos: each page embeds the youtube-nocookie player directly", pages.every((h) => /<iframe src="https:\/\/www\.youtube-nocookie\.com\/embed\/[A-Za-z0-9_-]{11}"/.test(h) && !/video\.js|video__play/.test(h)));
+  const pp = fs.readFileSync(path.join(__dirname, "..", "privacy", "index.html"), "utf8");
+  check("videos: the privacy page says YouTube loads with the page, not only on play", /When one of those pages loads, YouTube receives your IP address/.test(pp) && !/only load when you press play/.test(pp));
 }
 {
   // No third-party fonts on any page or in any animation a page embeds (CTO Re #41.1).
