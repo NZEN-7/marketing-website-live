@@ -1497,5 +1497,5 @@ body.dark.trial-cards .card:not(.card--orange){border-color:rgba(var(--td-orange
 .nav__logo::after{inset:-9px 0;}
 .nav__toggle::after{inset:-5px -1px;}
 .footer-social--icons a::after{inset:-5px;}
-.footer-links a::after{inset:-11px -4px;}
-@media (pointer:coarse){.footer-links{row-gap:22px;}}
+.footer-links a::after{inset:-11px -7px;}
+@media (pointer:coarse){.footer-links{row-gap:24px;}}
