@@ -1129,6 +1129,10 @@ body.dark .plogo__txt,.section--dark .plogo__txt,.section--cocoa .plogo__txt{col
 .anchor{scroll-margin-top:0;}
 .text-links a{font-weight:600;}
 @media(max-width:520px){body{font-size:16px;}.hero__inner{padding:70px 0 60px;}}
+/* Design win 1 (2 Oct): the phone padding above lost on specificity to the
+   centred (110/96px) and dark plain (86/70px) heroes, so every hero kept its
+   desktop spacing on a phone. Same selectors, later, so they win. */
+@media(max-width:520px){.hero--center .hero__inner,body.dark .hero--plain .hero__inner{padding:56px 0 48px;}}
 
 /* =========================================================================
    v5, lighter rhythm
@@ -1455,3 +1459,22 @@ table.data tr:has(td[data-figure]:empty){display:none;}
   table.data--stack tbody td::before{content:attr(data-label);font-weight:600;font-size:.85rem;opacity:.75;}
   body.dark table.data--stack tbody tr{border-bottom-color:rgba(255,255,255,.09);}
 }
+
+/* Legal documents (/privacy/, /pre-order/terms/): one even column, smaller
+   body, sharper headings, plain bullets (Nick, 2 Oct; design win 2). */
+.hero--legal .wrap{max-width:760px;}
+.hero--legal .hero__inner{padding-bottom:0!important;}
+.hero--legal h1{font-size:clamp(1.9rem,4.2vw,2.6rem);margin-bottom:0;}
+.section--legal{padding-top:clamp(18px,3vw,32px)!important;}
+body.dark .section .article.legal{max-width:720px;margin:0 auto;font-size:.95rem;line-height:1.7;}
+body.dark .section .article.legal p,body.dark .section .article.legal ul{max-width:none!important;margin-left:0!important;margin-right:0!important;}
+body.dark .section .article.legal>p:first-of-type{font-size:inherit;}
+body.dark .section .article.legal .article-meta{font-size:.85rem;margin-bottom:1.4em;}
+body.dark .section .article.legal h2{font-size:1.2rem;line-height:1.3;letter-spacing:0;margin:2.1em 0 .55em;}
+body.dark .section .article.legal ul{list-style:none!important;padding-left:0!important;margin-top:.4em;margin-bottom:1em;}
+body.dark .section .article.legal ul>li{position:relative;padding-left:1.25em!important;margin:.4em 0;}
+body.dark .section .article.legal ul>li::before{display:block!important;content:"";position:absolute;left:.2em;top:.72em;width:5px;height:5px;border-radius:50%;background:var(--td-orange);}
+body.dark .section .article.legal .table-wrap{font-size:.9rem;margin:1.2em 0 1.4em;}
+@media (max-width:520px){body.dark .section .article.legal{font-size:.92rem;}}
+body.dark .legal-title{font-size:clamp(1.9rem,4.2vw,2.6rem);}
+@media print{body.dark .section .article.legal{max-width:none;font-size:11pt;}}
