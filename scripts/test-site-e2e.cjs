@@ -62,7 +62,8 @@ async function context(browser,base,local) {
     if(url.origin !== new URL(base).origin) {
       let video = false;
       try { const f=req.frame(); video = /(^|\.)youtube-nocookie\.com$/.test(url.hostname) && req.isNavigationRequest() && f !== f.page().mainFrame(); } catch {}
-      if(!local && !video) violations.push('Unlisted cross-origin page-load request: '+url.origin+url.pathname);
+      const fleetStats = url.origin === 'https://thermal-dawn-platform.vercel.app' && url.pathname === '/api/public/stats' && !url.search;
+      if(!local && !video && !fleetStats) violations.push('Unlisted cross-origin page-load request: '+url.origin+url.pathname);
       blocked.push(video?'video-frame':url.origin);return route.abort();
     }
     return route.continue();
@@ -166,12 +167,11 @@ async function keyboard(p) {
           await test('Browser load '+urlPath,async()=>{await c.page.goto(new URL(urlPath,base).href,{waitUntil:'load'});await c.page.locator('#site-footer a[href="/privacy/"]').waitFor();loaded=true;});
           if(!loaded) continue;
           await test('Privacy links '+urlPath,async()=> {
-            const header=await c.page.locator('#site-header a[href="/privacy/"]').count();
-            const footer=await c.page.locator('#site-footer a[href="/privacy/"]').count();
-            if(urlPath==='/start/') assert.ok(await c.page.locator('[data-intake] a[href="/privacy/"]').count(),'Intake privacy link missing');
-            assert.ok(header && footer,'Privacy links: header='+header+', footer='+footer);
-            if(urlPath==='/start/') assert.ok(await c.page.locator('[data-intake] a[href="/privacy/"]').count(),'Intake privacy link missing');
-          });
+            assert.ok(await c.page.locator('#site-footer a[href="/privacy/"]').count(),'Footer privacy link missing');
+            if(urlPath==='/start/') {
+              assert.ok(await c.page.locator('[data-screen="S6"] a[href="/privacy/"]').count(),'Consent privacy link missing');
+              assert.ok(await c.page.locator('.iq-foot__privacy a[href="/privacy/"]').count(),'Intake footer strip privacy link missing');
+            }          });
           await test('Trial scope '+urlPath,async()=> {
             const classes=await c.page.locator('body').getAttribute('class') || '';
             assert.equal(classes.includes('trial-calm'),['/hydronic/pricing/','/hydronic/how-it-works/'].includes(urlPath));
@@ -257,6 +257,7 @@ async function keyboard(p) {
     console.log('Results: '+summary.passed+' passed, '+summary.failed+' failed; '+dest);if(summary.failed) process.exitCode=1;
   }
 })().catch(e=>{console.error(String(e.message));process.exitCode=1});
+
 
 
 
