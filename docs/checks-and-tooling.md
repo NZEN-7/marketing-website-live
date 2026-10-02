@@ -14,10 +14,12 @@ Two image scripts are PowerShell.
 | `test:leadrow` | Checks the Supabase row for every form: column names, mapping, nulls | After touching `leadRow()` or adding a field |
 | `copy:dump` | Writes the copy-review pack to `.claude/copy-review/` | Before any copy review |
 | `check:cachebust` | Are the `?v=` numbers newer than the files they point at? | Before committing a CSS or JS change |
+| `test:e2e` | Website GPT Dev's Playwright suite (`scripts/test-site-e2e.cjs`, see `scripts/SITE-E2E.md`): a loopback server of the public files, every page at 1280 and 390, the design defaults, keyboard and focus, and every intake path with `/api/` mocked. Needs Chrome installed | Before merging into `develop`; in CI |
+| `test:e2e:url <url>` | The same suite, read-only (GET only, API and cross-origin requests aborted), against the live site or a preview. Add `--design sitewide` once the calm defaults are on that site | After a deploy, or on the develop preview |
 
 ## CI on every PR
 
-`.github/workflows/ci.yml` runs on every pull request and every push to `main`.
+`.github/workflows/ci.yml` runs on every pull request and every push to `main` or `develop`.
 It deploys nothing.
 
 | Job | Runs | Expect |
