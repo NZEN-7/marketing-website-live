@@ -248,6 +248,9 @@ check("no placeholder privacy link on the intake (Nick, 2 Oct: strip it until th
   check("videos: no YouTube iframe on page load", pages.every((h) => !/<iframe[^>]+youtube/i.test(h)));
   check("videos: a play button with the video id, a no-JS link, and video.js", pages.every((h) => /<button type="button" class="video__play" data-yt="[A-Za-z0-9_-]{11}"/.test(h) && /<noscript><a class="video__fallback" href="https:\/\/www\.youtube\.com\/watch\?v=/.test(h) && /\/assets\/js\/video\.js\?v=\d+/.test(h)));
   check("videos: video.js injects the youtube-nocookie player only on click", /addEventListener\("click"/.test(fs.readFileSync(path.join(__dirname, "..", "assets", "js", "video.js"), "utf8")) && /youtube-nocookie\.com\/embed\//.test(fs.readFileSync(path.join(__dirname, "..", "assets", "js", "video.js"), "utf8")));
+  check("videos: the poster is the video's own thumbnail, self-hosted (no ytimg or Google request before play)",
+    pages.every((h) => { const ids = [...h.matchAll(/data-yt="([A-Za-z0-9_-]{11})"[^>]*><img class="video__thumb" src="\/assets\/img\/video\/([A-Za-z0-9_-]{11})\.webp"/g)];
+      return ids.length > 0 && ids.every((m) => m[1] === m[2] && fs.existsSync(path.join(__dirname, "..", "assets", "img", "video", m[2] + ".webp"))) && !/ytimg\.com|img\.youtube\.com/.test(h); }));
 }
 {
   // No third-party fonts on any page or in any animation a page embeds (CTO Re #41.1).

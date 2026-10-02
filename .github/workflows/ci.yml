@@ -45,7 +45,7 @@ jobs:
       - name: "Lead handler: order, test routing, code-only logs, bot screens (71 checks)"
         run: npm run test:handler
 
-      - name: "Intake: routing, phone-or-email, dedupe, leads row, first email, attachments (126 checks)"
+      - name: "Intake: routing, phone-or-email, dedupe, leads row, first email, attachments (127 checks)"
         run: npm run test:intake
 
       - name: "Preview guard: off production, mail to TEST_RECIPIENT only, no insert (16 checks)"
