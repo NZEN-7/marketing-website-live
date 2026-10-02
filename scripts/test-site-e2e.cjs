@@ -145,12 +145,40 @@ async function keyboard(p) {
   assert.deepEqual(details,[],'Visible controls missing from Tab traversal (including same-origin frames)');
   assert.deepEqual([...noRing],[],'Focused controls without visible outline/shadow');
 }
+async function designDefaults(p) {
+  const styles=await p.evaluate(()=> {
+    const trial=document.body.classList.contains('trial-calm') || document.body.classList.contains('trial-cards');
+    // Render ordinary elements to check the default cascade on every page type,
+    // including pages whose real headings use deliberate component styles.
+    const probe=document.createElement('div');probe.innerHTML='<h2>Test heading</h2><h3>Test subheading</h3><div class="card">Test card</div>';
+    document.body.append(probe);
+    const [h2,h3,card]=Array.from(probe.children).map(e=>{const s=getComputedStyle(e);return {size:parseFloat(s.fontSize),weight:s.fontWeight,line:parseFloat(s.lineHeight),gap:parseFloat(s.marginBottom),radius:s.borderTopLeftRadius,padding:s.paddingTop,shadow:s.boxShadow,border:s.borderTopColor};});
+    const root=parseFloat(getComputedStyle(document.documentElement).fontSize);const dark=document.body.classList.contains('dark');probe.remove();
+    return {trial,h2,h3,card,root,dark,width:innerWidth};
+  });
+  assert.equal(styles.trial,false,'Retired trial body class remains');
+  const size=Math.min(2*styles.root,Math.max(1.55*styles.root,.034*styles.width));
+  assert.ok(Math.abs(styles.h2.size-size)<.1,'Default H2 clamp');assert.equal(styles.h2.weight,'700');
+  assert.ok(Math.abs(styles.h2.line-size*1.25)<.1,'Default H2 leading');assert.ok(Math.abs(styles.h2.gap-size*.45)<.1,'Heading-to-text gap');
+  assert.ok(Math.abs(styles.h3.line/styles.h3.size-1.3)<.01,'Default H3 leading');
+  assert.equal(styles.card.radius,'6px');assert.equal(styles.card.padding,'20px');assert.equal(styles.card.shadow,'none');
+  if(styles.dark)assert.ok(styles.card.border.endsWith('0.28)'),'Dark card lighter keyline');
+}
 (async()=> {
   let localServer, browser;
   try {
     if(suite==='local') localServer=await server();
     const base = remote ? remote.href : localServer.url;
     browser=await playwright.chromium.launch({channel:process.env.E2E_BROWSER_CHANNEL || 'chrome',headless:true});
+    if(suite==='local') {
+      for(const urlPath of [...pages().filter(x=>x!=='/pre-order/register-interest/'),'/404.html']) {
+        const c=await context(browser,base,true);
+        try {
+          await c.page.goto(new URL(urlPath,base).href);
+          for(const width of [1280,390])await test('Local site-wide defaults '+urlPath+' '+width+'px',async()=>{await c.page.setViewportSize({width,height:900});await designDefaults(c.page);});
+        } finally {await c.ctx.close();}
+      }
+    }
     if(suite==='url') {
       // The runner does not activate deployed submits, exits, booking links or uploads.
       for(const urlPath of pages().filter(p=>!option('--paths') || option('--paths').split(',').includes(p))) {
@@ -172,7 +200,8 @@ async function keyboard(p) {
               assert.ok(await c.page.locator('[data-screen="S6"] a[href="/privacy/"]').count(),'Consent privacy link missing');
               assert.ok(await c.page.locator('.iq-foot__privacy a[href="/privacy/"]').count(),'Intake footer strip privacy link missing');
             }          });
-          await test('Trial scope '+urlPath,async()=> {
+          await test('Design scope '+urlPath,async()=> {
+            if(option('--design')==='sitewide') return designDefaults(c.page);
             const classes=await c.page.locator('body').getAttribute('class') || '';
             assert.equal(classes.includes('trial-calm'),['/hydronic/pricing/','/hydronic/how-it-works/'].includes(urlPath));
             assert.equal(classes.includes('trial-cards'),urlPath==='/hydronic/pricing/');
@@ -257,11 +286,3 @@ async function keyboard(p) {
     console.log('Results: '+summary.passed+' passed, '+summary.failed+' failed; '+dest);if(summary.failed) process.exitCode=1;
   }
 })().catch(e=>{console.error(String(e.message));process.exitCode=1});
-
-
-
-
-
-
-
-

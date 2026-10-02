@@ -29,3 +29,7 @@ Twelve assertions cover fit, outside area, split-only, renter, booking, explorat
 
 Use only an authorized target URL. The runner does not push, build or deploy, and does not change production source files.
 
+
+## Site-wide design rollout
+
+The local suite also renders default H2/H3/card probes on every canonical page and the 404 page at 1280px and 390px, checks the heading clamp/weight/leading/gap, card radius/padding/keyline and absence of retired body classes. Deliberate legal and component typography retains its specificity. For a deployed rollout use --design sitewide; the default URL mode still checks the current live trial contract. This lets the GET-only live suite remain meaningful before the owner ships the rollout. The probe checks CSS defaults, not the visual balance of every specialized component.
