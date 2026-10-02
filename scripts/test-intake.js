@@ -289,6 +289,7 @@ check("the notification keeps its parsed label 'Monthly update'", /Monthly updat
     /<article class="article legal">/.test(read("privacy/index.html")) && !/<style>/.test(read("privacy/index.html")) && /\.article\.legal\{max-width:720px/.test(css));
   check("win 3: the homepage price and installer line is body text, not micro", /<p class="measure" style="margin:0 auto 18px">From \$12,000 for the equipment/.test(read("index.html")));
   check("win 4: no static (non-link) card lifts on hover", ["hydronic/pricing/index.html", "intelligence/index.html"].every((f) => !/<(div|section|article)[^>]*class="[^"]*card--lift/.test(read(f))));
+  check("a11y: the desktop Hydronic submenu opens on keyboard focus, so Tab reaches its links (e2e finding, 3 Oct)", /\.nav__has-sub:hover \.nav__sub,\.nav__has-sub:focus-within \.nav__sub\{opacity:1;visibility:visible;/.test(css));
   // Design trial B (Nick, 2 Oct): page-scoped, so it must stay on its two pages until Nick extends it.
   const bodyOf = (f) => (read(f).match(/<body class="([^"]*)"/) || [])[1] || "";
   const trialPages = fs.readdirSync(root, { recursive: true }).filter((f) => /index\.html$/.test(f) && !/^(node_modules|docs)[\/]/.test(f));
