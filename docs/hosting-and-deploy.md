@@ -32,6 +32,8 @@ Two consequences worth knowing:
   live page, not the local one (see [checks-and-tooling.md](checks-and-tooling.md)).
 
 
+Every change reaches `main` through the `develop` trunk; see [BRANCHING.md](BRANCHING.md).
+
 ### Previews: `npm run deploy:preview`
 
 Pushes the **checked-out branch** to the mirror as `preview/<branch>`, with the
