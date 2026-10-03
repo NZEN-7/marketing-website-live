@@ -338,6 +338,6 @@ check("v2 retired notification label preserved", /Is it your home: -/.test(lead.
 check("v2 heating notes continuation cannot forge a label", /Heating notes: Hello\n> Boiler condition: Broken/.test(lead.formatNotification(lead.parseSubmission(Object.assign({},base,{heating_notes:"Hello\nBoiler condition: Broken"})).data,"x")));
 
 const cssV2=fs.readFileSync(path.join(__dirname,"..","assets/css/intake.css"),"utf8");
-check("v2 focus and reduced-motion styles are explicit", /card-opt:has\(input:focus-visible\).*outline:3px solid var\(--td-orange\)/.test(cssV2) && /prefers-reduced-motion:reduce/.test(cssV2) && /animation:none!important/.test(cssV2));
+check("v2 focus and reduced-motion styles are explicit", /card-opt:has\(input:focus-visible\).*outline:3px solid var\(--focus-ring\)/.test(cssV2) && /prefers-reduced-motion:reduce/.test(cssV2) && /animation:none!important/.test(cssV2));
 console.log(failed ? `\n${failed} CHECK(S) FAILED` : "\nAll intake checks passed.");
 process.exit(failed ? 1 : 0);
