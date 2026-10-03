@@ -24,7 +24,7 @@
     "test:e2e:url": "node scripts/test-site-e2e.cjs --suite url --url"
   },
   "dependencies": {
-    "nodemailer": "^6.9.15"
+    "nodemailer": "10.0.9"
   },
   "devDependencies": {
     "playwright": "1.62.1"
