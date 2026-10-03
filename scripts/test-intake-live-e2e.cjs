@@ -25,7 +25,7 @@ async function toHeating(p, base) {
       const html = fs.readFileSync(path.join(__dirname, '../start/index.html'), 'utf8');
       assert.ok(!/data-screen="(S9|R1)"|name="tenure"|landlord/.test(html));
       const card = html.split('class="intake-side"')[1].split('</aside>')[0];
-      assert.ok(/href="tel:\+61272283430"/.test(card)); assert.ok(!/12,000/.test(card));
+      assert.ok(/href="tel:\+61272283430"/.test(card)); assert.ok(!/12,000/.test(card)); assert.ok(!/Nick reads every enquiry/.test(card)); assert.ok(/>Talk to Nick</.test(card));
       assert.ok(!/November|installed in February|next winter/.test(html));
     });
     await pageTest('Heating notes: visible label, hint linked, no placeholder, sent with the enquiry', async (p, c, base) => {
