@@ -4,7 +4,8 @@
    One <form> holds every question. Without JavaScript it is the long form
    (SPEC rule 11). With it, this shows one screen at a time, routes with
    intake-route.js, holds photo uploads in memory (resized to ~2,000 px) and
-   sends ONE request at the end: answers + files -> api/lead.js -> one email.
+   sends the enquiry at MATCH, with exits and optional details as follow-ups.
+   API/email behavior is verified locally with mocks.
 
    Not in the prototype (PRD D13): per-screen saves, partial alerts, the
    resume link, Supabase, the customer's first email.
@@ -55,8 +56,7 @@
   function answers() {
     var a = {};
     Object.keys(seen).forEach(function (id) {
-      $$("input, textarea", screens[id] || $('[data-question="' + id + '"]', form)).forEach(function (el) {
-        var question=el.closest("[data-question]"); if (question && question.getAttribute("data-question") !== id) return;
+      $$("input, textarea", screens[id]).forEach(function (el) {
         if (!el.name || el.type === "file" || el.name === "website") return;
         if (el.type === "checkbox") {
           if (!el.checked) return;
@@ -69,12 +69,13 @@
         }
       });
     });
+    if(seen.S3b && subText && subText.value.trim())a.suburb=subText.value.trim();
     return a;
   }
   var counted = {};
   function countQuestions(s) {
-    var ids = [s.getAttribute("data-screen")].concat($$("[data-question]",s).filter(function(q){return !q.hidden;}).map(function(q){return q.getAttribute("data-question");}));
-    ids = ids.filter(function(id){return /^(S(?:[1-8]|4b|1[0-7])|MATCH|MATCH_SHORT|URGENT|DONE|O1|N1)$/.test(id) && !counted[id];});
+    var ids = [s.getAttribute("data-screen")];
+    ids = ids.filter(function(id){return /^(S(?:[1-8]b?|9b|1[0-7][b-d]?)|B2|MATCH|MATCH_SHORT|URGENT|DONE|O1|N1)$/.test(id) && !counted[id];});
     ids.forEach(function(id){counted[id]=true;});
     if (ids.length && navigator.sendBeacon) {
       try { navigator.sendBeacon("/api/intake-view", JSON.stringify({ q: ids })); }
@@ -92,7 +93,6 @@
     s.classList.add("is-current", isBack ? "is-back" : "is-entering");
     s.hidden = false;
     current = id; seen[id] = true;
-    $$("[data-question]", s).forEach(function (q) { if (!q.hasAttribute("data-boiler-part")) seen[q.getAttribute("data-question")] = true; });
     // Reaching the match (or the short match, or the urgent screen) submits the
     // enquiry: the row, Nick's notification and the one first email (Nick, 3 Oct,
     // CTO item 68.1). Once per lead: Back, coming back here or a later exit never
@@ -110,6 +110,9 @@
       li.classList.toggle("is-done", n < step); li.classList.toggle("is-on", n === step);
     });
     var isResult = s.classList.contains("iq--result");
+    var stageQuestions=history.concat([id]).filter(function(q){return R.stepOf(q)===step && /^(S|B2)/.test(q);});
+    $("[data-question-progress]",form).textContent=isResult ? "" : "Question " + stageQuestions.length + " in " + ["About you","Your home","The details"][Math.min(step,3)-1];
+    $$("[data-step-name]",form).forEach(function(li){if(+li.getAttribute("data-step-name")===Math.min(step,3))li.setAttribute("aria-current","step");else li.removeAttribute("aria-current");});
     nav.hidden = (id === "intro");
     btnBack.hidden = history.length === 0 || (sent && isResult);
     btnCont.hidden = isResult;
@@ -117,6 +120,7 @@
     if (id === "URGENT") $("[data-urgent-phone]", s).hidden = !!String(answers().phone || "").trim();
     if (id === "DONE") renderDone();
     toggles();
+    if(id === "S3b") renderSuburbs();
     countQuestions(s);
     var h = $(".iq__q", s); if (h) { h.setAttribute("tabindex", "-1"); h.focus({ preventScroll: true }); }
     window.scrollTo({ top: Math.max(0, $(".intake-layout").getBoundingClientRect().top + window.scrollY - 90), behavior: "auto" });
@@ -124,30 +128,18 @@
   function go(id) { if (current) history.push(current); show(id, false); }
   function back() { if (!history.length) return; show(history.pop(), true); }
 
-  // conditional bits inside screens (JS shows them only when they apply)
+  // Branching changes the next screen, never the current question.
+  // Clear answers to branches that no longer apply after going Back.
   function toggles() {
-    var a = answers(), src = a.source || [], heat = a.heating || [];
-    var ref = $("[data-referrer]", form); if (ref) ref.hidden = !(src.indexOf("friend") !== -1 || src.indexOf("installer") !== -1);
-    var oth = $("[data-other-text]", form); if (oth) oth.hidden = heat.indexOf("other") === -1;
-    var sub = $("[data-suburb-text]", form); if (sub) sub.hidden = outsideAU;
-    // S14 (Nick, 30 Sep): radiators for radiator homes, underfloor area for
-    // underfloor homes, both for both or LPG; radiators when we don't know.
-    var rad = heat.indexOf("boiler_radiators") !== -1, uf = heat.indexOf("boiler_underfloor") !== -1, lpg = heat.indexOf("lpg_boiler") !== -1;
-    var showUf = uf || lpg, showRad = rad || lpg || !uf;
-    var radRow = $("[data-rad-row]", form), ufRow = $("[data-uf-row]", form), ufChip = $("[data-uf-only-chip]", form);
-    if (radRow) radRow.hidden = !showRad;
-    if (ufRow) ufRow.hidden = !showUf;
-    // "Underfloor only" only when we don't know the emitters (Sales review, 7)
-    if (ufChip) ufChip.hidden = rad || uf || lpg;
-    var boiler = R.hasBoiler(a);
-    var part = $("[data-boiler-part]", form);
-    if (part) {
-      var visible = boiler && (!a.intent || a.intent === "fit");
-      var changed = part.hidden === visible; part.hidden = !visible;
-      if (visible) { seen.S8 = true; if (changed) { $("[data-boiler-announcement]", form).textContent = "Two questions about your boiler have appeared below."; if (current === "S7") countQuestions(screens.S7); } }
-      else { $$("input",part).forEach(function(i){i.checked=false;}); delete seen.S8; $("[data-boiler-announcement]", form).textContent = ""; }
-    }
-    [[radRow, showRad], [ufRow, showUf]].forEach(function (x) { if (x[0] && !x[1]) $$("input", x[0]).forEach(function (i) { i.checked = false; }); });
+    var a=answers(), heat=a.heating||[], src=a.source||[];
+    function clear(id) { if(!screens[id])return; $$('input, textarea',screens[id]).forEach(function(i){if(i.type==='radio'||i.type==='checkbox')i.checked=false;else i.value='';});delete seen[id]; }
+    if(!R.hasBoiler(a)|| (a.intent && a.intent!=='fit')) { clear('S8');clear('S9b'); }
+    if(heat.indexOf('other')===-1)clear('S7b');
+    if(src.indexOf('friend')===-1&&src.indexOf('installer')===-1)clear('S6b');
+    var rad=heat.indexOf('boiler_radiators')!==-1,uf=heat.indexOf('boiler_underfloor')!==-1,lpg=heat.indexOf('lpg_boiler')!==-1;
+    if(uf&&!rad&&!lpg)clear('S14b');
+    if(!uf&&!lpg)clear('S14c');
+    var chip=$('[data-uf-only-chip]',form);if(chip)chip.hidden=rad||uf||lpg;
   }
 
   // ---------------------------------------------------------------- validation
@@ -182,12 +174,11 @@
       names.forEach(function(f){if(!f.id)f.id="contact-"+f.name;});
       var nameBad=names.some(function(f){return !f.value.trim();});
       if(nameBad)missing.push({field:names.filter(function(f){return !f.value.trim();})[0],text:"Add your name."});
-      var email=$("[name=email]",form);if(!email.id)email.id="contact-email";
-      if(!EMAIL_OK(email.value))missing.push({field:email,text:"Check your email address."});
-      names.concat([email]).forEach(function(f){var bad=f===email?!EMAIL_OK(f.value):!f.value.trim();if(bad){f.setAttribute("aria-invalid","true");f.setAttribute("aria-describedby",summary.id);}else{f.removeAttribute("aria-invalid");f.removeAttribute("aria-describedby");}});
+      names.forEach(function(f){var bad=!f.value.trim();if(bad){f.setAttribute("aria-invalid","true");f.setAttribute("aria-describedby",summary.id);}else{f.removeAttribute("aria-invalid");f.removeAttribute("aria-describedby");}});
       summary.replaceChildren();missing.forEach(function(item){var link=document.createElement("a");link.href="#"+item.field.id;link.textContent=item.text;link.addEventListener("click",function(e){e.preventDefault();item.field.focus();});summary.appendChild(link);});summary.hidden=!missing.length;
       if(missing.length){summary.setAttribute("tabindex","-1");summary.focus();}return !missing.length;
     }
+    if (id === "S2") return err("email", !EMAIL_OK(a.email));
     if (id === "S3") return outsideAU || err("postcode", !/^\d{4}$/.test(a.postcode || ""));
     if (id === "S4") {   // no Skip here (Nick): a number, or "I'd prefer email"
       err("phone_empty", false); err("phone", false);
@@ -215,13 +206,19 @@
     var st = R.stateFor(v);
     $("[data-state]", form).value = st;
     $("[data-remote]", form).value = REMOTE[v] ? "true" : "";
+    if (v.length === 4) err("postcode", false);
+    subText.value="";delete seen.S3b;
+  }
+  function renderSuburbs() {
+    var v=pc.value, previous=subText.value;
     subBox.innerHTML = '<legend class="sr-only">Suburb</legend>';
     var list = v.length === 4 ? (SUBURBS[v] || []) : [];
     subBox.hidden = list.length < 2;
-    if (list.length) subText.value = list[0];
+    if (list.length && !previous) subText.value = list[0];
+    $("[data-suburb-text]",form).hidden = list.length > 1;
     if (list.length > 1) list.forEach(function (name, i) {
       var l = document.createElement("label"); l.className = "card-opt chip";
-      l.innerHTML = '<input type="radio" name="suburb_pick"' + (i === 0 ? " checked" : "") + '><span class="card-opt__t"></span>';
+      l.innerHTML = '<input type="radio" name="suburb_pick"' + ((previous ? previous === name : i === 0) ? " checked" : "") + '><span class="card-opt__t"></span>';
       l.querySelector(".card-opt__t").textContent = name;
       l.querySelector("input").addEventListener("change", function () { subText.value = name; });
       subBox.appendChild(l);
@@ -446,9 +443,6 @@
   var kbPick = false;
   form.addEventListener("keydown", function (e) {
     var t = e.target;
-    // Grouped screens: Enter on a choice never moves on (Continue only, CTO a11y 1),
-    // but Enter in a text field still means Continue, as on every other screen.
-    if (e.key === "Enter" && (t.type === "radio" || t.type === "checkbox") && t.closest("[data-grouped]")) { e.preventDefault(); return; }
     var auto = t.type === "radio" && t.closest("[data-auto]");
     if (auto && /^(Arrow(Up|Down|Left|Right)|Home|End)$/.test(e.key)) { kbPick = true; clearTimeout(advanceTimer); return; }
     if (auto && e.key === " " && t.checked) { e.preventDefault(); clearTimeout(advanceTimer); advance(); return; }
