@@ -53,58 +53,44 @@
   }
 
   /** Next screen after `done`, given answers `a`. */
-  function afterHeating(a) {
-    if (notOurProduct(a)) return "N1";
-    if (isUrgent(a)) return "URGENT";
-    if (a.intent === "explore") return "MATCH_SHORT";
-    if (a.intent === "book") return "MATCH";
-    return "S10";
-  }
-  function needsBoiler(a) { return hasBoiler(a) && (!a.intent || a.intent === "fit"); }
-  function radiators(a) { var h=list(a.heating); return h.indexOf("boiler_radiators")!==-1 || h.indexOf("lpg_boiler")!==-1 || h.indexOf("boiler_underfloor")===-1; }
-  function underfloor(a) { var h=list(a.heating); return h.indexOf("boiler_underfloor")!==-1 || h.indexOf("lpg_boiler")!==-1; }
   function next(done, a) {
+    var intent = a.intent || "fit";                  // no answer on S5 = the full path
     switch (done) {
       case "intro": return "S1";
       case "S1": return "S2";
-      case "S2": return "S2b";
-      case "S2b": return "S3";
-      case "S3": return a.state === "OS" ? "S6" : "S3b";
-      case "S3b": return inArea(a) ? "S4" : "S6";
+      case "S2": return "S3";
+      case "S3": return inArea(a) ? "S4" : "S6";      // out of area and NZ: no phone or intent, straight to consent (Sales review, 8)
       case "S4": return String(a.phone || "").trim() ? "S4b" : (inArea(a) ? "S5" : "S6");
-      case "S4b": return inArea(a) ? "S5" : "S6";
+      case "S4b": return inArea(a) ? "S5" : "S6";   // out of area: no intent question, straight to the save
       case "S5": return "S6";
-      case "S6": return list(a.source).some(function(s){return s === "friend" || s === "installer";}) ? "S6b" : (inArea(a) ? "S7" : "O1");
-      case "S6b": return inArea(a) ? "S7" : "O1";
-      case "S7": return needsBoiler(a) ? "S8" : "B2";
-      case "S8": return "S9b";
-      case "S9b": return "B2";
-      case "B2": return list(a.heating).indexOf("other")!==-1 ? "S7b" : afterHeating(a);
-      case "S7b": return afterHeating(a);
+      case "S6": return inArea(a) ? "S7" : "O1";      // O1 comes after step 1 is saved
+      case "S7":
+        if (notOurProduct(a)) return "N1";
+        if (intent === "explore") return "MATCH_SHORT";
+        // The own-or-rent question (S9) and the renter close (R1) are gone (Nick, 3 Oct)
+        if (intent === "urgent") return "URGENT";
+        if (intent === "book") return "MATCH";
+        return hasBoiler(a) ? "S8" : "S10";
+      case "S8": return isUrgent(a) ? "URGENT" : "S10";   // "Broken, or about to go" jumps to the urgent screen
       case "S10": return "S11";
       case "S11": return "S12";
       case "S12": return "S13";
-      case "S13": return "S13b";
-      case "S13b": return "MATCH";
-      case "MATCH": case "MATCH_SHORT": return "S14";
-      case "S14": return radiators(a) ? "S14b" : (underfloor(a) ? "S14c" : "S14d");
-      case "S14b": return underfloor(a) ? "S14c" : "S14d";
-      case "S14c": return "S14d";
-      case "S14d": return "S15";
+      case "S13": return "MATCH";
+      case "MATCH": return "S14";                     // "Help us prepare"
+      case "MATCH_SHORT": return "S14";               // "Tell us a bit more"
+      case "S14": return "S15";
       case "S15": return "S16";
-      case "S16": return "S16b";
-      case "S16b": return "S16c";
-      case "S16c": return "S16d";
-      case "S16d": return "S17";
+      case "S16": return "S17";
       case "S17": return "DONE";
       default: return null;
     }
   }
-  /** Stage names describe the journey; split questions retain their IDs. */
+
+  /** Step (1-4) a screen belongs to, for the progress bar. */
   function stepOf(screen) {
     if (/^S[1-6]b?$/.test(screen) || screen === "intro") return 1;
-    if (/^S([78]b?|9b|1[0-3]b?)$/.test(screen) || screen === "B2" || screen === "URGENT" || /^MATCH/.test(screen)) return 2;
-    if (/^S1[4-7][b-d]?$/.test(screen)) return 3;
+    if (/^S(7|8|9|1[0-3])$/.test(screen) || screen === "URGENT" || /^MATCH/.test(screen)) return 2;
+    if (/^S1[4-7]$/.test(screen)) return 3;
     return 4;
   }
 

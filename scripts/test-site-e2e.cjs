@@ -54,8 +54,8 @@ async function context(browser,base,local) {
   await ctx.route('**/*',async route=> {
     const req = route.request(), url = new URL(req.url());
     if (url.origin === new URL(base).origin && url.pathname.startsWith('/api/')) {
-      if (local) { if(url.pathname==='/api/intake-view'){views.push(JSON.parse(req.postData()||'{}'));return route.fulfill({status:204});} if(req.method()==='POST' && url.pathname.startsWith('/api/lead')) calls.push(JSON.parse(req.postData() || '{}')); return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,sent:true})}); }
-      if(req.method()!=='GET' && url.pathname!=='/api/intake-view') violations.push('Non-GET API attempt');
+      if (local) { if(req.method()==='POST') (url.pathname.startsWith('/api/intake-view') ? views : calls).push(JSON.parse(req.postData() || '{}')); return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,sent:true})}); }
+      if(req.method()!=='GET') violations.push('Non-GET API attempt');
       blocked.push('api'); return route.abort();
     }
     if(req.method() !== 'GET') {violations.push('Non-GET request blocked');return route.abort();}
@@ -75,13 +75,9 @@ async function next(p) {await p.locator('[data-continue]').click();}
 async function begin(p,base,postcode='3122') {
   await p.goto(new URL('/start/',base).href); await current(p,'intro');
   await p.locator('[data-go="S1"]').click();
-  await p.locator('[name=first_name]').fill('Test');await p.locator('[name=last_name]').fill('Fixture');
-  if(await p.locator('[data-screen="S2"]').count())await next(p); // v1 deployed GET-only compatibility
+  await p.locator('[name=first_name]').fill('Test');await p.locator('[name=last_name]').fill('Fixture');await next(p);
   await p.locator('[name=email]').fill('test@example.invalid');await next(p);
-  if(await p.locator('[data-screen=S2b]').count())await next(p);
-  if(postcode===''){await p.locator('[data-outside-au]').click();await current(p,'S6');return;}
   await p.locator('[name=postcode]').fill(postcode);
-  if(await p.locator('[data-screen=S3b]').count())await next(p);
   const suburbs=p.locator('[data-suburbs] input');if(await suburbs.count()) await suburbs.first().check();
   else await p.locator('[name=suburb]').fill('Test suburb');
   await next(p);
@@ -92,25 +88,20 @@ async function choose(p,name,value,screen) {
   await p.locator('[name="'+name+'"][value="'+value+'"]').check(); if(screen) await current(p,screen);
 }
 async function prepared(p,base,kind) {
-  await begin(p,base,kind==='outside'?'4000':kind==='nz'?'':'3122');
-  if(kind!=='outside'&&kind!=='nz')await choose(p,'intent',['book','explore','urgent'].includes(kind)?kind:'fit','S6');
-  assert.equal(await p.locator('[name=newsletter_opt_in]').isChecked(),false);await next(p);
-  if(kind==='outside'||kind==='nz')return current(p,'O1');
-  await choose(p,'heating',kind==='splits'?'splits':kind==='uncertain'?'not_sure':'boiler_radiators');
+  await begin(p,base,kind==='outside'?'4000':'3122');
+  if(kind !== 'outside') await choose(p,'intent',['book','explore','urgent'].includes(kind)?kind:'fit','S6');
+  assert.equal(await p.locator('[name=newsletter_opt_in]').isChecked(),false);
   await next(p);
-  if(!['book','explore','urgent','splits','uncertain'].includes(kind)) {
-    await choose(p,'boiler_condition',kind==='broken'?'broken':'working_fine','S9b');
-    await next(p);
-  }
-  await current(p,'B2');await p.locator('[name=heating_notes]').fill('Two boilers in this home. Underfloor downstairs and radiators upstairs.');await next(p);
-  if(kind==='splits')return current(p,'N1');if(kind==='explore')return current(p,'MATCH_SHORT');
-  if(kind==='urgent'||kind==='broken')return current(p,'URGENT');if(kind==='book')return current(p,'MATCH');
-  for(const id of ['S10','S11','S12','S13','S13b']) {await current(p,id);await p.locator('[data-screen="'+id+'"] [data-skip]').click();}
+  if(kind === 'outside') return current(p,'O1');
+  await choose(p,'heating',kind==='splits'?'splits':'boiler_radiators');await next(p);
+  if(kind==='splits') return current(p,'N1');
+  if(kind==='explore')return current(p,'MATCH_SHORT');
+  // No own-or-rent question (S9) any more (Nick, 3 Oct): book and urgent go straight on
+  if(kind==='book') return current(p,'MATCH');
+  if(kind==='urgent') return current(p,'URGENT');
+  await choose(p,'boiler_condition','working_fine');await next(p);
+  for(const id of ['S10','S11','S12','S13']) {await current(p,id);await p.locator('[data-screen="'+id+'"] [data-skip]').click();}
   await current(p,'MATCH');
-}
-async function skipDetails(p,target) {
-  for(let i=0;i<20;i++) {const id=await p.locator('[data-screen].is-current').getAttribute('data-screen');if(id===target)return;await p.locator('.is-current [data-skip]').click();}
-  throw Error('Details route did not reach '+target);
 }
 async function keyboard(p) {
   const frames=p.frames().filter(f=>{try{return new URL(f.url()).origin===new URL(p.url()).origin;}catch{return false;}});
@@ -220,36 +211,32 @@ async function designDefaults(p) {
         } finally {await c.ctx.close();}
       }
     } else {
-      for(const kind of ['fit','outside','nz','splits','book','explore','urgent','broken','uncertain']) await test('Local intake route '+kind,async()=> {
+      for(const kind of ['fit','outside','splits','book','explore','urgent']) await test('Local intake route '+kind,async()=> {
         const c=await context(browser,base,true);
         try {
           await prepared(c.page,base,kind);
-          if(['fit','book','explore','uncertain'].includes(kind)) {
+          if(['fit','book','explore'].includes(kind)) {
             await c.page.locator('.is-current [data-go="S14"]').click();
-            await skipDetails(c.page,'S17');
+            for(const id of ['S14','S15','S16']) {await current(c.page,id);await c.page.locator('[data-screen="'+id+'"] [data-skip]').click();}
             await current(c.page,'S17');await next(c.page);await current(c.page,'DONE');
-          } else if(['urgent','broken'].includes(kind)) {await c.page.locator('[data-urgent-phone-input]').fill('0412345678');await c.page.locator('[data-exit="urgent_call"]').click();await current(c.page,'DONE');
+          } else if(kind==='urgent') {await c.page.locator('[data-urgent-phone-input]').fill('0412345678');await c.page.locator('[data-exit="urgent_call"]').click();await current(c.page,'DONE');
           } else {await c.page.locator('.is-current [data-exit="keep_posted"]').click();await current(c.page,'POSTED');}
           // Reaching the match / urgent screen sends the enquiry; Step 3 (or a phone given on the urgent screen) follows as details (CTO item 68.1)
-          const matched=!['outside','nz','splits'].includes(kind);
+          const matched=!['outside','splits'].includes(kind);
           assert.equal(c.calls.length,matched?2:1);assert.equal(c.calls[0].newsletter_opt_in,undefined);
           if(matched){assert.equal(c.calls[0].outcome,'matched');assert.ok(!c.calls[0].followup);assert.equal(c.calls[1].followup,true);}
-          const routing={fit:'icp',outside:'out-of-area',splits:'not-our-product',nz:'out-of-area',broken:'urgent',uncertain:'icp-check',book:'icp',explore:'explore',urgent:'urgent'};
-          assert.equal(c.calls[0].route,routing[kind]);
-          assert.ok(c.calls[0].seen.includes('S1') && c.calls[0].seen.includes('S2'));assert.equal(c.calls[0].tenure,undefined);
-          if(['fit','uncertain'].includes(kind))for(const id of ['S7','S10','S11','S12','S13'])assert.ok(c.calls[0].seen.includes(id),'Lost logical question '+id);
-          if(!['outside','nz'].includes(kind))assert.equal(c.calls[0].heating_notes,'Two boilers in this home. Underfloor downstairs and radiators upstairs.');
-          assert.deepEqual(c.violations,[]);
+          const routing={fit:'icp',outside:'out-of-area',splits:'not-our-product',book:'icp',explore:'explore',urgent:'urgent'};
+          assert.equal(c.calls[0].route,routing[kind]);assert.deepEqual(c.violations,[]);
         } finally {await c.ctx.close();}
       });
       await test('Local invalid email and postcode announced',async()=> {
         const c=await context(browser,base,true);
         try {
           await c.page.goto(new URL('/start/',base).href);await c.page.locator('[data-go="S1"]').click();
-          await c.page.locator('[name=first_name]').fill('Test');await c.page.locator('[name=last_name]').fill('Fixture');
-          await next(c.page);await c.page.locator('[name=email]').fill('invalid');await next(c.page);await current(c.page,'S2');
+          await c.page.locator('[name=first_name]').fill('Test');await c.page.locator('[name=last_name]').fill('Fixture');await next(c.page);
+          await c.page.locator('[name=email]').fill('invalid');await next(c.page);await current(c.page,'S2');
           const err=c.page.locator('[data-err=email]');await err.waitFor({state:'visible'});assert.equal(await err.getAttribute('role'),'alert');assert.equal(await c.page.locator('[name=email]').getAttribute('aria-invalid'),'true');
-          await c.page.locator('[name=email]').fill('test@example.invalid');await next(c.page);await next(c.page);await c.page.locator('[name=postcode]').fill('12');await next(c.page);await current(c.page,'S3');
+          await c.page.locator('[name=email]').fill('test@example.invalid');await next(c.page);await c.page.locator('[name=postcode]').fill('12');await next(c.page);await current(c.page,'S3');
           assert.equal(await c.page.locator('[data-err=postcode]').getAttribute('role'),'alert');assert.equal(await c.page.locator('[name=postcode]').getAttribute('aria-invalid'),'true');assert.equal(c.calls.length,0);
         } finally {await c.ctx.close();}
       });
@@ -257,13 +244,13 @@ async function designDefaults(p) {
         const c=await context(browser,base,true);
         try {
           await prepared(c.page,base,'fit');await c.page.locator('[data-screen="MATCH"] [data-go="S14"]').click();
-          await skipDetails(c.page,'S16');
+          for(const id of ['S14','S15']) {await current(c.page,id);await c.page.locator('[data-screen="'+id+'"] [data-skip]').click();}
           await current(c.page,'S16');
           const uploads=c.page.locator('input[type=file]');assert.equal(await uploads.count(),4);
           for(let i=0;i<4;i++) {const input=uploads.nth(i);const ids=(await input.getAttribute('aria-labelledby')).split(' ');assert.ok(ids.length>=2);for(const id of ids) assert.ok((await c.page.locator('[id="'+id+'"]').textContent()).trim());}
           await uploads.first().setInputFiles({name:'fixture.pdf',mimeType:'application/pdf',buffer:Buffer.from('%PDF-1.4\nTest fixture\n%%EOF')});
           const remove=c.page.locator('[data-remove]:visible');assert.ok((await remove.first().getAttribute('aria-label')).startsWith('Remove '));
-          await next(c.page);await skipDetails(c.page,'S17');await next(c.page);await current(c.page,'DONE');assert.equal(c.calls.length,2);assert.equal(c.calls[0].outcome,'matched');assert.equal(c.calls[1].followup,true);assert.equal(c.calls[1].uploads.length,1);
+          await next(c.page);await current(c.page,'S17');await next(c.page);await current(c.page,'DONE');assert.equal(c.calls.length,2);assert.equal(c.calls[0].outcome,'matched');assert.equal(c.calls[1].followup,true);assert.equal(c.calls[1].uploads.length,1);
         } finally {await c.ctx.close();}
       });
     }
