@@ -73,7 +73,7 @@
      95. Measured in-browser, 50ch = 587px = ~75 characters, which is the top
      of the comfortable range. The site's default prose column was 91. */
   --measure:50ch;
-  --radius:14px;
+  --radius:6px;
   --radius-sm:9px;
   --shadow:0 10px 34px rgba(29,30,28,.10);
   --shadow-lg:0 20px 60px rgba(29,30,28,.18);
@@ -1246,7 +1246,7 @@ body.dark .next-orange .btn--ghost:hover,
      dark, so 70 moves the many by 2px and the homepage by 6. */
   --sec:70px;--sec-sm:42px;
   --anchor-offset:calc(var(--header-h) + 20px);
-  /* Radii. --radius 14, --radius-sm 9 and --btn-radius 8 already existed;
+  /* Radii. --radius 6, --radius-sm 9 and --btn-radius 8 already existed;
      these are the three literals the file kept reaching for instead. */
   --radius-lg:22px;--radius-xs:6px;--radius-pill:999px;
   /* Shadows. Twelve literals collapsed to four intents. The cream panels were
@@ -1486,7 +1486,7 @@ body.legal-page p,body.legal-page li{orphans:3;widows:3;}
 body h2{font-weight:700;font-size:clamp(1.55rem,3.4vw,2rem);line-height:1.25;letter-spacing:-.005em;margin-bottom:.45em;}
 body h3{font-weight:700;line-height:1.3;margin-bottom:.4em;}
 body p + h3,body ul + h3{margin-top:1.4em;}
-.card{border-radius:6px;padding:20px;box-shadow:none;}
+.card{border-radius:var(--radius);padding:20px;box-shadow:none;}
 body.dark .card:not(.card--orange){border-color:rgba(var(--td-orange-rgb),.28);}
 /* Tap targets (CTO item 54.3, 3 Oct): the shared header and footer controls get an invisible
    hit area of at least 44x44px, so nothing moves on screen. On touch screens the footer link rows
