@@ -496,5 +496,8 @@
     });
   });
   form.classList.add("is-stepped");
+  // Nick compares two looks on the preview (CTO item 68.2): ?look=light or ?look=quiet
+  var look = (location.search.match(/[?&]look=(light|quiet)(?:&|$)/) || [])[1];
+  if (look) document.body.classList.add("look-" + look);
   show("intro", false);
 })();
