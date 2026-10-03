@@ -220,3 +220,40 @@ html:not(.js) .drop__done{display:none;}
 .intake-page .intake-contact a{min-height:44px;display:inline-flex;align-items:center;}
 
 .intake-page .fld > label{font-size:.9rem;font-weight:700;}
+/* ---- Two looks for Nick to compare (CTO item 68.2, 3 Oct): /start/?look=light and
+   /start/?look=quiet. Without the parameter the form is as before. Nick picks one;
+   the other is then removed. Contrast: text AA, focus ring and state cues >= 3:1. */
+/* (A) light: a white form panel on the dark site */
+body.look-light .intake-layout{
+  --iq-surface:#fff;--iq-surface-2:#fff4e6;--iq-line:#d6cfc8;--iq-ink:#1c1514;--iq-muted:#5c524b;
+  --look-state:#b35c00;   /* selected border and tick: 4.7:1 on white */
+  --look-focus:#9a4a00;   /* focus ring: 6.3:1 on white, 5.8:1 on the tint */
+  background:#fff;color:var(--iq-ink);border-radius:var(--radius);padding:28px clamp(18px,4vw,40px) 32px;
+}
+body.look-light .intake-layout h1,body.look-light .intake-layout h2,body.look-light .intake-layout h3,body.look-light .intake-layout h4,
+body.look-light .intake-layout legend,body.look-light .intake-layout .card-opt__t{color:var(--iq-ink);}
+body.look-light .intake-layout .card-opt{background:#fff;border:1px solid var(--iq-line);color:var(--iq-ink);}
+body.look-light .intake-layout .card-opt:hover{border-color:#8f8780;}
+body.look-light .intake-layout .card-opt:has(input:checked){background:var(--iq-surface-2);border:2px solid var(--look-state);}
+body.look-light .intake-layout .card-opt__tick{border-color:#8f8780;}
+body.look-light .intake-layout .card-opt:has(input:checked) .card-opt__tick{background:var(--look-state);border-color:var(--look-state);}
+body.look-light .intake-layout .card-opt:has(input:checked) .card-opt__tick::after{border-color:#fff;}
+body.look-light .intake-layout .card-opt.chip:has(input:checked)::after{color:var(--look-state);}
+body.look-light .intake-layout .card-opt:has(input:focus-visible),
+body.look-light .intake-layout .fld input:focus,body.look-light .intake-layout .fld textarea:focus,
+body.look-light .intake-layout .linkbtn:focus-visible,body.look-light .intake-layout a:focus-visible,
+body.look-light .intake-layout .btn:focus-visible{outline:3px solid var(--look-focus);outline-offset:3px;}
+body.look-light .intake-layout .fld input,body.look-light .intake-layout .fld textarea{background:#fff;color:var(--iq-ink);border:1px solid #8f8780;}
+body.look-light .intake-layout .tick input{accent-color:var(--look-state);}
+body.look-light .intake-layout .btn--ghost-light{color:var(--iq-ink);border-color:var(--iq-ink);background:transparent;}
+body.look-light .intake-layout .iq__summary{border-color:#b3261e;}
+body.look-light .intake-layout .iq__summary a,body.look-light .intake-layout .iq__err{color:#b3261e;}
+body.look-light .intake-layout .iq-progress__bar li.is-done{border-top-color:var(--iq-ink);}
+body.look-light .intake-layout .match-card,body.look-light .intake-layout .upslot,body.look-light .intake-layout .iq__consent{background:#fff;border-color:var(--iq-line);}
+@media(max-width:520px){body.look-light .intake-layout{padding:22px 16px 26px;border-radius:0;margin:0 -16px;}}
+/* (B) dark kept, quieter: no fill on unselected cards, the selected one a tonal step lighter */
+body.look-quiet .intake-layout{--iq-surface:transparent;}
+body.look-quiet .intake-layout .card-opt{background:transparent;border:1px solid var(--iq-line);}
+body.look-quiet .intake-layout .card-opt:hover{border-color:rgba(255,255,255,.35);}
+body.look-quiet .intake-layout .card-opt:has(input:checked){background:#241b15;border:2px solid var(--td-orange);}
+body.look-quiet .intake-layout .match-card,body.look-quiet .intake-layout .upslot,body.look-quiet .intake-layout .iq__consent{background:transparent;}
