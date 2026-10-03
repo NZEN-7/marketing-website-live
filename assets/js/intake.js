@@ -53,7 +53,8 @@
   function answers() {
     var a = {};
     Object.keys(seen).forEach(function (id) {
-      $$("input, textarea", screens[id]).forEach(function (el) {
+      $$("input, textarea", screens[id] || $('[data-question="' + id + '"]', form)).forEach(function (el) {
+        var question=el.closest("[data-question]"); if (question && question.getAttribute("data-question") !== id) return;
         if (!el.name || el.type === "file" || el.name === "website") return;
         if (el.type === "checkbox") {
           if (!el.checked) return;
@@ -68,24 +69,35 @@
     });
     return a;
   }
+  var counted = {};
+  function countQuestions(s) {
+    var ids = [s.getAttribute("data-screen")].concat($$("[data-question]",s).filter(function(q){return !q.hidden;}).map(function(q){return q.getAttribute("data-question");}));
+    ids = ids.filter(function(id){return /^(S(?:[1-8]|4b|1[0-7])|MATCH|MATCH_SHORT|URGENT|DONE|O1|N1)$/.test(id) && !counted[id];});
+    ids.forEach(function(id){counted[id]=true;});
+    if (ids.length && navigator.sendBeacon) {
+      try { navigator.sendBeacon("/api/intake-view", JSON.stringify({ q: ids })); }
+      catch (_) { /* Counting must never interrupt the form. */ }
+    }
+  }
   function first() { var v = ($("[name=first_name]", form) || {}).value || ""; return v.trim().split(/\s+/)[0]; }
 
   // ---------------------------------------------------------------- display
-  var LABELS = { 1: "Let's get to know you", 2: "Great start. Let's check the fit", 3: "Nearly there", 4: "All done" };
   function show(id, isBack) {
     if (!screens[id]) return;
     clearTimeout(advanceTimer);
-    Object.keys(screens).forEach(function (k) { screens[k].classList.remove("is-current", "is-entering", "is-back"); });
+    Object.keys(screens).forEach(function (k) { screens[k].hidden = true; screens[k].classList.remove("is-current", "is-entering", "is-back"); });
     var s = screens[id];
     s.classList.add("is-current", isBack ? "is-back" : "is-entering");
+    s.hidden = false;
     current = id; seen[id] = true;
+    $$("[data-question]", s).forEach(function (q) { if (!q.hasAttribute("data-boiler-part")) seen[q.getAttribute("data-question")] = true; });
+
     var f = first();
     $$("[data-first]", form).forEach(function (el) { el.textContent = f; });
     $$("[data-first-prefix]", form).forEach(function (el) { el.hidden = !f; });
     var step = R.stepOf(id);
     progress.hidden = (id === "intro");
-    $("[data-progress-label]", form).textContent = LABELS[step];
-    $("[data-progress-count]", form).textContent = "Step " + step + " of 4";
+    $("[data-progress-count]", form).textContent = "Step " + Math.min(step, 3) + " of 3: " + ["About you", "Your home", "The details"][Math.min(step,3)-1];
     $$("[data-step-name]", form).forEach(function (li) {
       var n = +li.getAttribute("data-step-name");
       li.classList.toggle("is-done", n < step); li.classList.toggle("is-on", n === step);
@@ -98,8 +110,9 @@
     if (id === "URGENT") $("[data-urgent-phone]", s).hidden = !!String(answers().phone || "").trim();
     if (id === "DONE") renderDone();
     toggles();
+    countQuestions(s);
     var h = $(".iq__q", s); if (h) { h.setAttribute("tabindex", "-1"); h.focus({ preventScroll: true }); }
-    window.scrollTo({ top: Math.max(0, form.getBoundingClientRect().top + window.scrollY - 90), behavior: "auto" });
+    window.scrollTo({ top: Math.max(0, $(".intake-layout").getBoundingClientRect().top + window.scrollY - 90), behavior: "auto" });
   }
   function go(id) { if (current) history.push(current); show(id, false); }
   function back() { if (!history.length) return; show(history.pop(), true); }
@@ -119,10 +132,14 @@
     if (ufRow) ufRow.hidden = !showUf;
     // "Underfloor only" only when we don't know the emitters (Sales review, 7)
     if (ufChip) ufChip.hidden = rad || uf || lpg;
-    // R1: "replaces the boiler" only fits when there is one (Sales review, 11)
     var boiler = R.hasBoiler(a);
-    $$("[data-r1-boiler]", form).forEach(function (el) { el.hidden = !boiler; });
-    $$("[data-r1-house]", form).forEach(function (el) { el.hidden = boiler; });
+    var part = $("[data-boiler-part]", form);
+    if (part) {
+      var visible = boiler && (!a.intent || a.intent === "fit");
+      var changed = part.hidden === visible; part.hidden = !visible;
+      if (visible) { seen.S8 = true; if (changed) { $("[data-boiler-announcement]", form).textContent = "Two questions about your boiler have appeared below."; if (current === "S7") countQuestions(screens.S7); } }
+      else { $$("input",part).forEach(function(i){i.checked=false;}); delete seen.S8; $("[data-boiler-announcement]", form).textContent = ""; }
+    }
     [[radRow, showRad], [ufRow, showUf]].forEach(function (x) { if (x[0] && !x[1]) $$("input", x[0]).forEach(function (i) { i.checked = false; }); });
   }
 
@@ -132,7 +149,7 @@
   // An error is announced when it appears (role=alert) and tied to its field
   // (aria-invalid + aria-describedby), so a screen reader hears it (a11y pass, 2 Oct).
   var ERR_FIELD = { email: "[name=email]", postcode: "[name=postcode]", phone: "[name=phone]", phone_empty: "[name=phone]",
-    urgent_phone: "[data-urgent-phone-input]", landlord: "[name=landlord_email]" };
+    urgent_phone: "[data-urgent-phone-input]" };
   function err(name, on) {
     var e = $('[data-err="' + name + '"]', form);
     if (e) {
@@ -153,15 +170,16 @@
   function valid(id) {
     var a = answers();
     if (id === "S1") {
-      var ok = !!(a.first_name && a.last_name);
-      $$("input", screens.S1).forEach(function (i) { i.setAttribute("aria-invalid", i.value.trim() ? "false" : "true"); });
-      if (!ok) { var m = $$("input", screens.S1).filter(function (i) { return !i.value.trim(); })[0]; if (m) m.focus(); }
-      return ok;
-    }
-    if (id === "S2") {
-      var okE = err("email", !EMAIL_OK(a.email || ""));
-      if (!okE) $("[name=email]", form).focus();
-      return okE;
+      var missing = [], summary = $(".iq__summary",screens.S1);
+      var names = [$("[name=first_name]",form),$("[name=last_name]",form)];
+      names.forEach(function(f){if(!f.id)f.id="contact-"+f.name;});
+      var nameBad=names.some(function(f){return !f.value.trim();});
+      if(nameBad)missing.push({field:names.filter(function(f){return !f.value.trim();})[0],text:"Add your name."});
+      var email=$("[name=email]",form);if(!email.id)email.id="contact-email";
+      if(!EMAIL_OK(email.value))missing.push({field:email,text:"Check your email address."});
+      names.concat([email]).forEach(function(f){var bad=f===email?!EMAIL_OK(f.value):!f.value.trim();if(bad){f.setAttribute("aria-invalid","true");f.setAttribute("aria-describedby",summary.id);}else{f.removeAttribute("aria-invalid");f.removeAttribute("aria-describedby");}});
+      summary.replaceChildren();missing.forEach(function(item){var link=document.createElement("a");link.href="#"+item.field.id;link.textContent=item.text;link.addEventListener("click",function(e){e.preventDefault();item.field.focus();});summary.appendChild(link);});summary.hidden=!missing.length;
+      if(missing.length){summary.setAttribute("tabindex","-1");summary.focus();}return !missing.length;
     }
     if (id === "S3") return outsideAU || err("postcode", !/^\d{4}$/.test(a.postcode || ""));
     if (id === "S4") {   // no Skip here (Nick): a number, or "I'd prefer email"
@@ -356,7 +374,7 @@
   }
   // Every control that sends, locked while a send is out (Sales review, 1)
   function lock(on) {
-    [btnCont, btnBack].concat($$("button[data-exit], button[data-go], [data-landlord-share]", form))
+    [btnCont, btnBack].concat($$("button[data-exit], button[data-go]", form))
       .forEach(function (b) { b.disabled = on; });
     form.classList.toggle("is-sending", on);
   }
@@ -409,7 +427,9 @@
   // Enter (or Continue) confirms. A tap or click still moves on after the beat.
   var kbPick = false;
   form.addEventListener("keydown", function (e) {
-    var t = e.target, auto = t.type === "radio" && t.closest("[data-auto]");
+    var t = e.target;
+    if (e.key === "Enter" && t.tagName === "INPUT" && t.closest("[data-grouped]")) { e.preventDefault(); return; }
+    var auto = t.type === "radio" && t.closest("[data-auto]");
     if (auto && /^(Arrow(Up|Down|Left|Right)|Home|End)$/.test(e.key)) { kbPick = true; clearTimeout(advanceTimer); return; }
     if (auto && e.key === " " && t.checked) { e.preventDefault(); clearTimeout(advanceTimer); advance(); return; }
     if (auto && e.key === "Enter") { e.preventDefault(); clearTimeout(advanceTimer); advance(); return; }   // same as Continue
@@ -427,7 +447,7 @@
   var pref = $("[data-prefer-email]", form);
   if (pref) pref.addEventListener("click", function () { $("[data-contact-pref]", form).value = "email"; $("[name=phone]", form).value = ""; go(nextOf("S4")); });
   $("[name=phone]", form).addEventListener("input", function () { $("[data-contact-pref]", form).value = this.value.trim() ? "phone" : ""; err("phone_empty", false); });
-  $("[name=email]", form).addEventListener("input", function () { if (EMAIL_OK(this.value)) err("email", false); });
+  $("[name=email]", form).addEventListener("input", function () { if (EMAIL_OK(this.value)) this.removeAttribute("aria-invalid"); });
   form.addEventListener("change", function (e) {
     toggles();
     var s = e.target.closest("[data-screen]");
@@ -461,22 +481,6 @@
       finish(kind);
     });
   });
-  var share = $("[data-landlord-share]", form);
-  if (share) share.addEventListener("click", function () {
-    var box = $("[data-landlord]", form);
-    if (box.hidden) { box.hidden = false; seen.R1 = true; $("input", box).focus(); return; }
-    // Something to share, or it becomes "keep me posted" (Sales review, 11)
-    var em = $("[name=landlord_email]", form).value.trim(), ph = $("[name=landlord_phone]", form).value.trim();
-    if (!err("landlord", !!em && !EMAIL_OK(em))) { $("[name=landlord_email]", form).focus(); return; }
-    var has = !!(em || ph);
-    finish(has ? "landlord_share" : "keep_posted", function () {
-      $("[data-close-actions]", screens.R1).hidden = true; box.hidden = true;
-      var p = document.createElement("p"); p.className = "close-body";
-      p.textContent = has ? "Thanks, we'll get in touch with them." : "No worries, we'll keep you posted instead.";
-      screens.R1.appendChild(p);
-    });
-  });
-
   form.classList.add("is-stepped");
   show("intro", false);
 })();

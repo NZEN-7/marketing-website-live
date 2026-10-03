@@ -18,9 +18,9 @@
     "test:deploypreview": "node scripts/test-deploy-preview.mjs",
     "test:intake": "node scripts/test-intake.js",
     "test:spam": "node scripts/test-spam-guard.js",
-    "test:previewguard": "node scripts/test-preview-guard.js",
+    "test:previewguard": "node scripts/test-preview-guard.js && node scripts/test-intake-view.js",
     "test:releaseguards": "node scripts/test-release-guards.mjs",
-    "test:e2e": "node scripts/test-site-e2e.cjs --suite local",
+    "test:e2e": "node scripts/test-site-e2e.cjs --suite local && node scripts/test-intake-v2-e2e.cjs",
     "test:e2e:url": "node scripts/test-site-e2e.cjs --suite url --url"
   },
   "dependencies": {
