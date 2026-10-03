@@ -54,9 +54,9 @@ const OUTCOMES = ["matched", "completed", "book_chat", "deposit", "keep_posted",
 const SCREENS = /^(intro|S\d{1,2}[b-d]?|B2|MATCH|MATCH_SHORT|URGENT|DONE|O1|N1|R1|POSTED)$/;
 
 // Which screen asks which key: "Not asked" (screen never shown) vs "Skipped" (shown, no answer).
-const ASKED_ON = { phone: "S4", call_times: "S4b", intent: "S5", source: "S6", referrer: "S6b", heating: "S7", heating_other_text: "S7b", heating_notes: "B2",
-  boiler_condition: "S8", boiler_age: "S9b", tenure: "S9", scope: "S10", energy: "S11", winter_gas_bill_band: "S12", timing: "S13",
-  timing_note: "S13b", storeys: "S14", radiator_band: "S14b", underfloor_band: "S14c", built_band: "S14d", off_gas: "S15", uploads: "S16", notes: "S17" };
+const ASKED_ON = { phone: "S4", call_times: "S4b", intent: "S5", source: "S6", referrer: "S6", heating: "S7", heating_other_text: "S7", heating_notes: "S7",
+  boiler_condition: "S8", boiler_age: "S8", tenure: "S9", scope: "S10", energy: "S11", winter_gas_bill_band: "S12", timing: "S13",
+  timing_note: "S13", storeys: "S14", radiator_band: "S14", underfloor_band: "S14", built_band: "S14", off_gas: "S15", uploads: "S16", notes: "S17" };
 
 const LEAD_ID = /^il-[0-9a-f]{10}$/;
 // The page's own check (assets/js/intake.js), so both agree on what's valid.
