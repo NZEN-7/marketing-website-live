@@ -428,7 +428,9 @@
   var kbPick = false;
   form.addEventListener("keydown", function (e) {
     var t = e.target;
-    if (e.key === "Enter" && t.tagName === "INPUT" && t.closest("[data-grouped]")) { e.preventDefault(); return; }
+    // Grouped screens: Enter on a choice never moves on (Continue only, CTO a11y 1),
+    // but Enter in a text field still means Continue, as on every other screen.
+    if (e.key === "Enter" && (t.type === "radio" || t.type === "checkbox") && t.closest("[data-grouped]")) { e.preventDefault(); return; }
     var auto = t.type === "radio" && t.closest("[data-auto]");
     if (auto && /^(Arrow(Up|Down|Left|Right)|Home|End)$/.test(e.key)) { kbPick = true; clearTimeout(advanceTimer); return; }
     if (auto && e.key === " " && t.checked) { e.preventDefault(); clearTimeout(advanceTimer); advance(); return; }
