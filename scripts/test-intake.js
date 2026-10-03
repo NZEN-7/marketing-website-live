@@ -299,7 +299,7 @@ check("the notification keeps its parsed label 'Monthly update'", /Monthly updat
   const sitePages = fs.readdirSync(root, { recursive: true }).filter((f) => /index\.html$/.test(f) && !/^(node_modules|docs)[\\/]/.test(f));
   check("design: calmer headings and sharper cards are site defaults; no page carries the retired trial classes",
     sitePages.length > 20 && sitePages.every((f) => !/trial-(calm|cards)/.test(bodyOf(f))) && !/trial-(calm|cards)/.test(css) &&
-    /body h2\{font-weight:700;font-size:clamp\(1\.55rem,3\.4vw,2rem\);line-height:1\.25;/.test(css) && /\.card\{border-radius:6px;padding:20px;box-shadow:none;\}/.test(css));
+    /body h2\{font-weight:700;font-size:clamp\(1\.55rem,3\.4vw,2rem\);line-height:1\.25;/.test(css) && /\.card\{border-radius:var\(--radius\);padding:20px;box-shadow:none;\}/.test(css) && /--radius:6px;/.test(css));
 }
 check("Nick's old mobile is gone from the page", !/432 ?395 ?138/.test(page));
 
