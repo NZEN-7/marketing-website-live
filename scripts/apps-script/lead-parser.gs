@@ -37,7 +37,7 @@ var LEAD_LABELS = [
   'Lead ID', 'Rung reached', 'Route', 'Path', 'Ended on',
   'Best time to call', 'Contact preference', 'Remote delivery',
   'What brings you here', 'How you heard', 'Who should we thank', 'Monthly update',
-  'Heating', 'Heating, something else', 'Boiler condition', 'Boiler age',
+  'Heating', 'Heating, something else', 'Heating notes', 'Boiler condition', 'Boiler age',
   'Is it your home', 'Cover', 'Energy setup', 'Winter gas bill', 'Timing',
   'Anything driving the timing', 'Storeys', 'Radiators', 'Underfloor covers',
   'Built', 'Off gas', 'Uploads', 'Uploads not attached (type or size)',
@@ -74,7 +74,7 @@ var LEAD_LABEL_SECTION = {
   'Suburb': 'LOCATION', 'State': 'LOCATION', 'Postcode': 'LOCATION', 'Remote delivery': 'LOCATION',
   'What brings you here': 'ABOUT THE ENQUIRY', 'How you heard': 'ABOUT THE ENQUIRY',
   'Who should we thank': 'ABOUT THE ENQUIRY', 'Monthly update': 'ABOUT THE ENQUIRY',
-  'Heating': 'YOUR HOME', 'Heating, something else': 'YOUR HOME', 'Boiler condition': 'YOUR HOME',
+  'Heating': 'YOUR HOME', 'Heating, something else': 'YOUR HOME', 'Heating notes': 'YOUR HOME', 'Boiler condition': 'YOUR HOME',
   'Boiler age': 'YOUR HOME', 'Is it your home': 'YOUR HOME', 'Cover': 'YOUR HOME', 'Energy setup': 'YOUR HOME',
   'Winter gas bill': 'YOUR HOME', 'Timing': 'YOUR HOME', 'Anything driving the timing': 'YOUR HOME',
   'Storeys': 'THE DETAILS', 'Radiators': 'THE DETAILS', 'Underfloor covers': 'THE DETAILS', 'Built': 'THE DETAILS',
@@ -152,7 +152,7 @@ function parseLead(body) {
     var m = from.match(re);
     if (m) {
       // A multi-line value's later lines arrive quoted "> " (D6-S3); unquote.
-      var v = leadClean_(String(m[1]).replace(/\n> ?/g, '\n'));
+      var v = leadClean_(String(m[1]).replace(/\n> ?/g, '\n').replace(/[ \t]{2,}> ?/g, ' '));
       if (v) out[label] = v;
     }
   }

@@ -47,7 +47,6 @@
   function route(a) {
     if (a.state && !inArea(a)) return "out-of-area";
     if (notOurProduct(a)) return "not-our-product";
-    if (a.tenure === "renter") return "renter";
     if (isUrgent(a)) return "urgent";
     if (a.intent === "explore") return "explore";
     return unconfirmed(a) ? "icp-check" : "icp";
@@ -58,7 +57,7 @@
     var intent = a.intent || "fit";                  // no answer on S5 = the full path
     switch (done) {
       case "intro": return "S1";
-      case "S1": return "S2";
+      case "S1": return "S3";
       case "S2": return "S3";
       case "S3": return inArea(a) ? "S4" : "S6";      // out of area and NZ: no phone or intent, straight to consent (Sales review, 8)
       case "S4": return String(a.phone || "").trim() ? "S4b" : (inArea(a) ? "S5" : "S6");
@@ -67,19 +66,12 @@
       case "S6": return inArea(a) ? "S7" : "O1";      // O1 comes after step 1 is saved
       case "S7":
         if (notOurProduct(a)) return "N1";
-        if (intent === "explore") return "MATCH_SHORT";
-        if (intent === "book" || intent === "urgent") return "S9";
-        return hasBoiler(a) ? "S8" : "S9";
-      case "S8": return "S9";
-      case "S9":
-        if (a.tenure === "renter") return "R1";
         if (isUrgent(a)) return "URGENT";
+        if (intent === "explore") return "MATCH_SHORT";
         if (intent === "book") return "MATCH";
         return "S10";
-      case "S10": return "S11";
-      case "S11": return "S12";
-      case "S12": return "S13";
-      case "S13": return "MATCH";
+      case "S10": return "S12";
+      case "S12": return "MATCH";
       case "MATCH": return "S14";                     // "Help us prepare"
       case "MATCH_SHORT": return "S14";               // "Tell us a bit more"
       case "S14": return "S15";
@@ -93,7 +85,7 @@
   /** Step (1-4) a screen belongs to, for the progress bar. */
   function stepOf(screen) {
     if (/^S[1-6]b?$/.test(screen) || screen === "intro") return 1;
-    if (/^S(7|8|9|1[0-3])$/.test(screen) || screen === "URGENT" || /^MATCH/.test(screen)) return 2;
+    if (/^S(7|8|1[0-3])$/.test(screen) || screen === "URGENT" || /^MATCH/.test(screen)) return 2;
     if (/^S1[4-7]$/.test(screen)) return 3;
     return 4;
   }

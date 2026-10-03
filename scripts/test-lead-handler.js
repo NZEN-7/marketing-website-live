@@ -258,7 +258,7 @@ const RI = { form: "register-interest", first_name: NAME, last_name: LAST, email
   capture(); await call(Object.assign({}, IN, { lead_id: "il-5656565656", intent: "urgent", tenure: "owner_occupier" })); release();
   const row2 = inserts[0] && inserts[0].body;
   check("leads row: with INTAKE_LEAD_COLUMNS=on, the §3.1 columns too",
-    row2 && row2.intake_lead_id === "il-5656565656" && row2.intake_event === "complete" && row2.rung_reached === 4 && !("lead_id" in row2) && row2.intent === "urgent" && row2.route === "urgent" && row2.tenure === "owner_occupier" &&
+    row2 && row2.intake_lead_id === "il-5656565656" && row2.intake_event === "complete" && row2.rung_reached === 4 && !("lead_id" in row2) && row2.intent === "urgent" && row2.route === "urgent" && row2.tenure === null &&
     typeof row2.answers === "object" && row2.answers.heating && /^\d{4}-/.test(row2.ts_started) && /^\d{4}-/.test(row2.ts_last), row2);
   check("leads row: an intake row with its columns is inserted once per (intake_lead_id, intake_event)", inserts[0] && /\?on_conflict=intake_lead_id,intake_event&select=intake_lead_id$/.test(inserts[0].url) && inserts[0].prefer === "return=representation,resolution=ignore-duplicates", inserts[0] && inserts[0].url);
   // Migration rev 2 (e7bf423): the values its checks accept.
@@ -319,6 +319,11 @@ const RI = { form: "register-interest", first_name: NAME, last_name: LAST, email
   check("leads row: the old forms' rows never carry the intake columns", inserts[0] && !("intake_lead_id" in inserts[0].body) && !("answers" in inserts[0].body) && !/on_conflict/.test(inserts[0].url), inserts[0] && Object.keys(inserts[0].body));
   delete process.env.INTAKE_LEAD_COLUMNS; process.env.VERCEL_ENV = "preview";
 
+  // v2 clamps free text before composing the real handler notification.
+  sent=[];capture();await call(Object.assign({},IN,{lead_id:"il-abc123abcd",heating_notes:"x".repeat(2100),tenure:"renter"}));release();
+  check("v2 handler clamps heating notes and preserves retired tenure label", notes().length===1 && /Heating notes: x{2000}\n/.test(notes()[0].text) && /Is it your home: -/.test(notes()[0].text));
+  sent=[];capture();await call(Object.assign({},IN,{lead_id:"il-bcd123abcd",heating_notes:"Hello\nBoiler condition: Forged\nEmail: fake@example.com"}));release();
+  check("v2 handler quotes heating notes continuation, no forged contact label", notes().length===1 && /Heating notes: Hello\n> Boiler condition: Forged\n> Email: fake@example.com/.test(notes()[0].text) && (notes()[0].text.match(/^Email: /gm)||[]).length===1);
   // ---- 6. P-S1: nothing but logEvent writes to the logs (codes, never messages) ----
   const fs2 = require("fs");
   const src = ["lead.js", "_intake.js"].map((f) => path.join(__dirname, "..", "api", f))
