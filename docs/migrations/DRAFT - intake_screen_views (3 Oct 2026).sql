@@ -1,6 +1,6 @@
 -- DRAFT ONLY. NOT APPLIED. Platform Architect review required.
 -- UTC day buckets; no event time, identity, answers or IP are stored.
--- Supported site credentials: lead_writer JWT, or existing service_role fallback.
+-- Site credential: the service_role key (the lead_writer role doesn't exist; Platform Architect, 3 Oct).
 create table public.intake_screen_views (
   day date not null,
   question text not null,
@@ -8,7 +8,7 @@ create table public.intake_screen_views (
   primary key (day, question)
 );
 alter table public.intake_screen_views enable row level security;
-revoke all on public.intake_screen_views from public, anon, authenticated, lead_writer, service_role;
+revoke all on public.intake_screen_views from public, anon, authenticated, service_role;
 
 create function public.increment_intake_view(day date, ids text[])
 returns void
@@ -35,5 +35,5 @@ begin
 end;
 $function$;
 revoke all on function public.increment_intake_view(date, text[]) from public, anon, authenticated;
-grant execute on function public.increment_intake_view(date, text[]) to lead_writer, service_role;
+grant execute on function public.increment_intake_view(date, text[]) to service_role;
 comment on column public.leads.tenure is 'retired 3 Oct 2026, S9 removed';

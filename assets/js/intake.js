@@ -46,7 +46,9 @@
   var btnBack = $("[data-back]", form), btnCont = $("[data-continue]", form);
   var sending = $("[data-sending]", form);
   var history = [], seen = {}, current = null, sent = false, files = {}, advanceTimer = null;
-  var busy = null, sentOutcome = "", detailsSent = false, urgentPhoneAdded = false;
+  var busy = null, sentOutcome = "", detailsSent = false, urgentPhoneAdded = false, exitPicked = "none", exitSent = false;
+  // Exits after the match, as stored in the row (CTO item 69)
+  var EXIT_OF = { book_chat: "chat", urgent_book: "chat", deposit: "deposit", keep_posted: "keep_posted" };
   var outsideAU = false;
 
   // ---------------------------------------------------------------- answers
@@ -371,7 +373,7 @@
     a.state = stateNow();
     if (a.remote === "true") a.remote = true;
     a.form = "intake"; a.ts = stamped; a.lead_id = LEAD_ID; a.website = ($("[name=website]", form) || {}).value || "";
-    a.outcome = outcome; a.last_screen = current; a.seen = Object.keys(seen);
+    a.outcome = outcome; a.last_screen = current; a.seen = Object.keys(seen); a.exit = exitPicked;
     a.route = R.route(a); a.path = a.intent || "fit";
     a.rung_reached = seen.DONE ? "done" : Object.keys(seen).some(function (k) { return /^S1[4-7]$/.test(k); }) ? "3"
       : Object.keys(seen).some(function (k) { return /^S(7|8|9|1[0-3])$/.test(k); }) ? "2" : "1";
@@ -392,6 +394,11 @@
     // A phone number given on the urgent screen after the send goes the same way,
     // so Nick gets it.
     var details = sent && !detailsSent && ((outcome === "completed" && sentOutcome !== "completed") || (outcome === "urgent_call" && urgentPhoneAdded));
+    // The exit picked after the send goes as its own small details send, once,
+    // with no customer email (CTO item 69)
+    if (EXIT_OF[outcome]) exitPicked = EXIT_OF[outcome];
+    var exitDetails = sent && !details && !!EXIT_OF[outcome] && !exitSent;
+    if (exitDetails) details = true;
     if (sent && !details) { if (outcome === "completed" || outcome === "urgent_call") show("DONE", false); if (then) then(); return Promise.resolve(); }
     // The send on reaching the match runs in the background: nothing is locked
     // and nothing is shown unless it fails (an exit tapped meanwhile waits for it).
@@ -417,7 +424,7 @@
       });
     }).then(function () {
       sent = true; if (!quiet) sending.hidden = true;
-      if (details) detailsSent = true; else sentOutcome = outcome;
+      if (exitDetails) exitSent = true; else if (details) detailsSent = true; else sentOutcome = outcome;
       busy = null; if (!quiet) lock(false);
       if (outcome === "completed" || outcome === "urgent_call") show("DONE", false);
       if (then) then();
