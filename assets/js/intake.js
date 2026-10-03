@@ -503,8 +503,10 @@
     });
   });
   form.classList.add("is-stepped");
-  // Nick compares two looks on the preview (CTO item 68.2): ?look=light or ?look=quiet
-  var look = (location.search.match(/[?&]look=(light|quiet)(?:&|$)/) || [])[1];
-  if (look) document.body.classList.add("look-" + look);
+  // Nick picked the light form (CTO item 70.2): it's the working default on
+  // develop; ?look=dark or ?look=quiet still show the others until the light
+  // design is final (Website GPT Dev's recommendation, item 29)
+  var look = (location.search.match(/[?&]look=(light|quiet|dark)(?:&|$)/) || [])[1] || "light";
+  if (look !== "dark") document.body.classList.add("look-" + look);
   show("intro", false);
 })();

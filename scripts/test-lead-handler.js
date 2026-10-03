@@ -191,8 +191,8 @@ const RI = { form: "register-interest", first_name: NAME, last_name: LAST, email
   process.env.VERCEL_ENV = "preview"; process.env.TEST_RECIPIENT = "test-inbox@example.com";
   // The intake now sends the customer a first email too (CTO Re #30), so these
   // count the notifications to Nick; the customer email is checked on its own.
-  const notes = () => sent.filter((m) => /^(Website lead|URGENT) · /.test(m.subject));
-  const firsts = () => sent.filter((m) => !/^(Website lead|URGENT) · /.test(m.subject));
+  const notes = () => sent.filter((m) => /^(Re: )?(Website lead|URGENT) · /.test(m.subject));
+  const firsts = () => sent.filter((m) => !/^(Re: )?(Website lead|URGENT) · /.test(m.subject));
   const IN = { form: "intake", first_name: NAME, last_name: LAST, email: EMAIL, phone: PHONE, postcode: "3122", state: "VIC",
     heating: ["boiler_radiators"], outcome: "completed", lead_id: "il-0123456789" };
   sent = []; failSend = null;
@@ -205,6 +205,12 @@ const RI = { form: "register-interest", first_name: NAME, last_name: LAST, email
   await call(Object.assign({}, IN, { lead_id: "il-aaaaaaaaaa", outcome: "completed", followup: true })); release();
   check("intake: urgent first, then its details: both notifications sent", notes().length === 2, notes().length);
   check("intake: but only one customer email (the details are a follow-up)", firsts().length === 1, firsts().map((m) => m.subject));
+  // CTO item 70.1: Nick's notifications for one lead thread in Gmail; the customer still gets one email
+  const [n1, n2] = notes();
+  check("thread: the first notification's Message-ID comes from the lead ID", n1 && n1.messageId === "<intake-il-aaaaaaaaaa@thermaldawn.com>" && !n1.inReplyTo, n1 && [n1.messageId, n1.inReplyTo]);
+  check("thread: the follow-up replies to it, with the same subject and Re:", n2 && n2.inReplyTo === n1.messageId && n2.references === n1.messageId && !n2.messageId && n2.subject === "Re: " + n1.subject, n2 && [n2.inReplyTo, n2.subject]);
+  check("thread: the customer's email carries none of the thread headers", firsts().every((m) => !m.messageId && !m.inReplyTo && !m.references));
+  check("thread: stable for a lead ID, and only for intake", lead.notificationThread({ form: "intake", lead_id: "il-aaaaaaaaaa" }).messageId === n1.messageId && lead.notificationThread({ form: "contact", lead_id: "il-aaaaaaaaaa" }) === null && lead.notificationThread({ form: "intake", lead_id: "x" }) === null);
   sent = []; failSend = (m, i) => (i === 0 && !failSend.done ? (failSend.done = true, new Error("smtp down")) : null);
   capture(); const f1 = await call(Object.assign({}, IN, { lead_id: "il-bbbbbbbbbb" }));
   const f2 = await call(Object.assign({}, IN, { lead_id: "il-bbbbbbbbbb" })); release();

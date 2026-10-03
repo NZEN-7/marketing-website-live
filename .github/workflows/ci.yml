@@ -42,7 +42,7 @@ jobs:
       - name: "First emails: templates, served/unserved rule, rendering (73 checks)"
         run: npm run test:firstemails
 
-      - name: "Lead handler: order, test routing, code-only logs, bot screens (73 checks)"
+      - name: "Lead handler: order, test routing, code-only logs, bot screens (77 checks)"
         run: npm run test:handler
 
       - name: "Intake: routing, phone-or-email, dedupe, leads row, first email, attachments (156 checks)"
