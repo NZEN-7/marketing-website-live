@@ -12,26 +12,17 @@
 <link rel="preload" href="/assets/fonts/Montserrat-ExtraBold.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/Montserrat-Regular.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/assets/css/style.css?v=64">
-<link rel="stylesheet" href="/assets/css/intake.css?v=9">
+<link rel="stylesheet" href="/assets/css/intake.css?v=10">
 <script>document.documentElement.classList.add("js");</script>
 </head>
 <body class="dark intake-page">
-<!-- INTAKE PROTOTYPE (PRD D13, 30 Sep 2026). Previews only: not linked from the
-     site and noindexed. Copy: PRDs/Intake form/SPEC - Intake questions and copy.md
-     rev A, word for word. Without JavaScript every question shows as one long
-     form that posts once (SPEC rule 11). -->
+<!-- Intake v2. Without JavaScript the questions form one long form that posts once. -->
 <header id="site-header"></header>
 <main class="intake-main">
   <div class="wrap intake-layout">
 
-    <!-- SIDEBAR (PRD IF14). The fleet counters and a consented homeowner quote
-         are left out for now (Nick, 2 Oct: they don't add much at this stage). -->
-    <aside class="intake-side" aria-label="About Thermal Dawn">
-      <img class="side-photo" src="/assets/img/nick-headshot-2026-09.jpg" width="180" height="180" alt="Nick, from Thermal Dawn" loading="lazy">
-      <p class="side-line">Nick reads every enquiry and gets back to you himself.</p>
-      <p><a class="side-talk" href="mailto:nickz@thermaldawn.com">Talk to Nick</a> <span class="side-email">nickz@thermaldawn.com</span> <a class="side-email side-phone" href="tel:+61272283430">(02) 7228 3430</a></p>
-      <p class="side-offer">From $12,000 for the equipment. Installed by your own licensed installer.</p>
-    </aside>
+    <!-- Call number is gated until the policy owner adds call recording disclosure. -->
+    <div class="intake-contact"><img class="side-photo" src="/assets/img/nick-headshot-2026-09.jpg" width="180" height="180" alt="Nick, from Thermal Dawn" loading="lazy"><span>Nick</span><a data-calendly href="https://calendly.com/nickz-thermaldawn/30min" target="_blank" rel="noopener">Book a 15-minute chat</a></div>
 
     <form id="intake" class="intake" method="post" action="/api/lead/" novalidate data-intake>
       <input type="hidden" name="form" value="intake">
@@ -40,12 +31,12 @@
 
       <!-- progress (JS) -->
       <div class="iq-progress" data-progress hidden>
-        <div class="iq-progress__top"><span class="iq-progress__label" data-progress-label>Let's get to know you</span><span class="iq-progress__count" data-progress-count>Step 1 of 4</span></div>
+        <span class="sr-only" data-progress-count>Step 1 of 3: About you</span>
         <ol class="iq-progress__bar">
           <li data-step-name="1">About you</li>
           <li data-step-name="2">Your home</li>
           <li data-step-name="3">The details</li>
-          <li data-step-name="4">Done</li>
+
         </ol>
       </div>
 
@@ -59,23 +50,24 @@
       </section>
 
       <!-- ============ STEP 1: ABOUT YOU ============ -->
-      <section class="iq" data-screen="S1" aria-labelledby="h-S1">
-        <h2 class="iq__q" id="h-S1">What's your name?</h2>
-        <p class="iq__coach">So we know who we're talking to.</p>
+      <section class="iq" data-screen="S1" data-grouped aria-labelledby="h-S1">
+        <div class="iq__summary" id="contact-error-summary" role="alert" hidden></div><h2 class="iq__q" id="h-S1">What's your name?</h2>
+
         <div class="iq__fields">
           <label class="fld"><span>First name</span><input type="text" name="first_name" autocomplete="given-name" required maxlength="120"></label>
           <label class="fld"><span>Last name</span><input type="text" name="last_name" autocomplete="family-name" required maxlength="120"></label>
         </div>
-      </section>
+      <div data-question="S2">
+        <h3 class="iq__sub" id="h-S2">What's your email?</h3>
 
-      <section class="iq" data-screen="S2" aria-labelledby="h-S2">
-        <h2 class="iq__q" id="h-S2">Nice to meet you<span data-first-prefix>, <span data-first></span></span>. What's your email?</h2>
-        <p class="iq__coach">This is where your next steps go. We don't send marketing unless you ask for it.</p>
         <div class="iq__fields">
           <label class="fld fld--wide"><span>Email</span><input type="email" name="email" autocomplete="email" required maxlength="200" inputmode="email"></label>
         </div>
         <p class="iq__err" data-err="email" hidden>That email doesn't look quite right. Check for a typo?</p>
+      </div>
       </section>
+
+
 
       <section class="iq" data-screen="S3" aria-labelledby="h-S3">
         <h2 class="iq__q" id="h-S3">What's your postcode?</h2>
@@ -118,8 +110,8 @@
 
       <section class="iq" data-screen="S5" aria-labelledby="h-S5" data-auto>
         <h2 class="iq__q" id="h-S5">What brings you here?</h2>
-        <p class="iq__coach">So we can make this as short or as thorough as you like.</p>
-        <fieldset class="cards" aria-labelledby="h-S5">
+
+        <fieldset class="cards" aria-labelledby="h-S5" role="radiogroup">
           <label class="card-opt"><input type="radio" name="intent" value="fit"><span class="card-opt__t">Help me work out if it fits my home</span> <span class="card-opt__s">A few quick questions, then our honest take</span><span class="card-opt__tick" aria-hidden="true"></span></label>
           <label class="card-opt"><input type="radio" name="intent" value="book"><span class="card-opt__t">I'm ready to book</span> <span class="card-opt__s">Let's lock in a spot</span><span class="card-opt__tick" aria-hidden="true"></span></label>
           <label class="card-opt"><input type="radio" name="intent" value="explore"><span class="card-opt__t">I'm just exploring</span> <span class="card-opt__s">The short version, and a chat if you like</span><span class="card-opt__tick" aria-hidden="true"></span></label>
@@ -149,7 +141,7 @@
       </section>
 
       <!-- ============ STEP 2: YOUR HOME ============ -->
-      <section class="iq" data-screen="S7" aria-labelledby="h-S7">
+      <section class="iq" data-screen="S7" data-grouped aria-labelledby="h-S7">
         <h2 class="iq__q" id="h-S7">How is your home heated today?</h2>
         <p class="iq__coach">We replace gas and LPG hydronic heating: a boiler that heats water for radiators or underfloor pipes. Pick all that apply.</p>
         <fieldset class="cards" aria-labelledby="h-S7">
@@ -163,19 +155,17 @@
           <label class="card-opt"><input type="checkbox" name="heating" value="not_sure"><span class="card-opt__t">Not sure</span> <span class="card-opt__s">We'll work it out together</span><span class="card-opt__tick" aria-hidden="true"></span></label>
         </fieldset>
         <label class="fld fld--wide" data-other-text><span>Something else</span><input type="text" name="heating_other_text" maxlength="300"></label>
-      </section>
+      <div data-question="S8" data-boiler-part>
+        <h3 class="iq__sub" id="h-S8">How's your boiler going?</h3>
 
-      <section class="iq" data-screen="S8" aria-labelledby="h-S8">
-        <h2 class="iq__q" id="h-S8">How's your boiler going?</h2>
-        <p class="iq__coach">It tells us how soon you need a change, and whether this replaces a boiler you'd be buying anyway.</p>
-        <fieldset class="cards" aria-labelledby="h-S8">
+        <fieldset class="cards" aria-labelledby="h-S8" role="radiogroup">
           <label class="card-opt"><input type="radio" name="boiler_condition" value="working_fine"><span class="card-opt__t">Working fine</span><span class="card-opt__tick" aria-hidden="true"></span></label>
           <label class="card-opt"><input type="radio" name="boiler_condition" value="getting_on"><span class="card-opt__t">Getting on a bit</span><span class="card-opt__tick" aria-hidden="true"></span></label>
           <label class="card-opt"><input type="radio" name="boiler_condition" value="playing_up"><span class="card-opt__t">Playing up</span><span class="card-opt__tick" aria-hidden="true"></span></label>
           <label class="card-opt"><input type="radio" name="boiler_condition" value="broken"><span class="card-opt__t">Broken, or about to go</span><span class="card-opt__tick" aria-hidden="true"></span></label>
           <label class="card-opt"><input type="radio" name="boiler_condition" value="not_sure"><span class="card-opt__t">Not sure</span><span class="card-opt__tick" aria-hidden="true"></span></label>
         </fieldset>
-        <fieldset class="cards cards--chips" aria-labelledby="h-S8b">
+        <fieldset class="cards cards--chips" aria-labelledby="h-S8b" role="radiogroup">
           <legend class="chips-legend" id="h-S8b">Roughly how old is it?</legend>
           <label class="card-opt chip"><input type="radio" name="boiler_age" value="under_5"><span class="card-opt__t">Under 5 years</span></label>
           <label class="card-opt chip"><input type="radio" name="boiler_age" value="5_10"><span class="card-opt__t">5–10</span></label>
@@ -183,36 +173,30 @@
           <label class="card-opt chip"><input type="radio" name="boiler_age" value="over_15"><span class="card-opt__t">Over 15</span></label>
           <label class="card-opt chip"><input type="radio" name="boiler_age" value="not_sure"><span class="card-opt__t">Not sure</span></label>
         </fieldset>
-        <p class="iq__jsonly iq__skip"><button type="button" class="linkbtn" data-skip>Skip</button></p>
-      </section>
 
-      <section class="iq" data-screen="S9" aria-labelledby="h-S9" data-auto>
-        <h2 class="iq__q" id="h-S9">Is it your home?</h2>
-        <p class="iq__coach">Replacing a boiler is the owner's call, so it helps to know who we're talking with.</p>
-        <fieldset class="cards" aria-labelledby="h-S9">
-          <label class="card-opt"><input type="radio" name="tenure" value="owner_occupier"><span class="card-opt__t">I own it and live in it</span><span class="card-opt__tick" aria-hidden="true"></span></label>
-          <label class="card-opt"><input type="radio" name="tenure" value="landlord"><span class="card-opt__t">I own it and rent it out</span><span class="card-opt__tick" aria-hidden="true"></span></label>
-          <label class="card-opt"><input type="radio" name="tenure" value="renter"><span class="card-opt__t">I'm renting</span><span class="card-opt__tick" aria-hidden="true"></span></label>
-          <label class="card-opt"><input type="radio" name="tenure" value="build"><span class="card-opt__t">We're building or renovating</span><span class="card-opt__tick" aria-hidden="true"></span></label>
-        </fieldset>
-        <p class="iq__jsonly iq__skip"><button type="button" class="linkbtn" data-skip>Skip</button></p>
-      </section>
+      </div><p class="sr-only" aria-live="polite" data-boiler-announcement></p><div class="fld">
+          <label for="heating-notes">Anything else you'd like us to know? (optional)</label>
+          <span id="heating-notes-hint" class="iq__hint">For example: two boilers, underfloor downstairs and radiators up, battery size, boiler about 15 years old, or any questions for us.</span>
+          <textarea id="heating-notes" name="heating_notes" maxlength="2000" aria-describedby="heating-notes-hint"></textarea>
+        </div></section>
 
-      <section class="iq" data-screen="S10" aria-labelledby="h-S10">
+
+
+
+
+      <section class="iq" data-screen="S10" data-grouped aria-labelledby="h-S10">
         <h2 class="iq__q" id="h-S10">What would you like it to cover?</h2>
-        <p class="iq__coach">Heating is the core. Hot water can run from the same system. Cooling depends on what's in each room, so we'll talk it through.</p>
+
         <fieldset class="cards" aria-labelledby="h-S10">
           <label class="card-opt"><input type="checkbox" name="scope" value="heating"><span class="card-opt__t">Heating</span><span class="card-opt__tick" aria-hidden="true"></span></label>
           <label class="card-opt"><input type="checkbox" name="scope" value="hot_water"><span class="card-opt__t">Hot water</span><span class="card-opt__tick" aria-hidden="true"></span></label>
           <label class="card-opt"><input type="checkbox" name="scope" value="cooling"><span class="card-opt__t">Cooling</span><span class="card-opt__tick" aria-hidden="true"></span></label>
           <label class="card-opt"><input type="checkbox" name="scope" value="not_sure"><span class="card-opt__t">Not sure yet</span><span class="card-opt__tick" aria-hidden="true"></span></label>
         </fieldset>
-        <p class="iq__jsonly iq__skip"><button type="button" class="linkbtn" data-skip>Skip</button></p>
-      </section>
 
-      <section class="iq" data-screen="S11" aria-labelledby="h-S11">
-        <h2 class="iq__q" id="h-S11">What's your energy setup?</h2>
-        <p class="iq__coach">Our system stores heat when power is cheapest, from your own solar or off-peak, so this shapes the design. You don't need solar.</p>
+      <div data-question="S11">
+        <h3 class="iq__sub" id="h-S11">What's your energy setup?</h3>
+
         <fieldset class="cards" aria-labelledby="h-S11">
           <label class="card-opt"><input type="checkbox" name="energy" value="solar"><span class="card-opt__t">Rooftop solar</span><span class="card-opt__tick" aria-hidden="true"></span></label>
           <label class="card-opt"><input type="checkbox" name="energy" value="battery"><span class="card-opt__t">A home battery</span><span class="card-opt__tick" aria-hidden="true"></span></label>
@@ -221,34 +205,36 @@
           <label class="card-opt"><input type="checkbox" name="energy" value="none"><span class="card-opt__t">None of these yet</span><span class="card-opt__tick" aria-hidden="true"></span></label>
           <label class="card-opt"><input type="checkbox" name="energy" value="not_sure"><span class="card-opt__t">Not sure</span><span class="card-opt__tick" aria-hidden="true"></span></label>
         </fieldset>
-        <p class="iq__jsonly iq__skip"><button type="button" class="linkbtn" data-skip>Skip</button></p>
-      </section>
 
-      <section class="iq" data-screen="S12" aria-labelledby="h-S12" data-auto>
+      </div><p class="iq__jsonly iq__skip"><button type="button" class="linkbtn" data-skip>Skip</button></p></section>
+
+
+
+      <section class="iq" data-screen="S12" data-grouped aria-labelledby="h-S12">
         <h2 class="iq__q" id="h-S12">Roughly how much is a winter gas bill?</h2>
         <p class="iq__coach">A rough figure is fine. It helps Nick give you a ballpark when you talk. We never quote savings without seeing your actual bills.</p>
-        <fieldset class="cards" aria-labelledby="h-S12">
+        <fieldset class="cards" aria-labelledby="h-S12" role="radiogroup">
           <label class="card-opt"><input type="radio" name="winter_gas_bill_band" value="under_300"><span class="card-opt__t">Under $300</span><span class="card-opt__tick" aria-hidden="true"></span></label>
           <label class="card-opt"><input type="radio" name="winter_gas_bill_band" value="300_600"><span class="card-opt__t">$300 to $600</span><span class="card-opt__tick" aria-hidden="true"></span></label>
           <label class="card-opt"><input type="radio" name="winter_gas_bill_band" value="600_1000"><span class="card-opt__t">$600 to $1,000</span><span class="card-opt__tick" aria-hidden="true"></span></label>
           <label class="card-opt"><input type="radio" name="winter_gas_bill_band" value="over_1000"><span class="card-opt__t">Over $1,000</span><span class="card-opt__tick" aria-hidden="true"></span></label>
           <label class="card-opt"><input type="radio" name="winter_gas_bill_band" value="not_sure"><span class="card-opt__t">Not sure</span><span class="card-opt__tick" aria-hidden="true"></span></label>
         </fieldset>
-        <p class="iq__jsonly iq__skip"><button type="button" class="linkbtn" data-skip>Skip</button></p>
-      </section>
 
-      <section class="iq" data-screen="S13" aria-labelledby="h-S13">
-        <h2 class="iq__q" id="h-S13">When are you hoping to make the change?</h2>
-        <p class="iq__coach">Jobs booked in November are installed in February, well before next winter.</p>
-        <fieldset class="cards" aria-labelledby="h-S13">
+      <div data-question="S13">
+        <h3 class="iq__sub" id="h-S13">When are you hoping to make the change?</h3>
+
+        <fieldset class="cards" aria-labelledby="h-S13" role="radiogroup">
           <label class="card-opt"><input type="radio" name="timing" value="asap"><span class="card-opt__t">As soon as possible</span><span class="card-opt__tick" aria-hidden="true"></span></label>
           <label class="card-opt"><input type="radio" name="timing" value="3_months"><span class="card-opt__t">In the next 3 months</span><span class="card-opt__tick" aria-hidden="true"></span></label>
           <label class="card-opt"><input type="radio" name="timing" value="3_12_months"><span class="card-opt__t">In 3 to 12 months</span><span class="card-opt__tick" aria-hidden="true"></span></label>
           <label class="card-opt"><input type="radio" name="timing" value="planning"><span class="card-opt__t">Just planning ahead</span><span class="card-opt__tick" aria-hidden="true"></span></label>
         </fieldset>
         <label class="fld fld--wide"><span>Anything driving the timing?</span><input type="text" name="timing_note" maxlength="500" placeholder="e.g. the boiler's 20 years old, we're renovating in March"></label>
-        <p class="iq__jsonly iq__skip"><button type="button" class="linkbtn" data-skip>Skip</button></p>
-      </section>
+
+      </div><p class="iq__jsonly iq__skip"><button type="button" class="linkbtn" data-skip>Skip</button></p></section>
+
+
 
       <!-- ============ RESULT SCREENS (JS only) ============ -->
       <section class="iq iq--result iq--jsonly" data-screen="MATCH" aria-labelledby="h-MATCH">
@@ -257,8 +243,8 @@
           <h3>Our match: a Thermal Dawn heat pump with a thermal store</h3>
           <p><span data-fit-sure>It runs the <span data-emitters>radiators</span> you already have.</span><span data-fit-check hidden>It runs through radiators or underfloor heating. We'll check what suits your home when we talk.</span> It charges when power is cheapest and holds the heat for when you need it.</p>
           <ul class="match-why" data-why></ul>
-          <p><strong>From $12,000 for the equipment.</strong> Installation depends on the house, by your own licensed installer (we can recommend one).<span data-remote-line hidden> Remote locations carry a delivery cost.</span></p>
-          <p>Jobs booked in November are installed in February.</p>
+          <p><strong>From $12,000 for the equipment; installation depends on the house.</strong> Installed by your own licensed installer (we can recommend one).<span data-remote-line hidden> Remote locations carry a delivery cost.</span></p>
+
           <p class="match-caveat">We'll confirm the design once we've talked and seen your bills.</p>
         </div>
         <div class="match-actions" data-match-actions>
@@ -275,8 +261,8 @@
           <h3>Our match: a Thermal Dawn heat pump with a thermal store</h3>
           <p><span data-fit-sure>It runs the <span data-emitters>radiators</span> you already have.</span><span data-fit-check hidden>It runs through radiators or underfloor heating. We'll check what suits your home when we talk.</span> It charges when power is cheapest and holds the heat for when you need it.</p>
           <ul class="match-why" data-why></ul>
-          <p><strong>From $12,000 for the equipment.</strong> Installation depends on the house, by your own licensed installer (we can recommend one).<span data-remote-line hidden> Remote locations carry a delivery cost.</span></p>
-          <p>Jobs booked in November are installed in February.</p>
+
+
           <p class="match-caveat">We'll confirm the design once we've talked and seen your bills.</p>
         </div>
         <div class="match-actions">
@@ -288,7 +274,7 @@
 
       <section class="iq iq--result iq--jsonly" data-screen="URGENT" aria-labelledby="h-URGENT">
         <h2 class="iq__q" id="h-URGENT">Sorry to hear about the boiler<span data-first-prefix>, <span data-first></span></span>.</h2>
-        <p class="iq__coach">Nick will try to call you today. If we miss you, we'll try again tomorrow at lunchtime.</p>
+
         <div class="iq__fields" data-urgent-phone hidden>
           <label class="fld"><span>Phone</span><input type="tel" inputmode="tel" autocomplete="tel" maxlength="20" data-urgent-phone-input></label>
         </div>
@@ -302,8 +288,8 @@
       <!-- ============ STEP 3: THE DETAILS (all optional) ============ -->
       <section class="iq" data-screen="S14" aria-labelledby="h-S14">
         <h2 class="iq__q" id="h-S14">Tell us a little about the house</h2>
-        <p class="iq__coach">Rough answers are perfect. They help us prepare for the call.</p>
-        <fieldset class="cards cards--chips" aria-labelledby="h-S14a">
+
+        <fieldset class="cards cards--chips" aria-labelledby="h-S14a" role="radiogroup">
           <legend class="chips-legend" id="h-S14a">Storeys</legend>
           <label class="card-opt chip"><input type="radio" name="storeys" value="single"><span class="card-opt__t">Single</span></label>
           <label class="card-opt chip"><input type="radio" name="storeys" value="double"><span class="card-opt__t">Double</span></label>
@@ -314,7 +300,7 @@
         <!-- Nick, 30 Sep: the row follows S7. Radiators for radiator homes, the
              underfloor area for underfloor homes, both for both (and for LPG,
              which can be either). The underfloor row is NEW copy, for Sales. -->
-        <fieldset class="cards cards--chips" aria-labelledby="h-S14b" data-rad-row>
+        <fieldset class="cards cards--chips" aria-labelledby="h-S14b" data-rad-row role="radiogroup">
           <legend class="chips-legend" id="h-S14b">Radiators, roughly</legend>
           <label class="card-opt chip"><input type="radio" name="radiator_band" value="1_5"><span class="card-opt__t">1–5</span></label>
           <label class="card-opt chip"><input type="radio" name="radiator_band" value="6_10"><span class="card-opt__t">6–10</span></label>
@@ -323,7 +309,7 @@
           <label class="card-opt chip" data-uf-only-chip><input type="radio" name="radiator_band" value="underfloor_only"><span class="card-opt__t">Underfloor only</span></label>
           <label class="card-opt chip"><input type="radio" name="radiator_band" value="not_sure"><span class="card-opt__t">Not sure</span></label>
         </fieldset>
-        <fieldset class="cards cards--chips" aria-labelledby="h-S14u" data-uf-row>
+        <fieldset class="cards cards--chips" aria-labelledby="h-S14u" data-uf-row role="radiogroup">
           <legend class="chips-legend" id="h-S14u">Underfloor heating covers, roughly</legend>
           <label class="card-opt chip"><input type="radio" name="underfloor_band" value="one_zone"><span class="card-opt__t">One room or zone</span></label>
           <label class="card-opt chip"><input type="radio" name="underfloor_band" value="part"><span class="card-opt__t">Part of the house</span></label>
@@ -331,7 +317,7 @@
           <label class="card-opt chip"><input type="radio" name="underfloor_band" value="whole"><span class="card-opt__t">The whole house</span></label>
           <label class="card-opt chip"><input type="radio" name="underfloor_band" value="not_sure"><span class="card-opt__t">Not sure</span></label>
         </fieldset>
-        <fieldset class="cards cards--chips" aria-labelledby="h-S14c">
+        <fieldset class="cards cards--chips" aria-labelledby="h-S14c" role="radiogroup">
           <legend class="chips-legend" id="h-S14c">Built</legend>
           <label class="card-opt chip"><input type="radio" name="built_band" value="pre_1950"><span class="card-opt__t">Before 1950</span></label>
           <label class="card-opt chip"><input type="radio" name="built_band" value="1950_1990"><span class="card-opt__t">1950–1990</span></label>
@@ -344,8 +330,8 @@
 
       <section class="iq" data-screen="S15" aria-labelledby="h-S15" data-auto>
         <h2 class="iq__q" id="h-S15">Would you like to be off gas completely?</h2>
-        <p class="iq__coach">Going fully off gas also removes the daily gas supply charge.</p>
-        <fieldset class="cards" aria-labelledby="h-S15">
+
+        <fieldset class="cards" aria-labelledby="h-S15" role="radiogroup">
           <label class="card-opt"><input type="radio" name="off_gas" value="everything"><span class="card-opt__t">Yes, everything off gas</span><span class="card-opt__tick" aria-hidden="true"></span></label>
           <label class="card-opt"><input type="radio" name="off_gas" value="keep_cooktop"><span class="card-opt__t">Yes, but keep the gas cooktop</span><span class="card-opt__tick" aria-hidden="true"></span></label>
           <label class="card-opt"><input type="radio" name="off_gas" value="heating_only"><span class="card-opt__t">Just the heating for now</span><span class="card-opt__tick" aria-hidden="true"></span></label>
@@ -356,7 +342,7 @@
 
       <section class="iq" data-screen="S16" aria-labelledby="h-S16">
         <h2 class="iq__q" id="h-S16">Got these handy? Upload them now.</h2>
-        <p class="iq__coach">A phone photo is fine. Nothing here is needed to talk to us or to book.</p>
+
         <div class="uploads" data-uploads>
           <div class="upslot" data-slot="winter_gas_bill">
             <p class="upslot__t" id="up-winter_gas_bill-t">A recent winter gas bill</p>
@@ -430,7 +416,7 @@
 
       <section class="iq" data-screen="S17" aria-labelledby="h-S17">
         <h2 class="iq__q" id="h-S17">Anything else we should know?</h2>
-        <p class="iq__coach">What you type here is often the most useful thing we get.</p>
+
         <label class="fld fld--wide"><span class="sr-only">Anything else we should know?</span><textarea name="notes" rows="5" maxlength="5000" placeholder="e.g. upstairs gets too hot, we're extending next year, the boiler's in a tight cupboard"></textarea></label>
       </section>
 
@@ -477,21 +463,7 @@
         </div>
       </section>
 
-      <section class="iq iq--result iq--jsonly" data-screen="R1" aria-labelledby="h-R1">
-        <h2 class="iq__q" id="h-R1">Thanks<span data-first-prefix>, <span data-first></span></span>.</h2>
-        <p class="close-body"><span data-r1-boiler>Because this replaces the boiler, it's the owner's decision.</span><span data-r1-house hidden>Because this is a change to the house, it's the owner's decision.</span> If you think your landlord would be interested, we're happy to talk to them.</p>
-        <div class="landlord" data-landlord hidden>
-          <p class="iq__coach">Only if you're comfortable sharing</p>
-          <label class="fld"><span>Landlord's name</span><input type="text" name="landlord_name" maxlength="200"></label>
-          <label class="fld"><span>Landlord's email</span><input type="email" name="landlord_email" maxlength="200" inputmode="email"></label>
-          <label class="fld"><span>Landlord's phone</span><input type="tel" name="landlord_phone" maxlength="20" inputmode="tel"></label>
-          <p class="iq__err" data-err="landlord" hidden>That email doesn't look quite right. Check for a typo?</p>
-        </div>
-        <div class="match-actions" data-close-actions>
-          <button type="button" class="btn btn--primary btn--rect" data-landlord-share>Share with my landlord</button>
-          <button type="button" class="btn btn--ghost-light btn--rect" data-exit="keep_posted">Keep me posted</button>
-        </div>
-      </section>
+
 
       <section class="iq iq--result iq--jsonly" data-screen="POSTED" aria-labelledby="h-POSTED">
         <h2 class="iq__q" id="h-POSTED">Done. We'll be in touch when that changes. Thanks for thinking of us.</h2>
@@ -504,7 +476,7 @@
       </div>
       <p class="iq-sending" data-sending hidden aria-live="polite"></p>
       <footer class="iq-foot">
-        <p class="iq-foot__talk">Rather just talk? <a data-calendly href="https://calendly.com/nickz-thermaldawn/30min" target="_blank" rel="noopener"><strong>Book a 15-minute chat</strong></a> or call us on <a href="tel:+61272283430">(02) 7228 3430</a></p>
+
         <p class="iq-foot__privacy">Your details go to Thermal Dawn only. We don't use third-party form tools. <a href="/privacy/">Privacy policy</a></p>
       </footer>
     </form>
@@ -512,7 +484,7 @@
 </main>
 <footer id="site-footer" class="site-footer"></footer>
 <script src="/assets/js/site.js?v=18" defer></script>
-<script src="/assets/js/intake-route.js?v=2" defer></script>
-<script src="/assets/js/intake.js?v=7" defer></script>
+<script src="/assets/js/intake-route.js?v=8" defer></script>
+<script src="/assets/js/intake.js?v=8" defer></script>
 </body>
 </html>

@@ -142,5 +142,8 @@ check("contact gives the Dialpad number", lead.firstEmail(P({ form: "contact", n
 check("Nick's mobile is in no first email", [P(RI), IL({}), IL({ state: "QLD" }), P({ form: "subscribe", email: "s@example.com" }),
   P({ form: "contact", name: "Casey", email: "c@example.com", message: "x" })].every((d) => !/432 ?395 ?138/.test(lead.firstEmail(d).text)));
 
+check("v2 no batch timing in any first-email template", fs.readdirSync(dir).filter(f=>f.endsWith(".txt")).every(f=>!/November|installed in February|next winter/i.test(fs.readFileSync(path.join(dir,f),"utf8"))));
+const v2=lead.parseSubmission({form:"intake",first_name:"Test",last_name:"Fixture",email:"test@example.com",contact_pref:"email",postcode:"3122",heating:["boiler_radiators"],intent:"fit",tenure:"renter"}).data;
+check("v2 retired renter input cannot select the list variant", v2.tenure===null && lead.firstEmail(v2).template==="register-interest");
 console.log(failed ? `\n${failed} CHECK(S) FAILED` : "\nAll first-email checks passed.");
 process.exit(failed ? 1 : 0);
