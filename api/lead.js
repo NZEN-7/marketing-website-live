@@ -579,6 +579,17 @@ function formatNotification(d, stamp) {
   ].join("\n");
 }
 
+/** Nick's intake notifications for one lead thread together in Gmail (Nick,
+    3 Oct, CTO item 70.1): the first carries a Message-ID made from the lead ID,
+    and every follow-up (the exit, Step 3, an urgent phone) replies to it with
+    the same subject and "Re: ". Deterministic, so no lookup is needed. Only the
+    notification; the customer still gets exactly one email. */
+function notificationThread(d) {
+  if (d.form !== "intake" || !/^il-[0-9a-f]{10}$/.test(d.lead_id || "")) return null;
+  const id = `<intake-${d.lead_id}@thermaldawn.com>`;
+  return d.followup ? { inReplyTo: id, references: id } : { messageId: id };
+}
+
 function formatSubject(d) {
   if (d.form === "intake") return intake.formatIntakeSubject(d);
   if (d.form === "register-interest") {
@@ -930,11 +941,13 @@ module.exports = async function handler(req, res) {
     //    FIRST, as it always has (CTO Re: Web #12, A3).
     const notifyTo = routeTo(NOTIFY_TO);
     if (notifyTo) {
+      const thread = notificationThread(data);
       await transport.sendMail({
         from,
         to: notifyTo,
         replyTo: data.email,
-        subject: formatSubject(data),
+        subject: (thread && thread.inReplyTo ? "Re: " : "") + formatSubject(data),
+        ...(thread || {}),
         text: formatNotification(data),
         attachments: data._files ? data._files.attachments.map((a) =>
           ({ filename: a.filename, content: a.content, contentType: a.contentType })) : undefined,
@@ -1019,6 +1032,7 @@ module.exports = async function handler(req, res) {
 /* Exported for the local format harness (scripts/test-email-format.js). */
 module.exports.formatNotification = formatNotification;
 module.exports.formatSubject = formatSubject;
+module.exports.notificationThread = notificationThread;
 module.exports.formatAutoresponder = formatAutoresponder;
 module.exports.formatTimestamp = formatTimestamp;
 module.exports.parseSubmission = parseSubmission;
