@@ -102,6 +102,8 @@ function parseIntake(body) {
     // The details from "Help us prepare" after an earlier exit already sent:
     // a second notification, but never a second customer email.
     followup: body.followup === true || body.followup === "true",
+    // The exit chosen after the match (CTO item 69): the strongest signal we get.
+    exit: ["chat", "deposit", "keep_posted", "none"].indexOf(body.exit) !== -1 ? body.exit : "",
   };
   if (nojs) d.seen = Object.values(ASKED_ON);       // the long form shows every question
   // The server works out state and route itself: the long form has no script
@@ -291,7 +293,7 @@ function firstEmailKey(d) {
    intake_event partial|complete|details, rung_reached 1-4. */
 const RUNG = { 1: 1, 2: 2, 3: 3, done: 4 };   // rung_reached is 1-4, 4 = done (migration rev 2, e7bf423)
 const ANSWER_KEYS = ["intent", "source", "referrer", "newsletter_opt_in", "heating", "heating_other_text", "boiler_condition",
-  "boiler_age", "heating_notes", "tenure", "scope", "energy", "winter_gas_bill_band", "timing", "timing_note", "storeys", "radiator_band",
+  "boiler_age", "heating_notes", "exit", "tenure", "scope", "energy", "winter_gas_bill_band", "timing", "timing_note", "storeys", "radiator_band",
   "underfloor_band", "built_band", "off_gas", "send_later", "contact_pref", "call_times", "remote", "outcome", "last_screen"];
 function intakeLeadRow(d, env, now) {
   const at = new Date(now || Date.now()).toISOString();

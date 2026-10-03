@@ -92,6 +92,8 @@ check("a lead_id is issued", /^il-[0-9a-f]{10}$/.test(p.data.lead_id));
   // CTO item 68.1: reaching the match sends outcome "matched" (a full, non-followup send: the row and the one first email)
   const pm = lead.parseSubmission(Object.assign({}, base, { outcome: "matched", last_screen: "MATCH", rung_reached: "2" }));
   check("68.1: the server accepts outcome matched, as a first (non-followup) send", !pm.error && pm.data.outcome === "matched" && !pm.data.followup);
+  const px = lead.parseSubmission(Object.assign({}, base, { outcome: "book_chat", followup: true, exit: "chat" }));
+  check("69: the exit after the match is accepted (chat, deposit, keep_posted, none) and anything else is dropped", px.data.exit === "chat" && lead.parseSubmission(Object.assign({}, base, { exit: "bogus" })).data.exit === "");
   check("68.1: the notification says where it ended", /Ended on: matched \(screen MATCH\)/.test(lead.formatNotification(pm.data, "t")));
   const page = require("fs").readFileSync(require("path").join(__dirname, "..", "assets", "js", "intake.js"), "utf8");
   check("68.1: the page sends on reaching MATCH, MATCH_SHORT or URGENT, once", /if \(\/\^\(MATCH\|MATCH_SHORT\|URGENT\)\$\/\.test\(id\) && !sent && !busy\) finish\("matched"\);/.test(page));
