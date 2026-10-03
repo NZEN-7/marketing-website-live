@@ -25,10 +25,13 @@ This is Vercel's branch alias for the mirror's `preview/develop`, so the link ne
 
 ## Release
 
-1. Nick opens the develop preview, reads the DELTA and says go.
-2. Merge `develop` → `main` `--no-ff`; run every suite on the merged `main`.
-3. `npm run deploy:live`; tag `live-YYYY-MM-DD[b,c…]`; run the live checks.
-4. Clear the shipped lines from the DELTA.
+GitHub branch protection is on (organisation level, 4 Oct 2026): **`main` takes pull requests only** (no direct push, no force-push, no deletion), and `develop` can't be force-pushed or deleted.
+
+1. Nick opens the develop preview and reads the DELTA.
+2. The Web Designer opens a **`develop` → `main` pull request** with the DELTA in its description; CI runs on it.
+3. **Nick merges it on GitHub** (that's the go).
+4. The Web Designer pulls the merged `main`, runs every suite on it, then `npm run deploy:live` (it pushes only to the NZEN-7 mirror, which isn't protected; it never pushes `main` to origin), tags `live-YYYY-MM-DD[b,c…]` and runs the live checks.
+5. Clear the shipped lines from the DELTA.
 
 A ⚑ change Nick hasn't seen never ships. Nothing reaches `main` or production without his go.
 
