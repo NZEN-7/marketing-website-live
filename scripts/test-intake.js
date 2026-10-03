@@ -228,7 +228,8 @@ check("v2 number is gated until policy owner records calls", !/href="tel:/.test(
   // The privacy page (CTO Re #39-40): its own page, linked from every footer and from /start/.
   const priv = fs.readFileSync(path.join(__dirname, "..", "privacy", "index.html"), "utf8");
   const site = fs.readFileSync(path.join(__dirname, "..", "assets", "js", "site.js"), "utf8");
-  check("privacy: /privacy/ exists, with its sections and the providers table", /<h1>Privacy Policy<\/h1>/.test(priv) && (priv.match(/<h2>/g) || []).length >= 10 && /<td>Supabase<\/td>/.test(priv));
+  check("privacy: /privacy/ exists, with its sections and providers by category (rev 4)", /<h1>Privacy Policy<\/h1>/.test(priv) && (priv.match(/<h2>/g) || []).length >= 10 && /<strong>Website hosting<\/strong>/.test(priv) && /mainly in the United States/.test(priv));
+  check("privacy rev 4: no provider or tool is named (Nick, 4 Oct)", !/(Vercel|Supabase|Google|Calendly|YouTube|Stripe|Dialpad|Mailchimp|Anthropic|OpenAI|ChatGPT|Claude|Gmail)/.test(priv.replace(/<!--[\s\S]*?-->/g, "")));
   check("privacy: no TO CONFIRM, no placeholder", !/TO CONFIRM|placeholder/i.test(priv.replace(/<!--[\s\S]*?-->/g, "")));
   check("privacy: the shared footer links to it (every page)", /'<a href="\/privacy\/">Privacy<\/a>'/.test(site));
   check("privacy: /start/'s consent line and footer link to it, with no placeholder left", (page.match(/<a href="\/privacy\/">Privacy policy<\/a>/g) || []).length === 2 && !/\[Privacy policy\]|class="ph-link"/.test(page));
@@ -259,8 +260,9 @@ check("no placeholder privacy link on the intake (Nick, 2 Oct: strip it until th
   const pages = ["index.html", "mission/index.html", "hydronic/how-it-works/index.html"].map((f) => fs.readFileSync(path.join(__dirname, "..", f), "utf8"));
   check("videos: each page embeds the youtube-nocookie player directly", pages.every((h) => /<iframe src="https:\/\/www\.youtube-nocookie\.com\/embed\/[A-Za-z0-9_-]{11}"/.test(h) && !/video\.js|video__play/.test(h)));
   const pp = fs.readFileSync(path.join(__dirname, "..", "privacy", "index.html"), "utf8");
-  check("videos: the privacy page says YouTube loads with the page, not only on play", /When one of those pages loads, YouTube receives your IP address/.test(pp) && !/only load when you press play/.test(pp));
-  check("D12: the privacy page says form screens are counted without identifiers", /We count which form screens are viewed, without any name, email or other identifier/.test(pp));
+  check("videos: the privacy page says the video platform loads with the page, not only on play", /When one of those pages loads, the platform receives your IP address/.test(pp) && !/only load when you press play/.test(pp));
+  check("D12: the privacy page says form screens are counted without identifiers", /We count which screens of the form are viewed, without your name, email or any other identifier/.test(pp));
+  check("privacy rev 4: calls may be recorded, and callers are told", /Calls to our business number may be recorded; we'll tell you at the start of the call\./.test(pp));
 }
 {
   // No third-party fonts on any page or in any animation a page embeds (CTO Re #41.1).
