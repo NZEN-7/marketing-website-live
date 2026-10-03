@@ -26,6 +26,7 @@ begin
   end if;
   if exists (select 1 from unnest(question_ids) as q where q is null or q <> all(array[
     'S1','S2','S3','S4','S4b','S5','S6','S7','S8','S10','S11','S12','S13','S14','S15','S16','S17',
+    'S2b','S3b','S6b','S7b','S9b','B2','S13b','S14b','S14c','S14d','S16b','S16c','S16d',
     'MATCH','MATCH_SHORT','URGENT','DONE','O1','N1'])) then
     return;
   end if;

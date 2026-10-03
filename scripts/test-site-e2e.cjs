@@ -78,8 +78,10 @@ async function begin(p,base,postcode='3122') {
   await p.locator('[name=first_name]').fill('Test');await p.locator('[name=last_name]').fill('Fixture');
   if(await p.locator('[data-screen="S2"]').count())await next(p); // v1 deployed GET-only compatibility
   await p.locator('[name=email]').fill('test@example.invalid');await next(p);
+  if(await p.locator('[data-screen=S2b]').count())await next(p);
   if(postcode===''){await p.locator('[data-outside-au]').click();await current(p,'S6');return;}
   await p.locator('[name=postcode]').fill(postcode);
+  if(await p.locator('[data-screen=S3b]').count())await next(p);
   const suburbs=p.locator('[data-suburbs] input');if(await suburbs.count()) await suburbs.first().check();
   else await p.locator('[name=suburb]').fill('Test suburb');
   await next(p);
@@ -95,12 +97,20 @@ async function prepared(p,base,kind) {
   assert.equal(await p.locator('[name=newsletter_opt_in]').isChecked(),false);await next(p);
   if(kind==='outside'||kind==='nz')return current(p,'O1');
   await choose(p,'heating',kind==='splits'?'splits':kind==='uncertain'?'not_sure':'boiler_radiators');
-  if(!['book','explore','urgent','splits','uncertain'].includes(kind)) await choose(p,'boiler_condition',kind==='broken'?'broken':'working_fine');
-  await p.locator('[name=heating_notes]').fill('Two boilers in this home. Underfloor downstairs and radiators upstairs.');await next(p);
+  await next(p);
+  if(!['book','explore','urgent','splits','uncertain'].includes(kind)) {
+    await choose(p,'boiler_condition',kind==='broken'?'broken':'working_fine','S9b');
+    await next(p);
+  }
+  await current(p,'B2');await p.locator('[name=heating_notes]').fill('Two boilers in this home. Underfloor downstairs and radiators upstairs.');await next(p);
   if(kind==='splits')return current(p,'N1');if(kind==='explore')return current(p,'MATCH_SHORT');
   if(kind==='urgent'||kind==='broken')return current(p,'URGENT');if(kind==='book')return current(p,'MATCH');
-  for(const id of ['S10','S12']) {await current(p,id);await p.locator('[data-screen="'+id+'"] [data-skip]').click();}
+  for(const id of ['S10','S11','S12','S13','S13b']) {await current(p,id);await p.locator('[data-screen="'+id+'"] [data-skip]').click();}
   await current(p,'MATCH');
+}
+async function skipDetails(p,target) {
+  for(let i=0;i<20;i++) {const id=await p.locator('[data-screen].is-current').getAttribute('data-screen');if(id===target)return;await p.locator('.is-current [data-skip]').click();}
+  throw Error('Details route did not reach '+target);
 }
 async function keyboard(p) {
   const frames=p.frames().filter(f=>{try{return new URL(f.url()).origin===new URL(p.url()).origin;}catch{return false;}});
@@ -216,7 +226,7 @@ async function designDefaults(p) {
           await prepared(c.page,base,kind);
           if(['fit','book','explore','uncertain'].includes(kind)) {
             await c.page.locator('.is-current [data-go="S14"]').click();
-            for(const id of ['S14','S15','S16']) {await current(c.page,id);await c.page.locator('[data-screen="'+id+'"] [data-skip]').click();}
+            await skipDetails(c.page,'S17');
             await current(c.page,'S17');await next(c.page);await current(c.page,'DONE');
           } else if(['urgent','broken'].includes(kind)) {await c.page.locator('[data-urgent-phone-input]').fill('0412345678');await c.page.locator('[data-exit="urgent_call"]').click();await current(c.page,'DONE');
           } else {await c.page.locator('.is-current [data-exit="keep_posted"]').click();await current(c.page,'POSTED');}
@@ -237,9 +247,9 @@ async function designDefaults(p) {
         try {
           await c.page.goto(new URL('/start/',base).href);await c.page.locator('[data-go="S1"]').click();
           await c.page.locator('[name=first_name]').fill('Test');await c.page.locator('[name=last_name]').fill('Fixture');
-          await c.page.locator('[name=email]').fill('invalid');await next(c.page);await current(c.page,'S1');
-          const err=c.page.locator('#contact-error-summary');await err.waitFor({state:'visible'});assert.equal(await err.getAttribute('role'),'alert');assert.equal(await c.page.locator('[name=email]').getAttribute('aria-invalid'),'true');
-          await c.page.locator('[name=email]').fill('test@example.invalid');await next(c.page);await c.page.locator('[name=postcode]').fill('12');await next(c.page);await current(c.page,'S3');
+          await next(c.page);await c.page.locator('[name=email]').fill('invalid');await next(c.page);await current(c.page,'S2');
+          const err=c.page.locator('[data-err=email]');await err.waitFor({state:'visible'});assert.equal(await err.getAttribute('role'),'alert');assert.equal(await c.page.locator('[name=email]').getAttribute('aria-invalid'),'true');
+          await c.page.locator('[name=email]').fill('test@example.invalid');await next(c.page);await next(c.page);await c.page.locator('[name=postcode]').fill('12');await next(c.page);await current(c.page,'S3');
           assert.equal(await c.page.locator('[data-err=postcode]').getAttribute('role'),'alert');assert.equal(await c.page.locator('[name=postcode]').getAttribute('aria-invalid'),'true');assert.equal(c.calls.length,0);
         } finally {await c.ctx.close();}
       });
@@ -247,13 +257,13 @@ async function designDefaults(p) {
         const c=await context(browser,base,true);
         try {
           await prepared(c.page,base,'fit');await c.page.locator('[data-screen="MATCH"] [data-go="S14"]').click();
-          for(const id of ['S14','S15']) {await current(c.page,id);await c.page.locator('[data-screen="'+id+'"] [data-skip]').click();}
+          await skipDetails(c.page,'S16');
           await current(c.page,'S16');
           const uploads=c.page.locator('input[type=file]');assert.equal(await uploads.count(),4);
           for(let i=0;i<4;i++) {const input=uploads.nth(i);const ids=(await input.getAttribute('aria-labelledby')).split(' ');assert.ok(ids.length>=2);for(const id of ids) assert.ok((await c.page.locator('[id="'+id+'"]').textContent()).trim());}
           await uploads.first().setInputFiles({name:'fixture.pdf',mimeType:'application/pdf',buffer:Buffer.from('%PDF-1.4\nTest fixture\n%%EOF')});
           const remove=c.page.locator('[data-remove]:visible');assert.ok((await remove.first().getAttribute('aria-label')).startsWith('Remove '));
-          await next(c.page);await current(c.page,'S17');await next(c.page);await current(c.page,'DONE');assert.equal(c.calls.length,2);assert.equal(c.calls[0].outcome,'matched');assert.equal(c.calls[1].followup,true);assert.equal(c.calls[1].uploads.length,1);
+          await next(c.page);await skipDetails(c.page,'S17');await next(c.page);await current(c.page,'DONE');assert.equal(c.calls.length,2);assert.equal(c.calls[0].outcome,'matched');assert.equal(c.calls[1].followup,true);assert.equal(c.calls[1].uploads.length,1);
         } finally {await c.ctx.close();}
       });
     }

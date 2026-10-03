@@ -1,12 +1,12 @@
 /* Anonymous question counts only. No visitor identity is logged or persisted.
    Draft RPC: Platform must review/apply the migration before this can count. */
 "use strict";
-const IDS = new Set("S1 S2 S3 S4 S4b S5 S6 S7 S8 S10 S11 S12 S13 S14 S15 S16 S17 MATCH MATCH_SHORT URGENT DONE O1 N1".split(" "));
+const IDS = new Set("S1 S2 S3 S4 S4b S5 S6 S7 S8 S10 S11 S12 S13 S14 S15 S16 S17 S2b S3b S6b S7b S9b B2 S13b S14b S14c S14d S16b S16c S16d MATCH MATCH_SHORT URGENT DONE O1 N1".split(" "));
 const WINDOW = 10 * 60 * 1000;
-// Its own cap, not the lead form's 10: a full visit sends up to ~20 beacons (one
-// per screen), so 60 per 10 minutes admits three whole visits from one address,
+// Its own cap, not the lead form's 10: a full visit sends up to ~33 beacons (one
+// per screen), so 120 per 10 minutes admits three whole visits from one address,
 // such as a shared household connection, and still screens a flood (Web review, 3 Oct).
-const CAP = 60;
+const CAP = 120;
 const buckets = new Map();
 function screened(req, now) {
   const since = now - WINDOW;
