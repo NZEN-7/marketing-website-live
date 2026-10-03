@@ -45,10 +45,10 @@ jobs:
       - name: "Lead handler: order, test routing, code-only logs, bot screens (73 checks)"
         run: npm run test:handler
 
-      - name: "Intake: routing, phone-or-email, dedupe, leads row, first email, attachments (152 checks)"
+      - name: "Intake: routing, phone-or-email, dedupe, leads row, first email, attachments (155 checks)"
         run: npm run test:intake
 
-      - name: "End-to-end, local: every page and the intake paths in Chrome, /api/ mocked (85 checks)"
+      - name: "End-to-end, local: every page and the intake paths in Chrome, /api/ mocked (87 checks)"
         run: npm run test:e2e
         env:
           E2E_BROWSER_CHANNEL: chrome

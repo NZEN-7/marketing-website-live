@@ -88,6 +88,15 @@ const base = { form: "intake", first_name: "Alex", last_name: "Sample", email: "
 const p = lead.parseSubmission(base);
 check("intake parses with the three required fields", !p.error && p.data.form === "intake", p.error);
 check("a lead_id is issued", /^il-[0-9a-f]{10}$/.test(p.data.lead_id));
+{
+  // CTO item 68.1: reaching the match sends outcome "matched" (a full, non-followup send: the row and the one first email)
+  const pm = lead.parseSubmission(Object.assign({}, base, { outcome: "matched", last_screen: "MATCH", rung_reached: "2" }));
+  check("68.1: the server accepts outcome matched, as a first (non-followup) send", !pm.error && pm.data.outcome === "matched" && !pm.data.followup);
+  check("68.1: the notification says where it ended", /Ended on: matched \(screen MATCH\)/.test(lead.formatNotification(pm.data, "t")));
+  const page = require("fs").readFileSync(require("path").join(__dirname, "..", "assets", "js", "intake.js"), "utf8");
+  check("68.1: the page sends on reaching MATCH, MATCH_SHORT or URGENT, once", /if \(\/\^\(MATCH\|MATCH_SHORT\|URGENT\)\$\/\.test\(id\) && !sent && !busy\) finish\("matched"\);/.test(page));
+}
+
 // ---- stage 1, I-S1: phone-or-email on the server (rule 5 / D16) ----
 const ps = (o) => lead.parseSubmission(Object.assign({}, base, { contact_pref: "" }, o));
 check("I-S1: served, no phone, no email choice: refused, why=phone", ps({}).error && ps({}).why === "phone", ps({}));
