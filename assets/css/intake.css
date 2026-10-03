@@ -250,7 +250,8 @@ body.look-light .intake-layout .iq__summary{border-color:#b3261e;}
 body.look-light .intake-layout .iq__summary a,body.look-light .intake-layout .iq__err{color:#b3261e;}
 body.look-light .intake-layout .iq-progress__bar li.is-done{border-top-color:var(--iq-ink);}
 body.look-light .intake-layout .match-card,body.look-light .intake-layout .upslot,body.look-light .intake-layout .iq__consent{background:#fff;border-color:var(--iq-line);}
-@media(max-width:520px){body.look-light .intake-layout{padding:22px 16px 26px;border-radius:0;margin:0 -16px;}}
+body.look-light .intake-layout strong,body.look-light .intake-layout b{color:var(--iq-ink);}
+@media(max-width:520px){body.look-light .intake-layout{padding:22px 16px 26px;}}
 /* (B) dark kept, quieter: no fill on unselected cards, the selected one a tonal step lighter */
 body.look-quiet .intake-layout{--iq-surface:transparent;}
 body.look-quiet .intake-layout .card-opt{background:transparent;border:1px solid var(--iq-line);}
