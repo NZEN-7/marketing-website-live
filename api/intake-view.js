@@ -3,6 +3,10 @@
 "use strict";
 const IDS = new Set("S1 S2 S3 S4 S4b S5 S6 S7 S8 S10 S11 S12 S13 S14 S15 S16 S17 MATCH MATCH_SHORT URGENT DONE O1 N1".split(" "));
 const WINDOW = 10 * 60 * 1000;
+// Its own cap, not the lead form's 10: a full visit sends up to ~20 beacons (one
+// per screen), so 60 per 10 minutes admits three whole visits from one address,
+// such as a shared household connection, and still screens a flood (Web review, 3 Oct).
+const CAP = 60;
 const buckets = new Map();
 function screened(req, now) {
   const since = now - WINDOW;
@@ -11,8 +15,8 @@ function screened(req, now) {
   const ip = String(h["x-forwarded-for"] || h["x-real-ip"] || (req.socket || {}).remoteAddress || "unknown").split(",")[0].trim();
   const hits = (buckets.get(ip) || []).filter(t => t > since);
   hits.push(now);
-  buckets.set(ip, hits.slice(-11)); // Eleven timestamps suffice to detect >10; bounded per IP.
-  return hits.length > 10;
+  buckets.set(ip, hits.slice(-(CAP + 1))); // CAP + 1 timestamps suffice to detect > CAP; bounded per IP.
+  return hits.length > CAP;
 }
 function questions(body) {
   if (typeof body === "string") {

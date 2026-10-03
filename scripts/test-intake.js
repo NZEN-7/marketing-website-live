@@ -249,6 +249,7 @@ check("no placeholder privacy link on the intake (Nick, 2 Oct: strip it until th
   check("videos: each page embeds the youtube-nocookie player directly", pages.every((h) => /<iframe src="https:\/\/www\.youtube-nocookie\.com\/embed\/[A-Za-z0-9_-]{11}"/.test(h) && !/video\.js|video__play/.test(h)));
   const pp = fs.readFileSync(path.join(__dirname, "..", "privacy", "index.html"), "utf8");
   check("videos: the privacy page says YouTube loads with the page, not only on play", /When one of those pages loads, YouTube receives your IP address/.test(pp) && !/only load when you press play/.test(pp));
+  check("D12: the privacy page says form screens are counted without identifiers", /We count which form screens are viewed, without any name, email or other identifier/.test(pp));
 }
 {
   // No third-party fonts on any page or in any animation a page embeds (CTO Re #41.1).
