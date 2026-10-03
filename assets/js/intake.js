@@ -46,7 +46,7 @@
   var btnBack = $("[data-back]", form), btnCont = $("[data-continue]", form);
   var sending = $("[data-sending]", form);
   var history = [], seen = {}, current = null, sent = false, files = {}, advanceTimer = null;
-  var busy = null, sentOutcome = "", detailsSent = false;
+  var busy = null, sentOutcome = "", detailsSent = false, urgentPhoneAdded = false;
   var outsideAU = false;
 
   // ---------------------------------------------------------------- answers
@@ -91,6 +91,11 @@
     s.hidden = false;
     current = id; seen[id] = true;
     $$("[data-question]", s).forEach(function (q) { if (!q.hasAttribute("data-boiler-part")) seen[q.getAttribute("data-question")] = true; });
+    // Reaching the match (or the short match, or the urgent screen) submits the
+    // enquiry: the row, Nick's notification and the one first email (Nick, 3 Oct,
+    // CTO item 68.1). Once per lead: Back, coming back here or a later exit never
+    // re-sends; the exits then just do their job.
+    if (/^(MATCH|MATCH_SHORT|URGENT)$/.test(id) && !sent && !busy) finish("matched");
 
     var f = first();
     $$("[data-first]", form).forEach(function (el) { el.textContent = f; });
@@ -351,7 +356,7 @@
     $("[data-done-email]", form).hidden = !byEmail;
     $("[data-done-urgent]", form).hidden = !urgent;
     // Urgent: the details are most useful here, so offer them, once (Sales review, 3)
-    var prep = urgent && sentOutcome === "urgent_call" && !detailsSent;
+    var prep = urgent && !detailsSent;
     $("[data-done-prepare]", form).hidden = !prep;
     $("[data-done-book]", form).className = "btn btn--rect " + (prep ? "btn--ghost-light" : "btn--primary");
     if (droppedFile && !$("[data-dropped-note]", screens.DONE)) {
@@ -379,13 +384,19 @@
     form.classList.toggle("is-sending", on);
   }
   function finish(outcome, then) {
-    if (busy) { busy.then(function () { if (sent && then) then(); }); return busy; }   // a second tap waits for the first
+    // A tap while a send is out runs after it (a second tap of the same exit then
+    // finds it sent; Step 3 finishing during the background match send still goes)
+    if (busy) { var after = function () { return finish(outcome, then); }; return busy.then(after, after); }
     // The details from "Help us prepare" go as a second send when an earlier
     // exit already sent (urgent, or a chat booked from the match)
-    var details = sent && outcome === "completed" && sentOutcome !== "completed" && !detailsSent;
-    if (sent && !details) { if (then) then(); return Promise.resolve(); }
-    lock(true);
-    sending.hidden = false; sending.textContent = "Sending…";
+    // A phone number given on the urgent screen after the send goes the same way,
+    // so Nick gets it.
+    var details = sent && !detailsSent && ((outcome === "completed" && sentOutcome !== "completed") || (outcome === "urgent_call" && urgentPhoneAdded));
+    if (sent && !details) { if (outcome === "completed" || outcome === "urgent_call") show("DONE", false); if (then) then(); return Promise.resolve(); }
+    // The send on reaching the match runs in the background: nothing is locked
+    // and nothing is shown unless it fails (an exit tapped meanwhile waits for it).
+    var quiet = outcome === "matched";
+    if (!quiet) { lock(true); sending.hidden = false; sending.textContent = "Sending…"; }
     // Delivered means the server said `sent: true` (GPT Web I-S3): a bot
     // screen answers a bare { ok: true }, so that counts as not sent and is
     // tried once more. The first try waits out the 3 s floor, so a quick,
@@ -405,9 +416,9 @@
         return new Promise(function (r) { setTimeout(r, 1500); }).then(function () { return post(body); });
       });
     }).then(function () {
-      sent = true; sending.hidden = true;
+      sent = true; if (!quiet) sending.hidden = true;
       if (details) detailsSent = true; else sentOutcome = outcome;
-      busy = null; lock(false);
+      busy = null; if (!quiet) lock(false);
       if (outcome === "completed" || outcome === "urgent_call") show("DONE", false);
       if (then) then();
     }).catch(function () {
@@ -476,6 +487,7 @@
           var v = $("[data-urgent-phone-input]", box).value.trim();
           if (!err("urgent_phone", !PHONE_OK(v))) return;
           $("[name=phone]", form).value = v; $("[data-contact-pref]", form).value = "phone"; seen.S4 = true;
+          urgentPhoneAdded = true;
         }
         finish("urgent_call"); return;
       }

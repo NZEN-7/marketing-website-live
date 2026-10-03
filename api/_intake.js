@@ -50,7 +50,7 @@ const L = {
 };
 const SLOTS = { winter_gas_bill: "winter gas bill", boiler_compliance_plate: "boiler compliance plate", switchboard: "switchboard", electricity_bill: "electricity bill" };
 const ROUTES = ["icp", "icp-check", "explore", "urgent", "out-of-area", "not-our-product", "renter"];
-const OUTCOMES = ["completed", "book_chat", "deposit", "keep_posted", "no_thanks", "urgent_call", "urgent_book", "n1_chat"];
+const OUTCOMES = ["matched", "completed", "book_chat", "deposit", "keep_posted", "no_thanks", "urgent_call", "urgent_book", "n1_chat"];
 const SCREENS = /^(intro|S\d{1,2}b?|MATCH|MATCH_SHORT|URGENT|DONE|O1|N1|R1|POSTED)$/;
 
 // Which screen asks which key: "Not asked" (screen never shown) vs "Skipped" (shown, no answer).

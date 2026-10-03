@@ -220,7 +220,10 @@ async function designDefaults(p) {
             await current(c.page,'S17');await next(c.page);await current(c.page,'DONE');
           } else if(['urgent','broken'].includes(kind)) {await c.page.locator('[data-urgent-phone-input]').fill('0412345678');await c.page.locator('[data-exit="urgent_call"]').click();await current(c.page,'DONE');
           } else {await c.page.locator('.is-current [data-exit="keep_posted"]').click();await current(c.page,'POSTED');}
-          assert.equal(c.calls.length,1);assert.equal(c.calls[0].newsletter_opt_in,undefined);
+          // Reaching the match / urgent screen sends the enquiry; Step 3 (or a phone given on the urgent screen) follows as details (CTO item 68.1)
+          const matched=!['outside','nz','splits'].includes(kind);
+          assert.equal(c.calls.length,matched?2:1);assert.equal(c.calls[0].newsletter_opt_in,undefined);
+          if(matched){assert.equal(c.calls[0].outcome,'matched');assert.ok(!c.calls[0].followup);assert.equal(c.calls[1].followup,true);}
           const routing={fit:'icp',outside:'out-of-area',splits:'not-our-product',nz:'out-of-area',broken:'urgent',uncertain:'icp-check',book:'icp',explore:'explore',urgent:'urgent'};
           assert.equal(c.calls[0].route,routing[kind]);
           assert.ok(c.calls[0].seen.includes('S1') && c.calls[0].seen.includes('S2'));assert.equal(c.calls[0].tenure,undefined);
@@ -250,7 +253,7 @@ async function designDefaults(p) {
           for(let i=0;i<4;i++) {const input=uploads.nth(i);const ids=(await input.getAttribute('aria-labelledby')).split(' ');assert.ok(ids.length>=2);for(const id of ids) assert.ok((await c.page.locator('[id="'+id+'"]').textContent()).trim());}
           await uploads.first().setInputFiles({name:'fixture.pdf',mimeType:'application/pdf',buffer:Buffer.from('%PDF-1.4\nTest fixture\n%%EOF')});
           const remove=c.page.locator('[data-remove]:visible');assert.ok((await remove.first().getAttribute('aria-label')).startsWith('Remove '));
-          await next(c.page);await current(c.page,'S17');await next(c.page);await current(c.page,'DONE');assert.equal(c.calls.length,1);assert.equal(c.calls[0].uploads.length,1);
+          await next(c.page);await current(c.page,'S17');await next(c.page);await current(c.page,'DONE');assert.equal(c.calls.length,2);assert.equal(c.calls[0].outcome,'matched');assert.equal(c.calls[1].followup,true);assert.equal(c.calls[1].uploads.length,1);
         } finally {await c.ctx.close();}
       });
     }
