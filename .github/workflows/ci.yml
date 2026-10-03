@@ -20,7 +20,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version: '22'  # = package.json engines, the Vercel functions' runtime
           cache: npm
 
       - uses: actions/setup-python@v5
@@ -47,6 +47,9 @@ jobs:
 
       - name: "Intake: routing, phone-or-email, dedupe, leads row, first email, attachments (133 checks)"
         run: npm run test:intake
+
+      - name: "Nodemailer: the real library composes our mail offline (7 checks)"
+        run: npm run test:nodemailer
 
       - name: "End-to-end, local: every page and the intake paths in Chrome, /api/ mocked (74 checks)"
         run: npm run test:e2e

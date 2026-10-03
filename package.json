@@ -2,6 +2,9 @@
   "name": "td-marketing-website",
   "version": "1.0.0",
   "private": true,
+  "engines": {
+    "node": "22.x"
+  },
   "description": "Thermal Dawn marketing site, plain static, no build step.",
   "scripts": {
     "serve": "node .claude/serve.js 8080",
@@ -20,6 +23,7 @@
     "test:spam": "node scripts/test-spam-guard.js",
     "test:previewguard": "node scripts/test-preview-guard.js",
     "test:releaseguards": "node scripts/test-release-guards.mjs",
+    "test:nodemailer": "node scripts/test-nodemailer-compat.js",
     "test:e2e": "node scripts/test-site-e2e.cjs --suite local",
     "test:e2e:url": "node scripts/test-site-e2e.cjs --suite url --url"
   },
