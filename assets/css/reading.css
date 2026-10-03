@@ -1,0 +1,46 @@
+/* White reading surfaces (CTO item 30). Shared semantic tokens, never global brand overrides. */
+.intake-page,.legal-page{
+  --reading-page:#fff;--control-surface:#fff;--surface-hover:#f6f3ef;
+  --surface-selected:#fff4e6;--surface-error:#fff1ee;
+  --text-primary:#24211f;--text-secondary:#625a54;
+  --control-border:#81776f;--divider:#d8d1ca;
+  --state-selected:#a64f00;--focus-ring:#24211f;--state-error:#b3261e;
+  --action-fill:var(--td-orange);--action-hover:#ee8d00;--reading-radius:6px;
+}
+@media screen{
+  body.intake-page main,body.dark.legal-page main{background:var(--reading-page);color:var(--text-primary);min-height:calc(100vh - var(--header-h));}
+  body.intake-page #site-header,body.dark.legal-page #site-header{box-shadow:none;}
+  body.dark.legal-page main .hero,body.dark.legal-page main .section{background:var(--reading-page);}
+  body.dark.legal-page main *{text-shadow:none;}
+  body.dark.legal-page main .hero__inner{padding-top:40px;}
+  body.dark.legal-page main .hero h1{color:var(--text-primary);font-size:2rem;line-height:1.2;font-weight:600;letter-spacing:-.015em;}
+  body.dark.legal-page main>.section:first-child{padding-top:40px;}
+  body.dark.legal-page main .wrap.narrow{text-align:left;}
+  body.dark.legal-page main .legal-title{color:var(--text-primary);font-size:2rem;font-weight:600;line-height:1.2;letter-spacing:-.015em;margin:0 0 16px;}
+  body.dark.legal-page main .crumbs,body.dark.legal-page main .micro{font-size:.875rem;line-height:1.5;color:var(--text-secondary);text-align:left;}
+  body.dark.legal-page main .micro strong{color:var(--text-secondary);font-weight:600;}
+  body.dark.legal-page main a{color:var(--text-primary);text-decoration:underline;text-underline-offset:3px;}
+  body.dark.legal-page main .btn{background:var(--control-surface);color:var(--text-primary);border:1px solid var(--control-border);border-radius:var(--reading-radius);box-shadow:none;transform:none;min-height:44px;}
+  body.dark.legal-page main .btn:hover{background:var(--surface-hover);}
+  body.dark.legal-page main .hero .wrap,body.dark.legal-page main .wrap.narrow{max-width:720px;}
+  body.dark.legal-page main .article.legal{color:var(--text-primary);font-size:1rem;line-height:1.65;max-width:680px;}
+  body.dark.legal-page main .article.legal p,body.dark.legal-page main .article.legal li,
+  body.dark.legal-page main .article.legal strong,body.dark.legal-page main .article.legal h2,
+  body.dark.legal-page main .article.legal h3{color:var(--text-primary);}
+  body.dark.legal-page main .article.legal h2{font-size:1.25rem;font-weight:600;line-height:1.3;margin:2rem 0 .75rem;}
+  body.dark.legal-page main .article.legal .article-meta{font-size:.875rem;color:var(--text-secondary);font-style:normal;}
+  body.dark.legal-page main .article.legal a{color:var(--text-primary);text-decoration:underline;text-underline-offset:3px;}
+  body.dark.legal-page main .article.legal ul>li::before{background:var(--text-primary);}
+  body.dark.legal-page main table.data,body.dark.legal-page main table.data td,
+  body.dark.legal-page main table.data td:first-child,body.dark.legal-page main table.data th{
+    color:var(--text-primary);background:var(--reading-page);border-color:var(--divider);font-size:.875rem;
+  }
+  body.dark.legal-page main table.data thead th,
+  body.dark.legal-page main table.data tbody tr:nth-child(even) td{background:var(--surface-hover);}
+  body.dark.legal-page main a:focus-visible{outline:3px solid var(--focus-ring);outline-offset:3px;}
+  @media(max-width:520px){
+    body.dark.legal-page main .hero h1,body.dark.legal-page main .legal-title{font-size:1.75rem;}
+    body.dark.legal-page main>.section:first-child{padding-top:28px;}
+    body.dark.legal-page main .hero__inner{padding-top:28px;}
+  }
+}

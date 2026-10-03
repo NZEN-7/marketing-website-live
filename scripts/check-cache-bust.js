@@ -29,6 +29,7 @@ const sh = (cmd) => execSync(cmd, { cwd: ROOT, encoding: "utf8" }).trim();
 const ASSETS = [
   "assets/css/style.css",
   "assets/css/intake.css",
+  "assets/css/reading.css",
   "assets/js/intake.js",
   "assets/js/intake-route.js",
   "assets/js/site.js",
