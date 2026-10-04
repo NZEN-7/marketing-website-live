@@ -34,21 +34,18 @@ const VIC = { state: "VIC", phone: "0400000001" };
 check("state: 3121 VIC, 2000 NSW, 2600 ACT, 2880 NSW, 4000 QLD, 0800 NT",
   R.stateFor("3121") === "VIC" && R.stateFor("2000") === "NSW" && R.stateFor("2600") === "ACT" &&
   R.stateFor("2880") === "NSW" && R.stateFor("4000") === "QLD" && R.stateFor("0800") === "NT");
-check("fit, boiler: S1..S6, S7, S8, S9, S10-S13, MATCH",
-  walk(Object.assign({ intent: "fit", heating: ["boiler_radiators"], tenure: "owner_occupier" }, VIC)) ===
-  "S1 S2 S3 S4 S4b S5 S6 S7 S8 S9 S10 S11 S12 S13 MATCH", walk(Object.assign({ intent: "fit", heating: ["boiler_radiators"] }, VIC)));
-check("fit, no boiler picked: S8 is not shown",
-  walk({ state: "VIC", intent: "fit", heating: ["none"] }) === "S1 S2 S3 S4 S5 S6 S7 S9 S10 S11 S12 S13 MATCH");
+// The live form (Nick, 4 Oct): one screen per question as on production, minus
+// the own-or-rent question (S9) and the renter close (R1)
+check("fit boiler: the live path without S9",
+  walk(Object.assign({ intent: "fit", heating: ["boiler_radiators"] }, VIC)) === "S1 S2 S3 S4 S4b S5 S6 S7 S8 S10 S11 S12 S13 B2 MATCH",
+  walk(Object.assign({ intent: "fit", heating: ["boiler_radiators"] }, VIC)));
+check("fit without boiler: S8 skipped", walk({ state: "VIC", intent: "fit", heating: ["none"] }) === "S1 S2 S3 S4 S5 S6 S7 S10 S11 S12 S13 B2 MATCH");
 check("S4b only with a phone number", walk({ state: "VIC", intent: "explore", heating: ["not_sure"] }).indexOf("S4b") === -1);
-check("ready to book: only S7 and S9, then MATCH",
-  walk(Object.assign({ intent: "book", heating: ["boiler_underfloor"], tenure: "owner_occupier" }, VIC)) === "S1 S2 S3 S4 S4b S5 S6 S7 S9 MATCH");
-check("just exploring: S7, then the short match",
-  walk(Object.assign({ intent: "explore", heating: ["boiler_radiators"] }, VIC)) === "S1 S2 S3 S4 S4b S5 S6 S7 MATCH_SHORT");
-check("urgent: S7, S9, then URGENT",
-  walk(Object.assign({ intent: "urgent", heating: ["lpg_boiler"], tenure: "owner_occupier" }, VIC)) === "S1 S2 S3 S4 S4b S5 S6 S7 S9 URGENT");
-check("fit with 'Broken, or about to go' jumps to URGENT after S9",
-  walk(Object.assign({ intent: "fit", heating: ["boiler_radiators"], boiler_condition: "broken", tenure: "owner_occupier" }, VIC)).endsWith("S8 S9 URGENT"));
-check("no answer on S5 takes the full fit path", walk({ state: "NSW", heating: ["boiler_radiators"] }).endsWith("S13 MATCH"));
+check("ready to book: S7 then MATCH", walk(Object.assign({ intent: "book", heating: ["boiler_underfloor"] }, VIC)) === "S1 S2 S3 S4 S4b S5 S6 S7 B2 MATCH");
+check("just exploring: S7, then the short match", walk(Object.assign({ intent: "explore", heating: ["boiler_radiators"] }, VIC)) === "S1 S2 S3 S4 S4b S5 S6 S7 B2 MATCH_SHORT");
+check("urgent: S7 then URGENT", walk(Object.assign({ intent: "urgent", heating: ["lpg_boiler"] }, VIC)) === "S1 S2 S3 S4 S4b S5 S6 S7 URGENT");
+check("fit with 'Broken, or about to go' jumps to URGENT from S8", walk(Object.assign({ intent: "fit", heating: ["boiler_radiators"], boiler_condition: "broken" }, VIC)).endsWith("S8 URGENT"));
+check("no answer on S5 takes the full fit path", walk({ state: "NSW", heating: ["boiler_radiators"] }).endsWith("S13 B2 MATCH"));
 
 // ---- the closes ----
 check("O1: QLD goes straight to consent (S6), then closes: no phone or intent", walk({ state: "QLD", phone: "0400000001" }) === "S1 S2 S3 S6 O1");
@@ -59,7 +56,7 @@ for (const h of [["splits"], ["ducted_gas"], ["other"], ["splits", "ducted_gas"]
 for (const h of [["boiler_radiators", "ducted_gas"], ["none"], ["not_sure"], ["splits", "not_sure"]]) {
   check(`must NOT close: ${h.join("+")}`, walk({ state: "VIC", intent: "fit", heating: h }).indexOf("N1") === -1);
 }
-check("R1: renting closes at S9", walk({ state: "NSW", intent: "fit", heating: ["boiler_radiators"], tenure: "renter" }).endsWith("S9 R1"));
+check("a renter answer from an old page can't close a journey", walk({ state: "NSW", intent: "fit", heating: ["boiler_radiators"], tenure: "renter" }).endsWith("S13 B2 MATCH") && R.route({ state: "VIC", heating: ["boiler_radiators"], tenure: "renter" }) === "icp");
 check("'Not sure' never closes; it routes icp-check", R.route({ state: "VIC", heating: ["not_sure"], boiler_condition: "not_sure" }) === "icp-check");
 check("icp-check: 'No heating yet', and nothing picked", R.route({ state: "VIC", heating: ["none"] }) === "icp-check" && R.route({ state: "VIC" }) === "icp-check");
 check("icp: a boiler picked, even alongside 'Not sure'", R.route({ state: "VIC", heating: ["lpg_boiler", "not_sure"] }) === "icp");
@@ -88,6 +85,17 @@ const base = { form: "intake", first_name: "Alex", last_name: "Sample", email: "
 const p = lead.parseSubmission(base);
 check("intake parses with the three required fields", !p.error && p.data.form === "intake", p.error);
 check("a lead_id is issued", /^il-[0-9a-f]{10}$/.test(p.data.lead_id));
+{
+  // CTO item 68.1: reaching the match sends outcome "matched" (a full, non-followup send: the row and the one first email)
+  const pm = lead.parseSubmission(Object.assign({}, base, { outcome: "matched", last_screen: "MATCH", rung_reached: "2" }));
+  check("68.1: the server accepts outcome matched, as a first (non-followup) send", !pm.error && pm.data.outcome === "matched" && !pm.data.followup);
+  const px = lead.parseSubmission(Object.assign({}, base, { outcome: "book_chat", followup: true, exit: "chat" }));
+  check("69: the exit after the match is accepted (chat, deposit, keep_posted, none) and anything else is dropped", px.data.exit === "chat" && lead.parseSubmission(Object.assign({}, base, { exit: "bogus" })).data.exit === "");
+  check("68.1: the notification says where it ended", /Ended on: matched \(screen MATCH\)/.test(lead.formatNotification(pm.data, "t")));
+  const page = require("fs").readFileSync(require("path").join(__dirname, "..", "assets", "js", "intake.js"), "utf8");
+  check("68.1: the page sends on reaching MATCH, MATCH_SHORT or URGENT, once", /if \(\/\^\(MATCH\|MATCH_SHORT\|URGENT\)\$\/\.test\(id\) && !sent && !busy\) finish\("matched"\);/.test(page));
+}
+
 // ---- stage 1, I-S1: phone-or-email on the server (rule 5 / D16) ----
 const ps = (o) => lead.parseSubmission(Object.assign({}, base, { contact_pref: "" }, o));
 check("I-S1: served, no phone, no email choice: refused, why=phone", ps({}).error && ps({}).why === "phone", ps({}));
@@ -119,7 +127,7 @@ const k = { lead_id: "il-1111111111", outcome: "completed" };
 }
 check("icp-check: the server works it out from the answers", lead.parseSubmission(Object.assign({}, base, { heating: ["not_sure"] })).data.route === "icp-check");
 check("the page's own route claim is ignored", lead.parseSubmission(Object.assign({}, base, { route: "renter" })).data.route === "icp");
-check("the landlord's phone reaches the notification, under its own label", /LANDLORD[\s\S]*Landlord phone: 0400 000 002/.test(lead.formatNotification(lead.parseSubmission(Object.assign({}, base, { landlord_phone: "0400 000 002" })).data, "x")));
+check("retired landlord block never prints", !/LANDLORD|Landlord phone:/.test(lead.formatNotification(lead.parseSubmission(Object.assign({}, base, { landlord_phone: "0400 000 002" })).data, "x")));
 check("missing postcode is refused (unless outside Australia)", !!lead.parseSubmission(Object.assign({}, base, { postcode: "" })).error &&
   !lead.parseSubmission(Object.assign({}, base, { postcode: "", state: "OS" })).error);
 check("missing last name is refused", !!lead.parseSubmission(Object.assign({}, base, { last_name: "" })).error);
@@ -151,8 +159,8 @@ check("first email: 'Not sure' heating (icp-check) gets §1", fe({ heating: ["no
 check("first email: O1 out of area gets §2", fe({ postcode: "4000", state: "QLD", outcome: "keep_posted" }).template === "interest-list-unserved");
 check("first email: NZ gets §2", fe({ postcode: "", state: "OS", outcome: "keep_posted" }).template === "interest-list-unserved");
 check("first email: N1 (split systems only) gets §2", fe({ heating: ["splits"], outcome: "keep_posted" }).template === "interest-list-unserved");
-check("first email: R1 (renting) gets §2", fe({ tenure: "renter", outcome: "landlord_share" }).template === "interest-list-unserved");
-check("first email: §2 carries the unsubscribe line", /Reply with "unsubscribe"/.test(fe({ tenure: "renter" }).text));
+check("retired renter input gets the server-selected normal email", fe({ tenure: "renter" }).template === "register-interest");
+check("first email: §2 carries the unsubscribe line", /Reply with "unsubscribe"/.test(fe({ heating: ["splits"] }).text));
 check("first email: a follow-up details send gets none", lead.firstEmail(lead.parseSubmission(Object.assign({}, base, { followup: true })).data) === null);
 check("first email: the no-JS long form gets one too", fe({ nojs: "1" }).template === "register-interest");
 check("first email: no resume link yet (stage 2)", !/resume|come back/i.test(fe({}).text));
@@ -207,17 +215,17 @@ check("the urgent screen has no plain 'or book a time' (10)", !/>or book a time<
 check("the short match headline ends with a full stop (13)", /id="h-MATCH_SHORT">Here's the short version<span data-first-prefix>, <span data-first><\/span><\/span>\.<\/h2>/.test(page));
 check("S7 coach and N1 say hydronic (Sales' SPEC)", /We replace gas and LPG hydronic heating: a boiler that heats water/.test(page) && /LPG hydronic heating \(a boiler heating radiators/.test(page));
 
-check("SPEC rev B: the sidebar line", /Nick reads every enquiry and gets back to you himself\./.test(page) && !/calls you himself/.test(page));
-check("SPEC rev B: 'Landlord's phone'", /<span>Landlord's phone<\/span>/.test(page) && !/Or their phone/.test(page));
+check("v2 removes S9, R1 and landlord inputs", !/data-screen="(?:S9|R1)"|name="(?:tenure|landlord_\w+)"/.test(page));
 check("SPEC rev B: the upload-set message promises no email", /One file was too big to send here\. No problem: Nick will be in touch, and you can send it to him then\./.test(page) && !/Reply to the email/.test(visible(page)));
 check("SPEC rev B: the urgent screen and urgent Done lines", /Sorry to hear about the boiler/.test(page) && (page.match(/Nick will try to call you today\. If we miss you, we'll try again tomorrow at lunchtime\./g) || []).length === 2);
+check("the Dialpad number on the contact card, dialable; the card has no price line (Nick, 4 Oct)", /href="tel:\+61272283430">\(02\) 7228 3430<\/a>/.test(page) && !/class="side-offer"/.test(page));
 
-check("the Dialpad number in the sidebar and footer (SPEC §2), dialable", (page.match(/href="tel:\+61272283430">\(02\) 7228 3430<\/a>/g) || []).length === 2);
 {
   // The privacy page (CTO Re #39-40): its own page, linked from every footer and from /start/.
   const priv = fs.readFileSync(path.join(__dirname, "..", "privacy", "index.html"), "utf8");
   const site = fs.readFileSync(path.join(__dirname, "..", "assets", "js", "site.js"), "utf8");
-  check("privacy: /privacy/ exists, with its sections and the providers table", /<h1>Privacy Policy<\/h1>/.test(priv) && (priv.match(/<h2>/g) || []).length >= 10 && /<td>Supabase<\/td>/.test(priv));
+  check("privacy: /privacy/ exists, with its sections and providers by category (rev 4)", /<h1>Privacy Policy<\/h1>/.test(priv) && (priv.match(/<h2>/g) || []).length >= 10 && /<strong>Website hosting<\/strong>/.test(priv) && /mainly in the United States/.test(priv));
+  check("privacy rev 4: no provider or tool is named (Nick, 4 Oct)", !/(Vercel|Supabase|Google|Calendly|YouTube|Stripe|Dialpad|Mailchimp|Anthropic|OpenAI|ChatGPT|Claude|Gmail)/.test(priv.replace(/<!--[\s\S]*?-->/g, "")));
   check("privacy: no TO CONFIRM, no placeholder", !/TO CONFIRM|placeholder/i.test(priv.replace(/<!--[\s\S]*?-->/g, "")));
   check("privacy: the shared footer links to it (every page)", /'<a href="\/privacy\/">Privacy<\/a>'/.test(site));
   check("privacy: /start/'s consent line and footer link to it, with no placeholder left", (page.match(/<a href="\/privacy\/">Privacy policy<\/a>/g) || []).length === 2 && !/\[Privacy policy\]|class="ph-link"/.test(page));
@@ -248,7 +256,9 @@ check("no placeholder privacy link on the intake (Nick, 2 Oct: strip it until th
   const pages = ["index.html", "mission/index.html", "hydronic/how-it-works/index.html"].map((f) => fs.readFileSync(path.join(__dirname, "..", f), "utf8"));
   check("videos: each page embeds the youtube-nocookie player directly", pages.every((h) => /<iframe src="https:\/\/www\.youtube-nocookie\.com\/embed\/[A-Za-z0-9_-]{11}"/.test(h) && !/video\.js|video__play/.test(h)));
   const pp = fs.readFileSync(path.join(__dirname, "..", "privacy", "index.html"), "utf8");
-  check("videos: the privacy page says YouTube loads with the page, not only on play", /When one of those pages loads, YouTube receives your IP address/.test(pp) && !/only load when you press play/.test(pp));
+  check("videos: the privacy page says the video platform loads with the page, not only on play", /When one of those pages loads, the platform receives your IP address/.test(pp) && !/only load when you press play/.test(pp));
+  check("D12: the privacy page says form screens are counted without identifiers", /We count which screens of the form are viewed, without your name, email or any other identifier/.test(pp));
+  check("privacy rev 4: calls may be recorded, and callers are told", /Calls to our business number may be recorded; we'll tell you at the start of the call\./.test(pp));
 }
 {
   // No third-party fonts on any page or in any animation a page embeds (CTO Re #41.1).
@@ -289,15 +299,46 @@ check("the notification keeps its parsed label 'Monthly update'", /Monthly updat
     /<article class="article legal">/.test(read("privacy/index.html")) && !/<style>/.test(read("privacy/index.html")) && /\.article\.legal\{max-width:720px/.test(css));
   check("win 3: the homepage price and installer line is body text, not micro", /<p class="measure" style="margin:0 auto 18px">From \$12,000 for the equipment/.test(read("index.html")));
   check("win 4: no static (non-link) card lifts on hover", ["hydronic/pricing/index.html", "intelligence/index.html"].every((f) => !/<(div|section|article)[^>]*class="[^"]*card--lift/.test(read(f))));
-  // Design trial B (Nick, 2 Oct): page-scoped, so it must stay on its two pages until Nick extends it.
+  check("a11y: header and footer controls have a 44px hit area (item 54.3)", /\.nav__toggle::after\{inset:-5px -1px;\}/.test(css) && /\.footer-social--icons a::after\{inset:-5px;\}/.test(css) && /@media \(pointer:coarse\)\{\.footer-links\{row-gap:24px;\}\}/.test(css));
+  check("print: terms and privacy print black on white with no nav (legal-page, item 54.1)",
+    ["pre-order/terms/index.html", "privacy/index.html"].every((f) => /<body class="dark legal-page">/.test(read(f))) &&
+    /@media print\{\r?\nbody\.legal-page,body\.legal-page \.section[^\n]*\{background:#fff!important;\}/.test(css) && /body\.legal-page #site-header[^{]*\{display:none!important;\}/.test(css));
+  check("a11y: the desktop Hydronic submenu opens on keyboard focus, so Tab reaches its links (e2e finding, 3 Oct)", /\.nav__has-sub:hover \.nav__sub,\.nav__has-sub:focus-within \.nav__sub\{opacity:1;visibility:visible;/.test(css));
+  // Calmer headings and cards are the site defaults (Nick, 3 Oct): trial B promoted, its page classes retired.
   const bodyOf = (f) => (read(f).match(/<body class="([^"]*)"/) || [])[1] || "";
-  const trialPages = fs.readdirSync(root, { recursive: true }).filter((f) => /index\.html$/.test(f) && !/^(node_modules|docs)[\/]/.test(f));
-  check("trial B: calmer headings on how-it-works and pricing only; sharper cards on pricing only",
-    bodyOf("hydronic/how-it-works/index.html") === "dark trial-calm" && bodyOf("hydronic/pricing/index.html") === "dark trial-calm trial-cards" &&
-    trialPages.filter((f) => /trial-(calm|cards)/.test(bodyOf(f))).length === 2 &&
-    /body\.dark\.trial-calm h2\{font-weight:700;/.test(css) && /body\.dark\.trial-cards \.card\{border-radius:6px;padding:20px;/.test(css));
+  const sitePages = fs.readdirSync(root, { recursive: true }).filter((f) => /index\.html$/.test(f) && !/^(node_modules|docs)[\\/]/.test(f));
+  check("design: calmer headings and sharper cards are site defaults; no page carries the retired trial classes",
+    sitePages.length > 20 && sitePages.every((f) => !/trial-(calm|cards)/.test(bodyOf(f))) && !/trial-(calm|cards)/.test(css) &&
+    /body h2\{font-weight:700;font-size:clamp\(1\.55rem,3\.4vw,2rem\);line-height:1\.25;/.test(css) && /\.card\{border-radius:var\(--radius\);padding:20px;box-shadow:none;\}/.test(css) && /--radius:6px;/.test(css));
 }
 check("Nick's old mobile is gone from the page", !/432 ?395 ?138/.test(page));
 
+// Nick pass: one question per screen retains logical question IDs.
+const jsV2=fs.readFileSync(path.join(__dirname,"..","assets/js/intake.js"),"utf8");
+for(const id of ["S1","S7","S10","S11"]) {
+ const section=page.split('data-screen="'+id+'"')[1].split('</section>')[0];
+ check("Nick pass multi-select "+id+" never auto advances", !/data-auto/.test(section));
+}
+check("v2 heating notes have label, described hint and no placeholder", /<label for="heating-notes">Your notes/.test(page) && /name="heating_notes"[^>]*aria-describedby="heating-notes-hint"/.test(page) && !/<textarea[^>]*name="heating_notes"[^>]*placeholder/.test(page));
+check("v2 transition hides old questions and focuses new heading", /s.hidden = true/.test(jsV2) && /h.focus/.test(jsV2));
+check("v2 progress sections", ["intro","S1","S6","S4b"].every(id=>R.stepOf(id)===1) && ["S7","S8","S10","S13","B2","MATCH","MATCH_SHORT","URGENT"].every(id=>R.stepOf(id)===2) && ["S14","S17"].every(id=>R.stepOf(id)===3) && R.stepOf("DONE")===4);
+check("v2 no batch timing anywhere on start", !/November|installed in February|next winter/i.test(page));
+const notesData=lead.parseSubmission(Object.assign({},base,{heating_notes:"a".repeat(2100),tenure:"renter"})).data;
+check("v2 heating notes clamp 2000; tenure null", notesData.heating_notes.length===2000 && notesData.tenure===null);
+const v2row=I.intakeLeadRow(notesData,{INTAKE_LEAD_COLUMNS:"on"},Date.now());
+check("v2 notes saved under answers; tenure column retained null", v2row.answers.heating_notes.length===2000 && Object.hasOwn(v2row,"tenure") && v2row.tenure===null);
+check("v2 retired notification label preserved", /Is it your home: -/.test(lead.formatNotification(notesData,"x")));
+check("v2 heating notes continuation cannot forge a label", /Heating notes: Hello\n> Boiler condition: Broken/.test(lead.formatNotification(lead.parseSubmission(Object.assign({},base,{heating_notes:"Hello\nBoiler condition: Broken"})).data,"x")));
+
+const cssV2=fs.readFileSync(path.join(__dirname,"..","assets/css/intake.css"),"utf8");
+check("focus and reduced-motion styles are explicit", /card-opt:has\(input:focus-visible\)[^}]*outline:3px solid var\(--td-orange\)/.test(cssV2) && /prefers-reduced-motion:reduce/.test(cssV2));
+for (const heating of [["ducted_rc"], ["ducted_rc","splits"], ["ducted_rc","ducted_gas"]]) {
+ const d=lead.parseSubmission(Object.assign({},base,{heating})).data;
+ check("ducted RC non-product route "+heating, d.route==="not-our-product" && R.next("S7",d)==="N1");
+ check("ducted RC notification tag "+heating, /Tags: interest:ducted-rc, source:website/.test(lead.formatNotification(d,"x")));
+ check("ducted RC saved tag "+heating, I.intakeLeadRow(d,{INTAKE_LEAD_COLUMNS:"on"},Date.now()).answers.tags[0]==="interest:ducted-rc");
+}
+check("mixed boiler and ducted RC preserves fit",R.route({state:"VIC",heating:["boiler_radiators","ducted_rc"]})==="icp");
+check("uncertain ducted RC preserves check",R.route({state:"VIC",heating:["not_sure","ducted_rc"]})==="icp-check");
 console.log(failed ? `\n${failed} CHECK(S) FAILED` : "\nAll intake checks passed.");
 process.exit(failed ? 1 : 0);

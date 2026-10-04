@@ -1,7 +1,8 @@
 # First email: subscribe (HANDOVER v2 §5).
 # Source of truth: Sales +/Consumer/Sales Playbook/_Templates/First emails/
 #   HANDOVER - first emails for api-lead.js (v2, two doors).md
-# Sales edits the wording THERE; it is pasted here verbatim. Never edit it here first.
+# Signature override: Nick / CTO item 37, 4 Oct 2026. {signature} is composed by _customer-email.js.
+# Sales edits the body wording THERE; it is pasted here verbatim. Never edit it here first.
 # A list email: it carries the unsubscribe line (Spam Act; CTO Re: Web #12, A2),
 # added to the HANDOVER by Sales on 1 Oct 2026 and pasted here (CTO Re #25).
 # lead.js still refuses it, and sends today's email, if the line ever goes.
@@ -14,8 +15,6 @@ Thanks for subscribing. About once a month I'll send a short update on what we'r
 
 If you'd like to talk about your own home in the meantime, just reply to this email.
 
-Cheers,
-Nick
-Thermal Dawn
+{signature}
 
 Don't want these updates? Reply with "unsubscribe" and I'll take you off the list.

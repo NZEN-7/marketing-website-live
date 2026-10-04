@@ -13,6 +13,7 @@ it points to them where they hold the detail.
 | [architecture.md](architecture.md) | The shape of the thing: what talks to what, one diagram |
 | [lead-pipeline.md](lead-pipeline.md) | A form submission from the browser to Gmail, the CRM, Supabase and Stripe, and the three tests that guard it |
 | [hosting-and-deploy.md](hosting-and-deploy.md) | Vercel, the mirror-push deploy, caching, redirects, domains and DNS |
+| [BRANCHING.md](BRANCHING.md) | Branches, the `develop` trunk and its stable preview, the DELTA, and how a release reaches production |
 | [pages-and-content.md](pages-and-content.md) | The page map, what is indexed, the embedded interactives, legal copy, live figures |
 | [design-system.md](design-system.md) | `style.css`: tokens, the layered blocks, the contrast rules, fonts, motion, and how it relates to the brand and the customer documents |
 | [runbooks/domain-move.md](runbooks/domain-move.md) | Moving thermaldawn.com off Wix before 3 Nov 2026 without breaking Google Workspace mail: the zone as it stands, and the order to move it in |

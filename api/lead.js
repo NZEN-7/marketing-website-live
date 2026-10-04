@@ -21,6 +21,7 @@ const path = require("path");
 const crypto = require("crypto");
 // The intake prototype (PRD D13): its own module, so this file's diff stays small.
 const intake = require("./_intake.js");
+const customerEmail = require("./_customer-email.js");
 
 const TZ = "Australia/Sydney";
 const NOTIFY_TO = "nickz@thermaldawn.com";
@@ -299,6 +300,20 @@ async function recordLead(d) {
   // An intake row with its own columns is one per (intake_lead_id,
   // intake_event): two instances racing the same send get one row (Platform,
   // migration efaf42c; GPT Web I-S2).
+  // Same-row path (CTO items 69, 82): a follow-up with the lead's resume token updates its
+  // own `complete` row through update_intake_details. If that can't confirm the update
+  // (function not there yet, wrong token, any error), fall through to today's `details`
+  // insert, so no answer is ever dropped.
+  if (d.form === "intake" && d.followup && d.resume_token && String(process.env.INTAKE_LEAD_COLUMNS || "").trim() === "on") {
+    try {
+      const up = await fetch(`${SUPABASE_URL}/rest/v1/rpc/update_intake_details`, {
+        method: "POST",
+        headers: { apikey: auth.apikey, Authorization: `Bearer ${auth.bearer}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ p_lead_id: d.lead_id, p_token: d.resume_token, p_details: intake.sameRowDetails(d) }),
+      });
+      if (up.ok && String(await up.text()).trim() === "true") return "updated";
+    } catch (_) { /* fall back to the details row */ }
+  }
   const row = d.form === "intake" ? intake.intakeLeadRow(d, process.env) : leadRow(d);
   // With its own columns, an intake row asks for itself back, so the handler
   // knows whether this was the first row for (intake_lead_id, intake_event):
@@ -579,6 +594,17 @@ function formatNotification(d, stamp) {
   ].join("\n");
 }
 
+/** Nick's intake notifications for one lead thread together in Gmail (Nick,
+    3 Oct, CTO item 70.1): the first carries a Message-ID made from the lead ID,
+    and every follow-up (the exit, Step 3, an urgent phone) replies to it with
+    the same subject and "Re: ". Deterministic, so no lookup is needed. Only the
+    notification; the customer still gets exactly one email. */
+function notificationThread(d) {
+  if (d.form !== "intake" || !/^il-[0-9a-f]{10}$/.test(d.lead_id || "")) return null;
+  const id = `<intake-${d.lead_id}@thermaldawn.com>`;
+  return d.followup ? { inReplyTo: id, references: id } : { messageId: id };
+}
+
 function formatSubject(d) {
   if (d.form === "intake") return intake.formatIntakeSubject(d);
   if (d.form === "register-interest") {
@@ -676,10 +702,10 @@ function renderTemplate(t, d) {
     .split("{first_name}").join(name || "there")
     .split("{booking_link}").join(bookingLink());
   const subject = stripHeader((name ? t.subject : t.subjectNoName).split("{first_name}").join(name));
-  return { subject, text: body };
+  return Object.assign({ subject }, customerEmail(body, bookingLink()));
 }
 
-/** What the first email to this lead is: {template, subject, text}, or null
+/** What the first email to this lead is: {template, subject, text, html}, or null
     when this form gets none. Pure apart from reading the template file. */
 function firstEmail(d) {
   if (!AUTORESPOND[d.form]) return null;
@@ -688,10 +714,10 @@ function firstEmail(d) {
   const t = loadTemplate(key);
   if (LIST_TEMPLATES[key] && !/unsubscribe/i.test(t.body)) {
     return { template: key + " (held: no unsubscribe line yet; today's email sent)",
-             subject: legacySubject(d), text: legacyAutoresponder(d) };
+             subject: legacySubject(d), ...customerEmail(legacyAutoresponder(d).replace(/Nick\nThermal Dawn/, "{signature}"), bookingLink()) };
   }
   const r = renderTemplate(t, d);
-  return { template: key, subject: r.subject, text: r.text };
+  return { template: key, subject: r.subject, text: r.text, html: r.html, attachments: r.attachments };
 }
 
 /** Kept for the tests and the harness: the text of the first email. */
@@ -930,11 +956,13 @@ module.exports = async function handler(req, res) {
     //    FIRST, as it always has (CTO Re: Web #12, A3).
     const notifyTo = routeTo(NOTIFY_TO);
     if (notifyTo) {
+      const thread = notificationThread(data);
       await transport.sendMail({
         from,
         to: notifyTo,
         replyTo: data.email,
-        subject: formatSubject(data),
+        subject: (thread && thread.inReplyTo ? "Re: " : "") + formatSubject(data),
+        ...(thread || {}),
         text: formatNotification(data),
         attachments: data._files ? data._files.attachments.map((a) =>
           ({ filename: a.filename, content: a.content, contentType: a.contentType })) : undefined,
@@ -956,6 +984,7 @@ module.exports = async function handler(req, res) {
     try {
       const r = await recordLead(data);
       if (r === "inserted") inserted = true;
+      else if (r === "updated") logEvent(reqId, data.form, "row_updated", "same_row");
       else if (r === "duplicate") { inserted = false; logEvent(reqId, data.form, "insert_skipped", "duplicate_event"); }
       else if (r === "unknown") logEvent(reqId, data.form, "insert_unconfirmed", "unexpected_reply");
       else if (r !== "ok") logEvent(reqId, data.form, "insert_skipped", r === "skipped (non-production)" ? "non_production" : "not_configured");
@@ -996,6 +1025,8 @@ module.exports = async function handler(req, res) {
             replyTo: NOTIFY_TO,
             subject: first.subject,
             text: first.text,
+            html: first.html,
+            attachments: first.attachments,
           });
         } catch (autoErr) {
           logEvent(reqId, data.form, "first_email_failed", errorCode(autoErr));
@@ -1019,6 +1050,7 @@ module.exports = async function handler(req, res) {
 /* Exported for the local format harness (scripts/test-email-format.js). */
 module.exports.formatNotification = formatNotification;
 module.exports.formatSubject = formatSubject;
+module.exports.notificationThread = notificationThread;
 module.exports.formatAutoresponder = formatAutoresponder;
 module.exports.formatTimestamp = formatTimestamp;
 module.exports.parseSubmission = parseSubmission;

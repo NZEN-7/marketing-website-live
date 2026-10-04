@@ -46,7 +46,9 @@
   var btnBack = $("[data-back]", form), btnCont = $("[data-continue]", form);
   var sending = $("[data-sending]", form);
   var history = [], seen = {}, current = null, sent = false, files = {}, advanceTimer = null;
-  var busy = null, sentOutcome = "", detailsSent = false;
+  var busy = null, sentOutcome = "", detailsSent = false, urgentPhoneAdded = false, exitPicked = "none", exitSent = false;
+  // Exits after the match, as stored in the row (CTO item 69)
+  var EXIT_OF = { book_chat: "chat", urgent_book: "chat", deposit: "deposit", keep_posted: "keep_posted" };
   var outsideAU = false;
 
   // ---------------------------------------------------------------- answers
@@ -72,6 +74,10 @@
 
   // ---------------------------------------------------------------- display
   var LABELS = { 1: "Let's get to know you", 2: "Great start. Let's check the fit", 3: "Nearly there", 4: "All done" };
+  var counted = {};
+  // The resume token: 64 random hex characters, made once per visit and kept in memory
+  // only. The server keeps just its hash, so later sends can update the same CRM row.
+  var RESUME = (function () { try { var b = new Uint8Array(32); crypto.getRandomValues(b); return Array.prototype.map.call(b, function (x) { return ("0" + x.toString(16)).slice(-2); }).join(""); } catch (e) { return ""; } })();
   function show(id, isBack) {
     if (!screens[id]) return;
     clearTimeout(advanceTimer);
@@ -79,6 +85,17 @@
     var s = screens[id];
     s.classList.add("is-current", isBack ? "is-back" : "is-entering");
     current = id; seen[id] = true;
+    // Anonymous screen-view count (D12): the screen's ID only, once per page load;
+    // no identity, cookie or storage. Off production the server counts nothing.
+    if (!counted[id] && id !== "intro" && navigator.sendBeacon) {
+      counted[id] = true;
+      try { navigator.sendBeacon("/api/intake-view", JSON.stringify({ q: [id] })); } catch (e) {}
+    }
+    // Reaching the match (or the short match, or the urgent screen) submits the
+    // enquiry: the row, Nick's notification and the one first email (Nick, 3 Oct,
+    // CTO item 68.1). Once per lead: Back, coming back here or a later exit never
+    // re-sends; the exits then just do their job.
+    if (/^(MATCH|MATCH_SHORT|URGENT)$/.test(id) && !sent && !busy) finish("matched");
     var f = first();
     $$("[data-first]", form).forEach(function (el) { el.textContent = f; });
     $$("[data-first-prefix]", form).forEach(function (el) { el.hidden = !f; });
@@ -98,7 +115,22 @@
     if (id === "URGENT") $("[data-urgent-phone]", s).hidden = !!String(answers().phone || "").trim();
     if (id === "DONE") renderDone();
     toggles();
-    var h = $(".iq__q", s); if (h) { h.setAttribute("tabindex", "-1"); h.focus({ preventScroll: true }); }
+    var h = $(".iq__q", s);
+    // Touch devices keep heading focus so changing screens never opens a keyboard.
+    // On desktop, the question remains part of the field's accessible description.
+    var field = window.matchMedia("(pointer: fine)").matches && !navigator.maxTouchPoints
+      ? $$("input:not([type=hidden]):not([type=checkbox]):not([type=radio]):not([type=file]), textarea", s)
+          .filter(function (el) { return !el.disabled && !el.readOnly && el.getClientRects().length; })[0] : null;
+    if (h) {
+      h.setAttribute("tabindex", "-1");
+      if (field) {
+        var description = (field.getAttribute("aria-describedby") || "").split(/\s+/).filter(Boolean);
+        if (description.indexOf(h.id) === -1) description.unshift(h.id);
+        field.setAttribute("aria-describedby", description.join(" "));
+        $("[data-live]", form).textContent = h.textContent.trim();
+        field.focus({ preventScroll: true });
+      } else { $("[data-live]", form).textContent = ""; h.focus({ preventScroll: true }); }
+    }
     window.scrollTo({ top: Math.max(0, form.getBoundingClientRect().top + window.scrollY - 90), behavior: "auto" });
   }
   function go(id) { if (current) history.push(current); show(id, false); }
@@ -119,10 +151,6 @@
     if (ufRow) ufRow.hidden = !showUf;
     // "Underfloor only" only when we don't know the emitters (Sales review, 7)
     if (ufChip) ufChip.hidden = rad || uf || lpg;
-    // R1: "replaces the boiler" only fits when there is one (Sales review, 11)
-    var boiler = R.hasBoiler(a);
-    $$("[data-r1-boiler]", form).forEach(function (el) { el.hidden = !boiler; });
-    $$("[data-r1-house]", form).forEach(function (el) { el.hidden = boiler; });
     [[radRow, showRad], [ufRow, showUf]].forEach(function (x) { if (x[0] && !x[1]) $$("input", x[0]).forEach(function (i) { i.checked = false; }); });
   }
 
@@ -144,7 +172,7 @@
         var ids = (f.getAttribute("aria-describedby") || "").split(/\s+/).filter(function (x) { return x && x !== e.id; });
         if (on) ids.push(e.id);
         if (ids.length) f.setAttribute("aria-describedby", ids.join(" ")); else f.removeAttribute("aria-describedby");
-        var anyOn = ids.some(function (id) { var x = document.getElementById(id); return x && !x.hidden; });
+        var anyOn = ids.some(function (id) { var x = document.getElementById(id); return x && x.getAttribute("role") === "alert" && !x.hidden; });
         if (anyOn) f.setAttribute("aria-invalid", "true"); else f.removeAttribute("aria-invalid");
       }
     }
@@ -333,7 +361,7 @@
     $("[data-done-email]", form).hidden = !byEmail;
     $("[data-done-urgent]", form).hidden = !urgent;
     // Urgent: the details are most useful here, so offer them, once (Sales review, 3)
-    var prep = urgent && sentOutcome === "urgent_call" && !detailsSent;
+    var prep = urgent && !detailsSent;
     $("[data-done-prepare]", form).hidden = !prep;
     $("[data-done-book]", form).className = "btn btn--rect " + (prep ? "btn--ghost-light" : "btn--primary");
     if (droppedFile && !$("[data-dropped-note]", screens.DONE)) {
@@ -348,7 +376,7 @@
     a.state = stateNow();
     if (a.remote === "true") a.remote = true;
     a.form = "intake"; a.ts = stamped; a.lead_id = LEAD_ID; a.website = ($("[name=website]", form) || {}).value || "";
-    a.outcome = outcome; a.last_screen = current; a.seen = Object.keys(seen);
+    a.outcome = outcome; a.last_screen = current; a.seen = Object.keys(seen); a.exit = exitPicked; a.resume_token = RESUME;
     a.route = R.route(a); a.path = a.intent || "fit";
     a.rung_reached = seen.DONE ? "done" : Object.keys(seen).some(function (k) { return /^S1[4-7]$/.test(k); }) ? "3"
       : Object.keys(seen).some(function (k) { return /^S(7|8|9|1[0-3])$/.test(k); }) ? "2" : "1";
@@ -361,13 +389,24 @@
     form.classList.toggle("is-sending", on);
   }
   function finish(outcome, then) {
-    if (busy) { busy.then(function () { if (sent && then) then(); }); return busy; }   // a second tap waits for the first
+    // A tap while a send is out runs after it (a second tap of the same exit then
+    // finds it sent; Step 3 finishing during the background match send still goes)
+    if (busy) { var after = function () { return finish(outcome, then); }; return busy.then(after, after); }
     // The details from "Help us prepare" go as a second send when an earlier
     // exit already sent (urgent, or a chat booked from the match)
-    var details = sent && outcome === "completed" && sentOutcome !== "completed" && !detailsSent;
-    if (sent && !details) { if (then) then(); return Promise.resolve(); }
-    lock(true);
-    sending.hidden = false; sending.textContent = "Sending…";
+    // A phone number given on the urgent screen after the send goes the same way,
+    // so Nick gets it.
+    var details = sent && !detailsSent && ((outcome === "completed" && sentOutcome !== "completed") || (outcome === "urgent_call" && urgentPhoneAdded));
+    // The exit picked after the send goes as its own small details send, once,
+    // with no customer email (CTO item 69)
+    if (EXIT_OF[outcome]) exitPicked = EXIT_OF[outcome];
+    var exitDetails = sent && !details && !!EXIT_OF[outcome] && !exitSent;
+    if (exitDetails) details = true;
+    if (sent && !details) { if (outcome === "completed" || outcome === "urgent_call") show("DONE", false); if (then) then(); return Promise.resolve(); }
+    // The send on reaching the match runs in the background: nothing is locked
+    // and nothing is shown unless it fails (an exit tapped meanwhile waits for it).
+    var quiet = outcome === "matched";
+    if (!quiet) { lock(true); sending.hidden = false; sending.textContent = "Sending…"; }
     // Delivered means the server said `sent: true` (GPT Web I-S3): a bot
     // screen answers a bare { ok: true }, so that counts as not sent and is
     // tried once more. The first try waits out the 3 s floor, so a quick,
@@ -387,9 +426,9 @@
         return new Promise(function (r) { setTimeout(r, 1500); }).then(function () { return post(body); });
       });
     }).then(function () {
-      sent = true; sending.hidden = true;
-      if (details) detailsSent = true; else sentOutcome = outcome;
-      busy = null; lock(false);
+      sent = true; if (!quiet) sending.hidden = true;
+      if (exitDetails) exitSent = true; else if (details) detailsSent = true; else sentOutcome = outcome;
+      busy = null; if (!quiet) lock(false);
       if (outcome === "completed" || outcome === "urgent_call") show("DONE", false);
       if (then) then();
     }).catch(function () {
@@ -454,26 +493,12 @@
           var v = $("[data-urgent-phone-input]", box).value.trim();
           if (!err("urgent_phone", !PHONE_OK(v))) return;
           $("[name=phone]", form).value = v; $("[data-contact-pref]", form).value = "phone"; seen.S4 = true;
+          urgentPhoneAdded = true;
         }
         finish("urgent_call"); return;
       }
       // book_chat, urgent_book, n1_chat: the link opens Calendly in a new tab; send in the background
       finish(kind);
-    });
-  });
-  var share = $("[data-landlord-share]", form);
-  if (share) share.addEventListener("click", function () {
-    var box = $("[data-landlord]", form);
-    if (box.hidden) { box.hidden = false; seen.R1 = true; $("input", box).focus(); return; }
-    // Something to share, or it becomes "keep me posted" (Sales review, 11)
-    var em = $("[name=landlord_email]", form).value.trim(), ph = $("[name=landlord_phone]", form).value.trim();
-    if (!err("landlord", !!em && !EMAIL_OK(em))) { $("[name=landlord_email]", form).focus(); return; }
-    var has = !!(em || ph);
-    finish(has ? "landlord_share" : "keep_posted", function () {
-      $("[data-close-actions]", screens.R1).hidden = true; box.hidden = true;
-      var p = document.createElement("p"); p.className = "close-body";
-      p.textContent = has ? "Thanks, we'll get in touch with them." : "No worries, we'll keep you posted instead.";
-      screens.R1.appendChild(p);
     });
   });
 

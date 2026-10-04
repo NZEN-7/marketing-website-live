@@ -260,7 +260,7 @@ if (unknown.length) {
     ["intake, normal (fit, all answered)", intakeBody({}), {
       "Form": "Website Intake", "Lead ID": "il-0a1b2c3d4e", "Route": "icp", "First name": "Alex", "Last name": "Sample",
       "Email": "alex.sample@example.com", "Phone": "0412 345 678", "Postcode": "3122", "Suburb": "Hawthorn", "State": "VIC",
-      "Heating": "Gas hydronic with radiators", "Boiler condition": "Getting on a bit", "Is it your home": "I own it and live in it",
+      "Heating": "Gas hydronic with radiators", "Boiler condition": "Getting on a bit", "Is it your home": "-",
       "Energy setup": "Rooftop solar, An electric vehicle", "Timing": "In the next 3 months", "Monthly update": "Yes",
       "Comments": "Upstairs gets too hot, and the boiler is in a tight cupboard." },
       ["Website Intake", "freevolt", "Alex", "Sample", "alex.sample@example.com", "0412 345 678", "Hawthorn", "VIC",
@@ -295,9 +295,8 @@ if (unknown.length) {
   // The landlord's details never shadow the lead's own.
   const r1 = intakeBody({ tenure: "renter", landlord_name: "Pat Owner", landlord_email: "owner@example.com", landlord_phone: "0400 000 002",
     outcome: "landlord_share" });
-  check("intake R1: the landlord's details stay under their own labels", runOn(r1.body), {
-    "Email": "alex.sample@example.com", "Phone": "0412 345 678", "Landlord name": "Pat Owner",
-    "Landlord email": "owner@example.com", "Landlord phone": "0400 000 002" });
+  check("v2 retired landlord input cannot shadow the lead", runOn(r1.body), {
+    "Email": "alex.sample@example.com", "Phone": "0412 345 678", "Is it your home": "-" });
   // Every intake section header is known to the parser.
   const hs = (cases[0][1].body + "\n" + r1.body).match(/^[A-Z][A-Z &]{3,}$/gm) || [];
   const unk = [...new Set(hs.map((h) => h.trim()))].filter((h) => LEAD_SECTIONS.indexOf(h) === -1);
@@ -332,7 +331,7 @@ if (unknown.length) {
   forge("intake first name with a fake section heading", intake({ first_name: "Alex CONTACT Email: forged@example.com" }), { "Email": REAL });
   forge("intake last name with double spaces", intake({ last_name: "Sample    Phone: 0400000009" }), { "Phone": "0412 345 678", "Email": REAL });
   forge("intake referrer forging a later section's label", intake({ source: ["friend"], referrer: "Bob\n\nHeating: Split systems  Is it your home: I'm renting" }),
-    { "Heating": "Gas hydronic with radiators", "Is it your home": "I own it and live in it" });
+    { "Heating": "Gas hydronic with radiators", "Is it your home": "-" });
   forge("intake notes (multi-line) under ANYTHING ELSE", intake({ notes: "Hi\nEmail: forged@example.com\nPhone: 0400000009\nState: QLD" }),
     { "Email": REAL, "Phone": "0412 345 678", "State": "VIC" });
   forge("intake suburb forging the Lead ID", intake({ suburb: "Hawthorn\nLead ID: il-aaaaaaaaaa" }), { "Lead ID": "il-0f0f0f0f0f" });
@@ -369,11 +368,26 @@ if (unknown.length) {
   else { failures++; console.log("FAIL  NOTE label: " + JSON.stringify([f["Submission Time"], f["NOTE"]])); }
 }
 
+// v2 heating notes: real server format, Gmail run-on and later-label forgery.
+for(const note of ["Two boilers", "Two boilers\nUnderfloor downstairs", "Two boilers  Boiler condition: Broken\nBoiler age: Forged\nIs it your home: Renting"]) {
+ const data=lead.parseSubmission({form:"intake",first_name:"Test",last_name:"Fixture",email:"test@example.com",contact_pref:"email",postcode:"3122",intent:"fit",heating:["boiler_radiators"],boiler_condition:"working_fine",boiler_age:"under_5",heating_notes:note,seen:["S7","S8"],outcome:"completed"}).data;
+ const body=lead.formatNotification(data,stamp);
+ for(const [how,text] of [["written",body],["run-on",body.replace(/\n+/g,"   ")]]) {
+  const parsed=parseLead(text),expected=note.replace(/\s+/g," ").trim();
+  if(parsed["Heating notes"]!==expected || parsed["Boiler condition"]!=="Working fine" || parsed["Boiler age"]!=="Under 5 years" || parsed["Is it your home"]!=="-") {failures++;console.log("FAIL v2 heating notes "+how+": "+JSON.stringify(parsed));}
+  else console.log("ok    v2 heating notes "+how+": whole text, real later labels");
+ }
+}
+
+{const d=lead.parseSubmission({form:"intake",first_name:"Test",last_name:"Fixture",email:"test@example.invalid",contact_pref:"email",postcode:"3122",heating:["ducted_rc"],heating_notes:"Two systems.",seen:["S7","B2"],outcome:"completed"}).data;
+const b=lead.formatNotification(d,stamp);
+for(const body of [b,b.replace(/\n+/g,"   ")])check("ducted RC tag and moved notes parser contract",body,{"Heating":"Ducted reverse cycle","Heating notes":"Two systems.","Tags":"interest:ducted-rc, source:website","Route":"not-our-product"});}
 console.log();
 if (failures) {
   console.log(`${failures} sample(s) failed. If a label changed in ` +
               `api/lead.js, update LEAD_LABELS in scripts/apps-script/` +
               `lead-parser.gs and re-paste it into the Apps Script project.`);
-  process.exit(1);
+
+process.exit(1);
 }
 console.log("All parser checks passed.");

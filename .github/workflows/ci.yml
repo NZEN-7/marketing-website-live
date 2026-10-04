@@ -1,4 +1,4 @@
-# Every PR and every push to main: the four checks, the PII guard and a secret
+# Every PR and every push to main or develop: the four checks, the PII guard and a secret
 # scan (HOW CODE SESSIONS WORK, §3.4). Offline: nothing here needs a secret,
 # the Drive or the network beyond installing the toolchain. Nothing here
 # deploys; the live site still goes out only through `npm run deploy:live`.
@@ -7,7 +7,7 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [main, develop]
 
 permissions:
   contents: read
@@ -33,22 +33,27 @@ jobs:
       - name: Email layout (23 checks)
         run: npm run test:email
 
-      - name: CRM parser round-trip and capture query (52 checks)
+      - name: CRM parser round-trip and capture query (58 checks)
         run: npm run test:parser
 
       - name: Supabase lead row, key selection and interest tags (49 checks)
         run: npm run test:leadrow
 
-      - name: "First emails: templates, served/unserved rule, rendering (71 checks)"
+      - name: "First emails: templates, served/unserved rule, rendering (73 checks)"
         run: npm run test:firstemails
 
-      - name: "Lead handler: order, test routing, code-only logs, bot screens (71 checks)"
+      - name: "Lead handler: order, test routing, code-only logs, bot screens (85 checks)"
         run: npm run test:handler
 
-      - name: "Intake: routing, phone-or-email, dedupe, leads row, first email, attachments (130 checks)"
+      - name: "Intake: routing, phone-or-email, dedupe, leads row, first email, attachments (152 checks)"
         run: npm run test:intake
 
-      - name: "Preview guard: off production, mail to TEST_RECIPIENT only, no insert (16 checks)"
+      - name: "End-to-end, local: every page and the intake paths in Chrome, /api/ mocked (78 checks)"
+        run: npm run test:e2e
+        env:
+          E2E_BROWSER_CHANNEL: chrome
+
+      - name: "Preview guard: off production, mail to TEST_RECIPIENT only, no insert (45 checks)"
         run: npm run test:previewguard
 
       - name: "Release guards: no TO CONFIRM in anything served, scripts parse (11 checks)"
@@ -60,7 +65,7 @@ jobs:
       - name: "deploy:preview only ever targets preview/ (never main)"
         run: npm run test:deploypreview
 
-      - name: Cache-busting (8 assets)
+      - name: Cache-busting (11 assets)
         run: npm run check:cachebust
 
       - name: PII guard

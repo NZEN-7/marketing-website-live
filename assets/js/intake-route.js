@@ -12,7 +12,7 @@
 
   var SERVED = ["VIC", "NSW", "ACT"];                 // = SERVED_STATES in api/lead.js
   var BOILERS = ["boiler_radiators", "boiler_underfloor", "lpg_boiler"];
-  var NON_ICP = ["ducted_gas", "splits", "other"];    // N1 only if these are ALL they picked
+  var NON_ICP = ["ducted_gas", "ducted_rc", "splits", "other"];    // N1 only if these are ALL they picked
 
   function list(v) { return Array.isArray(v) ? v : (v ? [v] : []); }
 
@@ -47,7 +47,6 @@
   function route(a) {
     if (a.state && !inArea(a)) return "out-of-area";
     if (notOurProduct(a)) return "not-our-product";
-    if (a.tenure === "renter") return "renter";
     if (isUrgent(a)) return "urgent";
     if (a.intent === "explore") return "explore";
     return unconfirmed(a) ? "icp-check" : "icp";
@@ -67,19 +66,17 @@
       case "S6": return inArea(a) ? "S7" : "O1";      // O1 comes after step 1 is saved
       case "S7":
         if (notOurProduct(a)) return "N1";
-        if (intent === "explore") return "MATCH_SHORT";
-        if (intent === "book" || intent === "urgent") return "S9";
-        return hasBoiler(a) ? "S8" : "S9";
-      case "S8": return "S9";
-      case "S9":
-        if (a.tenure === "renter") return "R1";
-        if (isUrgent(a)) return "URGENT";
-        if (intent === "book") return "MATCH";
-        return "S10";
+        if (intent === "explore") return "B2";
+        // The own-or-rent question (S9) and the renter close (R1) are gone (Nick, 3 Oct)
+        if (intent === "urgent") return "URGENT";
+        if (intent === "book") return "B2";
+        return hasBoiler(a) ? "S8" : "S10";
+      case "S8": return isUrgent(a) ? "URGENT" : "S10";   // "Broken, or about to go" jumps to the urgent screen
       case "S10": return "S11";
       case "S11": return "S12";
       case "S12": return "S13";
-      case "S13": return "MATCH";
+      case "S13": return "B2";
+      case "B2": return intent === "explore" ? "MATCH_SHORT" : "MATCH";
       case "MATCH": return "S14";                     // "Help us prepare"
       case "MATCH_SHORT": return "S14";               // "Tell us a bit more"
       case "S14": return "S15";
@@ -93,7 +90,7 @@
   /** Step (1-4) a screen belongs to, for the progress bar. */
   function stepOf(screen) {
     if (/^S[1-6]b?$/.test(screen) || screen === "intro") return 1;
-    if (/^S(7|8|9|1[0-3])$/.test(screen) || screen === "URGENT" || /^MATCH/.test(screen)) return 2;
+    if (/^S(7|8|9|1[0-3])$/.test(screen) || screen === "URGENT" || screen === "B2" || /^MATCH/.test(screen)) return 2;
     if (/^S1[4-7]$/.test(screen)) return 3;
     return 4;
   }

@@ -73,7 +73,7 @@
      95. Measured in-browser, 50ch = 587px = ~75 characters, which is the top
      of the comfortable range. The site's default prose column was 91. */
   --measure:50ch;
-  --radius:14px;
+  --radius:6px;
   --radius-sm:9px;
   --shadow:0 10px 34px rgba(29,30,28,.10);
   --shadow-lg:0 20px 60px rgba(29,30,28,.18);
@@ -183,7 +183,7 @@ li{margin:.35em 0;}
   .nav__menu{display:flex;align-items:center;gap:26px;}
   .nav__menu>li{position:relative;}
   .nav__sub{list-style:none;margin:0;padding:10px;position:absolute;top:100%;left:-14px;min-width:220px;background:#fff;border:1px solid var(--td-line);border-radius:var(--radius);box-shadow:var(--shadow);opacity:0;visibility:hidden;transform:translateY(6px);transition:.16s;}
-  .nav__has-sub:hover .nav__sub{opacity:1;visibility:visible;transform:translateY(0);}
+  .nav__has-sub:hover .nav__sub,.nav__has-sub:focus-within .nav__sub{opacity:1;visibility:visible;transform:translateY(0);}.nav__has-sub:focus-within .nav__sub{transition:opacity .16s,transform .16s;}
   .nav__sub a{white-space:nowrap;padding:9px 10px;border-radius:var(--btn-radius);}
   .nav__sub a:hover{background:var(--td-paper-2);}
   .nav__cta{display:inline-flex;}
@@ -1246,7 +1246,7 @@ body.dark .next-orange .btn--ghost:hover,
      dark, so 70 moves the many by 2px and the homepage by 6. */
   --sec:70px;--sec-sm:42px;
   --anchor-offset:calc(var(--header-h) + 20px);
-  /* Radii. --radius 14, --radius-sm 9 and --btn-radius 8 already existed;
+  /* Radii. --radius 6, --radius-sm 9 and --btn-radius 8 already existed;
      these are the three literals the file kept reaching for instead. */
   --radius-lg:22px;--radius-xs:6px;--radius-pill:999px;
   /* Shadows. Twelve literals collapsed to four intents. The cream panels were
@@ -1466,13 +1466,35 @@ body.dark .section .article.legal ul>li::before{display:block!important;content:
 body.dark .section .article.legal .table-wrap{font-size:.9rem;margin:1.2em 0 1.4em;}
 @media (max-width:520px){body.dark .section .article.legal{font-size:.92rem;}}
 body.dark .legal-title{font-size:clamp(1.9rem,4.2vw,2.6rem);}
-@media print{body.dark .section .article.legal{max-width:none;font-size:11pt;}}
-/* Design trial B (2 Oct, Nick): page-scoped, so it can be judged before it spreads.
-   trial-calm (/hydronic/how-it-works/, /hydronic/pricing/): calmer H2s and H3s, and a heading
-   sits closer to its own text (win 5, win 7). Section padding is unchanged. Hero H1s untouched.
-   trial-cards (/hydronic/pricing/ only): sharper, quieter cards (win 6). */
-body.dark.trial-calm h2{font-weight:700;font-size:clamp(1.55rem,3.4vw,2rem);line-height:1.25;letter-spacing:-.005em;margin-bottom:.45em;}
-body.dark.trial-calm h3{font-weight:700;line-height:1.3;margin-bottom:.4em;}
-body.dark.trial-calm p + h3,body.dark.trial-calm ul + h3{margin-top:1.4em;}
-body.dark.trial-cards .card{border-radius:6px;padding:20px;box-shadow:none;}
-body.dark.trial-cards .card:not(.card--orange){border-color:rgba(var(--td-orange-rgb),.28);}
+/* Legal pages in print (CTO item 54.1, 3 Oct): black on white whether or not the browser prints
+   backgrounds; no nav, footer logo, social or links; the address and ABN line stay. */
+@media print{
+body.legal-page,body.legal-page .section,body.legal-page .hero,body.legal-page .site-footer{background:#fff!important;}
+body.legal-page,body.legal-page *{color:#000!important;text-shadow:none!important;box-shadow:none!important;}
+body.legal-page #site-header,body.legal-page .btn,body.legal-page .footer-center__logo,body.legal-page .footer-social,body.legal-page .footer-links{display:none!important;}
+body.legal-page .section,body.legal-page .hero__inner{padding-top:0!important;}
+body.legal-page .section .article.legal{max-width:none;font-size:11pt;}
+body.dark.legal-page .section .article.legal ul>li::before{content:"\2022";background:none!important;width:auto;height:auto;border-radius:0;top:0;left:.1em;}
+body.legal-page .table-wrap,body.legal-page .table-wrap th,body.legal-page .table-wrap td{border-color:#888!important;}
+body.legal-page a{text-decoration:underline;}
+body.legal-page h2{break-after:avoid;}
+body.legal-page p,body.legal-page li{orphans:3;widows:3;}
+}
+/* Calmer site defaults (Nick, 3 Oct): trial B promoted site-wide.
+   Legal/component typography keeps its more specific rules. Hero H1s and
+   section padding are unchanged. The desktop H2 text gap is about 14px. */
+body h2{font-weight:700;font-size:clamp(1.55rem,3.4vw,2rem);line-height:1.25;letter-spacing:-.005em;margin-bottom:.45em;}
+body h3{font-weight:700;line-height:1.3;margin-bottom:.4em;}
+body p + h3,body ul + h3{margin-top:1.4em;}
+.card{border-radius:var(--radius);padding:20px;box-shadow:none;}
+body.dark .card:not(.card--orange){border-color:rgba(var(--td-orange-rgb),.28);}
+/* Tap targets (CTO item 54.3, 3 Oct): the shared header and footer controls get an invisible
+   hit area of at least 44x44px, so nothing moves on screen. On touch screens the footer link rows
+   get enough space between them that those areas don't overlap. */
+.nav__logo,.nav__toggle,.footer-social--icons a,.footer-links a{position:relative;}
+.nav__logo::after,.nav__toggle::after,.footer-social--icons a::after,.footer-links a::after{content:"";position:absolute;}
+.nav__logo::after{inset:-9px 0;}
+.nav__toggle::after{inset:-5px -1px;}
+.footer-social--icons a::after{inset:-5px;}
+.footer-links a::after{inset:-11px -7px;}
+@media (pointer:coarse){.footer-links{row-gap:24px;}}

@@ -11,8 +11,8 @@
 <link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png?v=8">
 <link rel="preload" href="/assets/fonts/Montserrat-ExtraBold.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/Montserrat-Regular.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/assets/css/style.css?v=53">
-<link rel="stylesheet" href="/assets/css/intake.css?v=9">
+<link rel="stylesheet" href="/assets/css/style.css?v=64">
+<link rel="stylesheet" href="/assets/css/intake.css?v=19">
 <script>document.documentElement.classList.add("js");</script>
 </head>
 <body class="dark intake-page">
@@ -28,9 +28,7 @@
          are left out for now (Nick, 2 Oct: they don't add much at this stage). -->
     <aside class="intake-side" aria-label="About Thermal Dawn">
       <img class="side-photo" src="/assets/img/nick-headshot-2026-09.jpg" width="180" height="180" alt="Nick, from Thermal Dawn" loading="lazy">
-      <p class="side-line">Nick reads every enquiry and gets back to you himself.</p>
       <p><a class="side-talk" href="mailto:nickz@thermaldawn.com">Talk to Nick</a> <span class="side-email">nickz@thermaldawn.com</span> <a class="side-email side-phone" href="tel:+61272283430">(02) 7228 3430</a></p>
-      <p class="side-offer">From $12,000 for the equipment. Installed by your own licensed installer.</p>
     </aside>
 
     <form id="intake" class="intake" method="post" action="/api/lead/" novalidate data-intake>
@@ -49,13 +47,13 @@
         </ol>
       </div>
 
-      <div class="iq-live" aria-live="polite" data-live></div>
+      <div class="iq-live sr-only" aria-live="polite" data-live></div>
 
       <!-- INTRO -->
       <section class="iq iq--intro" data-screen="intro">
         <h1 class="iq__q">Is Thermal Dawn right for your home?</h1>
         <p class="iq__coach">About two minutes. Answer what you can. Anything you skip, we'll cover when we talk.</p>
-        <p class="iq__jsonly"><button type="button" class="btn btn--primary btn--rect" data-go="S1">Let's start</button></p>
+        <p class="iq-start-actions"><span class="iq__jsonly"><button type="button" class="btn btn--primary btn--rect" data-go="S1">Let's start</button></span></p>
       </section>
 
       <!-- ============ STEP 1: ABOUT YOU ============ -->
@@ -157,12 +155,14 @@
           <label class="card-opt"><input type="checkbox" name="heating" value="boiler_underfloor"><span class="card-opt__t">Gas hydronic with underfloor</span> <span class="card-opt__s">Hot water pipes in the slab or under the floor</span><span class="card-opt__tick" aria-hidden="true"></span></label>
           <label class="card-opt"><input type="checkbox" name="heating" value="lpg_boiler"><span class="card-opt__t">LPG hydronic</span> <span class="card-opt__s">Radiators or underfloor, on bottled gas</span><span class="card-opt__tick" aria-hidden="true"></span></label>
           <label class="card-opt"><input type="checkbox" name="heating" value="ducted_gas"><span class="card-opt__t">Ducted gas</span> <span class="card-opt__s">Warm air through vents in the floor or ceiling</span><span class="card-opt__tick" aria-hidden="true"></span></label>
+          <label class="card-opt"><input type="checkbox" name="heating" value="ducted_rc"><span class="card-opt__t">Ducted reverse cycle</span> <span class="card-opt__s">Electric heating and cooling through vents</span><span class="card-opt__tick" aria-hidden="true"></span></label>
           <label class="card-opt"><input type="checkbox" name="heating" value="splits"><span class="card-opt__t">Split systems</span> <span class="card-opt__s">Wall-mounted reverse-cycle units</span><span class="card-opt__tick" aria-hidden="true"></span></label>
           <label class="card-opt"><input type="checkbox" name="heating" value="other" data-other-toggle><span class="card-opt__t">Something else</span> <span class="card-opt__s">Wood, electric panels, a fireplace…</span><span class="card-opt__tick" aria-hidden="true"></span></label>
           <label class="card-opt"><input type="checkbox" name="heating" value="none"><span class="card-opt__t">No heating yet</span> <span class="card-opt__s">Or we're building</span><span class="card-opt__tick" aria-hidden="true"></span></label>
           <label class="card-opt"><input type="checkbox" name="heating" value="not_sure"><span class="card-opt__t">Not sure</span> <span class="card-opt__s">We'll work it out together</span><span class="card-opt__tick" aria-hidden="true"></span></label>
         </fieldset>
         <label class="fld fld--wide" data-other-text><span>Something else</span><input type="text" name="heating_other_text" maxlength="300"></label>
+
       </section>
 
       <section class="iq" data-screen="S8" aria-labelledby="h-S8">
@@ -186,17 +186,6 @@
         <p class="iq__jsonly iq__skip"><button type="button" class="linkbtn" data-skip>Skip</button></p>
       </section>
 
-      <section class="iq" data-screen="S9" aria-labelledby="h-S9" data-auto>
-        <h2 class="iq__q" id="h-S9">Is it your home?</h2>
-        <p class="iq__coach">Replacing a boiler is the owner's call, so it helps to know who we're talking with.</p>
-        <fieldset class="cards" aria-labelledby="h-S9">
-          <label class="card-opt"><input type="radio" name="tenure" value="owner_occupier"><span class="card-opt__t">I own it and live in it</span><span class="card-opt__tick" aria-hidden="true"></span></label>
-          <label class="card-opt"><input type="radio" name="tenure" value="landlord"><span class="card-opt__t">I own it and rent it out</span><span class="card-opt__tick" aria-hidden="true"></span></label>
-          <label class="card-opt"><input type="radio" name="tenure" value="renter"><span class="card-opt__t">I'm renting</span><span class="card-opt__tick" aria-hidden="true"></span></label>
-          <label class="card-opt"><input type="radio" name="tenure" value="build"><span class="card-opt__t">We're building or renovating</span><span class="card-opt__tick" aria-hidden="true"></span></label>
-        </fieldset>
-        <p class="iq__jsonly iq__skip"><button type="button" class="linkbtn" data-skip>Skip</button></p>
-      </section>
 
       <section class="iq" data-screen="S10" aria-labelledby="h-S10">
         <h2 class="iq__q" id="h-S10">What would you like it to cover?</h2>
@@ -239,7 +228,6 @@
 
       <section class="iq" data-screen="S13" aria-labelledby="h-S13">
         <h2 class="iq__q" id="h-S13">When are you hoping to make the change?</h2>
-        <p class="iq__coach">Jobs booked in November are installed in February, well before next winter.</p>
         <fieldset class="cards" aria-labelledby="h-S13">
           <label class="card-opt"><input type="radio" name="timing" value="asap"><span class="card-opt__t">As soon as possible</span><span class="card-opt__tick" aria-hidden="true"></span></label>
           <label class="card-opt"><input type="radio" name="timing" value="3_months"><span class="card-opt__t">In the next 3 months</span><span class="card-opt__tick" aria-hidden="true"></span></label>
@@ -251,6 +239,17 @@
       </section>
 
       <!-- ============ RESULT SCREENS (JS only) ============ -->
+      <section class="iq" data-screen="B2" aria-labelledby="h-B2">
+        <h2 class="iq__q" id="h-B2">Anything else you'd like us to know?</h2>
+        <div class="fld fld--wide fld--notes">
+          <label for="heating-notes">Your notes <span class="fld__opt">(optional)</span></label>
+          <p class="fld__hint" id="heating-notes-hint">For example: two boilers, underfloor downstairs and radiators up, battery size, boiler about 15 years old, or any questions for us.</p>
+          <textarea id="heating-notes" name="heating_notes" rows="3" maxlength="2000" aria-describedby="heating-notes-hint"></textarea>
+        </div>
+        <p class="iq__jsonly iq__skip"><button type="button" class="linkbtn" data-skip>Skip</button></p>
+      </section>
+
+      <!-- ============ RESULT SCREENS (JS only) ============ -->
       <section class="iq iq--result iq--jsonly" data-screen="MATCH" aria-labelledby="h-MATCH">
         <h2 class="iq__q" id="h-MATCH"><span data-fit-sure>Looks like a good fit</span><span data-fit-check hidden>This could be a good fit</span><span data-first-prefix>, <span data-first></span></span>.</h2>
         <div class="match-card">
@@ -258,7 +257,6 @@
           <p><span data-fit-sure>It runs the <span data-emitters>radiators</span> you already have.</span><span data-fit-check hidden>It runs through radiators or underfloor heating. We'll check what suits your home when we talk.</span> It charges when power is cheapest and holds the heat for when you need it.</p>
           <ul class="match-why" data-why></ul>
           <p><strong>From $12,000 for the equipment.</strong> Installation depends on the house, by your own licensed installer (we can recommend one).<span data-remote-line hidden> Remote locations carry a delivery cost.</span></p>
-          <p>Jobs booked in November are installed in February.</p>
           <p class="match-caveat">We'll confirm the design once we've talked and seen your bills.</p>
         </div>
         <div class="match-actions" data-match-actions>
@@ -276,7 +274,6 @@
           <p><span data-fit-sure>It runs the <span data-emitters>radiators</span> you already have.</span><span data-fit-check hidden>It runs through radiators or underfloor heating. We'll check what suits your home when we talk.</span> It charges when power is cheapest and holds the heat for when you need it.</p>
           <ul class="match-why" data-why></ul>
           <p><strong>From $12,000 for the equipment.</strong> Installation depends on the house, by your own licensed installer (we can recommend one).<span data-remote-line hidden> Remote locations carry a delivery cost.</span></p>
-          <p>Jobs booked in November are installed in February.</p>
           <p class="match-caveat">We'll confirm the design once we've talked and seen your bills.</p>
         </div>
         <div class="match-actions">
@@ -477,21 +474,6 @@
         </div>
       </section>
 
-      <section class="iq iq--result iq--jsonly" data-screen="R1" aria-labelledby="h-R1">
-        <h2 class="iq__q" id="h-R1">Thanks<span data-first-prefix>, <span data-first></span></span>.</h2>
-        <p class="close-body"><span data-r1-boiler>Because this replaces the boiler, it's the owner's decision.</span><span data-r1-house hidden>Because this is a change to the house, it's the owner's decision.</span> If you think your landlord would be interested, we're happy to talk to them.</p>
-        <div class="landlord" data-landlord hidden>
-          <p class="iq__coach">Only if you're comfortable sharing</p>
-          <label class="fld"><span>Landlord's name</span><input type="text" name="landlord_name" maxlength="200"></label>
-          <label class="fld"><span>Landlord's email</span><input type="email" name="landlord_email" maxlength="200" inputmode="email"></label>
-          <label class="fld"><span>Landlord's phone</span><input type="tel" name="landlord_phone" maxlength="20" inputmode="tel"></label>
-          <p class="iq__err" data-err="landlord" hidden>That email doesn't look quite right. Check for a typo?</p>
-        </div>
-        <div class="match-actions" data-close-actions>
-          <button type="button" class="btn btn--primary btn--rect" data-landlord-share>Share with my landlord</button>
-          <button type="button" class="btn btn--ghost-light btn--rect" data-exit="keep_posted">Keep me posted</button>
-        </div>
-      </section>
 
       <section class="iq iq--result iq--jsonly" data-screen="POSTED" aria-labelledby="h-POSTED">
         <h2 class="iq__q" id="h-POSTED">Done. We'll be in touch when that changes. Thanks for thinking of us.</h2>
@@ -504,7 +486,7 @@
       </div>
       <p class="iq-sending" data-sending hidden aria-live="polite"></p>
       <footer class="iq-foot">
-        <p class="iq-foot__talk">Rather just talk? <a data-calendly href="https://calendly.com/nickz-thermaldawn/30min" target="_blank" rel="noopener"><strong>Book a 15-minute chat</strong></a> or call us on <a href="tel:+61272283430">(02) 7228 3430</a></p>
+        <p class="iq-foot__talk">Rather just talk? <a href="/contact/"><strong>Send us a message</strong></a>, <a data-calendly href="https://calendly.com/nickz-thermaldawn/30min" target="_blank" rel="noopener"><strong>book a 15-minute chat</strong></a> or call us on <a href="tel:+61272283430">(02) 7228 3430</a></p>
         <p class="iq-foot__privacy">Your details go to Thermal Dawn only. We don't use third-party form tools. <a href="/privacy/">Privacy policy</a></p>
       </footer>
     </form>
@@ -512,7 +494,7 @@
 </main>
 <footer id="site-footer" class="site-footer"></footer>
 <script src="/assets/js/site.js?v=18" defer></script>
-<script src="/assets/js/intake-route.js?v=2" defer></script>
-<script src="/assets/js/intake.js?v=7" defer></script>
+<script src="/assets/js/intake-route.js?v=11" defer></script>
+<script src="/assets/js/intake.js?v=18" defer></script>
 </body>
 </html>

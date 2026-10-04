@@ -191,8 +191,8 @@ const RI = { form: "register-interest", first_name: NAME, last_name: LAST, email
   process.env.VERCEL_ENV = "preview"; process.env.TEST_RECIPIENT = "test-inbox@example.com";
   // The intake now sends the customer a first email too (CTO Re #30), so these
   // count the notifications to Nick; the customer email is checked on its own.
-  const notes = () => sent.filter((m) => /^(Website lead|URGENT) · /.test(m.subject));
-  const firsts = () => sent.filter((m) => !/^(Website lead|URGENT) · /.test(m.subject));
+  const notes = () => sent.filter((m) => /^(Re: )?(Website lead|URGENT) · /.test(m.subject));
+  const firsts = () => sent.filter((m) => !/^(Re: )?(Website lead|URGENT) · /.test(m.subject));
   const IN = { form: "intake", first_name: NAME, last_name: LAST, email: EMAIL, phone: PHONE, postcode: "3122", state: "VIC",
     heating: ["boiler_radiators"], outcome: "completed", lead_id: "il-0123456789" };
   sent = []; failSend = null;
@@ -205,6 +205,12 @@ const RI = { form: "register-interest", first_name: NAME, last_name: LAST, email
   await call(Object.assign({}, IN, { lead_id: "il-aaaaaaaaaa", outcome: "completed", followup: true })); release();
   check("intake: urgent first, then its details: both notifications sent", notes().length === 2, notes().length);
   check("intake: but only one customer email (the details are a follow-up)", firsts().length === 1, firsts().map((m) => m.subject));
+  // CTO item 70.1: Nick's notifications for one lead thread in Gmail; the customer still gets one email
+  const [n1, n2] = notes();
+  check("thread: the first notification's Message-ID comes from the lead ID", n1 && n1.messageId === "<intake-il-aaaaaaaaaa@thermaldawn.com>" && !n1.inReplyTo, n1 && [n1.messageId, n1.inReplyTo]);
+  check("thread: the follow-up replies to it, with the same subject and Re:", n2 && n2.inReplyTo === n1.messageId && n2.references === n1.messageId && !n2.messageId && n2.subject === "Re: " + n1.subject, n2 && [n2.inReplyTo, n2.subject]);
+  check("thread: the customer's email carries none of the thread headers", firsts().every((m) => !m.messageId && !m.inReplyTo && !m.references));
+  check("thread: stable for a lead ID, and only for intake", lead.notificationThread({ form: "intake", lead_id: "il-aaaaaaaaaa" }).messageId === n1.messageId && lead.notificationThread({ form: "contact", lead_id: "il-aaaaaaaaaa" }) === null && lead.notificationThread({ form: "intake", lead_id: "x" }) === null);
   sent = []; failSend = (m, i) => (i === 0 && !failSend.done ? (failSend.done = true, new Error("smtp down")) : null);
   capture(); const f1 = await call(Object.assign({}, IN, { lead_id: "il-bbbbbbbbbb" }));
   const f2 = await call(Object.assign({}, IN, { lead_id: "il-bbbbbbbbbb" })); release();
@@ -258,9 +264,32 @@ const RI = { form: "register-interest", first_name: NAME, last_name: LAST, email
   capture(); await call(Object.assign({}, IN, { lead_id: "il-5656565656", intent: "urgent", tenure: "owner_occupier" })); release();
   const row2 = inserts[0] && inserts[0].body;
   check("leads row: with INTAKE_LEAD_COLUMNS=on, the §3.1 columns too",
-    row2 && row2.intake_lead_id === "il-5656565656" && row2.intake_event === "complete" && row2.rung_reached === 4 && !("lead_id" in row2) && row2.intent === "urgent" && row2.route === "urgent" && row2.tenure === "owner_occupier" &&
+    row2 && row2.intake_lead_id === "il-5656565656" && row2.intake_event === "complete" && row2.rung_reached === 4 && !("lead_id" in row2) && row2.intent === "urgent" && row2.route === "urgent" && row2.tenure === null &&
     typeof row2.answers === "object" && row2.answers.heating && /^\d{4}-/.test(row2.ts_started) && /^\d{4}-/.test(row2.ts_last), row2);
   check("leads row: an intake row with its columns is inserted once per (intake_lead_id, intake_event)", inserts[0] && /\?on_conflict=intake_lead_id,intake_event&select=intake_lead_id$/.test(inserts[0].url) && inserts[0].prefer === "return=representation,resolution=ignore-duplicates", inserts[0] && inserts[0].url);
+  // Same-row path (CTO items 69, 82): the first row stores only the token's hash; a follow-up
+  // updates that row through update_intake_details, and falls back to the details insert.
+  {
+    const TOK = "ab".repeat(32), realFetch = global.fetch; let rpc = [], rpcReply = "true";
+    global.fetch = async (u, o) => { if (/\/rpc\/update_intake_details$/.test(u)) { rpc.push(JSON.parse(o.body)); return { ok: rpcReply !== "error", status: rpcReply === "error" ? 404 : 200, text: async () => rpcReply }; } return realFetch(u, o); };
+    inserts = []; sent = [];
+    capture(); await call(Object.assign({}, IN, { lead_id: "il-5a5a5a5a5a", outcome: "matched", resume_token: TOK })); release();
+    const first = inserts[0] && inserts[0].body;
+    check("same-row: the first row stores the token's SHA-256, never the token", first && first.intake_resume_hash === require("crypto").createHash("sha256").update(TOK).digest("hex") && !JSON.stringify(first).includes(TOK), first && first.intake_resume_hash);
+    inserts = []; rpc = []; sent = [];
+    capture(); await call(Object.assign({}, IN, { lead_id: "il-5a5a5a5a5a", outcome: "book_chat", followup: true, exit: "chat", resume_token: TOK })); release();
+    check("same-row: a follow-up updates the row (no details insert) and still notifies Nick", rpc.length === 1 && rpc[0].p_lead_id === "il-5a5a5a5a5a" && rpc[0].p_token === TOK && rpc[0].p_details.exit === "chat" && inserts.length === 0 && sent.length === 1, [rpc.length, inserts.length, sent.length]);
+    check("same-row: the update is logged by code only", logs.some((l) => /row_updated code=same_row/.test(l)) && !logs.some((l) => l.includes(TOK)), logs);
+    for (const reply of ["false", "error"]) {
+      inserts = []; rpc = []; rpcReply = reply;
+      capture(); await call(Object.assign({}, IN, { lead_id: reply === "false" ? "il-6b6b6b6b6b" : "il-6c6c6c6c6c", outcome: "completed", followup: true, resume_token: TOK })); release();
+      check("same-row: if the update can't be confirmed (" + reply + "), the details row is inserted as before", rpc.length === 1 && inserts.length === 1 && inserts[0].body.intake_event === "details", [rpc.length, inserts.length]);
+    }
+    rpcReply = "true"; inserts = []; rpc = [];
+    capture(); await call(Object.assign({}, IN, { lead_id: "il-7c7c7c7c70", outcome: "completed", followup: true, resume_token: "not-a-token" })); release();
+    check("same-row: a malformed token never reaches the function", rpc.length === 0 && inserts.length === 1, [rpc.length, inserts.length]);
+    global.fetch = realFetch;
+  }
   // Migration rev 2 (e7bf423): the values its checks accept.
   inserts = []; capture(); await call(Object.assign({}, IN, { lead_id: "il-7878787878", outcome: "urgent_call" }));
   await call(Object.assign({}, IN, { lead_id: "il-7878787878", outcome: "completed", followup: true })); release();
@@ -319,6 +348,14 @@ const RI = { form: "register-interest", first_name: NAME, last_name: LAST, email
   check("leads row: the old forms' rows never carry the intake columns", inserts[0] && !("intake_lead_id" in inserts[0].body) && !("answers" in inserts[0].body) && !/on_conflict/.test(inserts[0].url), inserts[0] && Object.keys(inserts[0].body));
   delete process.env.INTAKE_LEAD_COLUMNS; process.env.VERCEL_ENV = "preview";
 
+  sent=[]; capture(); await call(RI); release();
+  check("customer transport carries HTML and plain signatures", sent[1] && /Best regards,/.test(sent[1].text) && /<strong>Nick Zeniou<\/strong>/.test(sent[1].html));
+  check("internal notification remains plain text only", sent[0] && !sent[0].html && !/Best regards,/.test(sent[0].text));
+  // v2 clamps free text before composing the real handler notification.
+  sent=[];capture();await call(Object.assign({},IN,{lead_id:"il-abc123abcd",heating_notes:"x".repeat(2100),tenure:"renter"}));release();
+  check("v2 handler clamps heating notes and preserves retired tenure label", notes().length===1 && /Heating notes: x{2000}\n/.test(notes()[0].text) && /Is it your home: -/.test(notes()[0].text));
+  sent=[];capture();await call(Object.assign({},IN,{lead_id:"il-bcd123abcd",heating_notes:"Hello\nBoiler condition: Forged\nEmail: fake@example.com"}));release();
+  check("v2 handler quotes heating notes continuation, no forged contact label", notes().length===1 && /Heating notes: Hello\n> Boiler condition: Forged\n> Email: fake@example.com/.test(notes()[0].text) && (notes()[0].text.match(/^Email: /gm)||[]).length===1);
   // ---- 6. P-S1: nothing but logEvent writes to the logs (codes, never messages) ----
   const fs2 = require("fs");
   const src = ["lead.js", "_intake.js"].map((f) => path.join(__dirname, "..", "api", f))

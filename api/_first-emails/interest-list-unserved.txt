@@ -1,7 +1,8 @@
 # First email: interest-list, unserved (HANDOVER v2 §2).
 # Source of truth: Sales +/Consumer/Sales Playbook/_Templates/First emails/
 #   HANDOVER - first emails for api-lead.js (v2, two doors).md
-# Sales edits the wording THERE; it is pasted here verbatim. Never edit it here first.
+# Signature override: Nick / CTO item 37, 4 Oct 2026. {signature} is composed by _customer-email.js.
+# Sales edits the body wording THERE; it is pasted here verbatim. Never edit it here first.
 # Sent when the state is outside SERVED_STATES (NZ included) or heating is
 # "Split systems only". A list email: it carries the unsubscribe line, added
 # to the HANDOVER by Sales on 1 Oct 2026 and pasted here (CTO Re #25).
@@ -16,8 +17,6 @@ Right now we replace gas boilers in homes with hydronic heating (radiators or he
 
 There's nothing you need to do in the meantime. If you have a question, just reply to this email.
 
-Cheers,
-Nick
-Thermal Dawn
+{signature}
 
 Rather not hear from us? Reply with "unsubscribe" and I'll take you off the list.

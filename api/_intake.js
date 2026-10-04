@@ -33,7 +33,7 @@ const L = {
             news: "News, a podcast or an article", other: "Other" },
   call_times: { lunchtime: "Weekdays around lunchtime", after_5: "Weekdays after 5pm", weekends: "Weekends", any: "Any time" },
   heating: { boiler_radiators: "Gas hydronic with radiators", boiler_underfloor: "Gas hydronic with underfloor", lpg_boiler: "LPG hydronic",
-             ducted_gas: "Ducted gas", splits: "Split systems", other: "Something else", none: "No heating yet", not_sure: "Not sure" },
+             ducted_gas: "Ducted gas", ducted_rc: "Ducted reverse cycle", splits: "Split systems", other: "Something else", none: "No heating yet", not_sure: "Not sure" },
   boiler_condition: { working_fine: "Working fine", getting_on: "Getting on a bit", playing_up: "Playing up", broken: "Broken, or about to go", not_sure: "Not sure" },
   boiler_age: { under_5: "Under 5 years", "5_10": "5–10", "10_15": "10–15", over_15: "Over 15", not_sure: "Not sure" },
   tenure: { owner_occupier: "I own it and live in it", landlord: "I own it and rent it out", renter: "I'm renting", build: "We're building or renovating" },
@@ -50,11 +50,11 @@ const L = {
 };
 const SLOTS = { winter_gas_bill: "winter gas bill", boiler_compliance_plate: "boiler compliance plate", switchboard: "switchboard", electricity_bill: "electricity bill" };
 const ROUTES = ["icp", "icp-check", "explore", "urgent", "out-of-area", "not-our-product", "renter"];
-const OUTCOMES = ["completed", "book_chat", "deposit", "keep_posted", "no_thanks", "urgent_call", "urgent_book", "n1_chat", "landlord_share"];
-const SCREENS = /^(intro|S\d{1,2}b?|MATCH|MATCH_SHORT|URGENT|DONE|O1|N1|R1|POSTED)$/;
+const OUTCOMES = ["matched", "completed", "book_chat", "deposit", "keep_posted", "no_thanks", "urgent_call", "urgent_book", "n1_chat"];
+const SCREENS = /^(intro|S\d{1,2}[b-d]?|B2|MATCH|MATCH_SHORT|URGENT|DONE|O1|N1|R1|POSTED)$/;
 
 // Which screen asks which key: "Not asked" (screen never shown) vs "Skipped" (shown, no answer).
-const ASKED_ON = { phone: "S4", call_times: "S4b", intent: "S5", source: "S6", referrer: "S6", heating: "S7", heating_other_text: "S7",
+const ASKED_ON = { phone: "S4", call_times: "S4b", intent: "S5", source: "S6", referrer: "S6", heating: "S7", heating_other_text: "S7", heating_notes: "B2",
   boiler_condition: "S8", boiler_age: "S8", tenure: "S9", scope: "S10", energy: "S11", winter_gas_bill_band: "S12", timing: "S13",
   timing_note: "S13", storeys: "S14", radiator_band: "S14", underfloor_band: "S14", built_band: "S14", off_gas: "S15", uploads: "S16", notes: "S17" };
 
@@ -82,7 +82,7 @@ function parseIntake(body) {
     newsletter_opt_in: body.newsletter_opt_in === true || body.newsletter_opt_in === "true",
     heating: list(body.heating).filter((v) => L.heating[v]), heating_other_text: line(body.heating_other_text, 300),
     boiler_condition: pick(L.boiler_condition, body.boiler_condition), boiler_age: pick(L.boiler_age, body.boiler_age),
-    tenure: pick(L.tenure, body.tenure),
+    tenure: null,
     scope: list(body.scope).filter((v) => L.scope[v]), energy: list(body.energy).filter((v) => L.energy[v]),
     winter_gas_bill_band: pick(L.winter_gas_bill_band, body.winter_gas_bill_band),
     timing: pick(L.timing, body.timing), timing_note: line(body.timing_note, 500),
@@ -91,8 +91,7 @@ function parseIntake(body) {
     built_band: pick(L.built_band, body.built_band), off_gas: pick(L.off_gas, body.off_gas),
     send_later: list(body.send_later).filter((v) => SLOTS[v]),
     notes: clamp(body.notes, 5000),
-    landlord_name: line(body.landlord_name, 200), landlord_email: line(body.landlord_email, 200),
-    landlord_phone: line(body.landlord_phone, 40),
+    heating_notes: clamp(body.heating_notes, 2000),
     route: ROUTES.indexOf(body.route) !== -1 ? body.route : "", outcome: OUTCOMES.indexOf(body.outcome) !== -1 ? body.outcome : (nojs ? "completed" : ""),
     rung_reached: ["1", "2", "3", "done"].indexOf(String(body.rung_reached)) !== -1 ? String(body.rung_reached) : (nojs ? "done" : ""),
     last_screen: SCREENS.test(String(body.last_screen || "")) ? String(body.last_screen) : "",
@@ -103,6 +102,11 @@ function parseIntake(body) {
     // The details from "Help us prepare" after an earlier exit already sent:
     // a second notification, but never a second customer email.
     followup: body.followup === true || body.followup === "true",
+    // The resume token (64 hex, made by the page at load): the first row stores only
+    // its hash; later sends update that row with it (same-row path, CTO items 69, 82).
+    resume_token: /^[0-9a-f]{64}$/.test(String(body.resume_token || "")) ? String(body.resume_token) : "",
+    // The exit chosen after the match (CTO item 69): the strongest signal we get.
+    exit: ["chat", "deposit", "keep_posted", "none"].indexOf(body.exit) !== -1 ? body.exit : "",
   };
   if (nojs) d.seen = Object.values(ASKED_ON);       // the long form shows every question
   // The server works out state and route itself: the long form has no script
@@ -169,6 +173,7 @@ function formatIntakeNotification(d, when, files) {
     `Submission Time: ${when}`,
     `Rung reached: ${d.rung_reached || "-"}`,
     `Route: ${d.route || "-"}`,
+    `Tags: ${d.heating.includes("ducted_rc") ? "interest:ducted-rc, " : ""}source:website`,
     `Path: ${d.intent ? L.intent[d.intent] : "Not answered"}`,
     `Ended on: ${d.outcome || "-"}${d.last_screen ? " (screen " + d.last_screen + ")" : ""}`,
     "",
@@ -195,9 +200,10 @@ function formatIntakeNotification(d, when, files) {
     "YOUR HOME",
     `Heating: ${val(d, "heating", L.heating)}`,
     `Heating, something else: ${val(d, "heating_other_text")}`,
+    `Heating notes: ${d.heating_notes ? String(d.heating_notes).split(/\r?\n/).map(l => l.replace(/[^\S\n]+/g, " ").trim()).join("\n> ") : "-"}`,
     `Boiler condition: ${val(d, "boiler_condition", L.boiler_condition)}`,
     `Boiler age: ${val(d, "boiler_age", L.boiler_age)}`,
-    `Is it your home: ${val(d, "tenure", L.tenure)}`,
+    `Is it your home: -`,
     `Cover: ${val(d, "scope", L.scope)}`,
     `Energy setup: ${val(d, "energy", L.energy)}`,
     `Winter gas bill: ${val(d, "winter_gas_bill_band", L.winter_gas_bill_band)}`,
@@ -214,7 +220,6 @@ function formatIntakeNotification(d, when, files) {
   ];
   if (files && files.rejected.length) lines.push(`Uploads not attached (type or size): ${files.rejected.join(", ")}`);
   // Own labels, so the parser never mistakes them for the lead's own Email or Phone.
-  if (d.landlord_name || d.landlord_email || d.landlord_phone) lines.push("", "LANDLORD", `Landlord name: ${d.landlord_name || "-"}`, `Landlord email: ${d.landlord_email || "-"}`, `Landlord phone: ${d.landlord_phone || "-"}`);
   // Lines after the first are quoted "> ", so no typed line can pass for a label (D6-S3).
   lines.push("", "ANYTHING ELSE", d.notes ? String(d.notes).split(/\r?\n/).map((l) => l.replace(/[^\S\n]+/g, " ").trim()).join("\n> ") : val(d, "notes"), "");
   return lines.join("\n");
@@ -271,10 +276,10 @@ function settleSend(d, ok, now) {
 }
 
 /* ---- the customer's first email (CTO Re #30: stage 1, brief 07's templates) ----
-   §2 when the route closes them (O1, N1, R1); §1 on every other route (the
+   §2 when the route closes them (O1, N1); §1 on every other route (the
    match, done and urgent screens). One per lead: a follow-up details send
    gets none. No resume link until stage 2. */
-const CLOSED = { "out-of-area": 1, "not-our-product": 1, renter: 1 };
+const CLOSED = { "out-of-area": 1, "not-our-product": 1 };
 function firstEmailKey(d) {
   if (d.followup) return null;
   return CLOSED[d.route] ? "interest-list-unserved" : "register-interest";
@@ -292,7 +297,7 @@ function firstEmailKey(d) {
    intake_event partial|complete|details, rung_reached 1-4. */
 const RUNG = { 1: 1, 2: 2, 3: 3, done: 4 };   // rung_reached is 1-4, 4 = done (migration rev 2, e7bf423)
 const ANSWER_KEYS = ["intent", "source", "referrer", "newsletter_opt_in", "heating", "heating_other_text", "boiler_condition",
-  "boiler_age", "tenure", "scope", "energy", "winter_gas_bill_band", "timing", "timing_note", "storeys", "radiator_band",
+  "boiler_age", "heating_notes", "exit", "tenure", "scope", "energy", "winter_gas_bill_band", "timing", "timing_note", "storeys", "radiator_band",
   "underfloor_band", "built_band", "off_gas", "send_later", "contact_pref", "call_times", "remote", "outcome", "last_screen"];
 function intakeLeadRow(d, env, now) {
   const at = new Date(now || Date.now()).toISOString();
@@ -322,6 +327,7 @@ function intakeLeadRow(d, env, now) {
   if (String((env || {}).INTAKE_LEAD_COLUMNS || "").trim() === "on") {
     const answers = {};
     ANSWER_KEYS.forEach((k) => { const v = d[k]; if (Array.isArray(v) ? v.length : (v !== "" && v != null && v !== false)) answers[k] = v; });
+    answers.tags = d.heating.includes("ducted_rc") ? ["interest:ducted-rc"] : [];
     const started = Number(d.ts_started) > 0 ? new Date(Number(d.ts_started)).toISOString() : null;
     Object.assign(row, {
       // Stage 1 sends no partials; a later "Help us prepare" send is its own
@@ -331,8 +337,20 @@ function intakeLeadRow(d, env, now) {
       tenure: d.tenure || null, boiler_condition: d.boiler_condition || null,
       ts_started: started, ts_last: at, answers,
     });
+    if (!d.followup && d.resume_token) row.intake_resume_hash = crypto.createHash("sha256").update(d.resume_token).digest("hex");
   }
   return row;
 }
 
-module.exports = { parseIntake, claimSend, settleSend, claimFirstEmail, intakeLeadRow, firstEmailKey, PHONE_OK, formatIntakeNotification, formatIntakeSubject, intakeAttachments, sniff, LABELS: L, SLOTS };
+/** What a later send (the exit, Step 3, an urgent-screen phone) changes on the lead's own
+    `complete` row, for update_intake_details. Only keys its whitelist allows. */
+function sameRowDetails(d) {
+  const out = {};
+  ["storeys", "radiator_band", "underfloor_band", "built_band", "off_gas", "notes", "exit", "phone", "call_times"].forEach((k) => {
+    const v = d[k]; if (Array.isArray(v) ? v.length : (v !== "" && v != null && v !== false)) out[k] = v;
+  });
+  if (d.rung_reached === "done") out.rung_reached = "done";
+  return out;
+}
+
+module.exports = { sameRowDetails, parseIntake, claimSend, settleSend, claimFirstEmail, intakeLeadRow, firstEmailKey, PHONE_OK, formatIntakeNotification, formatIntakeSubject, intakeAttachments, sniff, LABELS: L, SLOTS };
