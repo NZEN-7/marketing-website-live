@@ -267,6 +267,29 @@ const RI = { form: "register-interest", first_name: NAME, last_name: LAST, email
     row2 && row2.intake_lead_id === "il-5656565656" && row2.intake_event === "complete" && row2.rung_reached === 4 && !("lead_id" in row2) && row2.intent === "urgent" && row2.route === "urgent" && row2.tenure === null &&
     typeof row2.answers === "object" && row2.answers.heating && /^\d{4}-/.test(row2.ts_started) && /^\d{4}-/.test(row2.ts_last), row2);
   check("leads row: an intake row with its columns is inserted once per (intake_lead_id, intake_event)", inserts[0] && /\?on_conflict=intake_lead_id,intake_event&select=intake_lead_id$/.test(inserts[0].url) && inserts[0].prefer === "return=representation,resolution=ignore-duplicates", inserts[0] && inserts[0].url);
+  // Same-row path (CTO items 69, 82): the first row stores only the token's hash; a follow-up
+  // updates that row through update_intake_details, and falls back to the details insert.
+  {
+    const TOK = "ab".repeat(32), realFetch = global.fetch; let rpc = [], rpcReply = "true";
+    global.fetch = async (u, o) => { if (/\/rpc\/update_intake_details$/.test(u)) { rpc.push(JSON.parse(o.body)); return { ok: rpcReply !== "error", status: rpcReply === "error" ? 404 : 200, text: async () => rpcReply }; } return realFetch(u, o); };
+    inserts = []; sent = [];
+    capture(); await call(Object.assign({}, IN, { lead_id: "il-5a5a5a5a5a", outcome: "matched", resume_token: TOK })); release();
+    const first = inserts[0] && inserts[0].body;
+    check("same-row: the first row stores the token's SHA-256, never the token", first && first.intake_resume_hash === require("crypto").createHash("sha256").update(TOK).digest("hex") && !JSON.stringify(first).includes(TOK), first && first.intake_resume_hash);
+    inserts = []; rpc = []; sent = [];
+    capture(); await call(Object.assign({}, IN, { lead_id: "il-5a5a5a5a5a", outcome: "book_chat", followup: true, exit: "chat", resume_token: TOK })); release();
+    check("same-row: a follow-up updates the row (no details insert) and still notifies Nick", rpc.length === 1 && rpc[0].p_lead_id === "il-5a5a5a5a5a" && rpc[0].p_token === TOK && rpc[0].p_details.exit === "chat" && inserts.length === 0 && sent.length === 1, [rpc.length, inserts.length, sent.length]);
+    check("same-row: the update is logged by code only", logs.some((l) => /row_updated code=same_row/.test(l)) && !logs.some((l) => l.includes(TOK)), logs);
+    for (const reply of ["false", "error"]) {
+      inserts = []; rpc = []; rpcReply = reply;
+      capture(); await call(Object.assign({}, IN, { lead_id: reply === "false" ? "il-6b6b6b6b6b" : "il-6c6c6c6c6c", outcome: "completed", followup: true, resume_token: TOK })); release();
+      check("same-row: if the update can't be confirmed (" + reply + "), the details row is inserted as before", rpc.length === 1 && inserts.length === 1 && inserts[0].body.intake_event === "details", [rpc.length, inserts.length]);
+    }
+    rpcReply = "true"; inserts = []; rpc = [];
+    capture(); await call(Object.assign({}, IN, { lead_id: "il-7c7c7c7c70", outcome: "completed", followup: true, resume_token: "not-a-token" })); release();
+    check("same-row: a malformed token never reaches the function", rpc.length === 0 && inserts.length === 1, [rpc.length, inserts.length]);
+    global.fetch = realFetch;
+  }
   // Migration rev 2 (e7bf423): the values its checks accept.
   inserts = []; capture(); await call(Object.assign({}, IN, { lead_id: "il-7878787878", outcome: "urgent_call" }));
   await call(Object.assign({}, IN, { lead_id: "il-7878787878", outcome: "completed", followup: true })); release();

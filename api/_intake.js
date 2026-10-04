@@ -102,6 +102,9 @@ function parseIntake(body) {
     // The details from "Help us prepare" after an earlier exit already sent:
     // a second notification, but never a second customer email.
     followup: body.followup === true || body.followup === "true",
+    // The resume token (64 hex, made by the page at load): the first row stores only
+    // its hash; later sends update that row with it (same-row path, CTO items 69, 82).
+    resume_token: /^[0-9a-f]{64}$/.test(String(body.resume_token || "")) ? String(body.resume_token) : "",
     // The exit chosen after the match (CTO item 69): the strongest signal we get.
     exit: ["chat", "deposit", "keep_posted", "none"].indexOf(body.exit) !== -1 ? body.exit : "",
   };
@@ -334,8 +337,20 @@ function intakeLeadRow(d, env, now) {
       tenure: d.tenure || null, boiler_condition: d.boiler_condition || null,
       ts_started: started, ts_last: at, answers,
     });
+    if (!d.followup && d.resume_token) row.intake_resume_hash = crypto.createHash("sha256").update(d.resume_token).digest("hex");
   }
   return row;
 }
 
-module.exports = { parseIntake, claimSend, settleSend, claimFirstEmail, intakeLeadRow, firstEmailKey, PHONE_OK, formatIntakeNotification, formatIntakeSubject, intakeAttachments, sniff, LABELS: L, SLOTS };
+/** What a later send (the exit, Step 3, an urgent-screen phone) changes on the lead's own
+    `complete` row, for update_intake_details. Only keys its whitelist allows. */
+function sameRowDetails(d) {
+  const out = {};
+  ["storeys", "radiator_band", "underfloor_band", "built_band", "off_gas", "notes", "exit", "phone", "call_times"].forEach((k) => {
+    const v = d[k]; if (Array.isArray(v) ? v.length : (v !== "" && v != null && v !== false)) out[k] = v;
+  });
+  if (d.rung_reached === "done") out.rung_reached = "done";
+  return out;
+}
+
+module.exports = { sameRowDetails, parseIntake, claimSend, settleSend, claimFirstEmail, intakeLeadRow, firstEmailKey, PHONE_OK, formatIntakeNotification, formatIntakeSubject, intakeAttachments, sniff, LABELS: L, SLOTS };
