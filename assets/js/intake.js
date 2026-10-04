@@ -89,7 +89,7 @@
     // no identity, cookie or storage. Off production the server counts nothing.
     if (!counted[id] && id !== "intro" && navigator.sendBeacon) {
       counted[id] = true;
-      try { navigator.sendBeacon("/api/intake-view", JSON.stringify({ q: [id] })); } catch (e) {}
+      try { navigator.sendBeacon("/api/intake-view/", JSON.stringify({ q: [id] })); } catch (e) {}
     }
     // Reaching the match (or the short match, or the urgent screen) submits the
     // enquiry: the row, Nick's notification and the one first email (Nick, 3 Oct,
