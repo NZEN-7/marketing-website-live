@@ -310,6 +310,7 @@ async function recordLead(d) {
         method: "POST",
         headers: { apikey: auth.apikey, Authorization: `Bearer ${auth.bearer}`, "Content-Type": "application/json" },
         body: JSON.stringify({ p_lead_id: d.lead_id, p_token: d.resume_token, p_details: intake.sameRowDetails(d) }),
+        signal: AbortSignal.timeout(3000),   // a slow call falls back to the details row (Platform, item 98 nit)
       });
       if (up.ok && String(await up.text()).trim() === "true") return "updated";
     } catch (_) { /* fall back to the details row */ }
