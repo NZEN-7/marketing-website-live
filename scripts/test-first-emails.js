@@ -149,7 +149,10 @@ const customerEmail=require("../api/_customer-email.js");
 for(const d of [P(RI), IL({}), IL({state:"QLD"}), P({form:"subscribe",email:"test@example.invalid"}), P({form:"contact",name:"Test",email:"test@example.invalid",message:"x"}),v2]) {
  const e=lead.firstEmail(d);
  check("exact plain signature "+e.template, /Best regards,\nNick Zeniou\nFounder\n\(02\) 7228 3430\nthermaldawn.com \| Book a call: https:\/\/[^\n]+\nHornsby NSW, 2077, Australia\nABN 47 682 866 913/.test(e.text) && !/<img/.test(e.text));
- check("HTML signature "+e.template, /<strong>Nick Zeniou<\/strong>/.test(e.html) && /alt="Thermal Dawn" width="260"/.test(e.html) && /src="https:\/\/www.thermaldawn.com\/assets\/email\/logo.png"/.test(e.html) && /<em>Hornsby NSW, 2077, Australia<\/em>/.test(e.html) && /font-size:12px;color:#666666/.test(e.html));
+ check("HTML signature "+e.template, /<strong>Nick Zeniou<\/strong>/.test(e.html) && /alt="Thermal Dawn" width="260"/.test(e.html) && /src="cid:td-logo@thermaldawn\.com"/.test(e.html) && /<em>Hornsby NSW, 2077, Australia<\/em>/.test(e.html));
+ // Nick, 4 Oct: it reads as a normal email (no panel, background or forced font) and the logo travels inside it
+ check("HTML is plain: no body background, padding or colour "+e.template, /<body>/.test(e.html) && !/background:|padding:24px|color:#/.test(e.html));
+ check("the logo is an inline attachment that exists "+e.template, Array.isArray(e.attachments) && e.attachments.length===1 && e.attachments[0].cid==="td-logo@thermaldawn.com" && fs.existsSync(e.attachments[0].path));
  check("single HTML signature "+e.template,(e.html.match(/Best regards,/g)||[]).length===1 && !/\{signature\}/.test(e.text+e.html));
 }
 const escaped=customerEmail('Hi <img src=x onerror=boom>,\n\n{signature}', 'https://example.invalid/?a="b"&c=d');
