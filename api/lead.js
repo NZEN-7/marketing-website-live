@@ -703,7 +703,7 @@ function firstEmail(d) {
              subject: legacySubject(d), ...customerEmail(legacyAutoresponder(d).replace(/Nick\nThermal Dawn/, "{signature}"), bookingLink()) };
   }
   const r = renderTemplate(t, d);
-  return { template: key, subject: r.subject, text: r.text, html: r.html };
+  return { template: key, subject: r.subject, text: r.text, html: r.html, attachments: r.attachments };
 }
 
 /** Kept for the tests and the harness: the text of the first email. */
@@ -1011,6 +1011,7 @@ module.exports = async function handler(req, res) {
             subject: first.subject,
             text: first.text,
             html: first.html,
+            attachments: first.attachments,
           });
         } catch (autoErr) {
           logEvent(reqId, data.form, "first_email_failed", errorCode(autoErr));

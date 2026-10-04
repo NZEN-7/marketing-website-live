@@ -367,7 +367,7 @@
   ],
   "functions": {
     "api/lead.js": {
-      "includeFiles": "{api/_first-emails/**,assets/js/intake-route.js}"
+      "includeFiles": "{api/_first-emails/**,assets/js/intake-route.js,assets/email/logo.png}"
     }
   }
 }
