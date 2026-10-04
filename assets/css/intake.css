@@ -196,3 +196,17 @@ html:not(.js) .drop__done{display:none;}
 .fld__opt{font-weight:400;color:var(--iq-muted);}
 .fld__hint{margin:0;font-size:.86rem;color:var(--iq-muted);}
 .fld--notes textarea{min-height:96px;resize:vertical;}
+
+/* Item 37: keep the primary start action; add a white-outline contact door. */
+.iq-start-actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px;}
+.intake .intake-start-secondary{border-color:#fff;color:#fff;min-height:48px;}
+/* Nine desktop choices need the full content width. Only this screen widens;
+   the contact card moves underneath and all other screens keep their layout. */
+@media (min-width:960px){
+  .intake-layout:has([data-screen="S7"].is-current){grid-template-columns:minmax(0,1fr);}
+  .intake-layout:has([data-screen="S7"].is-current) .intake{max-width:none;}
+  .intake-layout:has([data-screen="S7"].is-current) .intake-side{order:2;position:static;max-width:280px;}
+  [data-screen="S7"] .cards{grid-template-columns:repeat(9,minmax(112px,1fr));align-items:stretch;overflow-x:auto;min-width:0;padding:6px;}
+  [data-screen="S7"] .card-opt{padding:38px 10px 14px;overflow-wrap:anywhere;align-content:start;}
+  [data-screen="S7"] .card-opt__tick{top:10px;right:10px;margin-top:0;}
+}

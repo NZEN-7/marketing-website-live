@@ -47,8 +47,8 @@ async function server() {
   await new Promise(resolve=>s.listen(0,'127.0.0.1',resolve));
   return {url:'http://127.0.0.1:'+s.address().port+'/',close:()=>new Promise(resolve=>s.close(resolve))};
 }
-async function context(browser,base,local) {
-  const ctx = await browser.newContext({serviceWorkers:'block', viewport:{width:1280,height:900}, reducedMotion:'reduce'});
+async function context(browser,base,local,options={}) {
+  const ctx = await browser.newContext({serviceWorkers:'block', viewport:{width:1280,height:900}, reducedMotion:'reduce',...options});
   ctx.setDefaultTimeout(10000);
   const calls = [], views = [], violations = [], blocked = [];
   await ctx.route('**/*',async route=> {
@@ -95,13 +95,13 @@ async function prepared(p,base,kind) {
   if(kind === 'outside') return current(p,'O1');
   await choose(p,'heating',kind==='splits'?'splits':'boiler_radiators');await next(p);
   if(kind==='splits') return current(p,'N1');
-  if(kind==='explore')return current(p,'MATCH_SHORT');
+  if(kind==='explore'){await current(p,'B2');await next(p);return current(p,'MATCH_SHORT');}
   // No own-or-rent question (S9) any more (Nick, 3 Oct): book and urgent go straight on
-  if(kind==='book') return current(p,'MATCH');
+  if(kind==='book'){await current(p,'B2');await next(p);return current(p,'MATCH');}
   if(kind==='urgent') return current(p,'URGENT');
   await choose(p,'boiler_condition','working_fine');await next(p);
   for(const id of ['S10','S11','S12','S13']) {await current(p,id);await p.locator('[data-screen="'+id+'"] [data-skip]').click();}
-  await current(p,'MATCH');
+  await current(p,'B2');await next(p);await current(p,'MATCH');
 }
 async function keyboard(p) {
   const frames=p.frames().filter(f=>{try{return new URL(f.url()).origin===new URL(p.url()).origin;}catch{return false;}});

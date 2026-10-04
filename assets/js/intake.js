@@ -112,7 +112,22 @@
     if (id === "URGENT") $("[data-urgent-phone]", s).hidden = !!String(answers().phone || "").trim();
     if (id === "DONE") renderDone();
     toggles();
-    var h = $(".iq__q", s); if (h) { h.setAttribute("tabindex", "-1"); h.focus({ preventScroll: true }); }
+    var h = $(".iq__q", s);
+    // Touch devices keep heading focus so changing screens never opens a keyboard.
+    // On desktop, the question remains part of the field's accessible description.
+    var field = window.matchMedia("(pointer: fine)").matches && !navigator.maxTouchPoints
+      ? $$("input:not([type=hidden]):not([type=checkbox]):not([type=radio]):not([type=file]), textarea", s)
+          .filter(function (el) { return !el.disabled && !el.readOnly && el.getClientRects().length; })[0] : null;
+    if (h) {
+      h.setAttribute("tabindex", "-1");
+      if (field) {
+        var description = (field.getAttribute("aria-describedby") || "").split(/\s+/).filter(Boolean);
+        if (description.indexOf(h.id) === -1) description.unshift(h.id);
+        field.setAttribute("aria-describedby", description.join(" "));
+        $("[data-live]", form).textContent = h.textContent.trim();
+        field.focus({ preventScroll: true });
+      } else { $("[data-live]", form).textContent = ""; h.focus({ preventScroll: true }); }
+    }
     window.scrollTo({ top: Math.max(0, form.getBoundingClientRect().top + window.scrollY - 90), behavior: "auto" });
   }
   function go(id) { if (current) history.push(current); show(id, false); }
@@ -154,7 +169,7 @@
         var ids = (f.getAttribute("aria-describedby") || "").split(/\s+/).filter(function (x) { return x && x !== e.id; });
         if (on) ids.push(e.id);
         if (ids.length) f.setAttribute("aria-describedby", ids.join(" ")); else f.removeAttribute("aria-describedby");
-        var anyOn = ids.some(function (id) { var x = document.getElementById(id); return x && !x.hidden; });
+        var anyOn = ids.some(function (id) { var x = document.getElementById(id); return x && x.getAttribute("role") === "alert" && !x.hidden; });
         if (anyOn) f.setAttribute("aria-invalid", "true"); else f.removeAttribute("aria-invalid");
       }
     }

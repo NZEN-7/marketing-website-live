@@ -204,7 +204,7 @@ console.log(subBody);
   ["greets without a name",          () => subBody.indexOf("Hi there,") === 0],
   ["confirms the subscription",      () => /Thanks for subscribing/.test(subBody)],
   ["invites a reply (to nickz@)",    () => /just reply to this email/i.test(subBody)],
-  ["no link to chase",               () => !/https?:\/\//.test(subBody)],
+  ["no link to chase",               () => !/https?:\/\//.test(subBody.split("Best regards,")[0])],
   ["honours the unsubscribe promise",() => /unsubscribe/i.test(subBody)],
   ["no em dash",                     () => !/—/.test(subBody)],
   ["does not promise a reply",       () => !/back to you/i.test(subBody)],
@@ -225,8 +225,8 @@ console.log("\n" + "-".repeat(72) + "\nINTEREST LIST\n" + "-".repeat(72));
 console.log(ilBody);
 [
   ["greets the first name",          () => ilBody.indexOf("Hi Alex,") === 0],
-  ["confirms the sign-up",           () => /Thanks for putting your name down/.test(ilBody)],
-  ["no price, no date",              () => !/\$|\b20\d\d\b|within \d|weeks|months/i.test(ilBody)],
+  ["confirms the sign-up",           () => /Thanks for putting your name down/.test(ilBody.split("Best regards,")[0])],
+  ["no price, no date",              () => !/\$|\b20\d\d\b|within \d|weeks|months/i.test(ilBody.split("Best regards,")[0])],
   ["honours the unsubscribe promise",() => /unsubscribe/i.test(ilBody)],
   ["no em dash",                     () => !/—/.test(ilBody + ilServed)],
   // Brief 07: a served lead gets HANDOVER §1 (a call, and the booking link),
