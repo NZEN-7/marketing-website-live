@@ -139,8 +139,8 @@ check("§2 unserved: its own template, not held", un.template === "interest-list
 check("§2 unserved: Sales' unsubscribe line, last, after the sign-off", un.text.trim().endsWith("ABN 47 682 866 913\n\n" + UN_LINE), un.text.slice(-160));
 check("§1 signs off with Nick signature", lead.firstEmail(P(RI)).text.trim().endsWith("ABN 47 682 866 913"));
 check("contact gives the Dialpad number", lead.firstEmail(P({ form: "contact", name: "Casey", email: "c@example.com", message: "x" })).text.includes("or call me on (02) 7228 3430."));
-check("Nick's mobile is in every first email", [P(RI), IL({}), IL({ state: "QLD" }), P({ form: "subscribe", email: "s@example.com" }),
-  P({ form: "contact", name: "Casey", email: "c@example.com", message: "x" })].every((d) => /432 ?395 ?138/.test(lead.firstEmail(d).text)));
+check("the signature carries the Dialpad number and never Nick's old mobile (1 Oct rule)", [P(RI), IL({}), IL({ state: "QLD" }), P({ form: "subscribe", email: "s@example.com" }),
+  P({ form: "contact", name: "Casey", email: "c@example.com", message: "x" })].every((d) => !/432 ?395 ?138/.test(lead.firstEmail(d).text) && lead.firstEmail(d).text.includes("(02) 7228 3430")));
 
 check("v2 no batch timing in any first-email template", fs.readdirSync(dir).filter(f=>f.endsWith(".txt")).every(f=>!/November|installed in February|next winter/i.test(fs.readFileSync(path.join(dir,f),"utf8"))));
 const v2=lead.parseSubmission({form:"intake",first_name:"Test",last_name:"Fixture",email:"test@example.com",contact_pref:"email",postcode:"3122",heating:["boiler_radiators"],intent:"fit",tenure:"renter"}).data;
@@ -148,7 +148,7 @@ check("v2 retired renter input cannot select the list variant", v2.tenure===null
 const customerEmail=require("../api/_customer-email.js");
 for(const d of [P(RI), IL({}), IL({state:"QLD"}), P({form:"subscribe",email:"test@example.invalid"}), P({form:"contact",name:"Test",email:"test@example.invalid",message:"x"}),v2]) {
  const e=lead.firstEmail(d);
- check("exact plain signature "+e.template, /Best regards,\nNick Zeniou\nFounder\n\+61 432 395 138\nthermaldawn.com \| Book a call: https:\/\/[^\n]+\nHornsby NSW, 2077, Australia\nABN 47 682 866 913/.test(e.text) && !/<img/.test(e.text));
+ check("exact plain signature "+e.template, /Best regards,\nNick Zeniou\nFounder\n\(02\) 7228 3430\nthermaldawn.com \| Book a call: https:\/\/[^\n]+\nHornsby NSW, 2077, Australia\nABN 47 682 866 913/.test(e.text) && !/<img/.test(e.text));
  check("HTML signature "+e.template, /<strong>Nick Zeniou<\/strong>/.test(e.html) && /alt="Thermal Dawn" width="260"/.test(e.html) && /src="https:\/\/www.thermaldawn.com\/assets\/email\/logo.png"/.test(e.html) && /<em>Hornsby NSW, 2077, Australia<\/em>/.test(e.html) && /font-size:12px;color:#666666/.test(e.html));
  check("single HTML signature "+e.template,(e.html.match(/Best regards,/g)||[]).length===1 && !/\{signature\}/.test(e.text+e.html));
 }
