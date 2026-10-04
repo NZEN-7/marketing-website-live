@@ -199,7 +199,6 @@ html:not(.js) .drop__done{display:none;}
 
 /* Item 37: keep the primary start action; add a white-outline contact door. */
 .iq-start-actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px;}
-.intake .intake-start-secondary{border-color:#fff;color:#fff;min-height:48px;}
 /* Heating choices (Nick, 4 Oct): one column; on desktop each card is one line,
    the subtitle to the right of the title. Phones keep the stacked cards. The
    contact card keeps its place. */
