@@ -37,15 +37,15 @@ check("state: 3121 VIC, 2000 NSW, 2600 ACT, 2880 NSW, 4000 QLD, 0800 NT",
 // The live form (Nick, 4 Oct): one screen per question as on production, minus
 // the own-or-rent question (S9) and the renter close (R1)
 check("fit boiler: the live path without S9",
-  walk(Object.assign({ intent: "fit", heating: ["boiler_radiators"] }, VIC)) === "S1 S2 S3 S4 S4b S5 S6 S7 S8 S10 S11 S12 S13 MATCH",
+  walk(Object.assign({ intent: "fit", heating: ["boiler_radiators"] }, VIC)) === "S1 S2 S3 S4 S4b S5 S6 S7 S8 S10 S11 S12 S13 B2 MATCH",
   walk(Object.assign({ intent: "fit", heating: ["boiler_radiators"] }, VIC)));
-check("fit without boiler: S8 skipped", walk({ state: "VIC", intent: "fit", heating: ["none"] }) === "S1 S2 S3 S4 S5 S6 S7 S10 S11 S12 S13 MATCH");
+check("fit without boiler: S8 skipped", walk({ state: "VIC", intent: "fit", heating: ["none"] }) === "S1 S2 S3 S4 S5 S6 S7 S10 S11 S12 S13 B2 MATCH");
 check("S4b only with a phone number", walk({ state: "VIC", intent: "explore", heating: ["not_sure"] }).indexOf("S4b") === -1);
-check("ready to book: S7 then MATCH", walk(Object.assign({ intent: "book", heating: ["boiler_underfloor"] }, VIC)) === "S1 S2 S3 S4 S4b S5 S6 S7 MATCH");
-check("just exploring: S7, then the short match", walk(Object.assign({ intent: "explore", heating: ["boiler_radiators"] }, VIC)) === "S1 S2 S3 S4 S4b S5 S6 S7 MATCH_SHORT");
+check("ready to book: S7 then MATCH", walk(Object.assign({ intent: "book", heating: ["boiler_underfloor"] }, VIC)) === "S1 S2 S3 S4 S4b S5 S6 S7 B2 MATCH");
+check("just exploring: S7, then the short match", walk(Object.assign({ intent: "explore", heating: ["boiler_radiators"] }, VIC)) === "S1 S2 S3 S4 S4b S5 S6 S7 B2 MATCH_SHORT");
 check("urgent: S7 then URGENT", walk(Object.assign({ intent: "urgent", heating: ["lpg_boiler"] }, VIC)) === "S1 S2 S3 S4 S4b S5 S6 S7 URGENT");
 check("fit with 'Broken, or about to go' jumps to URGENT from S8", walk(Object.assign({ intent: "fit", heating: ["boiler_radiators"], boiler_condition: "broken" }, VIC)).endsWith("S8 URGENT"));
-check("no answer on S5 takes the full fit path", walk({ state: "NSW", heating: ["boiler_radiators"] }).endsWith("S13 MATCH"));
+check("no answer on S5 takes the full fit path", walk({ state: "NSW", heating: ["boiler_radiators"] }).endsWith("S13 B2 MATCH"));
 
 // ---- the closes ----
 check("O1: QLD goes straight to consent (S6), then closes: no phone or intent", walk({ state: "QLD", phone: "0400000001" }) === "S1 S2 S3 S6 O1");
@@ -56,7 +56,7 @@ for (const h of [["splits"], ["ducted_gas"], ["other"], ["splits", "ducted_gas"]
 for (const h of [["boiler_radiators", "ducted_gas"], ["none"], ["not_sure"], ["splits", "not_sure"]]) {
   check(`must NOT close: ${h.join("+")}`, walk({ state: "VIC", intent: "fit", heating: h }).indexOf("N1") === -1);
 }
-check("a renter answer from an old page can't close a journey", walk({ state: "NSW", intent: "fit", heating: ["boiler_radiators"], tenure: "renter" }).endsWith("S13 MATCH") && R.route({ state: "VIC", heating: ["boiler_radiators"], tenure: "renter" }) === "icp");
+check("a renter answer from an old page can't close a journey", walk({ state: "NSW", intent: "fit", heating: ["boiler_radiators"], tenure: "renter" }).endsWith("S13 B2 MATCH") && R.route({ state: "VIC", heating: ["boiler_radiators"], tenure: "renter" }) === "icp");
 check("'Not sure' never closes; it routes icp-check", R.route({ state: "VIC", heating: ["not_sure"], boiler_condition: "not_sure" }) === "icp-check");
 check("icp-check: 'No heating yet', and nothing picked", R.route({ state: "VIC", heating: ["none"] }) === "icp-check" && R.route({ state: "VIC" }) === "icp-check");
 check("icp: a boiler picked, even alongside 'Not sure'", R.route({ state: "VIC", heating: ["lpg_boiler", "not_sure"] }) === "icp");
@@ -319,9 +319,9 @@ for(const id of ["S1","S7","S10","S11"]) {
  const section=page.split('data-screen="'+id+'"')[1].split('</section>')[0];
  check("Nick pass multi-select "+id+" never auto advances", !/data-auto/.test(section));
 }
-check("v2 heating notes have label, described hint and no placeholder", /<label for="heating-notes">Anything else/.test(page) && /name="heating_notes"[^>]*aria-describedby="heating-notes-hint"/.test(page) && !/<textarea[^>]*name="heating_notes"[^>]*placeholder/.test(page));
+check("v2 heating notes have label, described hint and no placeholder", /<label for="heating-notes">Your notes/.test(page) && /name="heating_notes"[^>]*aria-describedby="heating-notes-hint"/.test(page) && !/<textarea[^>]*name="heating_notes"[^>]*placeholder/.test(page));
 check("v2 transition hides old questions and focuses new heading", /s.hidden = true/.test(jsV2) && /h.focus/.test(jsV2));
-check("v2 progress sections", ["intro","S1","S6","S4b"].every(id=>R.stepOf(id)===1) && ["S7","S8","S10","S13","MATCH","MATCH_SHORT","URGENT"].every(id=>R.stepOf(id)===2) && ["S14","S17"].every(id=>R.stepOf(id)===3) && R.stepOf("DONE")===4);
+check("v2 progress sections", ["intro","S1","S6","S4b"].every(id=>R.stepOf(id)===1) && ["S7","S8","S10","S13","B2","MATCH","MATCH_SHORT","URGENT"].every(id=>R.stepOf(id)===2) && ["S14","S17"].every(id=>R.stepOf(id)===3) && R.stepOf("DONE")===4);
 check("v2 no batch timing anywhere on start", !/November|installed in February|next winter/i.test(page));
 const notesData=lead.parseSubmission(Object.assign({},base,{heating_notes:"a".repeat(2100),tenure:"renter"})).data;
 check("v2 heating notes clamp 2000; tenure null", notesData.heating_notes.length===2000 && notesData.tenure===null);
@@ -332,5 +332,13 @@ check("v2 heating notes continuation cannot forge a label", /Heating notes: Hell
 
 const cssV2=fs.readFileSync(path.join(__dirname,"..","assets/css/intake.css"),"utf8");
 check("focus and reduced-motion styles are explicit", /card-opt:has\(input:focus-visible\)[^}]*outline:3px solid var\(--td-orange\)/.test(cssV2) && /prefers-reduced-motion:reduce/.test(cssV2));
+for (const heating of [["ducted_rc"], ["ducted_rc","splits"], ["ducted_rc","ducted_gas"]]) {
+ const d=lead.parseSubmission(Object.assign({},base,{heating})).data;
+ check("ducted RC non-product route "+heating, d.route==="not-our-product" && R.next("S7",d)==="N1");
+ check("ducted RC notification tag "+heating, /Tags: interest:ducted-rc, source:website/.test(lead.formatNotification(d,"x")));
+ check("ducted RC saved tag "+heating, I.intakeLeadRow(d,{INTAKE_LEAD_COLUMNS:"on"},Date.now()).answers.tags[0]==="interest:ducted-rc");
+}
+check("mixed boiler and ducted RC preserves fit",R.route({state:"VIC",heating:["boiler_radiators","ducted_rc"]})==="icp");
+check("uncertain ducted RC preserves check",R.route({state:"VIC",heating:["not_sure","ducted_rc"]})==="icp-check");
 console.log(failed ? `\n${failed} CHECK(S) FAILED` : "\nAll intake checks passed.");
 process.exit(failed ? 1 : 0);

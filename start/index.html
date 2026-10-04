@@ -12,7 +12,7 @@
 <link rel="preload" href="/assets/fonts/Montserrat-ExtraBold.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/Montserrat-Regular.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/assets/css/style.css?v=64">
-<link rel="stylesheet" href="/assets/css/intake.css?v=15">
+<link rel="stylesheet" href="/assets/css/intake.css?v=18">
 <script>document.documentElement.classList.add("js");</script>
 </head>
 <body class="dark intake-page">
@@ -47,13 +47,13 @@
         </ol>
       </div>
 
-      <div class="iq-live" aria-live="polite" data-live></div>
+      <div class="iq-live sr-only" aria-live="polite" data-live></div>
 
       <!-- INTRO -->
       <section class="iq iq--intro" data-screen="intro">
         <h1 class="iq__q">Is Thermal Dawn right for your home?</h1>
         <p class="iq__coach">About two minutes. Answer what you can. Anything you skip, we'll cover when we talk.</p>
-        <p class="iq__jsonly"><button type="button" class="btn btn--primary btn--rect" data-go="S1">Let's start</button></p>
+        <p class="iq-start-actions"><span class="iq__jsonly"><button type="button" class="btn btn--primary btn--rect" data-go="S1">Let's start</button></span><a class="btn btn--ghost-light btn--rect intake-start-secondary" href="/contact/">Not sure? Send us a message</a></p>
       </section>
 
       <!-- ============ STEP 1: ABOUT YOU ============ -->
@@ -155,17 +155,14 @@
           <label class="card-opt"><input type="checkbox" name="heating" value="boiler_underfloor"><span class="card-opt__t">Gas hydronic with underfloor</span> <span class="card-opt__s">Hot water pipes in the slab or under the floor</span><span class="card-opt__tick" aria-hidden="true"></span></label>
           <label class="card-opt"><input type="checkbox" name="heating" value="lpg_boiler"><span class="card-opt__t">LPG hydronic</span> <span class="card-opt__s">Radiators or underfloor, on bottled gas</span><span class="card-opt__tick" aria-hidden="true"></span></label>
           <label class="card-opt"><input type="checkbox" name="heating" value="ducted_gas"><span class="card-opt__t">Ducted gas</span> <span class="card-opt__s">Warm air through vents in the floor or ceiling</span><span class="card-opt__tick" aria-hidden="true"></span></label>
+          <label class="card-opt"><input type="checkbox" name="heating" value="ducted_rc"><span class="card-opt__t">Ducted reverse cycle</span> <span class="card-opt__s">Electric heating and cooling through vents</span><span class="card-opt__tick" aria-hidden="true"></span></label>
           <label class="card-opt"><input type="checkbox" name="heating" value="splits"><span class="card-opt__t">Split systems</span> <span class="card-opt__s">Wall-mounted reverse-cycle units</span><span class="card-opt__tick" aria-hidden="true"></span></label>
           <label class="card-opt"><input type="checkbox" name="heating" value="other" data-other-toggle><span class="card-opt__t">Something else</span> <span class="card-opt__s">Wood, electric panels, a fireplace…</span><span class="card-opt__tick" aria-hidden="true"></span></label>
           <label class="card-opt"><input type="checkbox" name="heating" value="none"><span class="card-opt__t">No heating yet</span> <span class="card-opt__s">Or we're building</span><span class="card-opt__tick" aria-hidden="true"></span></label>
           <label class="card-opt"><input type="checkbox" name="heating" value="not_sure"><span class="card-opt__t">Not sure</span> <span class="card-opt__s">We'll work it out together</span><span class="card-opt__tick" aria-hidden="true"></span></label>
         </fieldset>
         <label class="fld fld--wide" data-other-text><span>Something else</span><input type="text" name="heating_other_text" maxlength="300"></label>
-        <div class="fld fld--wide fld--notes">
-          <label for="heating-notes">Anything else you'd like us to know? <span class="fld__opt">(optional)</span></label>
-          <p class="fld__hint" id="heating-notes-hint">For example: two boilers, underfloor downstairs and radiators up, battery size, boiler about 15 years old, or any questions for us.</p>
-          <textarea id="heating-notes" name="heating_notes" rows="3" maxlength="2000" aria-describedby="heating-notes-hint"></textarea>
-        </div>
+
       </section>
 
       <section class="iq" data-screen="S8" aria-labelledby="h-S8">
@@ -238,6 +235,17 @@
           <label class="card-opt"><input type="radio" name="timing" value="planning"><span class="card-opt__t">Just planning ahead</span><span class="card-opt__tick" aria-hidden="true"></span></label>
         </fieldset>
         <label class="fld fld--wide"><span>Anything driving the timing?</span><input type="text" name="timing_note" maxlength="500" placeholder="e.g. the boiler's 20 years old, we're renovating in March"></label>
+        <p class="iq__jsonly iq__skip"><button type="button" class="linkbtn" data-skip>Skip</button></p>
+      </section>
+
+      <!-- ============ RESULT SCREENS (JS only) ============ -->
+      <section class="iq" data-screen="B2" aria-labelledby="h-B2">
+        <h2 class="iq__q" id="h-B2">Anything else you'd like us to know?</h2>
+        <div class="fld fld--wide fld--notes">
+          <label for="heating-notes">Your notes <span class="fld__opt">(optional)</span></label>
+          <p class="fld__hint" id="heating-notes-hint">For example: two boilers, underfloor downstairs and radiators up, battery size, boiler about 15 years old, or any questions for us.</p>
+          <textarea id="heating-notes" name="heating_notes" rows="3" maxlength="2000" aria-describedby="heating-notes-hint"></textarea>
+        </div>
         <p class="iq__jsonly iq__skip"><button type="button" class="linkbtn" data-skip>Skip</button></p>
       </section>
 
@@ -486,7 +494,7 @@
 </main>
 <footer id="site-footer" class="site-footer"></footer>
 <script src="/assets/js/site.js?v=18" defer></script>
-<script src="/assets/js/intake-route.js?v=10" defer></script>
-<script src="/assets/js/intake.js?v=16" defer></script>
+<script src="/assets/js/intake-route.js?v=11" defer></script>
+<script src="/assets/js/intake.js?v=17" defer></script>
 </body>
 </html>

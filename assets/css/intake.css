@@ -196,3 +196,16 @@ html:not(.js) .drop__done{display:none;}
 .fld__opt{font-weight:400;color:var(--iq-muted);}
 .fld__hint{margin:0;font-size:.86rem;color:var(--iq-muted);}
 .fld--notes textarea{min-height:96px;resize:vertical;}
+
+/* Item 37: keep the primary start action; add a white-outline contact door. */
+.iq-start-actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px;}
+.intake .intake-start-secondary{border-color:#fff;color:#fff;min-height:48px;}
+/* Heating choices (Nick, 4 Oct): one column; on desktop each card is one line,
+   the subtitle to the right of the title. Phones keep the stacked cards. The
+   contact card keeps its place. */
+@media (min-width:720px){
+  [data-screen="S7"] .card-opt{display:flex;align-items:baseline;gap:14px;min-height:48px;padding:12px 48px 12px 16px;}
+  [data-screen="S7"] .card-opt__t{white-space:nowrap;flex:none;}
+  [data-screen="S7"] .card-opt{min-width:0;}
+  [data-screen="S7"] .card-opt__s{min-width:0;}   /* wraps only if the column is too narrow for one line */
+}

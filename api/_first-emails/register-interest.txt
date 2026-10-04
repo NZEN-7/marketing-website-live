@@ -1,7 +1,8 @@
 # First email: register-interest, and interest-list when served (HANDOVER v2 §1).
 # Source of truth: Sales +/Consumer/Sales Playbook/_Templates/First emails/
 #   HANDOVER - first emails for api-lead.js (v2, two doors).md
-# Sales edits the wording THERE; it is pasted here verbatim. Never edit it here first.
+# Signature override: Nick / CTO item 37, 4 Oct 2026. {signature} is composed by _customer-email.js.
+# Sales edits the body wording THERE; it is pasted here verbatim. Never edit it here first.
 # Placeholders: {first_name} {booking_link}. [phone]...[/phone] is sent when the
 # form has a phone number, [no-phone]...[/no-phone] when it has none.
 Subject: Thanks {first_name}, let's talk about your heating
@@ -21,7 +22,4 @@ If you like to get ahead, three photos help me give you a sharper answer when we
 
 Just reply to this email with them. No pressure if they're not handy.
 
-Cheers,
-Nick
-Thermal Dawn
-(02) 7228 3430
+{signature}

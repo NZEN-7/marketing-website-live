@@ -379,11 +379,15 @@ for(const note of ["Two boilers", "Two boilers\nUnderfloor downstairs", "Two boi
  }
 }
 
+{const d=lead.parseSubmission({form:"intake",first_name:"Test",last_name:"Fixture",email:"test@example.invalid",contact_pref:"email",postcode:"3122",heating:["ducted_rc"],heating_notes:"Two systems.",seen:["S7","B2"],outcome:"completed"}).data;
+const b=lead.formatNotification(d,stamp);
+for(const body of [b,b.replace(/\n+/g,"   ")])check("ducted RC tag and moved notes parser contract",body,{"Heating":"Ducted reverse cycle","Heating notes":"Two systems.","Tags":"interest:ducted-rc, source:website","Route":"not-our-product"});}
 console.log();
 if (failures) {
   console.log(`${failures} sample(s) failed. If a label changed in ` +
               `api/lead.js, update LEAD_LABELS in scripts/apps-script/` +
               `lead-parser.gs and re-paste it into the Apps Script project.`);
-  process.exit(1);
+
+process.exit(1);
 }
 console.log("All parser checks passed.");
