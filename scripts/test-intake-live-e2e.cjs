@@ -59,6 +59,7 @@ async function toHeating(p, base) {
       for (const id of ['S14', 'S15', 'S16']) { await current(p, id); await p.locator('[data-screen="' + id + '"] [data-skip]').click(); }
       await current(p, 'S17'); await next(p); await current(p, 'DONE');
       assert.equal(c.calls.length, 3); assert.equal(c.calls[2].followup, true); assert.ok(c.calls.every((x) => x.lead_id === c.calls[0].lead_id));
+      assert.ok(/^[0-9a-f]{64}$/.test(c.calls[0].resume_token) && c.calls.every((x) => x.resume_token === c.calls[0].resume_token), 'one resume token per visit, on every send');
     });
     await pageTest('Anonymous counts: each screen ID once per page, no identifiers or storage', async (p, c, base) => {
       await toHeating(p, base); await p.waitForTimeout(200);

@@ -75,6 +75,9 @@
   // ---------------------------------------------------------------- display
   var LABELS = { 1: "Let's get to know you", 2: "Great start. Let's check the fit", 3: "Nearly there", 4: "All done" };
   var counted = {};
+  // The resume token: 64 random hex characters, made once per visit and kept in memory
+  // only. The server keeps just its hash, so later sends can update the same CRM row.
+  var RESUME = (function () { try { var b = new Uint8Array(32); crypto.getRandomValues(b); return Array.prototype.map.call(b, function (x) { return ("0" + x.toString(16)).slice(-2); }).join(""); } catch (e) { return ""; } })();
   function show(id, isBack) {
     if (!screens[id]) return;
     clearTimeout(advanceTimer);
@@ -373,7 +376,7 @@
     a.state = stateNow();
     if (a.remote === "true") a.remote = true;
     a.form = "intake"; a.ts = stamped; a.lead_id = LEAD_ID; a.website = ($("[name=website]", form) || {}).value || "";
-    a.outcome = outcome; a.last_screen = current; a.seen = Object.keys(seen); a.exit = exitPicked;
+    a.outcome = outcome; a.last_screen = current; a.seen = Object.keys(seen); a.exit = exitPicked; a.resume_token = RESUME;
     a.route = R.route(a); a.path = a.intent || "fit";
     a.rung_reached = seen.DONE ? "done" : Object.keys(seen).some(function (k) { return /^S1[4-7]$/.test(k); }) ? "3"
       : Object.keys(seen).some(function (k) { return /^S(7|8|9|1[0-3])$/.test(k); }) ? "2" : "1";

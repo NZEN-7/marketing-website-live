@@ -300,6 +300,20 @@ async function recordLead(d) {
   // An intake row with its own columns is one per (intake_lead_id,
   // intake_event): two instances racing the same send get one row (Platform,
   // migration efaf42c; GPT Web I-S2).
+  // Same-row path (CTO items 69, 82): a follow-up with the lead's resume token updates its
+  // own `complete` row through update_intake_details. If that can't confirm the update
+  // (function not there yet, wrong token, any error), fall through to today's `details`
+  // insert, so no answer is ever dropped.
+  if (d.form === "intake" && d.followup && d.resume_token && String(process.env.INTAKE_LEAD_COLUMNS || "").trim() === "on") {
+    try {
+      const up = await fetch(`${SUPABASE_URL}/rest/v1/rpc/update_intake_details`, {
+        method: "POST",
+        headers: { apikey: auth.apikey, Authorization: `Bearer ${auth.bearer}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ p_lead_id: d.lead_id, p_token: d.resume_token, p_details: intake.sameRowDetails(d) }),
+      });
+      if (up.ok && String(await up.text()).trim() === "true") return "updated";
+    } catch (_) { /* fall back to the details row */ }
+  }
   const row = d.form === "intake" ? intake.intakeLeadRow(d, process.env) : leadRow(d);
   // With its own columns, an intake row asks for itself back, so the handler
   // knows whether this was the first row for (intake_lead_id, intake_event):
@@ -970,6 +984,7 @@ module.exports = async function handler(req, res) {
     try {
       const r = await recordLead(data);
       if (r === "inserted") inserted = true;
+      else if (r === "updated") logEvent(reqId, data.form, "row_updated", "same_row");
       else if (r === "duplicate") { inserted = false; logEvent(reqId, data.form, "insert_skipped", "duplicate_event"); }
       else if (r === "unknown") logEvent(reqId, data.form, "insert_unconfirmed", "unexpected_reply");
       else if (r !== "ok") logEvent(reqId, data.form, "insert_skipped", r === "skipped (non-production)" ? "non_production" : "not_configured");
