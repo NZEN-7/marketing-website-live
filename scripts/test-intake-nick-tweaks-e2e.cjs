@@ -22,9 +22,12 @@ try{
  }
  for(const width of [390,960,1280])await test('heating layout '+width,{viewport:{width,height:900},hasTouch:width===390,isMobile:width===390},async(p)=>{
   await begin(p,s.url);await p.locator('[name=intent][value=fit]').check();await current(p,'S6');await next(p);await current(p,'S7');
-  const rects=await p.locator('[data-screen=S7] .card-opt').evaluateAll(es=>es.map(e=>({y:e.offsetTop,w:e.offsetWidth})));
+  const rects=await p.locator('[data-screen=S7] .card-opt').evaluateAll(es=>es.map(e=>{const t=e.querySelector('.card-opt__t').getBoundingClientRect(),s=e.querySelector('.card-opt__s').getBoundingClientRect();return {y:e.offsetTop,w:e.offsetWidth,h:e.offsetHeight,inline:Math.abs(t.top-s.top)<8&&s.left>t.right};}));
   assert.equal(await p.locator("[data-live]").textContent(), "");assert.equal(rects.length,9);assert.ok(rects.every(r=>r.w>=100));
-  if(width>=960)assert.equal(new Set(rects.map(r=>r.y)).size,1);else assert.ok(new Set(rects.map(r=>r.y)).size>1);
+  // Nick, 4 Oct (corrected): one column at every width; on desktop each card is one line, subtitle to the right
+  assert.equal(new Set(rects.map(r=>r.y)).size,9,'one column');
+  if(width>=960){assert.ok(rects.every(r=>r.inline),'subtitle to the right of the title');if(width>=1280)assert.ok(rects.every(r=>r.h<=60),'one line high: '+rects.map(r=>r.h));
+    assert.ok(await p.locator('.intake-side').evaluate(e=>e.getBoundingClientRect().left<document.querySelector('[data-screen=S7]').getBoundingClientRect().left),'the contact card stays in the left column');}
   assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));assert.equal(await p.locator('[name=heating_notes]').isVisible(),false);
   await p.locator('[name=heating][value=ducted_rc]').focus();assert.equal(await p.locator('[name=heating][value=ducted_rc]').evaluate(e=>e===document.activeElement),true);
   await p.keyboard.press('Space');await next(p);await current(p,'N1');
