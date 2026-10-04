@@ -33,7 +33,7 @@ const L = {
             news: "News, a podcast or an article", other: "Other" },
   call_times: { lunchtime: "Weekdays around lunchtime", after_5: "Weekdays after 5pm", weekends: "Weekends", any: "Any time" },
   heating: { boiler_radiators: "Gas hydronic with radiators", boiler_underfloor: "Gas hydronic with underfloor", lpg_boiler: "LPG hydronic",
-             ducted_gas: "Ducted gas", splits: "Split systems", other: "Something else", none: "No heating yet", not_sure: "Not sure" },
+             ducted_gas: "Ducted gas", ducted_rc: "Ducted reverse cycle", splits: "Split systems", other: "Something else", none: "No heating yet", not_sure: "Not sure" },
   boiler_condition: { working_fine: "Working fine", getting_on: "Getting on a bit", playing_up: "Playing up", broken: "Broken, or about to go", not_sure: "Not sure" },
   boiler_age: { under_5: "Under 5 years", "5_10": "5–10", "10_15": "10–15", over_15: "Over 15", not_sure: "Not sure" },
   tenure: { owner_occupier: "I own it and live in it", landlord: "I own it and rent it out", renter: "I'm renting", build: "We're building or renovating" },
@@ -54,7 +54,7 @@ const OUTCOMES = ["matched", "completed", "book_chat", "deposit", "keep_posted",
 const SCREENS = /^(intro|S\d{1,2}[b-d]?|B2|MATCH|MATCH_SHORT|URGENT|DONE|O1|N1|R1|POSTED)$/;
 
 // Which screen asks which key: "Not asked" (screen never shown) vs "Skipped" (shown, no answer).
-const ASKED_ON = { phone: "S4", call_times: "S4b", intent: "S5", source: "S6", referrer: "S6", heating: "S7", heating_other_text: "S7", heating_notes: "S7",
+const ASKED_ON = { phone: "S4", call_times: "S4b", intent: "S5", source: "S6", referrer: "S6", heating: "S7", heating_other_text: "S7", heating_notes: "B2",
   boiler_condition: "S8", boiler_age: "S8", tenure: "S9", scope: "S10", energy: "S11", winter_gas_bill_band: "S12", timing: "S13",
   timing_note: "S13", storeys: "S14", radiator_band: "S14", underfloor_band: "S14", built_band: "S14", off_gas: "S15", uploads: "S16", notes: "S17" };
 
@@ -170,6 +170,7 @@ function formatIntakeNotification(d, when, files) {
     `Submission Time: ${when}`,
     `Rung reached: ${d.rung_reached || "-"}`,
     `Route: ${d.route || "-"}`,
+    `Tags: ${d.heating.includes("ducted_rc") ? "interest:ducted-rc, " : ""}source:website`,
     `Path: ${d.intent ? L.intent[d.intent] : "Not answered"}`,
     `Ended on: ${d.outcome || "-"}${d.last_screen ? " (screen " + d.last_screen + ")" : ""}`,
     "",
@@ -323,6 +324,7 @@ function intakeLeadRow(d, env, now) {
   if (String((env || {}).INTAKE_LEAD_COLUMNS || "").trim() === "on") {
     const answers = {};
     ANSWER_KEYS.forEach((k) => { const v = d[k]; if (Array.isArray(v) ? v.length : (v !== "" && v != null && v !== false)) answers[k] = v; });
+    answers.tags = d.heating.includes("ducted_rc") ? ["interest:ducted-rc"] : [];
     const started = Number(d.ts_started) > 0 ? new Date(Number(d.ts_started)).toISOString() : null;
     Object.assign(row, {
       // Stage 1 sends no partials; a later "Help us prepare" send is its own

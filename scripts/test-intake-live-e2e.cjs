@@ -7,6 +7,7 @@ vm.runInNewContext(source.slice(0, source.indexOf('(async()=> {')) + '\nmodule.e
 const { server, context, playwright } = sandbox.module.exports;
 const results = [];
 async function test(name, fn) { try { await fn(); results.push({ name, passed: true }); console.log('PASS ' + name); } catch (e) { results.push({ name, passed: false, error: e.message }); console.log('FAIL ' + name + ': ' + e.message); } }
+const notesFill = async p => { await p.locator('[name=heating_notes]').fill('Two boilers.'); };
 const next = (p) => p.locator('[data-continue]').click();
 const current = (p, id) => p.locator('[data-screen="' + id + '"].is-current').waitFor();
 async function toHeating(p, base) {
@@ -30,13 +31,15 @@ async function toHeating(p, base) {
     });
     await pageTest('Heating notes: visible label, hint linked, no placeholder, sent with the enquiry', async (p, c, base) => {
       await toHeating(p, base);
-      const notes = p.locator('[name=heating_notes]'); assert.ok(await notes.isVisible());
-      assert.equal(await p.getByRole('textbox', { name: /Anything else you'd like us to know\?/ }).count(), 1);
+      const notes = p.locator('[name=heating_notes]'); assert.ok(!await notes.isVisible());
+      assert.equal(await p.getByRole('textbox', { name: /Your notes/, includeHidden:true }).count(), 1);
       assert.equal(await notes.getAttribute('placeholder'), null);
-      assert.match(await p.locator('#' + (await notes.getAttribute('aria-describedby'))).textContent(), /For example/);
-      await p.locator('[name=heating][value=boiler_radiators]').check(); await notes.fill('Two boilers.'); await next(p);
+      assert.match(await p.locator('#heating-notes-hint').textContent(), /For example/);
+      await p.locator('[name=heating][value=boiler_radiators]').check(); await next(p);
       await current(p, 'S8'); await p.locator('[name=boiler_condition][value=working_fine]').check(); await next(p);
       for (const id of ['S10', 'S11', 'S12', 'S13']) { await current(p, id); await p.locator('[data-screen="' + id + '"] [data-skip]').click(); }
+      await current(p, 'B2'); assert.equal(c.calls.length,0); await notesFill(p); await next(p);
+      if(await p.locator('[data-screen=B2].is-current').count()){await next(p);}
       await current(p, 'MATCH'); await p.waitForTimeout(3800);
       assert.equal(c.calls.length, 1); assert.equal(c.calls[0].heating_notes, 'Two boilers.'); assert.equal(c.calls[0].tenure, undefined);
     });
@@ -44,9 +47,9 @@ async function toHeating(p, base) {
       await toHeating(p, base); await p.locator('[name=heating][value=boiler_radiators]').check(); await next(p);
       await current(p, 'S8'); await p.locator('[name=boiler_condition][value=working_fine]').check(); await next(p);
       for (const id of ['S10', 'S11', 'S12', 'S13']) { await current(p, id); await p.locator('[data-screen="' + id + '"] [data-skip]').click(); }
-      await current(p, 'MATCH'); await p.waitForTimeout(3800);
+      await current(p,'B2');await next(p);await current(p, 'MATCH'); await p.waitForTimeout(3800);
       assert.equal(c.calls.length, 1); assert.equal(c.calls[0].outcome, 'matched'); assert.ok(!c.calls[0].followup); assert.equal(c.calls[0].exit, 'none');
-      await p.locator('[data-back]').click(); await current(p, 'S13'); await next(p); await current(p, 'MATCH'); await p.waitForTimeout(400);
+      await p.locator('.is-current [data-go=S14]').click(); await current(p,'S14'); await p.locator('[data-back]').click(); await current(p, 'MATCH'); await p.waitForTimeout(400);
       assert.equal(c.calls.length, 1, 'returning to the match sends nothing');
       await p.locator('.is-current [data-exit=book_chat]').click().catch(() => {}); await p.waitForTimeout(400);
       assert.equal(c.calls.length, 2); assert.equal(c.calls[1].followup, true); assert.equal(c.calls[1].exit, 'chat');

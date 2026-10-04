@@ -21,6 +21,7 @@ const path = require("path");
 const crypto = require("crypto");
 // The intake prototype (PRD D13): its own module, so this file's diff stays small.
 const intake = require("./_intake.js");
+const customerEmail = require("./_customer-email.js");
 
 const TZ = "Australia/Sydney";
 const NOTIFY_TO = "nickz@thermaldawn.com";
@@ -687,10 +688,10 @@ function renderTemplate(t, d) {
     .split("{first_name}").join(name || "there")
     .split("{booking_link}").join(bookingLink());
   const subject = stripHeader((name ? t.subject : t.subjectNoName).split("{first_name}").join(name));
-  return { subject, text: body };
+  return Object.assign({ subject }, customerEmail(body, bookingLink()));
 }
 
-/** What the first email to this lead is: {template, subject, text}, or null
+/** What the first email to this lead is: {template, subject, text, html}, or null
     when this form gets none. Pure apart from reading the template file. */
 function firstEmail(d) {
   if (!AUTORESPOND[d.form]) return null;
@@ -699,10 +700,10 @@ function firstEmail(d) {
   const t = loadTemplate(key);
   if (LIST_TEMPLATES[key] && !/unsubscribe/i.test(t.body)) {
     return { template: key + " (held: no unsubscribe line yet; today's email sent)",
-             subject: legacySubject(d), text: legacyAutoresponder(d) };
+             subject: legacySubject(d), ...customerEmail(legacyAutoresponder(d).replace(/Nick\nThermal Dawn/, "{signature}"), bookingLink()) };
   }
   const r = renderTemplate(t, d);
-  return { template: key, subject: r.subject, text: r.text };
+  return { template: key, subject: r.subject, text: r.text, html: r.html };
 }
 
 /** Kept for the tests and the harness: the text of the first email. */
@@ -1009,6 +1010,7 @@ module.exports = async function handler(req, res) {
             replyTo: NOTIFY_TO,
             subject: first.subject,
             text: first.text,
+            html: first.html,
           });
         } catch (autoErr) {
           logEvent(reqId, data.form, "first_email_failed", errorCode(autoErr));

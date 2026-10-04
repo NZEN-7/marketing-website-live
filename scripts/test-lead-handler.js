@@ -325,6 +325,9 @@ const RI = { form: "register-interest", first_name: NAME, last_name: LAST, email
   check("leads row: the old forms' rows never carry the intake columns", inserts[0] && !("intake_lead_id" in inserts[0].body) && !("answers" in inserts[0].body) && !/on_conflict/.test(inserts[0].url), inserts[0] && Object.keys(inserts[0].body));
   delete process.env.INTAKE_LEAD_COLUMNS; process.env.VERCEL_ENV = "preview";
 
+  sent=[]; capture(); await call(RI); release();
+  check("customer transport carries HTML and plain signatures", sent[1] && /Best regards,/.test(sent[1].text) && /<strong>Nick Zeniou<\/strong>/.test(sent[1].html));
+  check("internal notification remains plain text only", sent[0] && !sent[0].html && !/Best regards,/.test(sent[0].text));
   // v2 clamps free text before composing the real handler notification.
   sent=[];capture();await call(Object.assign({},IN,{lead_id:"il-abc123abcd",heating_notes:"x".repeat(2100),tenure:"renter"}));release();
   check("v2 handler clamps heating notes and preserves retired tenure label", notes().length===1 && /Heating notes: x{2000}\n/.test(notes()[0].text) && /Is it your home: -/.test(notes()[0].text));
