@@ -21,6 +21,7 @@ const path = require("path");
 const crypto = require("crypto");
 // The intake prototype (PRD D13): its own module, so this file's diff stays small.
 const intake = require("./_intake.js");
+const stand = require("./_stand.js");
 const customerEmail = require("./_customer-email.js");
 
 const TZ = "Australia/Sydney";
@@ -315,7 +316,7 @@ async function recordLead(d) {
       if (up.ok && String(await up.text()).trim() === "true") return "updated";
     } catch (_) { /* fall back to the details row */ }
   }
-  const row = d.form === "intake" ? intake.intakeLeadRow(d, process.env) : leadRow(d);
+  const row = d.form === "stand" ? stand.row(d, leadRow(d)) : d.form === "intake" ? intake.intakeLeadRow(d, process.env) : leadRow(d);
   // With its own columns, an intake row asks for itself back, so the handler
   // knows whether this was the first row for (intake_lead_id, intake_event):
   // that decides the customer's first email (GPT Web S1-2). Only the id comes
@@ -354,6 +355,7 @@ async function recordLead(d) {
 function parseSubmission(body) {
   const form = String(body && body.form ? body.form : "").trim();
   if (form === "intake") return intake.parseIntake(body);
+  if (form === "stand") return stand.parse(body);
   const spec = FORMS[form];
   if (!spec) return { error: "Unknown form" };
 
@@ -460,6 +462,7 @@ function listNote(d) {
 function formatNotification(d, stamp) {
   const when = stamp || formatTimestamp();
   if (d.form === "intake") return intake.formatIntakeNotification(d, when, d._files);
+  if (d.form === "stand") return stand.notification(d, when);
 
   // Interest list. New labels (Postcode, Interested in, Consent to be
   // contacted, Tags) and sections (INTEREST, LIST) are in lead-parser.gs;
@@ -608,6 +611,7 @@ function notificationThread(d) {
 
 function formatSubject(d) {
   if (d.form === "intake") return intake.formatIntakeSubject(d);
+  if (d.form === "stand") return stripHeader("Event capture — " + d.event);
   if (d.form === "register-interest") {
     return stripHeader(
       `New website lead: ${d.first_name} ${d.last_name} · ${d.heating} · ${d.email}`
@@ -637,7 +641,7 @@ function formatSubject(d) {
    Deposits get none: that form posts BEFORE the Stripe handoff, and Stripe
    sends the receipt (CTO Re: Web #12, A1). A paid-booking email waits for a
    Stripe-webhook brief of its own. */
-const AUTORESPOND = { "register-interest": true, contact: true, subscribe: true, "interest-list": true, intake: true };
+const AUTORESPOND = { "register-interest": true, contact: true, subscribe: true, "interest-list": true, intake: true, stand: true };
 
 /* Unserved (HANDOVER §2) only when CLEARLY unserved: a known unserved state
    (UNSERVED_STATES, NZ included), or "Split systems only". Anything else,
@@ -653,6 +657,7 @@ function isUnservedListLead(d) {
 function templateKey(d) {
   if (d.form === "interest-list") return isUnservedListLead(d) ? "interest-list-unserved" : "register-interest";
   if (d.form === "intake") return intake.firstEmailKey(d);
+  if (d.form === "stand") return d.email ? "event-capture" : null;
   if (d.form === "register-interest" || d.form === "contact" || d.form === "subscribe") return d.form;
   return null;
 }
@@ -887,6 +892,39 @@ function routeTo(addr) {
   return isEmail(t) ? t : null;
 }
 
+// Stand capture shares screening, transport, insert and preview guards.
+// Success confirms every required side effect; partial failures stay visible.
+async function handleStand(d,reqId,reply){
+ const claim=intake.claimSend(d,Date.now());
+ if(claim.status==='done')return reply(200,{ok:true,saved:isProduction(),sent:true,preview:!isProduction()});
+ if(claim.status==='pending'){
+  const ok=await claim.result;return reply(ok?200:502,{ok,saved:ok&&isProduction(),sent:ok,preview:!isProduction(),error:ok?undefined:"Capture not confirmed. Check Nick's notification."});
+ }
+ let saved=false,notification=false;
+ try{
+  const transport=makeTransport(),notifyTo=routeTo(NOTIFY_TO);
+  if(!notifyTo)throw new Error('preview_recipient_missing');
+  await transport.sendMail({from:'"Thermal Dawn Website" <'+process.env.GMAIL_USER+'>',to:notifyTo,replyTo:d.email||undefined,subject:formatSubject(d),text:formatNotification(d)});
+  notification=true;
+  if(isProduction()){
+   if(String(process.env.INTAKE_LEAD_COLUMNS||'').trim()!=='on')throw new Error('columns_missing');
+   const result=await recordLead(d);saved=result==='inserted'||result==='duplicate';
+   if(result!=='inserted'){
+    intake.settleSend(d,false);logEvent(reqId,d.form,'capture_unconfirmed',result==='duplicate'?'duplicate_event':'insert_unconfirmed');
+    return reply(409,{ok:false,saved,sent:false,notification,error:saved?"Already saved. Check Nick's notification before capturing again.":"Saving not confirmed. Check Nick's notification before retrying."});
+   }
+  }
+  if(d.email){
+   const first=firstEmail(d),to=routeTo(d.email);if(!first||!to)throw new Error('first_email_unavailable');
+   await transport.sendMail({from:autoresponderFrom(),to,replyTo:NOTIFY_TO,subject:first.subject,text:first.text,html:first.html,attachments:first.attachments});
+  }
+  intake.settleSend(d,true);return reply(200,{ok:true,saved,sent:true,preview:!isProduction()});
+ }catch(err){
+  intake.settleSend(d,false);logEvent(reqId,d.form,'capture_failed',errorCode(err));
+  return reply(502,{ok:false,saved,sent:false,notification,error:saved?"Saved, but email failed. Check Nick's notification before retrying.":"Capture not confirmed. Check Nick's notification before retrying."});
+ }
+}
+
 module.exports = async function handler(req, res) {
   const reqId = crypto.randomBytes(4).toString("hex");
   if (req.method !== "POST") {
@@ -908,8 +946,16 @@ module.exports = async function handler(req, res) {
   // page stamp: it relies on the honeypot and the IP cap, and its subject is
   // tagged [no-JS]. It gets a redirect to the thanks page, not JSON.
   const ct = String((req.headers && req.headers["content-type"]) || "");
+  const nojsStand = body.form === "stand" && String(body.nojs) === "1" && /urlencoded|multipart/.test(ct);
   const nojsIntake = body.form === "intake" && String(body.nojs) === "1" && /urlencoded|multipart/.test(ct);
   const reply = (code, json) => {
+    if (nojsStand) {
+      const message = code === 400 ? "Please check the name, phone or email, postcode, event tag and consent. Use Back to correct the form." : json.saved && json.sent ? "Done: saved and emailed" : json.preview && json.sent ? "Preview: test email sent; no CRM row saved." : "Capture not confirmed. Check Nick's notification before retrying.";
+      res.setHeader("Content-Type", "text/html; charset=utf-8");
+      res.setHeader("Cache-Control", "no-store");
+      res.setHeader("X-Robots-Tag", "noindex, nofollow");
+      return res.status(code).send('<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Capture result | Thermal Dawn</title><link rel="stylesheet" href="/assets/css/style.css?v=64"><link rel="stylesheet" href="/assets/css/stand.css?v=1"><body class="stand-page"><main class="stand-main wrap narrow"><h1>' + message + '</h1><p>Use your browser Back button to check or correct the previous entry.</p><a class="btn btn--primary" href="/hello/">Capture another</a></main></body></html>');
+    }
     if (nojsIntake && code < 400) { res.setHeader("Location", "/start/thanks/"); return res.status(303).end(); }
     // The long form gets a page, not JSON, when something's missing (GPT Web I-S1).
     if (nojsIntake && code === 400) { res.setHeader("Location", "/start/check/"); return res.status(303).end(); }
@@ -918,18 +964,19 @@ module.exports = async function handler(req, res) {
   const ts = Number(body.ts);
   const trapped =
     (typeof body.website === "string" && body.website.trim() !== "") ||
-    (!nojsIntake && (!(ts > 0) || Date.now() - ts < 3000));
+    (!nojsIntake && !nojsStand && (!(ts > 0) || Date.now() - ts < 3000));
   if (trapped) {
     logEvent(reqId, String(body.form || ""), "screened", "bot_trap");
     return reply(200, { ok: true });
   }
   if (rateLimited(clientIp(req), Date.now())) {
     logEvent(reqId, String(body.form || ""), "screened", "rate_limited");
-    return res.status(429).json({ ok: false, error: "Too many submissions. Please email us directly." });
+    return reply(429, { ok: false, error: "Too many submissions. Please email us directly." });
   }
 
   const { data, error } = parseSubmission(body);
   if (error) return reply(400, { ok: false, error });
+  if (data.form === "stand") return handleStand(data, reqId, reply);
   // The intake: one send per (lead ID, outcome), and a repeat waits for the
   // first one's result (GPT Web I-S2). `sent: true` only when the
   // notification really went (I-S3): the bot screens above answer a bare

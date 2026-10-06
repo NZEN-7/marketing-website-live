@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Stand capture | Thermal Dawn</title><meta name="description" content="Thermal Dawn event capture."><link rel="stylesheet" href="/assets/css/style.css?v=64"><link rel="stylesheet" href="/assets/css/stand.css?v=1"></head>
+<body class="stand-page"><a class="skip-link" href="#main">Skip to content</a><header id="site-header" class="site-header"></header><main id="main" class="stand-main wrap narrow">
+<h1>Stand capture</h1><p>Enter their details and confirm they're happy for us to contact them.</p>
+<div id="capture-result" role="status" aria-live="polite" tabindex="-1" hidden></div>
+<noscript><p>Enter a phone number or email address. After sending, the result page confirms what happened. Without JavaScript, the default event tag applies; you can edit it below.</p></noscript>
+<form id="stand-form" method="post" action="/api/lead/">
+<input type="hidden" name="form" value="stand"><input type="hidden" name="nojs" value="1"><input type="hidden" name="lead_id" value="">
+<p class="hp"><label>Don't fill this out <input name="website" tabindex="-1" autocomplete="off"></label></p>
+<div class="field"><label for="capture-name">Name (required)</label><input id="capture-name" name="name" autocomplete="name" maxlength="120" required></div>
+<div class="field"><label for="capture-phone">Phone</label><input id="capture-phone" type="tel" name="phone" autocomplete="tel" maxlength="40" aria-describedby="contact-hint"></div>
+<div class="field"><label for="capture-email">Email</label><input id="capture-email" type="email" name="email" autocomplete="email" maxlength="254" aria-describedby="contact-hint"></div>
+<p id="contact-hint">At least one of phone or email is required.</p>
+<div class="field"><label for="capture-postcode">Postcode</label><input id="capture-postcode" name="postcode" inputmode="numeric" autocomplete="postal-code" pattern="[0-9]{4}" maxlength="4"></div>
+<div class="field"><label for="capture-note">Note</label><textarea id="capture-note" name="note" rows="3" maxlength="5000"></textarea></div>
+<div class="field"><label for="capture-event">Event tag</label><input id="capture-event" name="event" value="electrify-boroondara" pattern="[a-zA-Z0-9][a-zA-Z0-9_-]{0,79}" maxlength="80" required></div>
+<label class="stand-consent"><input type="checkbox" name="consent" required> They're happy for us to contact them</label>
+<p id="capture-error" role="alert" tabindex="-1" hidden></p><button class="btn btn--primary" type="submit">Send</button>
+</form><button id="capture-another" class="btn btn--primary" type="button" hidden>Capture another</button></main><footer id="site-footer" class="site-footer"></footer>
+<script src="/assets/js/config.js?v=9" defer></script><script src="/assets/js/site.js?v=18" defer></script><script src="/assets/js/stand.js?v=1" defer></script></body></html>

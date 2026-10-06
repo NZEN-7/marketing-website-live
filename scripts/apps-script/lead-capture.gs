@@ -36,7 +36,7 @@ var CFG = {
   QUERY: 'from:(nickz@thermaldawn.com OR noreply@thermaldawn.com) ' +
          '{subject:("New website lead" OR "New website message" OR ' +
          '"New subscriber" OR "New deposit intent" OR ' +
-         '"New interest-list signup" OR "Website lead") ' +
+         '"New interest-list signup" OR "Website lead" OR "Event capture") ' +
          '(subject:URGENT "Form: Website Intake")} ' +
          '-label:' + 'crm-captured',
 
