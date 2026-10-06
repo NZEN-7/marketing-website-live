@@ -382,6 +382,9 @@ for(const note of ["Two boilers", "Two boilers\nUnderfloor downstairs", "Two boi
 {const d=lead.parseSubmission({form:"intake",first_name:"Test",last_name:"Fixture",email:"test@example.invalid",contact_pref:"email",postcode:"3122",heating:["ducted_rc"],heating_notes:"Two systems.",seen:["S7","B2"],outcome:"completed"}).data;
 const b=lead.formatNotification(d,stamp);
 for(const body of [b,b.replace(/\n+/g,"   ")])check("ducted RC tag and moved notes parser contract",body,{"Heating":"Ducted reverse cycle","Heating notes":"Two systems.","Tags":"interest:ducted-rc, source:website","Route":"not-our-product"});}
+if (!capture.CFG.QUERY.includes("Event capture")) { failures++; console.log("FAIL Event capture Gmail query"); } else console.log("ok    Event capture Gmail query");
+const standData=lead.parseSubmission({form:"stand",name:"Alex Sample",email:"sample@example.com",phone:"0400000001",postcode:"3122",event:"electrify-boroondara",note:"Follow up tomorrow.",consent:"on"}).data;
+for(const body of [lead.formatNotification(standData,stamp),lead.formatNotification(standData,stamp).replace(/\n/g,"   ")])check("Event capture parser contract",body,{"Form":"Event capture","Name":"Alex Sample","Email":"sample@example.com","Phone":"0400000001","Postcode":"3122","Consent to be contacted":"Yes","Tags":"source:event, medium:stand, event:electrify-boroondara","Comments":"Follow up tomorrow."});
 console.log();
 if (failures) {
   console.log(`${failures} sample(s) failed. If a label changed in ` +
