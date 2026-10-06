@@ -1,5 +1,7 @@
 const fs=require('fs'),path=require('path'),assert=require('assert/strict'),cp=require('child_process');const root=path.resolve(__dirname,'..');
-const v=require('../vercel.json');const before=JSON.parse(cp.execFileSync('git',['show','6cb6b928b2595721deb1916478a83ea2b890f5ef:vercel.json'],{cwd:root,encoding:'utf8'}));
+const v=require('../vercel.json');// The redirects as they were before the web bundle (6cb6b92), kept as a fixture so the
+// test doesn't need git history (CI checks out shallow).
+const before=JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures','vercel-before-web-bundle.json'),'utf8'));
 const n=fs.readFileSync(path.join(root,'netlify.toml'),'utf8');const net=[...n.matchAll(/\[\[redirects\]\]([\s\S]*?)(?=\[\[|$)/g)].map(m=>({source:m[1].match(/from = "([^"]*)"/)?.[1],destination:m[1].match(/to = "([^"]*)"/)?.[1]}));
 function next(p,host){return v.redirects.find(r=>r.source===p&&(!r.has||r.has.every(h=>h.type==='host'&&h.value===host)))?.destination;}
 const overrides={'/learn':'/hydronic/how-it-works/','/register':'/start/','/register-interest-installer':'/start/'};
