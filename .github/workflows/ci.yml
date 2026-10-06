@@ -48,6 +48,9 @@ jobs:
       - name: "Intake: routing, phone-or-email, dedupe, leads row, first email, attachments (152 checks)"
         run: npm run test:intake
 
+      - name: "Stand capture (/hello/): parse, row, guards, emails, no-JS (15 checks)"
+        run: npm run test:stand
+
       - name: "End-to-end, local: every page and the intake paths in Chrome, /api/ mocked (78 checks)"
         run: npm run test:e2e
         env:
