@@ -41,7 +41,7 @@ for (const f of files) {
     (raw.match(/\{[a-z_]+\}/g) || []).every((p) => p === "{first_name}" || p === "{booking_link}" || p === "{signature}"),
     raw.match(/\{[a-z_]+\}/g));
   check(`${f}: booking link is never written in`, !/calendly\.com/i.test(raw));
-  check(`${f}: only approved price copy; no performance figures`, f === "event-capture.txt" ? /from \$12,000 for the equipment; installation depends on the house/.test(raw) && !/\bCOP\b|kWh/i.test(raw) : !/\$\d|\bCOP\b|kWh/i.test(raw));
+  check(`${f}: only approved price copy; no performance figures`, f === "event-capture.txt" ? /(^|\s)From \$12,000 for the equipment; installation depends on the house\./.test(raw) && !/Prices start/.test(raw) && !/\bCOP\b|kWh/i.test(raw) : !/\$\d|\bCOP\b|kWh/i.test(raw));
 }
 
 // ---- 2. which template -----------------------------------------------------
