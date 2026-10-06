@@ -178,7 +178,7 @@
   status = 301
 [[redirects]]
   from = "/register"
-  to = "/pre-order/register-interest/"
+  to = "/start/"
   status = 301
 [[redirects]]
   from = "/contact-form"
@@ -227,7 +227,7 @@
 
 [[redirects]]
   from = "/learn"
-  to = "/blog/"
+  to = "/hydronic/how-it-works/"
   status = 301
   force = true
 
@@ -245,7 +245,7 @@
 
 [[redirects]]
   from = "/register-interest-installer"
-  to = "/pre-order/register-interest/"
+  to = "/start/"
   status = 301
   force = true
 
