@@ -48,6 +48,1282 @@
   ],
   "redirects": [
     {
+      "source": "/hydronic-overview",
+      "destination": "https://www.thermaldawn.com/hydronic/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/product",
+      "destination": "https://www.thermaldawn.com/hydronic/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/how-it-works",
+      "destination": "https://www.thermaldawn.com/hydronic/how-it-works/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/pricing",
+      "destination": "https://www.thermaldawn.com/hydronic/pricing/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/pre-order-form",
+      "destination": "https://www.thermaldawn.com/pre-order/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/pre-order-form/basic-reserve",
+      "destination": "https://www.thermaldawn.com/interest/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/pre-order-form/founder-premium",
+      "destination": "https://www.thermaldawn.com/pre-order/booking/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/pre-order/founder-premium",
+      "destination": "https://www.thermaldawn.com/pre-order/booking/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/pre-order/basic-reserve",
+      "destination": "https://www.thermaldawn.com/interest/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/thank-you/founder-premium",
+      "destination": "https://www.thermaldawn.com/thank-you/booking/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/thank-you/basic-reserve",
+      "destination": "https://www.thermaldawn.com/thank-you/booking/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/register",
+      "destination": "https://www.thermaldawn.com/start/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/contact-form",
+      "destination": "https://www.thermaldawn.com/contact/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/post/hawthorn-first-install",
+      "destination": "https://www.thermaldawn.com/blog/hawthorn-first-install/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/post/heat-pump-replace-gas-hydronic-boiler",
+      "destination": "https://www.thermaldawn.com/blog/heat-pump-replace-gas-hydronic-boiler/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/post/thermal-storage-vs-lithium-battery",
+      "destination": "https://www.thermaldawn.com/blog/thermal-storage-vs-lithium-battery/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/post/heat-pump-pipe-diameter-myth",
+      "destination": "https://www.thermaldawn.com/blog/heat-pump-pipe-diameter-myth/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/post/old-gas-boiler-removal-electrification",
+      "destination": "https://www.thermaldawn.com/blog/old-gas-boiler-removal-electrification/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/post/hydronic-heat-pump-installation",
+      "destination": "https://www.thermaldawn.com/blog/hydronic-heat-pump-installation/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/post/heat-pump-radiator-compatibility-australia",
+      "destination": "https://www.thermaldawn.com/blog/heat-pump-radiator-compatibility-australia/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/post/hydronic-cooling-fan-coil-units-australia",
+      "destination": "https://www.thermaldawn.com/blog/hydronic-cooling-fan-coil-units-australia/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/post/victorian-gas-boiler-replacement-timing-should-you-replace-now-or-wait",
+      "destination": "https://www.thermaldawn.com/blog/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/learn",
+      "destination": "https://www.thermaldawn.com/hydronic/how-it-works/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/copy-of-learn-old",
+      "destination": "https://www.thermaldawn.com/blog/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/copy-of-hydronic-heat-2",
+      "destination": "https://www.thermaldawn.com/hydronic/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/register-interest-installer",
+      "destination": "https://www.thermaldawn.com/start/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/copy-of-english-privacy-policy",
+      "destination": "https://www.thermaldawn.com/contact/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/post/i-want-to-replace-my-ducted-gas-heating-what-are-my-options",
+      "destination": "https://www.thermaldawn.com/blog/heat-pump-replace-gas-hydronic-boiler/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/post/why-your-gas-boiler-s-days-are-numbered-and-what-to-do-about-it",
+      "destination": "https://www.thermaldawn.com/blog/old-gas-boiler-removal-electrification/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/hydronic-overview/",
+      "destination": "https://www.thermaldawn.com/hydronic/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/product/",
+      "destination": "https://www.thermaldawn.com/hydronic/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/how-it-works/",
+      "destination": "https://www.thermaldawn.com/hydronic/how-it-works/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/pricing/",
+      "destination": "https://www.thermaldawn.com/hydronic/pricing/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/pre-order-form/",
+      "destination": "https://www.thermaldawn.com/pre-order/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/pre-order-form/basic-reserve/",
+      "destination": "https://www.thermaldawn.com/interest/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/pre-order-form/founder-premium/",
+      "destination": "https://www.thermaldawn.com/pre-order/booking/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/pre-order/founder-premium/",
+      "destination": "https://www.thermaldawn.com/pre-order/booking/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/pre-order/basic-reserve/",
+      "destination": "https://www.thermaldawn.com/interest/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/thank-you/founder-premium/",
+      "destination": "https://www.thermaldawn.com/thank-you/booking/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/thank-you/basic-reserve/",
+      "destination": "https://www.thermaldawn.com/thank-you/booking/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/register/",
+      "destination": "https://www.thermaldawn.com/start/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/contact-form/",
+      "destination": "https://www.thermaldawn.com/contact/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/post/hawthorn-first-install/",
+      "destination": "https://www.thermaldawn.com/blog/hawthorn-first-install/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/post/heat-pump-replace-gas-hydronic-boiler/",
+      "destination": "https://www.thermaldawn.com/blog/heat-pump-replace-gas-hydronic-boiler/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/post/thermal-storage-vs-lithium-battery/",
+      "destination": "https://www.thermaldawn.com/blog/thermal-storage-vs-lithium-battery/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/post/heat-pump-pipe-diameter-myth/",
+      "destination": "https://www.thermaldawn.com/blog/heat-pump-pipe-diameter-myth/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/post/old-gas-boiler-removal-electrification/",
+      "destination": "https://www.thermaldawn.com/blog/old-gas-boiler-removal-electrification/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/post/hydronic-heat-pump-installation/",
+      "destination": "https://www.thermaldawn.com/blog/hydronic-heat-pump-installation/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/post/heat-pump-radiator-compatibility-australia/",
+      "destination": "https://www.thermaldawn.com/blog/heat-pump-radiator-compatibility-australia/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/post/hydronic-cooling-fan-coil-units-australia/",
+      "destination": "https://www.thermaldawn.com/blog/hydronic-cooling-fan-coil-units-australia/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/post/victorian-gas-boiler-replacement-timing-should-you-replace-now-or-wait/",
+      "destination": "https://www.thermaldawn.com/blog/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/learn/",
+      "destination": "https://www.thermaldawn.com/hydronic/how-it-works/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/copy-of-learn-old/",
+      "destination": "https://www.thermaldawn.com/blog/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/copy-of-hydronic-heat-2/",
+      "destination": "https://www.thermaldawn.com/hydronic/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/register-interest-installer/",
+      "destination": "https://www.thermaldawn.com/start/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/copy-of-english-privacy-policy/",
+      "destination": "https://www.thermaldawn.com/contact/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/post/i-want-to-replace-my-ducted-gas-heating-what-are-my-options/",
+      "destination": "https://www.thermaldawn.com/blog/heat-pump-replace-gas-hydronic-boiler/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/post/why-your-gas-boiler-s-days-are-numbered-and-what-to-do-about-it/",
+      "destination": "https://www.thermaldawn.com/blog/old-gas-boiler-removal-electrification/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/hydronic-overview",
+      "destination": "https://www.thermaldawn.com/hydronic/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/product",
+      "destination": "https://www.thermaldawn.com/hydronic/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/how-it-works",
+      "destination": "https://www.thermaldawn.com/hydronic/how-it-works/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/pricing",
+      "destination": "https://www.thermaldawn.com/hydronic/pricing/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/pre-order-form",
+      "destination": "https://www.thermaldawn.com/pre-order/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/pre-order-form/basic-reserve",
+      "destination": "https://www.thermaldawn.com/interest/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/pre-order-form/founder-premium",
+      "destination": "https://www.thermaldawn.com/pre-order/booking/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/pre-order/founder-premium",
+      "destination": "https://www.thermaldawn.com/pre-order/booking/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/pre-order/basic-reserve",
+      "destination": "https://www.thermaldawn.com/interest/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/thank-you/founder-premium",
+      "destination": "https://www.thermaldawn.com/thank-you/booking/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/thank-you/basic-reserve",
+      "destination": "https://www.thermaldawn.com/thank-you/booking/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/register",
+      "destination": "https://www.thermaldawn.com/start/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/contact-form",
+      "destination": "https://www.thermaldawn.com/contact/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/post/hawthorn-first-install",
+      "destination": "https://www.thermaldawn.com/blog/hawthorn-first-install/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/post/heat-pump-replace-gas-hydronic-boiler",
+      "destination": "https://www.thermaldawn.com/blog/heat-pump-replace-gas-hydronic-boiler/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/post/thermal-storage-vs-lithium-battery",
+      "destination": "https://www.thermaldawn.com/blog/thermal-storage-vs-lithium-battery/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/post/heat-pump-pipe-diameter-myth",
+      "destination": "https://www.thermaldawn.com/blog/heat-pump-pipe-diameter-myth/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/post/old-gas-boiler-removal-electrification",
+      "destination": "https://www.thermaldawn.com/blog/old-gas-boiler-removal-electrification/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/post/hydronic-heat-pump-installation",
+      "destination": "https://www.thermaldawn.com/blog/hydronic-heat-pump-installation/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/post/heat-pump-radiator-compatibility-australia",
+      "destination": "https://www.thermaldawn.com/blog/heat-pump-radiator-compatibility-australia/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/post/hydronic-cooling-fan-coil-units-australia",
+      "destination": "https://www.thermaldawn.com/blog/hydronic-cooling-fan-coil-units-australia/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/post/victorian-gas-boiler-replacement-timing-should-you-replace-now-or-wait",
+      "destination": "https://www.thermaldawn.com/blog/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/learn",
+      "destination": "https://www.thermaldawn.com/hydronic/how-it-works/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/copy-of-learn-old",
+      "destination": "https://www.thermaldawn.com/blog/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/copy-of-hydronic-heat-2",
+      "destination": "https://www.thermaldawn.com/hydronic/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/register-interest-installer",
+      "destination": "https://www.thermaldawn.com/start/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/copy-of-english-privacy-policy",
+      "destination": "https://www.thermaldawn.com/contact/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/post/i-want-to-replace-my-ducted-gas-heating-what-are-my-options",
+      "destination": "https://www.thermaldawn.com/blog/heat-pump-replace-gas-hydronic-boiler/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/post/why-your-gas-boiler-s-days-are-numbered-and-what-to-do-about-it",
+      "destination": "https://www.thermaldawn.com/blog/old-gas-boiler-removal-electrification/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/hydronic-overview/",
+      "destination": "https://www.thermaldawn.com/hydronic/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/product/",
+      "destination": "https://www.thermaldawn.com/hydronic/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/how-it-works/",
+      "destination": "https://www.thermaldawn.com/hydronic/how-it-works/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/pricing/",
+      "destination": "https://www.thermaldawn.com/hydronic/pricing/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/pre-order-form/",
+      "destination": "https://www.thermaldawn.com/pre-order/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/pre-order-form/basic-reserve/",
+      "destination": "https://www.thermaldawn.com/interest/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/pre-order-form/founder-premium/",
+      "destination": "https://www.thermaldawn.com/pre-order/booking/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/pre-order/founder-premium/",
+      "destination": "https://www.thermaldawn.com/pre-order/booking/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/pre-order/basic-reserve/",
+      "destination": "https://www.thermaldawn.com/interest/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/thank-you/founder-premium/",
+      "destination": "https://www.thermaldawn.com/thank-you/booking/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/thank-you/basic-reserve/",
+      "destination": "https://www.thermaldawn.com/thank-you/booking/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/register/",
+      "destination": "https://www.thermaldawn.com/start/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/contact-form/",
+      "destination": "https://www.thermaldawn.com/contact/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/post/hawthorn-first-install/",
+      "destination": "https://www.thermaldawn.com/blog/hawthorn-first-install/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/post/heat-pump-replace-gas-hydronic-boiler/",
+      "destination": "https://www.thermaldawn.com/blog/heat-pump-replace-gas-hydronic-boiler/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/post/thermal-storage-vs-lithium-battery/",
+      "destination": "https://www.thermaldawn.com/blog/thermal-storage-vs-lithium-battery/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/post/heat-pump-pipe-diameter-myth/",
+      "destination": "https://www.thermaldawn.com/blog/heat-pump-pipe-diameter-myth/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/post/old-gas-boiler-removal-electrification/",
+      "destination": "https://www.thermaldawn.com/blog/old-gas-boiler-removal-electrification/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/post/hydronic-heat-pump-installation/",
+      "destination": "https://www.thermaldawn.com/blog/hydronic-heat-pump-installation/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/post/heat-pump-radiator-compatibility-australia/",
+      "destination": "https://www.thermaldawn.com/blog/heat-pump-radiator-compatibility-australia/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/post/hydronic-cooling-fan-coil-units-australia/",
+      "destination": "https://www.thermaldawn.com/blog/hydronic-cooling-fan-coil-units-australia/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/post/victorian-gas-boiler-replacement-timing-should-you-replace-now-or-wait/",
+      "destination": "https://www.thermaldawn.com/blog/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/learn/",
+      "destination": "https://www.thermaldawn.com/hydronic/how-it-works/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/copy-of-learn-old/",
+      "destination": "https://www.thermaldawn.com/blog/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/copy-of-hydronic-heat-2/",
+      "destination": "https://www.thermaldawn.com/hydronic/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/register-interest-installer/",
+      "destination": "https://www.thermaldawn.com/start/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/copy-of-english-privacy-policy/",
+      "destination": "https://www.thermaldawn.com/contact/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/post/i-want-to-replace-my-ducted-gas-heating-what-are-my-options/",
+      "destination": "https://www.thermaldawn.com/blog/heat-pump-replace-gas-hydronic-boiler/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
+      "source": "/post/why-your-gas-boiler-s-days-are-numbered-and-what-to-do-about-it/",
+      "destination": "https://www.thermaldawn.com/blog/old-gas-boiler-removal-electrification/",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.freevolt.com.au"
+        }
+      ]
+    },
+    {
       "source": "/(.*)",
       "has": [
         {
@@ -131,7 +1407,7 @@
     },
     {
       "source": "/register",
-      "destination": "/pre-order/register-interest/",
+      "destination": "/start/",
       "permanent": true
     },
     {
@@ -186,7 +1462,7 @@
     },
     {
       "source": "/learn",
-      "destination": "/blog/",
+      "destination": "/hydronic/how-it-works/",
       "permanent": true
     },
     {
@@ -201,7 +1477,7 @@
     },
     {
       "source": "/register-interest-installer",
-      "destination": "/pre-order/register-interest/",
+      "destination": "/start/",
       "permanent": true
     },
     {
@@ -276,7 +1552,7 @@
     },
     {
       "source": "/register/",
-      "destination": "/pre-order/register-interest/",
+      "destination": "/start/",
       "permanent": true
     },
     {
@@ -331,7 +1607,7 @@
     },
     {
       "source": "/learn/",
-      "destination": "/blog/",
+      "destination": "/hydronic/how-it-works/",
       "permanent": true
     },
     {
@@ -346,7 +1622,7 @@
     },
     {
       "source": "/register-interest-installer/",
-      "destination": "/pre-order/register-interest/",
+      "destination": "/start/",
       "permanent": true
     },
     {
