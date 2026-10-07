@@ -1498,3 +1498,7 @@ body.dark .card:not(.card--orange){border-color:rgba(var(--td-orange-rgb),.28);}
 .footer-social--icons a::after{inset:-5px;}
 .footer-links a::after{inset:-11px -7px;}
 @media (pointer:coarse){.footer-links{row-gap:24px;}}
+/* Comparison tables (Web 1, Nick 7 Oct): the header row carries the brand gradient as one band
+   (on the row group, so it doesn't restart in each cell), and column headings don't wrap. */
+table.data--win thead,body.dark table.data--win thead{background:var(--td-sunrise);}
+table.data--win thead th,body.dark table.data--win thead th{background:transparent;white-space:nowrap;}
