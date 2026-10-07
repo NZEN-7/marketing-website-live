@@ -24,7 +24,8 @@ for(const figure of ['$1,800','$2,600','$800','$1,400','$0','$900']){assert(chec
 assert.deepEqual(check('hydronic/pricing/index.html',clean.replace('</main>','<p>'+COMPARISON+'</p></main>')),[]);cases++;
 assert(check('hydronic/index.html',clean.replace('</main>','<p>'+COMPARISON+'</p></main>')).length);cases++;
 const pricing=fs.readFileSync(path.join(root,'hydronic/pricing/index.html'),'utf8');
-assert(pricing.includes('<h2>Heat. Hot water. Pool.</h2>'));assert(pricing.includes('<h3>Pool Heating</h3>'));cases++;
+// Web 1 §5a (Nick, 7 Oct): the four-card block with cooling, in development and quoted per home.
+assert(pricing.includes('<h2>Heat. Cool. Hot water. Pool. One Thermal Dawn system.</h2>'));assert(pricing.includes('<h3>Pool Heating</h3>'));assert(pricing.includes("Thermal Dawn can run in reverse cycle to cool your home in summer, through hydronic underfloor cooling or fan coil units. It's in development and we quote it per home."));cases++;
 assert(pricing.includes("Your running cost depends mostly on three things: your electricity tariff, whether you have solar, and whether your plan has a free or cheap window. A thermal store lets the heat pump make heat when power is cheapest and keep it for the evening, when power costs most. Every home is different, so we estimate yours from your own bills."));cases++;
 assert(!/WEB_BUNDLE_|data-web-bundle-estimates|What it costs to run: estimates/.test(pricing));cases++;
 const running=pricing.match(/<div[^>]*data-running-costs[^>]*>([\s\S]*?)<\/div>/)?.[1];assert(running&&!running.includes('$'));assert(running.includes('href="/start/">See your own number')&&running.includes(BOOK+'">or book a 15-minute chat'));cases++;
