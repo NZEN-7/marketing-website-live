@@ -469,3 +469,57 @@ idx.push(`- curly quotes: ${curlyLines.length}${curlyLines.length ? " -> " + cur
 idx.push(`- en dashes (ranges should read "to"): ${enDashLines.length}${enDashLines.length ? " -> " + enDashLines.join(", ") : ""}`);
 fs.writeFileSync(path.join(PACK, "INDEX.md"), idx.join("\n") + "\n", "utf8");
 console.log(`Wrote .claude/copy-review/ (INDEX.md + ${pages.length} page files) for human reviewers.`);
+
+/* ---------- the Live copy record (HoE item 90.3, Nick and the CGO, 7 Oct) ---
+   npm run copy:live -- "<Drive Website/Live copy folder>" "Web 1"
+   After every deploy:live, from main: one markdown file per served page,
+   named after its URL, plus the shared menu and footer, into
+   <folder>/<YYYY-MM-DD>/. One way only (repo -> Drive), a record: nobody
+   edits it there, and changes still go through the release files. */
+const liveAt = process.argv.indexOf("--live-copy");
+if (liveAt !== -1) {
+  const base = process.argv[liveAt + 1], release = process.argv[liveAt + 2];
+  if (!base || !release) { console.error('usage: npm run copy:live -- "<folder>" "<release, e.g. Web 1>"'); process.exit(1); }
+  const { execFileSync } = require("child_process");
+  const branch = execFileSync("git", ["rev-parse", "--abbrev-ref", "HEAD"], { cwd: ROOT, encoding: "utf8" }).trim();
+  const sha = execFileSync("git", ["rev-parse", "--short", "HEAD"], { cwd: ROOT, encoding: "utf8" }).trim();
+  if (branch !== "main") { console.error(`on ${branch}: run the Live copy export from main, after deploy:live`); process.exit(1); }
+  const day = new Date().toLocaleDateString("en-CA", { timeZone: "Australia/Sydney" });
+  const dir = path.join(base, day);
+  fs.mkdirSync(dir, { recursive: true });
+  const NOT_SERVED = /^(docs|feedback)\//;   // = .vercelignore's page folders
+  const urlOf = (rel) => "/" + rel.replace(/index\.html$/, "");
+  const fileOf = (rel) => (rel.replace(/\/?index\.html$/, "").replace(/\.html$/, "").replace(/\//g, "-") || "home") + ".md";
+  const head = (title) => [`# ${title}`, "", `**Release:** ${release} · **Exported:** ${day} from \`main\` @ \`${sha}\` · a record only; edit through the release files, not here.`, ""];
+  let n = 0;
+  for (const p of pages) {
+    if (NOT_SERVED.test(p.rel)) continue;
+    const md = head(urlOf(p.rel));
+    md.push("| | |", "|---|---|");
+    if (p.title) md.push(`| Title | ${p.title} |`);
+    if (p.description) md.push(`| Meta description | ${p.description} |`);
+    md.push("", "## Wording", "");
+    for (const b of p.blocks) md.push(`- ${b.flags.includes("CTA") ? "**[button]** " : ""}${b.text}`);
+    if (p.media.length) { md.push("", "## Image alt text", ""); for (const m of p.media) md.push(`- ${m.alt || "(decorative)"}`); }
+    if (p.uiText.length) { md.push("", "## Field labels and placeholders", ""); for (const u of p.uiText) md.push(`- ${u.text || u}`); }
+    fs.writeFileSync(path.join(dir, fileOf(p.rel)), md.join("\n") + "\n", "utf8");
+    n++;
+  }
+  /* The menu and footer are written by assets/js/site.js into every page. */
+  const site = fs.readFileSync(path.join(ROOT, "assets", "js", "site.js"), "utf8");
+  /* The markup is built from concatenated single-quoted strings: drop the JS
+     comments, join every single-quoted literal, then read the text between tags. */
+  const code = site.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/[^\n]*/g, "$1");
+  const markup = [...code.matchAll(/'((?:[^'\\\n]|\\.)*)'/g)].map((m) => m[1].replace(/\\'/g, "'")).join("");
+  const bits = [];
+  for (const m of markup.matchAll(/>([^<>]+)</g)) {
+    const t = tidy(m[1]);
+    if (hasWords(t)) bits.push(t);
+  }
+  for (const m of markup.matchAll(/aria-label="([^"]+)"/g)) bits.push(`(label) ${decode(m[1])}`);
+  const shared = head("Shared menu and footer (every page)");
+  shared.push("From `assets/js/site.js`.", "");
+  for (const t of [...new Set(bits)]) shared.push(`- ${t}`);
+  fs.writeFileSync(path.join(dir, "_shared-menu-and-footer.md"), shared.join("\n") + "\n", "utf8");
+  console.log(`Live copy: ${n} pages + the shared menu and footer -> ${dir}`);
+}
