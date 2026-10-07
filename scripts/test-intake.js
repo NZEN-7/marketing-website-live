@@ -340,5 +340,15 @@ for (const heating of [["ducted_rc"], ["ducted_rc","splits"], ["ducted_rc","duct
 }
 check("mixed boiler and ducted RC preserves fit",R.route({state:"VIC",heating:["boiler_radiators","ducted_rc"]})==="icp");
 check("uncertain ducted RC preserves check",R.route({state:"VIC",heating:["not_sure","ducted_rc"]})==="icp-check");
+{
+  // No meta tag may contain markup: a "$1..." in a replacement once nested a <meta> inside pricing's description (Web 1, 7 Oct).
+  const allPages = fs.readdirSync(path.join(__dirname, ".."), { recursive: true }).filter((f) => /\.html$/.test(f) && !/^(node_modules|docs)[\\/]/.test(f));
+  const broken = allPages.filter((f) => /<meta\b[^>]*content="[^"]*</.test(fs.readFileSync(path.join(__dirname, "..", f), "utf8")));
+  check("every page's meta tags are clean (no markup inside a content attribute)", broken.length === 0, broken);
+  const pricingHtml = fs.readFileSync(path.join(__dirname, "..", "hydronic", "pricing", "index.html"), "utf8");
+  check("pricing's meta and og descriptions are the CGO's exact wording",
+    pricingHtml.includes('<meta name="description" content="What\'s in a Thermal Dawn hydronic system: heat pump, thermal store and smart controls. From $12,000 for the equipment; installation depends on the house.">') &&
+    pricingHtml.includes('<meta property="og:description" content="What\'s in a Thermal Dawn hydronic system: heat pump, thermal store and smart controls. From $12,000 for the equipment; installation depends on the house.">'));
+}
 console.log(failed ? `\n${failed} CHECK(S) FAILED` : "\nAll intake checks passed.");
 process.exit(failed ? 1 : 0);

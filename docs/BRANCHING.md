@@ -31,7 +31,8 @@ GitHub branch protection is on (organisation level, 4 Oct 2026): **`main` takes 
 2. The Web Designer opens a **`develop` → `main` pull request** with the DELTA in its description; CI runs on it.
 3. **Nick merges it on GitHub** (that's the go).
 4. The Web Designer pulls the merged `main`, runs every suite on it, then `npm run deploy:live` (it pushes only to the NZEN-7 mirror, which isn't protected; it never pushes `main` to origin), tags `live-YYYY-MM-DD[b,c…]` and runs the live checks.
-5. Clear the shipped lines from the DELTA.
+5. **Live copy record:** from `main`, `npm run copy:live -- "<Drive>/Growth +/Marketing +/Website/Live copy" "Web N"` writes one file per page plus the shared menu and footer into `Live copy/<YYYY-MM-DD>/` (one way, repo → Drive; nobody edits it).
+6. Clear the shipped lines from the DELTA.
 
 A ⚑ change Nick hasn't seen never ships. Nothing reaches `main` or production without his go.
 
