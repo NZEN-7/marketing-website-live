@@ -22,7 +22,9 @@
     "test:releaseguards": "node scripts/test-release-guards.mjs",
     "test:e2e": "node scripts/test-site-e2e.cjs --suite local && node scripts/test-intake-live-e2e.cjs && node scripts/test-intake-nick-tweaks-e2e.cjs && node scripts/test-stand-e2e.cjs",
     "test:e2e:url": "node scripts/test-site-e2e.cjs --suite url --url",
-    "test:stand": "node scripts/test-stand.js"
+    "test:stand": "node scripts/test-stand.js",
+    "test:contract": "node scripts/test-contract.cjs",
+    "test:redirects": "node scripts/test-web-bundle-redirects.cjs"
   },
   "dependencies": {
     "nodemailer": "^6.9.15"
