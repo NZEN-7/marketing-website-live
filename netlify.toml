@@ -67,6 +67,36 @@
   force = true
 
 [[redirects]]
+  from = "/assets/animations/day-night-storage-animation.html"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/assets/animations/heating-comparison-table.html"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/assets/animations/heating-tool.html"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/assets/animations/homepage_web_animation_new.html"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/assets/animations/thermal-dawn-flow-cycle.html"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
   from = "/BUILD-NOTES.md"
   to = "/404.html"
   status = 404
@@ -187,7 +217,7 @@
 # Old Wix blog scheme  /post/<slug>  ->  /blog/<slug>/
 [[redirects]]
   from = "/post/hawthorn-first-install"
-  to = "/blog/hawthorn-first-install/"
+  to = "/blog/"
   status = 301
 [[redirects]]
   from = "/post/heat-pump-replace-gas-hydronic-boiler"
@@ -195,11 +225,11 @@
   status = 301
 [[redirects]]
   from = "/post/thermal-storage-vs-lithium-battery"
-  to = "/blog/thermal-storage-vs-lithium-battery/"
+  to = "/hydronic/how-it-works/"
   status = 301
 [[redirects]]
   from = "/post/heat-pump-pipe-diameter-myth"
-  to = "/blog/heat-pump-pipe-diameter-myth/"
+  to = "/blog/heat-pump-radiator-compatibility-australia/"
   status = 301
 [[redirects]]
   from = "/post/old-gas-boiler-removal-electrification"
@@ -207,7 +237,7 @@
   status = 301
 [[redirects]]
   from = "/post/hydronic-heat-pump-installation"
-  to = "/blog/hydronic-heat-pump-installation/"
+  to = "/blog/"
   status = 301
 [[redirects]]
   from = "/post/heat-pump-radiator-compatibility-australia"
@@ -219,7 +249,24 @@
   status = 301
 [[redirects]]
   from = "/post/victorian-gas-boiler-replacement-timing-should-you-replace-now-or-wait"
-  to = "/blog/"
+  to = "/blog/old-gas-boiler-removal-electrification/"
+  status = 301
+# Web 2a (9 Oct): stubs merged or pulled; their addresses 301 to the live page
+[[redirects]]
+  from = "/post/victorian-gas-boiler-replacement-timing"
+  to = "/blog/old-gas-boiler-removal-electrification/"
+  status = 301
+[[redirects]]
+  from = "/blog/heat-pump-pipe-diameter-myth"
+  to = "/blog/heat-pump-radiator-compatibility-australia/"
+  status = 301
+[[redirects]]
+  from = "/blog/victorian-gas-boiler-replacement-timing"
+  to = "/blog/old-gas-boiler-removal-electrification/"
+  status = 301
+[[redirects]]
+  from = "/blog/thermal-storage-vs-lithium-battery"
+  to = "/hydronic/how-it-works/"
   status = 301
 
 # SPA-style fallback is NOT wanted (this is a multipage static site).

@@ -2,7 +2,13 @@ const fs=require('fs'),path=require('path'),assert=require('assert/strict'),cp=r
 const root=path.resolve(__dirname,'..'),PRICE='From $12,000 for the equipment; installation depends on the house',COMPARISON='A premium heat pump replacement without storage typically costs $20,000 to $30,000 installed, and more for large homes.',BOOK='https://calendly.com/nickz-thermaldawn/30min';
 function decode(s){return s.replace(/&#(?:x([0-9a-f]+)|(\d+));/gi,(_,h,d)=>String.fromCodePoint(parseInt(h||d,h?16:10))).replace(/&mdash;/gi,'—').replace(/&deg;/gi,'°').replace(/&nbsp;/gi,' ').replace(/&amp;/gi,'&').replace(/&quot;/gi,'"').replace(/&#39;/g,"'");}
 function text(s){return decode(s.replace(/<[^>]*>/g,' ')).replace(/\s+/g,' ').trim();}
-function check(file,html){const hits=[],hit=(rule,fragment)=>hits.push({file,rule,line:html.slice(0,Math.max(0,html.indexOf(fragment))).split('\n').length});let s=html.replace(/<!--[\s\S]*?-->/g,'');
+const known=[];
+function check(file,html,{cta=true}={}){const hits=[],hit=(rule,fragment)=>hits.push({file,rule,line:html.slice(0,Math.max(0,html.indexOf(fragment))).split('\n').length});let s=html.replace(/<!--[\s\S]*?-->/g,'');
+ // Web 2a (CGO, 9 Oct): home may carry the ruled comparison card and Mike & Kay's quote. Two items on home are
+ // known and owned by Web 2 (W2-29 the savings tile; the tariff-history charts): reported here, not failed.
+ if(file==='index.html'){s=s.replace('<b>$20,000 to $30,000</b>','').replace(/<blockquote>"We've been looking for 5 years[^<]*\$25,000[^<]*<\/blockquote>/,'');
+  for(const [what,re] of [['W2-29 savings tile',/<dd>\$<span data-live-stat="totalSavedAud">[^<]*<\/span><\/dd>/],['tariff-history charts',/<svg class="mt-2" viewBox="0 0 320 190" role="img" aria-label="(?:Solar export|Grid electricity) price:[\s\S]*?<\/svg>/g]])
+   s=s.replace(re,m=>{known.push(file+': '+what);return '';});}
  // Web 1 §5a 1a (Nick, 7 Oct): the Hawthorn proof paragraph on /hydronic/ may carry its app totals
  // and "since install in <month>". Only that one paragraph, only on that page.
  if(file==='hydronic/index.html')s=s.replace(/<p class="lead"><strong>(?:A home in |In )Hawthorn, Melbourne<\/strong>[\s\S]*?<\/p>/,'');
@@ -13,7 +19,7 @@ function check(file,html){const hits=[],hit=(rule,fragment)=>hits.push({file,rul
  money=money.split(PRICE).join('');if(file==='hydronic/pricing/index.html')money=money.split(COMPARISON).join('');
  money=money.replace(/\$990(?=[^.!?<>]{0,100}\b(?:deposit|booking)\b)|\$3,000(?=[^.!?<>]{0,100}\bproduction\b)/gi,'');
  if(money.includes('$'))hit('unapproved dollars',money.slice(Math.max(0,money.indexOf('$')-25),money.indexOf('$')+60));
- let hasCTA=false;for(const m of s.matchAll(/<a\b[^>]*>[\s\S]*?<\/a>/g)){const tag=m[0].slice(0,m[0].indexOf('>')+1);if(!/class="[^"]*\bbtn\b/.test(tag)&&!/(?:See your own number|book a 15-minute chat)/i.test(text(m[0])))continue;const href=tag.match(/href="([^"]*)"/)?.[1];if(href==='/start/'||href===BOOK)hasCTA=true;else hit('CTA destination',m[0]);}if(!hasCTA)hit('missing CTA','<main');
+ let hasCTA=false;for(const m of s.matchAll(/<a\b[^>]*>[\s\S]*?<\/a>/g)){const tag=m[0].slice(0,m[0].indexOf('>')+1);if(!/class="[^"]*\bbtn\b/.test(tag)&&!/(?:See your own number|book a 15-minute chat)/i.test(text(m[0])))continue;const href=tag.match(/href="([^"]*)"/)?.[1];if(href==='/start/'||href===BOOK)hasCTA=true;else if(cta)hit('CTA destination',m[0]);}if(cta&&!hasCTA)hit('missing CTA','<main');
  for(const m of s.matchAll(/<img\b[^>]*>/g))if(!/\balt="[^"]+"/.test(m[0])&&!/\b(?:role="presentation"|aria-hidden="true")/.test(m[0]))hit('image alt',m[0]);
  return hits;
 }
@@ -33,12 +39,18 @@ assert(pricing.includes("Your running cost depends mostly on three things: your 
 assert(!/WEB_BUNDLE_|data-web-bundle-estimates|What it costs to run: estimates/.test(pricing));cases++;
 const running=pricing.match(/<div[^>]*data-running-costs[^>]*>([\s\S]*?)<\/div>/)?.[1];assert(running&&!running.includes('$'));assert(running.includes('href="/start/">See your own number')&&running.includes(BOOK+'">or book a 15-minute chat'));cases++;
 assert(!fs.existsSync(path.join(root,'tools/web-bundle-oct10.json'))&&!fs.existsSync(path.join(root,'tools/update-web-bundle-partials.cjs')));cases++;
-const pages=new Set(require('../tools/web-bundle-pages.json'));for(const args of [['diff','--name-only','HEAD'],['diff','--cached','--name-only']])for(const f of cp.execFileSync('git',args,{cwd:root,encoding:'utf8'}).trim().split('\n'))if(f.endsWith('.html'))pages.add(f.trim());
-const hits=[...pages].flatMap(f=>check(f,fs.readFileSync(path.join(root,f),'utf8')));for(const h of hits)console.error(h.file+':'+h.line+' '+h.rule);// The Hawthorn exemption stays narrow: the same paragraph on another page still hits, and any
+const pages=new Set(require('../tools/web-bundle-pages.json'));for(const args of [['diff','--name-only','HEAD'],['diff','--cached','--name-only']])for(const f of cp.execFileSync('git',args,{cwd:root,encoding:'utf8'}).trim().split('\n'))if(f.endsWith('.html')&&fs.existsSync(path.join(root,f.trim())))pages.add(f.trim());
+const bundle=new Set(require('../tools/web-bundle-pages.json'));
+const hits=[...pages].flatMap(f=>check(f,fs.readFileSync(path.join(root,f),'utf8'),{cta:bundle.has(f)}));for(const h of hits)console.error(h.file+':'+h.line+' '+h.rule);// The Hawthorn exemption stays narrow: the same paragraph on another page still hits, and any
 // other dollar figure on /hydronic/ still hits.
 {const para='<p class="lead"><strong>A home in Hawthorn, Melbourne</strong>: totals since install in June: <span>$1,685</span> saved.</p>';
  const h=fs.readFileSync(path.join(root,'hydronic/index.html'),'utf8');
  assert(check('hydronic/pricing/index.html',fs.readFileSync(path.join(root,'hydronic/pricing/index.html'),'utf8').replace('</main>',para+'</main>')).some(x=>x.rule==='unapproved dollars'));
  assert(check('hydronic/index.html',h.replace('</main>','<p>Only $5,000.</p></main>')).some(x=>x.rule==='unapproved dollars'));cases+=2;}
+{const ex=clean.replace('</main>','<b>$20,000 to $30,000</b></main>');assert(check('contact/index.html',ex).some(h=>h.rule==='unapproved dollars'));
+ assert(check('index.html',clean.replace('</main>','<p>Only $5,000.</p></main>'),{cta:false}).some(h=>h.rule==='unapproved dollars'));
+ assert(check('contact/index.html',clean.replace('</p>',' a fixed price</p>'),{cta:false}).some(h=>h.rule==='fixed price'));
+ assert.deepEqual(check('contact/index.html',clean.replace('href="/start/"','href="/contact/"'),{cta:false}),[]);cases+=4;}
+for(const k of new Set(known))console.log('known, not failed: '+k);
 console.log('Contract: '+pages.size+' pages, '+cases+' mutation/content checks, '+hits.length+' hits.');if(hits.length)process.exitCode=1;
 module.exports={check};

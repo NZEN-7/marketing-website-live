@@ -45,8 +45,8 @@ say `https://www.thermaldawn.com` everywhere.
   Option B): no page mentions a $190 offer, a Founder tier, pilot pricing or a
   discount. `/pre-order/basic-reserve/` and both old deposit thank-you pages
   301 away.
-- The price line is ruled copy, word for word: "From $12,000 including GST, for
-  the equipment. Installed by your own licensed installer." (booking page).
+- The price line is ruled copy, word for word: "From $12,000 for the
+  equipment; installation depends on the house." (CONTRACT §6; Web 2a, W2-21).
 
 ## The shared chrome
 
