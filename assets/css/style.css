@@ -435,6 +435,8 @@ body.dark .form-consent{color:#a2968c;}
 .post-grid{display:grid;gap:26px;grid-template-columns:1fr;}
 @media(min-width:680px){.post-grid{grid-template-columns:1fr 1fr;}}
 @media(min-width:980px){.post-grid{grid-template-columns:repeat(3,1fr);}}
+/* Four posts read better as two pairs than three plus one (Web 2a). */
+@media(min-width:980px){.post-grid--pairs{grid-template-columns:1fr 1fr;max-width:900px;margin:0 auto;}}
 .post-card{background:#fff;border:1px solid var(--td-line);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);display:flex;flex-direction:column;}
 .post-card a{text-decoration:none;color:inherit;display:flex;flex-direction:column;height:100%;}
 .post-card__thumb{aspect-ratio:16/9;background:var(--td-sunrise);position:relative;overflow:hidden;}

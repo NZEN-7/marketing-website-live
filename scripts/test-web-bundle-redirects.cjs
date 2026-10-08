@@ -4,12 +4,19 @@ const v=require('../vercel.json');// The redirects as they were before the web b
 const before=JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures','vercel-before-web-bundle.json'),'utf8'));
 const n=fs.readFileSync(path.join(root,'netlify.toml'),'utf8');const net=[...n.matchAll(/\[\[redirects\]\]([\s\S]*?)(?=\[\[|$)/g)].map(m=>({source:m[1].match(/from = "([^"]*)"/)?.[1],destination:m[1].match(/to = "([^"]*)"/)?.[1]}));
 function next(p,host){return v.redirects.find(r=>r.source===p&&(!r.has||r.has.every(h=>h.type==='host'&&h.value===host)))?.destination;}
-const overrides={'/learn':'/hydronic/how-it-works/','/register':'/start/','/register-interest-installer':'/start/'};
+const overrides={'/learn':'/hydronic/how-it-works/','/register':'/start/','/register-interest-installer':'/start/',
+ // Web 2a (W2-10 to W2-13, 9 Oct): stubs off the index; merged or pulled stubs 301 to the live page.
+ '/post/hawthorn-first-install':'/blog/','/post/hydronic-heat-pump-installation':'/blog/',
+ '/post/heat-pump-pipe-diameter-myth':'/blog/heat-pump-radiator-compatibility-australia/','/post/thermal-storage-vs-lithium-battery':'/hydronic/how-it-works/',
+ '/post/victorian-gas-boiler-replacement-timing-should-you-replace-now-or-wait':'/blog/old-gas-boiler-removal-electrification/'};
 let count=0;for(const r of before.redirects.filter(r=>!r.has&&!r.source.includes('(')&&r.destination.startsWith('/'))){const expected=overrides[r.source.replace(/\/$/,'')]||r.destination;let dest=expected;while(before.redirects.some(x=>!x.has&&x.source===dest)){dest=before.redirects.find(x=>!x.has&&x.source===dest).destination;}if(expected.startsWith('/pre-order/register-interest'))dest='/start/';
  assert.equal(next(r.source,'www.thermaldawn.com'),dest,r.source);assert(!next(dest,'www.thermaldawn.com'),'chain '+r.source);assert(fs.existsSync(path.join(root,dest,'index.html'))||fs.existsSync(path.join(root,dest)),dest);
  for(const host of ['freevolt.com.au','www.freevolt.com.au'])assert.equal(next(r.source,host),'https://www.thermaldawn.com'+dest,host+r.source);count+=4;
  const twin=net.find(x=>x.source===r.source);if(twin){assert.equal(twin.destination,dest,'Netlify '+r.source);assert(!net.some(x=>x.source===dest),'Netlify chain '+r.source);count+=2;}
 }
 for(const p of ['/product','/pricing','/how-it-works','/hydronic-overview','/register','/pre-order-form','/post/i-want-to-replace-my-ducted-gas-heating-what-are-my-options','/learn'])assert(next(p,'www.thermaldawn.com'),p);
-assert.equal(next('/post/i-want-to-replace-my-ducted-gas-heating-what-are-my-options','www.thermaldawn.com'),'/blog/heat-pump-replace-gas-hydronic-boiler/');assert(fs.existsSync(path.join(root,'blog/heat-pump-pipe-diameter-myth/index.html')));
+assert.equal(next('/post/i-want-to-replace-my-ducted-gas-heating-what-are-my-options','www.thermaldawn.com'),'/blog/heat-pump-replace-gas-hydronic-boiler/');
+for(const [p,d] of [['/blog/heat-pump-pipe-diameter-myth','/blog/heat-pump-radiator-compatibility-australia/'],['/blog/victorian-gas-boiler-replacement-timing','/blog/old-gas-boiler-removal-electrification/'],['/blog/thermal-storage-vs-lithium-battery','/hydronic/how-it-works/'],['/post/victorian-gas-boiler-replacement-timing','/blog/old-gas-boiler-removal-electrification/']])for(const q of [p,p+'/']){
+ assert.equal(next(q,'www.thermaldawn.com'),d,q);assert(fs.existsSync(path.join(root,d,'index.html')),d);assert.equal(net.find(x=>x.source===p)?.destination,d,'Netlify '+p);count+=3;}
+for(const gone of ['heat-pump-pipe-diameter-myth','victorian-gas-boiler-replacement-timing','thermal-storage-vs-lithium-battery'])assert(!fs.existsSync(path.join(root,'blog',gone)),'stub still served: '+gone);
 console.log('Redirects: '+count+' configuration assertions pass; existing aliases reach files without path or domain chains.');

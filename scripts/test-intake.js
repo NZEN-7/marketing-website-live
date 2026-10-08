@@ -235,13 +235,14 @@ check("no placeholder privacy link on the intake (Nick, 2 Oct: strip it until th
 {
   // The button switch (Nick, 2 Oct): "Request a Quote" and the interest list go to /start/;
   // contact and the $990 booking page stay. The old pages themselves still exist.
+  // At least 15 pages (18 after Web 2a removed three blog stubs, 9 Oct).
   const { execFileSync } = require("child_process");
   const files = execFileSync("git", ["ls-files", "*.html", "*.js"], { cwd: path.join(__dirname, "..") }).toString().split(/\r?\n/)
     .filter((f) => f && !/^(start|docs|feedback|\.claude|scripts|api|tools)\//.test(f));
   const read = (f) => fs.readFileSync(path.join(__dirname, "..", f), "utf8");
   const old = files.filter((f) => /href="(\/pre-order\/register-interest\/|\/interest\/)"/.test(read(f)));
   check("buttons: no site page links to the old quote or interest-list forms", old.length === 0, old);
-  check("buttons: the site links to /start/ from its pages and the shared header", files.filter((f) => /href="\/start\/"/.test(read(f))).length >= 20 && /href="\/start\/"/.test(read("assets/js/site.js")));
+  check("buttons: the site links to /start/ from its pages and the shared header", files.filter((f) => /href="\/start\/"/.test(read(f))).length >= 15 && /href="\/start\/"/.test(read("assets/js/site.js")));
   const vj = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "vercel.json"), "utf8"));
   const r301 = (vj.redirects || []).find((r) => r.destination === "/start/");
   check("buttons: /pre-order/register-interest/ 301s to /start/ (its bundled consent retires; CTO Re #41.4)",

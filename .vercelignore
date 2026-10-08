@@ -15,3 +15,10 @@ package-lock.json
 .github
 .githooks
 .gitleaksignore
+# Web 2a (W2-20): five animation pages no page uses. Kept in the repo (the homepage
+# build reads homepage_web_animation_new.html as its shell); masters in Drive Animations/.
+assets/animations/day-night-storage-animation.html
+assets/animations/heating-comparison-table.html
+assets/animations/heating-tool.html
+assets/animations/homepage_web_animation_new.html
+assets/animations/thermal-dawn-flow-cycle.html
