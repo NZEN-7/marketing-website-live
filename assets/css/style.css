@@ -968,6 +968,7 @@ body.dark .section--photo,body.dark .section--photo>.wrap{color:#e2d7cd;}
   color:transparent;-webkit-text-stroke:1px rgba(255,255,255,.14);pointer-events:none;user-select:none;
 }
 @media(max-width:900px){.watermark__word{display:none;}}
+.watermark__word--sm{font-size:clamp(2rem,3.4vw,2.6rem);}  /* fits a one-paragraph section */
 
 /* =========================================================================
    v4, typographic hierarchy
@@ -1338,6 +1339,7 @@ body:not(.dark) .step p,body:not(.dark) .tl p,body:not(.dark) .benefits__item p{
 .embed__cap{max-width:var(--measure);margin-left:auto;margin-right:auto;}
 .section>.wrap>.callout{max-width:calc(var(--measure) + 44px);margin-left:auto;margin-right:auto;}
 body.home .section>.wrap>p{max-width:var(--measure);margin-left:auto;margin-right:auto;}
+.wrap.measure-col{max-width:calc(var(--measure) + 44px);}  /* the column is the paragraph measure (50ch at body size) plus the wrap's padding, so the heading lines up with its paragraphs */
 
 /* --- v8c, hierarchy ----------------------------------------------------- */
 
