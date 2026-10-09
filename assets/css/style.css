@@ -1339,7 +1339,7 @@ body:not(.dark) .step p,body:not(.dark) .tl p,body:not(.dark) .benefits__item p{
 .embed__cap{max-width:var(--measure);margin-left:auto;margin-right:auto;}
 .section>.wrap>.callout{max-width:calc(var(--measure) + 44px);margin-left:auto;margin-right:auto;}
 body.home .section>.wrap>p{max-width:var(--measure);margin-left:auto;margin-right:auto;}
-.measure-col>*{max-width:var(--measure);margin-left:auto;margin-right:auto;}  /* heading lines up with its paragraphs */
+.wrap.measure-col{max-width:calc(var(--measure) + 44px);}  /* the column is the paragraph measure (50ch at body size) plus the wrap's padding, so the heading lines up with its paragraphs */
 
 /* --- v8c, hierarchy ----------------------------------------------------- */
 
