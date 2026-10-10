@@ -1506,3 +1506,33 @@ body.dark .card:not(.card--orange){border-color:rgba(var(--td-orange-rgb),.28);}
    (on the row group, so it doesn't restart in each cell), and column headings don't wrap. */
 table.data--win thead,body.dark table.data--win thead{background:var(--td-sunrise);}
 table.data--win thead th,body.dark table.data--win thead th{background:transparent;white-space:nowrap;}
+
+/* W3-01: credibility strip as two rows, "As seen on" and "Supported by". One logo height,
+   greyscale until hover. On a phone each row stays one line and swipes sideways. */
+.credstrip--rows .wrap{display:grid;gap:22px;}
+.credrow{display:flex;align-items:center;justify-content:center;gap:28px;min-width:0;}
+.credrow__label{margin:0;flex:none;width:118px;text-align:right;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--td-grey);}
+.credrow__logos{display:flex;align-items:center;gap:40px;min-width:0;}
+.credlogo{display:inline-flex;align-items:center;gap:8px;flex:none;text-decoration:none;color:var(--td-black);}
+.credlogo img{height:30px;width:auto;display:block;filter:grayscale(1);opacity:.62;transition:filter .2s,opacity .2s;}
+.credlogo__txt{font-weight:900;font-size:1.15rem;letter-spacing:-.01em;line-height:30px;opacity:.62;transition:opacity .2s;}
+a.credlogo:hover img,a.credlogo:focus-visible img{filter:none;opacity:1;}
+a.credlogo:hover .credlogo__txt,a.credlogo:focus-visible .credlogo__txt{opacity:1;}
+.credlogo__play{width:18px;height:18px;flex:none;border-radius:50%;border:1.5px solid currentColor;opacity:.45;position:relative;}
+.credlogo__play::after{content:"";position:absolute;left:6px;top:4px;border-style:solid;border-width:4px 0 4px 6px;border-color:transparent transparent transparent currentColor;}
+a.credlogo:hover .credlogo__play{opacity:.9;color:var(--td-deep);}
+@media(max-width:759px){
+  .credrow{justify-content:flex-start;gap:16px;}
+  .credrow__label{width:auto;text-align:left;font-size:.66rem;}
+  .credrow__logos{overflow-x:auto;gap:28px;padding:4px 2px;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+  .credrow__logos::-webkit-scrollbar{display:none;}
+  .credlogo img{height:24px;}
+  .credlogo__txt{font-size:1rem;line-height:24px;}
+}
+/* W3-02: a video that links out (no embed), with our own thumbnail and a play mark. */
+.video-link{max-width:820px;margin-left:auto;margin-right:auto;}
+.video-link a{position:relative;display:block;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-lg);border:1px solid rgba(255,255,255,.1);}
+.video-link img{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;}
+.video-link__play{position:absolute;left:50%;top:50%;width:76px;height:76px;margin:-38px 0 0 -38px;border-radius:50%;background:rgba(0,0,0,.6);box-shadow:0 0 0 2px rgba(255,255,255,.85);transition:transform .2s,background .2s;}
+.video-link__play::after{content:"";position:absolute;left:31px;top:24px;border-style:solid;border-width:14px 0 14px 22px;border-color:transparent transparent transparent #fff;}
+.video-link a:hover .video-link__play,.video-link a:focus-visible .video-link__play{transform:scale(1.08);background:var(--td-deep);}
