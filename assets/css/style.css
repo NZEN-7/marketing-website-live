@@ -1538,6 +1538,12 @@ a.credlogo:hover .credlogo__play{opacity:.9;color:var(--td-deep);}
   .credlogo img{height:24px;}
   .credlogo__txt{font-size:1rem;line-height:24px;}
 }
+@media(max-width:759px){
+  /* With the script (assets/js/credstrip.js) the row is driven by hand and by the loop, not the keyframes. */
+  .credrow__logos.is-js{touch-action:pan-y;cursor:grab;-webkit-user-select:none;user-select:none;}
+  .credrow__logos.is-js .credrow__track{animation:none;will-change:transform;}
+  .credrow__logos.is-js img{-webkit-user-drag:none;pointer-events:none;}
+}
 @keyframes credloop{to{transform:translateX(-50%);}}
 @media(max-width:759px) and (prefers-reduced-motion:reduce){
   .credrow__track{animation:none;}
