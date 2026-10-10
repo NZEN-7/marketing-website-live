@@ -1509,8 +1509,8 @@ table.data--win thead th,body.dark table.data--win thead th{background:transpare
 
 /* W3-01: credibility strip as two rows, "As seen on" and "Supported by". One logo height,
    greyscale until hover. On a phone each row stays one line and swipes sideways. */
-.credstrip--rows .wrap{display:grid;gap:22px;}
-.credrow{display:flex;align-items:center;justify-content:center;gap:28px;min-width:0;}
+.credstrip--rows .wrap{display:grid;gap:22px;justify-content:center;}  /* one column sized to the wider row, so both labels line up */
+.credrow{display:flex;align-items:center;justify-content:flex-start;gap:28px;min-width:0;}
 .credrow__label{margin:0;flex:none;width:118px;text-align:right;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--td-grey);}
 .credrow__logos{display:flex;align-items:center;gap:40px;min-width:0;}
 .credlogo{display:inline-flex;align-items:center;gap:8px;flex:none;text-decoration:none;color:var(--td-black);}
@@ -1522,7 +1522,8 @@ a.credlogo:hover .credlogo__txt,a.credlogo:focus-visible .credlogo__txt{opacity:
 .credlogo__play::after{content:"";position:absolute;left:6px;top:4px;border-style:solid;border-width:4px 0 4px 6px;border-color:transparent transparent transparent currentColor;}
 a.credlogo:hover .credlogo__play{opacity:.9;color:var(--td-deep);}
 @media(max-width:759px){
-  .credrow{justify-content:flex-start;gap:16px;}
+  .credstrip--rows .wrap{justify-content:stretch;grid-template-columns:minmax(0,1fr);}
+  .credrow{gap:16px;}
   .credrow__label{width:auto;text-align:left;font-size:.66rem;}
   .credrow__logos{overflow-x:auto;gap:28px;padding:4px 2px;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
   .credrow__logos::-webkit-scrollbar{display:none;}
