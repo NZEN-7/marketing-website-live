@@ -49,8 +49,37 @@
       requestAnimationFrame(frame);
     }
 
+    // Touch: iOS Safari hands pointer gestures to page scrolling, so a finger is
+    // followed with touch events. The gesture is only claimed (preventDefault) once
+    // it is clearly sideways; an up-and-down swipe still scrolls the page.
+    box.addEventListener("touchstart", function (e) {
+      if (!phone.matches || e.touches.length !== 1) return;
+      var t = e.touches[0];
+      down = { id: "touch", startX: t.clientX, startY: t.clientY, startOffset: x, axis: null };
+      dragged = false;
+    }, { passive: true });
+
+    box.addEventListener("touchmove", function (e) {
+      if (!down || down.id !== "touch") return;
+      var t = e.touches[0];
+      var dx = t.clientX - down.startX, dy = t.clientY - down.startY;
+      if (!down.axis) {
+        if (Math.abs(dx) < DRAG_PX && Math.abs(dy) < DRAG_PX) return;
+        down.axis = Math.abs(dx) > Math.abs(dy) ? "x" : "y";
+      }
+      if (down.axis === "y") { down = null; return; }  // a page scroll: let it go
+      dragged = true;
+      e.preventDefault();
+      x = down.startOffset - dx;
+    }, { passive: false });
+
+    function endTouch() { if (down && down.id === "touch") down = null; }
+    box.addEventListener("touchend", endTouch);
+    box.addEventListener("touchcancel", endTouch);
+
+    // Mouse (a narrow desktop window): the same drag with pointer events.
     box.addEventListener("pointerdown", function (e) {
-      if (!phone.matches || (e.pointerType === "mouse" && e.button !== 0)) return;
+      if (!phone.matches || e.pointerType !== "mouse" || e.button !== 0) return;
       down = { id: e.pointerId, startX: e.clientX, startOffset: x };
       dragged = false;
     });
