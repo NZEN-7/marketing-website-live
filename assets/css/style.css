@@ -1522,6 +1522,8 @@ a.credlogo:hover .credlogo__txt,a.credlogo:focus-visible .credlogo__txt{opacity:
 .credlogo__play::after{content:"";position:absolute;left:6px;top:4px;border-style:solid;border-width:4px 0 4px 6px;border-color:transparent transparent transparent currentColor;}
 a.credlogo:hover .credlogo__play{opacity:.9;color:var(--td-deep);}
 .credrow__track,.credrow__set{display:flex;align-items:center;gap:40px;}
+/* Sets and logos never shrink: iOS sized them before the images loaded and the loop's copy overlapped the first set. */
+.credrow__set,.credlogo,.credlogo img{flex:none;}
 .credrow__set--dup{display:none;}
 @media(max-width:759px){
   .credstrip--rows .wrap{justify-content:stretch;grid-template-columns:minmax(0,1fr);gap:18px;}
