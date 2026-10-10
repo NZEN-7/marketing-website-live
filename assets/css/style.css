@@ -1509,7 +1509,7 @@ table.data--win thead th,body.dark table.data--win thead th{background:transpare
 
 /* W3-01: credibility strip as two rows, "As seen on" and "Supported by". One logo height,
    greyscale until hover. On a phone each row stays one line and swipes sideways. */
-.credstrip--rows .wrap{display:grid;gap:22px;justify-content:center;}  /* one column sized to the wider row, so both labels line up */
+.credstrip--rows .wrap{display:grid;gap:34px;justify-content:center;}  /* one column sized to the wider row, so both labels line up */
 .credrow{display:flex;align-items:center;justify-content:flex-start;gap:28px;min-width:0;}
 .credrow__label{margin:0;flex:none;width:118px;text-align:right;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--td-grey);}
 .credrow__logos{display:flex;align-items:center;gap:40px;min-width:0;}
