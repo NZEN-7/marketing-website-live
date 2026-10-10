@@ -38,6 +38,7 @@ const ASSETS = [
   "assets/js/live-stats.js",
   "assets/js/forms.js",
   "assets/js/config.js",
+  "assets/js/credstrip.js",
   "assets/animations/homepage-flow-v2.html",
   "assets/animations/hydronic-before-after.html",
   "assets/animations/intelligence-day.html",

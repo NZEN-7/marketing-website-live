@@ -1506,3 +1506,55 @@ body.dark .card:not(.card--orange){border-color:rgba(var(--td-orange-rgb),.28);}
    (on the row group, so it doesn't restart in each cell), and column headings don't wrap. */
 table.data--win thead,body.dark table.data--win thead{background:var(--td-sunrise);}
 table.data--win thead th,body.dark table.data--win thead th{background:transparent;white-space:nowrap;}
+
+/* W3-01: credibility strip as two rows, "As seen on" and "Supported by". One logo height,
+   greyscale until hover. On a phone each row stays one line and swipes sideways. */
+.credstrip--rows .wrap{display:grid;gap:34px;justify-content:center;}  /* one column sized to the wider row, so both labels line up */
+.credrow{display:flex;align-items:center;justify-content:flex-start;gap:28px;min-width:0;}
+.credrow__label{margin:0;flex:none;width:118px;text-align:right;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--td-grey);}
+.credrow__logos{display:flex;align-items:center;gap:40px;min-width:0;}
+.credlogo{display:inline-flex;align-items:center;gap:8px;flex:none;text-decoration:none;color:var(--td-black);}
+.credlogo img{height:30px;width:auto;display:block;filter:grayscale(1);opacity:.62;transition:filter .2s,opacity .2s;}
+.credlogo__txt{font-weight:900;font-size:1.15rem;letter-spacing:-.01em;line-height:30px;opacity:.62;transition:opacity .2s;}
+a.credlogo:hover img,a.credlogo:focus-visible img{filter:none;opacity:1;}
+a.credlogo:hover .credlogo__txt,a.credlogo:focus-visible .credlogo__txt{opacity:1;}
+.credlogo__play{width:18px;height:18px;flex:none;border-radius:50%;border:1.5px solid currentColor;opacity:.45;position:relative;}
+.credlogo__play::after{content:"";position:absolute;left:6px;top:4px;border-style:solid;border-width:4px 0 4px 6px;border-color:transparent transparent transparent currentColor;}
+a.credlogo:hover .credlogo__play{opacity:.9;color:var(--td-deep);}
+.credrow__track,.credrow__set{display:flex;align-items:center;gap:40px;}
+/* Sets and logos never shrink: iOS sized them before the images loaded and the loop's copy overlapped the first set. */
+.credrow__set,.credlogo,.credlogo img{flex:none;}
+.credrow__set--dup{display:none;}
+@media(max-width:759px){
+  .credstrip--rows .wrap{justify-content:stretch;grid-template-columns:minmax(0,1fr);gap:18px;}
+  .credrow{flex-direction:column;align-items:stretch;gap:8px;}
+  .credrow__label{width:auto;text-align:center;font-size:.66rem;}
+  .credrow__logos{overflow:hidden;width:100%;padding:4px 0;}
+  .credrow__track{width:max-content;gap:0;animation:credloop 32s linear infinite;}
+  .credrow + .credrow .credrow__track{animation-duration:40s;}
+  .credrow__set{gap:32px;padding-right:32px;}
+  .credrow__set--dup{display:flex;}
+  .credrow__logos:hover .credrow__track,.credrow__logos:active .credrow__track,.credrow__logos:focus-within .credrow__track{animation-play-state:paused;}
+  .credlogo img{height:24px;}
+  .credlogo__txt{font-size:1rem;line-height:24px;}
+}
+@media(max-width:759px){
+  /* With the script (assets/js/credstrip.js) the row is driven by hand and by the loop, not the keyframes. */
+  .credrow__logos.is-js{touch-action:pan-y;cursor:grab;-webkit-user-select:none;user-select:none;}
+  .credrow__logos.is-js .credrow__track{animation:none;will-change:transform;}
+  .credrow__logos.is-js img{-webkit-user-drag:none;pointer-events:none;}
+}
+@keyframes credloop{to{transform:translateX(-50%);}}
+@media(max-width:759px) and (prefers-reduced-motion:reduce){
+  .credrow__track{animation:none;}
+  .credrow__set--dup{display:none;}
+  .credrow__logos{overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+  .credrow__logos::-webkit-scrollbar{display:none;}
+}
+/* W3-02: a video that links out (no embed), with our own thumbnail and a play mark. */
+.video-link{max-width:820px;margin-left:auto;margin-right:auto;}
+.video-link a{position:relative;display:block;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-lg);border:1px solid rgba(255,255,255,.1);}
+.video-link img{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;}
+.video-link__play{position:absolute;left:50%;top:50%;width:68px;height:48px;margin:-24px 0 0 -34px;}  /* YouTube's own play button: red pill, white triangle */
+.video-link__pill{fill:#f00;transition:fill .1s;}
+.video-link a:hover .video-link__pill,.video-link a:focus-visible .video-link__pill{fill:#cc0000;}
