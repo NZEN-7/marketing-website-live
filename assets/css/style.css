@@ -1555,6 +1555,6 @@ a.credlogo:hover .credlogo__play{opacity:.9;color:var(--td-deep);}
 .video-link{max-width:820px;margin-left:auto;margin-right:auto;}
 .video-link a{position:relative;display:block;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-lg);border:1px solid rgba(255,255,255,.1);}
 .video-link img{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;}
-.video-link__play{position:absolute;left:50%;top:50%;width:76px;height:76px;margin:-38px 0 0 -38px;border-radius:50%;background:rgba(0,0,0,.6);box-shadow:0 0 0 2px rgba(255,255,255,.85);transition:transform .2s,background .2s;}
-.video-link__play::after{content:"";position:absolute;left:31px;top:24px;border-style:solid;border-width:14px 0 14px 22px;border-color:transparent transparent transparent #fff;}
-.video-link a:hover .video-link__play,.video-link a:focus-visible .video-link__play{transform:scale(1.08);background:var(--td-deep);}
+.video-link__play{position:absolute;left:50%;top:50%;width:68px;height:48px;margin:-24px 0 0 -34px;}  /* YouTube's own play button: red pill, white triangle */
+.video-link__pill{fill:#f00;transition:fill .1s;}
+.video-link a:hover .video-link__pill,.video-link a:focus-visible .video-link__pill{fill:#cc0000;}
