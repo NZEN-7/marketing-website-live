@@ -571,7 +571,15 @@
   if (resumeLink && window.fetch) {
     try { window.history.replaceState(null, "", location.pathname); } catch (e) {}
     show("intro", false);
-    resume(resumeLink[1], resumeLink[2]);
+    // A link that no longer works (finished, past 30 days, or reset) says so, then starts fresh (HoE item 109).
+    resume(resumeLink[1], resumeLink[2]).then(function (ok) {
+      if (ok) return;
+      var note = document.createElement("p");
+      note.className = "iq__coach"; note.setAttribute("role", "status"); note.setAttribute("data-resume-note", "");
+      note.textContent = "That link has expired, or this enquiry has already been sent. You can start again below: it takes about two minutes.";
+      var acts = $(".iq-start-actions", screens.intro);
+      screens.intro.insertBefore(note, acts);
+    });
   } else {
     show("intro", false);
   }
