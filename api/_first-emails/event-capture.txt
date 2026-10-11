@@ -1,15 +1,16 @@
-# Draft for Nick and Sales to edit before release (CTO items 41–42).
+# Event capture first email (/hello/). Nick's own wording, 11 Oct 2026 (in chat), word for word.
+# {signature} is composed by _customer-email.js (Best regards, Nick Zeniou, Founder, and contact lines).
 Subject: Great to meet you at Electrify Boroondara
 Subject-no-name: Great to meet you at Electrify Boroondara
 
 Hi {first_name},
 
-Great to meet you at Electrify Boroondara. As promised, here's how Thermal Dawn works.
+Great to meet you at Electrify Boroondara.
 
-The Thermal Dawn heat pump replaces your gas boiler and heats the water for your hydronic radiators or underfloor heating. You can keep the heating system you already enjoy while moving away from gas. From $12,000 for the equipment; installation depends on the house.
+Thermal Dawn replaces your gas boiler with a heat pump that heats the water for your existing radiators or underfloor heating. You keep the heating you already have, just without the gas.
 
-I'll give you a call in the next day or two.
+You can read how it works here: https://www.thermaldawn.com/hydronic/how-it-works/
 
-https://www.thermaldawn.com/hydronic/how-it-works/
+We'll be in touch soon.
 
 {signature}
