@@ -21,9 +21,10 @@
     "test:spam": "node scripts/test-spam-guard.js",
     "test:previewguard": "node scripts/test-preview-guard.js && node scripts/test-intake-view.js",
     "test:releaseguards": "node scripts/test-release-guards.mjs",
-    "test:e2e": "node scripts/test-site-e2e.cjs --suite local && node scripts/test-intake-live-e2e.cjs && node scripts/test-intake-nick-tweaks-e2e.cjs && node scripts/test-stand-e2e.cjs",
+    "test:e2e": "node scripts/test-site-e2e.cjs --suite local && node scripts/test-intake-live-e2e.cjs && node scripts/test-intake-sessions-e2e.cjs && node scripts/test-intake-nick-tweaks-e2e.cjs && node scripts/test-stand-e2e.cjs",
     "test:e2e:url": "node scripts/test-site-e2e.cjs --suite url --url",
     "test:stand": "node scripts/test-stand.js",
+    "test:sessions": "node scripts/test-sessions.js",
     "test:contract": "node scripts/test-contract.cjs",
     "test:redirects": "node scripts/test-web-bundle-redirects.cjs"
   },

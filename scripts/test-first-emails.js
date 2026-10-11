@@ -31,14 +31,15 @@ const IL = (over) => P(Object.assign({ form: "interest-list", first_name: "Robin
 // ---- 1. the files --------------------------------------------------------
 const dir = lead.TEMPLATE_DIR;
 const files = fs.readdirSync(dir).filter((f) => f.endsWith(".txt")).sort();
-check("five template files (including the approved event-capture draft)",
-  JSON.stringify(files) === JSON.stringify(["contact.txt", "event-capture.txt", "interest-list-unserved.txt", "register-interest.txt", "subscribe.txt"]), files);
+check("six template files (including the approved event-capture draft and stage 2's partial)",
+  JSON.stringify(files) === JSON.stringify(["contact.txt", "event-capture.txt", "intake-partial.txt", "interest-list-unserved.txt", "register-interest.txt", "subscribe.txt"]), files);
 for (const f of files) {
   const raw = fs.readFileSync(path.join(dir, f), "utf8");
-  check(`${f}: identifies its approved copy source`, f === "event-capture.txt" ? /Draft for Nick and Sales/.test(raw) : /HANDOVER - first emails for api-lead\.js/.test(raw));
+  check(`${f}: identifies its approved copy source`, f === "event-capture.txt" ? /Draft for Nick and Sales/.test(raw)
+    : f === "intake-partial.txt" ? /Nick, 11 Oct/.test(raw) && /for\s+# Sales to confirm in the HANDOVER/.test(raw) : /HANDOVER - first emails for api-lead\.js/.test(raw));
   check(`${f}: no em dash`, !/—/.test(raw));
   check(`${f}: only Sales copy and signature placeholders`,
-    (raw.match(/\{[a-z_]+\}/g) || []).every((p) => p === "{first_name}" || p === "{booking_link}" || p === "{signature}"),
+    (raw.match(/\{[a-z_]+\}/g) || []).every((p) => p === "{first_name}" || p === "{booking_link}" || p === "{signature}" || (f === "intake-partial.txt" && p === "{resume_link}")),
     raw.match(/\{[a-z_]+\}/g));
   check(`${f}: booking link is never written in`, !/calendly\.com/i.test(raw));
   check(`${f}: only approved price copy; no performance figures`, f === "event-capture.txt" ? /(^|\s)From \$12,000 for the equipment; installation depends on the house\./.test(raw) && !/Prices start/.test(raw) && !/\bCOP\b|kWh/i.test(raw) : !/\$\d|\bCOP\b|kWh/i.test(raw));

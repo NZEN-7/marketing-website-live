@@ -6,8 +6,11 @@
    intake-route.js, holds photo uploads in memory (resized to ~2,000 px) and
    sends ONE request at the end: answers + files -> api/lead.js -> one email.
 
-   Not in the prototype (PRD D13): per-screen saves, partial alerts, the
-   resume link, Supabase, the customer's first email.
+   Stage 2 (PRD IF4, Nick 11 Oct): from the end of step 1 the answers are
+   saved on every screen change (/api/intake-save/), and once more as a beacon
+   when the page is hidden, so someone who leaves partway is kept. A partial
+   email with a resume link follows 30 minutes later (/api/intake-sweep/);
+   /start/?resume=... reopens the form where they left off.
    ========================================================================= */
 (function () {
   "use strict";
@@ -133,7 +136,32 @@
     }
     window.scrollTo({ top: Math.max(0, form.getBoundingClientRect().top + window.scrollY - 90), behavior: "auto" });
   }
-  function go(id) { if (current) history.push(current); show(id, false); }
+  function go(id) { if (current) history.push(current); show(id, false); save(false); }
+
+  // ---------------------------------------------------------------- stage 2: saves
+  var SAVE = "/api/intake-save/";
+  // IF4: nothing is saved before step 1 is complete (the server checks it too).
+  function stepOneDone(a) {
+    if (!a.first_name || !a.last_name || !EMAIL_OK(a.email || "")) return false;
+    if (!outsideAU && !/^\d{4}$/.test(a.postcode || "")) return false;
+    return outsideAU || !!a.phone || a.contact_pref === "email";
+  }
+  // The send closes the session, so saves stop once it has gone.
+  function save(beacon) {
+    if (sent || !RESUME) return;
+    var a = answers();
+    if (!stepOneDone(a)) return;
+    var p = payload("");
+    var body = JSON.stringify({ lead_id: LEAD_ID, resume_token: RESUME, ts: stamped, website: p.website, beacon: !!beacon,
+      last_screen: current, rung_reached: p.rung_reached, route: p.route, state: p.state, answers: a });
+    try {
+      if (beacon && navigator.sendBeacon) navigator.sendBeacon(SAVE, body);
+      else fetch(SAVE, { method: "POST", headers: { "Content-Type": "application/json" }, body: body, keepalive: true }).catch(function () {});
+    } catch (e) {}
+  }
+  // A half-finished screen still counts: one beacon when the page goes away.
+  document.addEventListener("visibilitychange", function () { if (document.visibilityState === "hidden") save(true); });
+  window.addEventListener("pagehide", function () { save(true); });
   function back() { if (!history.length) return; show(history.pop(), true); }
 
   // conditional bits inside screens (JS shows them only when they apply)
@@ -502,6 +530,48 @@
     });
   });
 
+  // ---------------------------------------------------------------- stage 2: resume
+  // /start/?resume=<signed link from the partial email>: the answers come back,
+  // the fields are filled, and the path to the last screen is replayed so Back works.
+  function fill(a) {
+    Object.keys(a).forEach(function (k) {
+      var v = a[k];
+      $$('[name="' + k + '"]', form).forEach(function (el) {
+        if (el.type === "file") return;
+        if (el.type === "radio") el.checked = el.value === String(v);
+        else if (el.type === "checkbox") el.checked = Array.isArray(v) ? v.indexOf(el.value) !== -1 : v === true;
+        else if (typeof v === "string") el.value = v;
+      });
+    });
+    var cp = $("[data-contact-pref]", form); if (cp && a.contact_pref) cp.value = a.contact_pref;
+    if (a.state === "OS") { outsideAU = true; $("[data-state]", form).value = "OS"; }
+    else if (a.postcode) onPostcode();
+    if (a.suburb) subText.value = a.suburb;
+  }
+  function resume(t) {
+    return fetch("/api/intake-resume/", { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ t: t, resume_token: RESUME }) })
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        if (!j || !j.ok || !/^il-[0-9a-f]{10}$/.test(j.lead_id || "")) return false;
+        LEAD_ID = j.lead_id;
+        fill(j.answers || {});
+        var id = "S1", path = [], end = screens[j.last_screen] ? j.last_screen : "S1";
+        for (var i = 0; i < 40 && id && id !== end; i++) { seen[id] = true; path.push(id); toggles(); id = nextOf(id); }
+        if (id !== end) { path = []; end = "S1"; }       // the answers no longer lead there: start at the top, filled in
+        history = path;
+        show(end, false);
+        return true;
+      }).catch(function () { return false; });
+  }
+
   form.classList.add("is-stepped");
-  show("intro", false);
+  var resumeLink = (location.search.match(/[?&]resume=([^&]+)/) || [])[1];
+  if (resumeLink && window.fetch) {
+    try { window.history.replaceState(null, "", location.pathname); } catch (e) {}
+    show("intro", false);
+    resume(decodeURIComponent(resumeLink));
+  } else {
+    show("intro", false);
+  }
 })();
