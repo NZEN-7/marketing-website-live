@@ -332,7 +332,8 @@ function intakeLeadRow(d, env, now) {
     Object.assign(row, {
       // Stage 1 sends no partials; a later "Help us prepare" send is its own
       // event, so the unique (intake_lead_id, intake_event) index keeps both rows.
-      intake_lead_id: d.lead_id, intake_event: d.followup ? "details" : "complete",
+      // Stage 2: the sweep writes the partial row (d.event = "partial") before any completion.
+      intake_lead_id: d.lead_id, intake_event: d.event === "partial" ? "partial" : d.followup ? "details" : "complete",
       intent: d.intent || null, route: d.route || null, rung_reached: RUNG[d.rung_reached] || null,
       tenure: d.tenure || null, boiler_condition: d.boiler_condition || null,
       ts_started: started, ts_last: at, answers,

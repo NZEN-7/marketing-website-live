@@ -51,6 +51,9 @@ jobs:
       - name: "Stand capture (/hello/): parse, row, guards, emails, no-JS (15 checks)"
         run: npm run test:stand
 
+      - name: "Intake stage 2: saves, sweep, resume (sessions mocked)"
+        run: npm run test:sessions
+
       - name: "Content contract (Blog/CONTRACT.md section 6) over the bundle's pages"
         run: npm run test:contract
 

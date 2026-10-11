@@ -23,6 +23,7 @@ const crypto = require("crypto");
 const intake = require("./_intake.js");
 const stand = require("./_stand.js");
 const customerEmail = require("./_customer-email.js");
+const sessions = require("./_sessions.js");
 
 const TZ = "Australia/Sydney";
 const NOTIFY_TO = "nickz@thermaldawn.com";
@@ -606,7 +607,9 @@ function formatNotification(d, stamp) {
 function notificationThread(d) {
   if (d.form !== "intake" || !/^il-[0-9a-f]{10}$/.test(d.lead_id || "")) return null;
   const id = `<intake-${d.lead_id}@thermaldawn.com>`;
-  return d.followup ? { inReplyTo: id, references: id } : { messageId: id };
+  // After a partial (stage 2) the partial is the thread's root, so the completion replies to it:
+  // a second message with the same Message-ID could be dropped as a duplicate.
+  return d.followup || d._partialSent ? { inReplyTo: id, references: id } : { messageId: id };
 }
 
 function formatSubject(d) {
@@ -699,14 +702,15 @@ function firstNameFor(d) {
   return /^[\p{L}][\p{L}'\u2019-]{0,39}$/u.test(first) ? first : "";
 }
 
-function renderTemplate(t, d) {
+function renderTemplate(t, d, extra) {
   const name = firstNameFor(d);
   const hasPhone = !!String(d.phone || "").trim();
   let body = t.body
     .replace(/\[phone\]([\s\S]*?)\[\/phone\]\n?/g, hasPhone ? "$1\n" : "")
     .replace(/\[no-phone\]([\s\S]*?)\[\/no-phone\]\n?/g, hasPhone ? "" : "$1\n")
     .split("{first_name}").join(name || "there")
-    .split("{booking_link}").join(bookingLink());
+    .split("{booking_link}").join(bookingLink())
+    .split("{resume_link}").join((extra && extra.resume_link) || "");
   const subject = stripHeader((name ? t.subject : t.subjectNoName).split("{first_name}").join(name));
   return Object.assign({ subject }, customerEmail(body, bookingLink()));
 }
@@ -925,6 +929,19 @@ async function handleStand(d,reqId,reply){
  }
 }
 
+/** Close the intake session on the first send (stage 2). Best effort: off, unset or
+    failing, it answers false and the send goes on exactly as in stage 1. */
+async function sessionsClose(d, reqId) {
+  if (d.form !== "intake" || !/^[0-9a-f]{64}$/.test(d.resume_token || "")) return false;
+  const store = sessions.store();
+  if (store.skip) return false;
+  try { await store.complete(d.lead_id, d.resume_token, d.route); }
+  catch (err) { logEvent(reqId, d.form, "session_close_failed", errorCode(err)); }
+  // Did a partial go first? Its `leads` row says so; then this send replies in its thread.
+  try { return await store.hasPartial(d.lead_id); }
+  catch (err) { logEvent(reqId, d.form, "partial_check_failed", errorCode(err)); return false; }
+}
+
 module.exports = async function handler(req, res) {
   const reqId = crypto.randomBytes(4).toString("hex");
   if (req.method !== "POST") {
@@ -994,6 +1011,9 @@ module.exports = async function handler(req, res) {
     }
     // Intake uploads ride on the notification as attachments (PRD D3).
     data._files = intake.intakeAttachments(data);
+    // Stage 2: the first send closes the lead's session, so the partial sweep
+    // never emails someone who finished, and says if a partial already went.
+    if (!data.followup) data._partialSent = await sessionsClose(data, reqId);
   }
 
   try {
@@ -1113,3 +1133,11 @@ module.exports.firstNameFor = firstNameFor;
 module.exports.errorCode = errorCode;
 module.exports.InsertError = InsertError;
 module.exports.TEMPLATE_DIR = TEMPLATE_DIR;
+// For the partial sweep (api/intake-sweep.js): the same transport, guards, row and templates.
+module.exports.makeTransport = makeTransport;
+module.exports.routeTo = routeTo;
+module.exports.recordLead = recordLead;
+module.exports.autoresponderFrom = autoresponderFrom;
+module.exports.logEvent = logEvent;
+module.exports.NOTIFY_TO = NOTIFY_TO;
+module.exports.templateEmail = (key, d, extra) => renderTemplate(loadTemplate(key), d, extra);

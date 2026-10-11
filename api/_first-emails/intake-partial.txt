@@ -1,0 +1,17 @@
+# First email: an intake left unfinished, sent by the partial sweep 30 minutes after the last
+# screen (stage 2; Nick, 11 Oct: "Thanks for putting down your details, we'll be in touch.").
+# In-area sessions only. Finished enquiries get their route email at once, as before.
+# The opening line is Nick's, word for word. The resume sentence is the Web Designer's draft for
+# Sales to confirm in the HANDOVER (Sales +/Consumer/Sales Playbook/_Templates/First emails/);
+# once Sales has it there, paste it here verbatim and edit it there first.
+# Placeholders: {first_name} {resume_link} {booking_link}. {signature} is composed by _customer-email.js.
+Subject: Thanks {first_name}, we've got your details
+Subject-no-name: Thanks, we've got your details
+
+Hi {first_name},
+
+Thanks for putting down your details, we'll be in touch.
+
+If you'd like to finish the rest, you can pick up where you left off here: {resume_link}
+
+{signature}
