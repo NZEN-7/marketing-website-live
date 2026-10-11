@@ -6,15 +6,21 @@
    on Pro). Vercel sends `Authorization: Bearer <CRON_SECRET>`; anything else
    is refused, and with CRON_SECRET unset the sweep never runs.
 
-   For each session left unfinished for 30 minutes, claimed atomically by the
-   database so two runs can't both take it:
+   For each session left unfinished for 30 minutes, claimed by Pete's
+   intake_sweep_claim (a 15-minute lease, FOR UPDATE SKIP LOCKED, so two runs
+   can't both take it):
+     0. If the lead's `partial` row is already in `leads`, an earlier run sent it
+        and lost the done call: mark it done and send nothing (Pete's
+        at-least-once note).
      1. Nick's notification, first, as ever: the root of the lead's one Gmail
         thread (IF6). A later completion replies to it.
      2. The `leads` row, event "partial" (PRD §3.1).
      3. In area only: the customer's one email, "Thanks for putting down your
         details, we'll be in touch.", with the resume link. Out of area or not
         our product: Nick's notification only.
-   If the notification fails, the claim is released and the next run retries.
+     4. intake_sweep_done: the session is never taken again.
+   If the notification fails, done is not called: the lease lapses after 15
+   minutes and a later run retries.
    Finished enquiries never come here: their first send closes the session and
    their route email goes at once, as before.
 
@@ -44,10 +50,10 @@ function authorised(req) {
 /** A claimed session row as the lead form's data: the same parse, so the
     notification, subject and row read exactly as a completed one does. */
 function asLead(row) {
-  const a = row.answers || {};
+  const a = sessions.publicAnswers(row.answers);
   const body = Object.assign({}, a, {
-    lead_id: row.lead_id, last_screen: row.last_screen || "", rung_reached: row.rung_reached || "",
-    route: row.route || "", ts: row.ts_started ? Date.parse(row.ts_started) : 0, outcome: "",
+    lead_id: row.intake_lead_id, last_screen: row.last_screen || "", rung_reached: sessions.RUNG_BACK[row.rung_reached] || "",
+    route: sessions.routeOut(row.route), ts: row.ts_started ? Date.parse(row.ts_started) : 0, outcome: "",
   });
   const p = intake.parseIntake(body);
   if (p.error) return null;
@@ -60,7 +66,7 @@ async function sendPartial(row, transport, reqId) {
   const d = asLead(row);
   if (!d) { lead.logEvent(reqId, "intake", "partial_skipped", "unreadable_session"); return "skipped"; }
   const notifyTo = lead.routeTo(lead.NOTIFY_TO);
-  if (!notifyTo) { lead.logEvent(reqId, "intake", "partial_skipped", "test_recipient_unset"); return "released"; }
+  if (!notifyTo) { lead.logEvent(reqId, "intake", "partial_skipped", "test_recipient_unset"); return "lapsed"; }
   // 1. Nick's notification: the thread's root (Message-ID from the lead ID).
   await transport.sendMail({
     from: `"Thermal Dawn Website" <${process.env.GMAIL_USER}>`,
@@ -73,13 +79,13 @@ async function sendPartial(row, transport, reqId) {
   try { await lead.recordLead(d); } catch (e) { lead.logEvent(reqId, "intake", "partial_insert_failed", lead.errorCode(e)); }
   // 3. The customer's one email, in area only.
   if (R.inArea(d)) {
-    const t = sessions.signResume(d.lead_id);
+    const t = sessions.openToken((row.answers || {})._rt);
     const to = lead.routeTo(d.email);
-    if (!t) lead.logEvent(reqId, "intake", "partial_email_skipped", "token_secret_unset");
+    if (!t) lead.logEvent(reqId, "intake", "partial_email_skipped", "no_resume_token");
     else if (!to) lead.logEvent(reqId, "intake", "partial_email_skipped", "test_recipient_unset");
     else {
       try {
-        const e = lead.templateEmail("intake-partial", d, { resume_link: sessions.resumeUrl(t) });
+        const e = lead.templateEmail("intake-partial", d, { resume_link: sessions.resumeUrl(d.lead_id, t) });
         await transport.sendMail({ from: lead.autoresponderFrom(), to, replyTo: lead.NOTIFY_TO,
           subject: e.subject, text: e.text, html: e.html, attachments: e.attachments });
       } catch (e) { lead.logEvent(reqId, "intake", "partial_email_failed", lead.errorCode(e)); }
@@ -94,22 +100,22 @@ module.exports = async function intakeSweep(req, res) {
   const store = sessions.store();
   if (store.skip) { lead.logEvent(reqId, "intake", "sweep_skipped", store.skip); return res.status(200).json({ ok: true, swept: 0, skipped: store.skip }); }
   let rows;
-  try { rows = await store.claimPartials(sessions.IDLE_MINUTES, PER_RUN); }
+  try { rows = await store.claim(sessions.IDLE_MINUTES, PER_RUN); }
   catch (e) { lead.logEvent(reqId, "intake", "sweep_claim_failed", lead.errorCode(e)); return res.status(502).json({ ok: false }); }
-  rows = Array.isArray(rows) ? rows : [];
-  const out = { sent: 0, released: 0, skipped: 0 };
+  const out = { sent: 0, already: 0, lapsed: 0, skipped: 0 };
   let transport = null;
   for (const row of rows) {
     try {
+      // 0. An earlier run sent this one and lost its done call: just close it.
+      if (await store.hasPartial(row.intake_lead_id)) { await store.done(row.intake_lead_id, row.claim); out.already++; continue; }
       transport = transport || lead.makeTransport();
       const r = await sendPartial(row, transport, reqId);
-      if (r === "released") { await store.releasePartial(row.lead_id); out.released++; }
-      else out[r]++;
+      if (r === "sent" || r === "skipped") await store.done(row.intake_lead_id, row.claim);
+      out[r]++;
     } catch (e) {
-      // The notification didn't go: give the session back for the next run.
+      // The notification didn't go: no done, so the lease lapses and a later run retries.
       lead.logEvent(reqId, "intake", "partial_failed", lead.errorCode(e));
-      try { await store.releasePartial(row.lead_id); } catch (_) { /* the next run's claim is unaffected */ }
-      out.released++;
+      out.lapsed++;
     }
   }
   return res.status(200).json(Object.assign({ ok: true, swept: rows.length }, out));

@@ -935,10 +935,11 @@ async function sessionsClose(d, reqId) {
   if (d.form !== "intake" || !/^[0-9a-f]{64}$/.test(d.resume_token || "")) return false;
   const store = sessions.store();
   if (store.skip) return false;
-  try {
-    const r = await store.complete(d.lead_id, sessions.hashToken(d.resume_token));
-    return !!(r && r.ok && r.partial_sent);
-  } catch (err) { logEvent(reqId, d.form, "session_close_failed", errorCode(err)); return false; }
+  try { await store.complete(d.lead_id, d.resume_token, d.route); }
+  catch (err) { logEvent(reqId, d.form, "session_close_failed", errorCode(err)); }
+  // Did a partial go first? Its `leads` row says so; then this send replies in its thread.
+  try { return await store.hasPartial(d.lead_id); }
+  catch (err) { logEvent(reqId, d.form, "partial_check_failed", errorCode(err)); return false; }
 }
 
 module.exports = async function handler(req, res) {

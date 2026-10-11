@@ -1,17 +1,20 @@
-/* Intake stage 2 (HoE items 103 to 105): the session layer, end to end, with
-   the sessions table mocked (the same five-function contract as _sessions.js),
-   the mail transport faked and Supabase's leads insert faked. Proves:
+/* Intake stage 2 (HoE items 103 to 108): the session layer, end to end, with
+   Pete's five functions mocked by the same rules (_sessions.js memoryStore),
+   the mail transport faked and Supabase's leads table faked. Proves:
      - the guards: off by default; a preview never touches the production CRM;
-     - the resume link: signed, 30 days, tamper and expiry refused;
-     - /api/intake-save/: nothing before step 1; first save fixes the token;
-       another token is refused; bot trap, cap and beacon replies; no PII in logs;
-     - /api/intake-sweep/: CRON_SECRET required; only sessions idle 30 minutes;
-       Nick's notification is the thread's root; the partial row; the customer's
-       one email with the resume link, in area only; a second run sends nothing;
-       a failed notification gives the session back;
+     - the sealed token: round trips, refuses tampering and another secret, never leaves the server;
+     - /api/intake-save/: nothing before step 1; first save fixes the token; another
+       token is refused; hyphenated routes survive Pete's [a-z0-9_] check; bot trap,
+       cap and beacon replies; no PII in logs;
+     - /api/intake-sweep/: CRON_SECRET required; only sessions idle 30 minutes; Nick's
+       notification is the thread's root; the partial row; the customer's one email
+       with a working resume link, in area only; done once; a second run sends nothing;
+       a failed notification lapses the lease and is retried after 15 minutes; a lost
+       done call is closed without a re-send (Pete's at-least-once note);
      - api/lead.js: the first send closes the session (never swept after), and a
        completion after a partial replies in the partial's thread;
-     - /api/intake-resume/: answers back, token rotated, closed sessions refused.
+     - /api/intake-resume/: answers back without the sealed token; wrong token, finished
+       or 30-day-old sessions refused.
    No credentials, no network.
 
      npm run test:sessions
@@ -22,7 +25,7 @@ const path = require("path");
 const api = (f) => path.join(__dirname, "..", "api", f);
 
 // ---- fakes ------------------------------------------------------------------
-let sent = [], failSend = null;
+let sent = [], failSend = null, live = null;
 const nm = require.resolve("nodemailer");
 require.cache[nm] = { id: nm, filename: nm, loaded: true, exports: {
   createTransport: () => ({ sendMail: async (m) => { const e = failSend && failSend(m); if (e) throw e; sent.push(m); } }),
@@ -31,6 +34,8 @@ let inserts = [];
 global.fetch = async (url, opts) => {
   const body = JSON.parse(opts.body);
   inserts.push({ url, body });
+  // The leads table: a partial row is what the sweep and lead.js read back.
+  if (body.intake_event === "partial" && live) live.partials.add(body.intake_lead_id);
   if (/on_conflict=intake_lead_id,intake_event/.test(url)) return { ok: true, status: 201, text: async () => JSON.stringify([{ intake_lead_id: body.intake_lead_id }]) };
   return { ok: true, status: 201, text: async () => "" };
 };
@@ -67,49 +72,51 @@ const realErr = console.error, realWarn = console.warn;
 const capture = () => { logs = []; console.error = console.warn = (...a) => logs.push(a.join(" ")); };
 const release = () => { console.error = realErr; console.warn = realWarn; };
 const pii = () => logs.filter((l) => [NAME, LAST, EMAIL, PHONE, "198.51.100."].some((v) => l.includes(v)));
+const use = (s) => { live = s; sessions.useStore(s); return s; };
 
-const hex = (n, c) => c.repeat(n);
-const TOKEN_A = hex(64, "a"), TOKEN_B = hex(64, "b"), TOKEN_C = hex(64, "c");
+const TOKEN_A = "a".repeat(64), TOKEN_B = "b".repeat(64), TOKEN_C = "c".repeat(64);
 const STEP1 = { first_name: NAME, last_name: LAST, email: EMAIL, phone: PHONE, postcode: "3122", suburb: "Hawthorn", contact_pref: "phone" };
 const saveBody = (leadId, token, extra) => Object.assign({ lead_id: leadId, resume_token: token, ts: Date.now() - 60000, website: "",
   last_screen: "S7", rung_reached: "1", route: "icp", state: "VIC", answers: Object.assign({}, STEP1) }, extra || {});
 
 (async () => {
   // ---- 1. guards --------------------------------------------------------------
-  check("off by default: no INTAKE_SESSIONS, nothing is written", sessions.target({}).skip === "sessions_off");
-  check("on but unconfigured: skipped", sessions.target({ INTAKE_SESSIONS: "on" }).skip === "not_configured");
-  const cfg = { INTAKE_SESSIONS: "on", INTAKE_SESSIONS_KEY: "k", INTAKE_SESSIONS_APIKEY: "a" };
-  check("a preview never writes to the production CRM",
-    sessions.target(Object.assign({ INTAKE_SESSIONS_URL: "https://skyequfcoejlhzbyipwt.supabase.co" }, cfg)).skip === "non_production_guard");
-  check("a preview may write to a non-production scope",
-    !sessions.target(Object.assign({ INTAKE_SESSIONS_URL: "https://test-scope.supabase.co" }, cfg)).skip);
-  check("production writes to the production CRM",
-    !sessions.target(Object.assign({ VERCEL_ENV: "production", INTAKE_SESSIONS_URL: "https://skyequfcoejlhzbyipwt.supabase.co" }, cfg)).skip);
+  const base = { SUPABASE_URL: "https://skyequfcoejlhzbyipwt.supabase.co", SUPABASE_SERVICE_ROLE_KEY: "k", INTAKE_TOKEN_SECRET: "s" };
+  check("off by default: no INTAKE_SESSIONS, nothing is written", sessions.target(base).skip === "sessions_off");
+  check("on without the server key: skipped", sessions.target({ INTAKE_SESSIONS: "on", SUPABASE_URL: base.SUPABASE_URL }).skip === "not_configured");
+  check("on without INTAKE_TOKEN_SECRET: skipped", sessions.target(Object.assign({}, base, { INTAKE_SESSIONS: "on", INTAKE_TOKEN_SECRET: "" })).skip === "token_secret_unset");
+  check("a preview never writes to the production CRM", sessions.target(Object.assign({ INTAKE_SESSIONS: "on" }, base)).skip === "non_production_guard");
+  check("production writes to the production CRM", !sessions.target(Object.assign({ INTAKE_SESSIONS: "on", VERCEL_ENV: "production" }, base)).skip);
 
-  // ---- 2. the resume link -----------------------------------------------------
-  const link = sessions.signResume("il-0123456789");
-  check("a signed link verifies to its lead", sessions.verifyResume(link) === "il-0123456789");
-  check("a tampered link is refused", sessions.verifyResume(link.replace("il-0123456789", "il-9876543210")) === null);
-  check("another secret refuses it", sessions.verifyResume(link, { INTAKE_TOKEN_SECRET: "another-secret-entirely-xyz" }) === null);
-  check("it expires after 30 days", sessions.verifyResume(link, null, Date.now() + 31 * 86400000) === null);
-  check("no secret, no link", sessions.signResume("il-0123456789", {}) === null);
-  check("off production the link points at the preview",
-    sessions.resumeUrl("t", { VERCEL_URL: "marketing-website-live-x.vercel.app" }) === "https://marketing-website-live-x.vercel.app/start/?resume=t");
-  check("in production it points at the live site", sessions.resumeUrl("t", { VERCEL_ENV: "production" }) === "https://www.thermaldawn.com/start/?resume=t");
+  // ---- 2. the sealed token ----------------------------------------------------
+  const sealed = sessions.sealToken(TOKEN_A);
+  check("the sealed token opens to the same token", sessions.openToken(sealed) === TOKEN_A);
+  check("it isn't the token in the clear", sealed.indexOf(TOKEN_A) === -1);
+  check("a tampered seal opens to nothing", sessions.openToken(sealed.slice(0, -3) + "AAA") === null);
+  check("another secret can't open it", sessions.openToken(sealed, { INTAKE_TOKEN_SECRET: "another-secret-entirely" }) === null);
+  check("the link is in the fragment, on the live site in production",
+    sessions.resumeUrl("il-0123456789", TOKEN_A, { VERCEL_ENV: "production" }) === "https://www.thermaldawn.com/start/#resume=il-0123456789." + TOKEN_A);
+  check("…and on the preview off production",
+    sessions.resumeUrl("il-0123456789", TOKEN_A, { VERCEL_URL: "x.vercel.app" }).indexOf("https://x.vercel.app/start/#resume=") === 0);
 
   // ---- 3. saves -------------------------------------------------------------------
-  const mem = sessions.memoryStore();
-  sessions.useStore(mem);
+  const mem = use(sessions.memoryStore());
   capture();
   let r = await call(save, { body: saveBody("il-aaaaaaaaaa", TOKEN_A, { answers: { first_name: NAME } }) });
   check("before step 1 is done: not saved", r.json && r.json.saved === false && !mem.rows.has("il-aaaaaaaaaa"), r.json);
   r = await call(save, { body: saveBody("il-aaaaaaaaaa", TOKEN_A) });
-  check("step 1 done: the first save makes the row", r.json.saved === true && mem.rows.get("il-aaaaaaaaaa").token_hash === sessions.hashToken(TOKEN_A));
-  r = await call(save, { body: saveBody("il-aaaaaaaaaa", TOKEN_A, { last_screen: "S8", answers: Object.assign({ heating: ["boiler_radiators"] }, STEP1) }) });
-  check("a later save merges the answers and moves last_screen",
-    r.json.saved === true && mem.rows.get("il-aaaaaaaaaa").last_screen === "S8" && mem.rows.get("il-aaaaaaaaaa").answers.heating[0] === "boiler_radiators");
+  check("step 1 done: the first save makes the row", r.json.saved === true && mem.rows.has("il-aaaaaaaaaa"));
+  check("…with the token sealed in the answers, never in the clear",
+    sessions.openToken(mem.rows.get("il-aaaaaaaaaa").answers._rt) === TOKEN_A && JSON.stringify(mem.rows.get("il-aaaaaaaaaa")).indexOf(TOKEN_A) === -1);
+  r = await call(save, { body: saveBody("il-aaaaaaaaaa", TOKEN_A, { last_screen: "S8", rung_reached: "2", answers: Object.assign({ heating: ["boiler_radiators"] }, STEP1) }) });
+  const ra = mem.rows.get("il-aaaaaaaaaa");
+  check("a later save merges the answers, moves last_screen and the rung", r.json.saved === true && ra.last_screen === "S8" && ra.rung_reached === 2 && ra.answers.heating[0] === "boiler_radiators");
   r = await call(save, { body: saveBody("il-aaaaaaaaaa", TOKEN_B, { answers: Object.assign({}, STEP1, { email: "other@example.com" }) }) });
-  check("another token can't overwrite the row", r.json.saved === false && mem.rows.get("il-aaaaaaaaaa").answers.email === EMAIL);
+  check("another token can't overwrite the row", r.json.saved === false && ra.answers.email === EMAIL);
+  r = await call(save, { body: saveBody("il-eeeeeeeeee", TOKEN_A, { route: "out-of-area", last_screen: "O1" }) });
+  check("a hyphenated route survives Pete's [a-z0-9_] check", r.json.saved === true && mem.rows.get("il-eeeeeeeeee").route === "out_of_area");
+  r = await call(save, { body: saveBody("il-ffffffffff", TOKEN_A, { answers: Object.assign({ _rt: "forged" }, STEP1) }) });
+  check("the page can't write its own _rt", sessions.openToken(mem.rows.get("il-ffffffffff").answers._rt) === TOKEN_A);
   r = await call(save, { body: saveBody("il-bbbbbbbbbb", TOKEN_B, { website: "bot" }) });
   check("the honeypot screens it", r.json.saved === false && !mem.rows.has("il-bbbbbbbbbb"));
   r = await call(save, { body: saveBody("il-bbbbbbbbbb", TOKEN_B, { ts: Date.now() - 500 }) });
@@ -131,12 +138,11 @@ const saveBody = (leadId, token, extra) => Object.assign({ lead_id: leadId, resu
   check("…and a wrong one", r.code === 401);
   const AUTH = { authorization: "Bearer " + process.env.CRON_SECRET };
 
-  // A clock we can move: sessions idle under 30 minutes are left alone.
   let clock = Date.now();
   sessions.memoryStore.clock = () => clock;
-  const fresh = sessions.memoryStore(); sessions.useStore(fresh);
+  const fresh = use(sessions.memoryStore());
   await call(save, { body: saveBody("il-1111111111", TOKEN_A) });                                   // in area
-  await call(save, { body: saveBody("il-2222222222", TOKEN_B, { postcode: "4000", state: "QLD",      // out of area
+  await call(save, { body: saveBody("il-2222222222", TOKEN_B, { state: "QLD",                         // out of area
     answers: Object.assign({}, STEP1, { postcode: "4000", suburb: "Brisbane City" }) }) });
   sent = []; inserts = [];
   r = await call(sweep, { method: "GET", headers: AUTH });
@@ -154,83 +160,97 @@ const saveBody = (leadId, token, extra) => Object.assign({ lead_id: leadId, resu
   check("the partial notification is the thread's root (Message-ID from the lead ID)",
     n1 && n1.messageId === "<intake-il-1111111111@thermaldawn.com>" && !n1.inReplyTo && !/^Re:/.test(n1.subject));
   check("it says partial in the Ended on line, layout otherwise unchanged",
-    n1 && /\nEnded on: partial \(screen S7\)\n/.test(n1.text) && /^Hi Thermal Dawn Team,/.test(n1.text));
+    n1 && /\nEnded on: partial \(screen S7\)\n/.test(n1.text) && /^Hi Thermal Dawn Team,/.test(n1.text) && /\nRoute: icp-check\n/.test(n1.text));   // the server's own route: no heating answer yet
+  check("no token, sealed or not, in Nick's notification", n1 && n1.text.indexOf(TOKEN_A) === -1 && !/_rt/.test(n1.text));
   const rows = inserts.filter((i) => /\/rest\/v1\/leads/.test(i.url));
   check("each gets a leads row with event partial", rows.length === 2 && rows.every((x) => x.body.intake_event === "partial"), rows.map((x) => x.body.intake_event));
+  check("…without the sealed token in its answers", rows.every((x) => !("_rt" in (x.body.answers || {}))));
   const toCustomer = sent.filter((m) => m.to === EMAIL);
   check("the in-area customer gets one email; the out-of-area one gets none", toCustomer.length === 1);
   const pe = toCustomer[0] || {};
   check("…with Nick's line", /Thanks for putting down your details, we'll be in touch\./.test(pe.text || ""));
-  const m = /https:\/\/www\.thermaldawn\.com\/start\/\?resume=([^\s]+)/.exec(pe.text || "");
-  check("…and a working resume link", m && sessions.verifyResume(decodeURIComponent(m[1])) === "il-1111111111");
+  const m = /https:\/\/www\.thermaldawn\.com\/start\/#resume=(il-[0-9a-f]{10})\.([0-9a-f]{64})/.exec(pe.text || "");
+  check("…and a resume link with the lead's own token", m && m[1] === "il-1111111111" && m[2] === TOKEN_A);
   check("…in HTML too, with the signature", /<html/.test(pe.html || "") && /Nick Zeniou/.test(pe.html || ""));
+  check("both are marked done", !!fresh.rows.get("il-1111111111").partial_sent_at && !!fresh.rows.get("il-2222222222").partial_sent_at);
   check("sweep logs carry no name, email or phone", pii().length === 0, pii());
 
-  sent = [];
+  sent = []; clock += 60 * 60000;
   r = await call(sweep, { method: "GET", headers: AUTH });
-  check("a second run sends nothing (idempotent)", r.json.swept === 0 && sent.length === 0);
+  check("a later run sends nothing (done once)", r.json.swept === 0 && sent.length === 0);
 
-  // A failed notification gives the session back for the next run.
+  // A failed notification: no done, the lease lapses, retried after 15 minutes.
   await call(save, { body: saveBody("il-3333333333", TOKEN_C) });
   clock += 31 * 60000;
   failSend = (msg) => (msg.to === "nickz@thermaldawn.com" ? Object.assign(new Error("smtp"), { responseCode: 451 }) : null);
   capture(); r = await call(sweep, { method: "GET", headers: AUTH }); release();
-  check("a failed notification is released, not lost", r.json.released === 1 && fresh.rows.get("il-3333333333").partial_sent_at === null);
+  check("a failed notification isn't marked done", r.json.lapsed === 1 && !fresh.rows.get("il-3333333333").partial_sent_at);
   failSend = null; sent = [];
   r = await call(sweep, { method: "GET", headers: AUTH });
-  check("…and the next run sends it", r.json.sent === 1 && sent.some((x) => /il-3333333333/.test(x.subject)));
+  check("…inside the 15-minute lease nobody else takes it", r.json.swept === 0 && sent.length === 0);
+  clock += 16 * 60000;
+  r = await call(sweep, { method: "GET", headers: AUTH });
+  check("…after it the next run sends it", r.json.sent === 1 && sent.some((x) => /il-3333333333/.test(x.subject)));
+
+  // A lost done call: the partial row exists, so the retry closes it without a re-send.
+  await call(save, { body: saveBody("il-8888888888", TOKEN_A) });
+  clock += 31 * 60000;
+  fresh.partials.add("il-8888888888");
+  sent = [];
+  r = await call(sweep, { method: "GET", headers: AUTH });
+  check("a lost done call is closed without sending again", r.json.already === 1 && sent.length === 0 && !!fresh.rows.get("il-8888888888").partial_sent_at);
   delete process.env.VERCEL_ENV;
 
-  // Off production: every email only to TEST_RECIPIENT, none when it's unset.
+  // Off production: every email only to TEST_RECIPIENT; none and no done when it's unset.
   await call(save, { body: saveBody("il-4444444444", TOKEN_A) }); clock += 31 * 60000; sent = [];
   r = await call(sweep, { method: "GET", headers: AUTH });
-  check("off production with no TEST_RECIPIENT: nothing sent, the session is released",
-    sent.length === 0 && r.json.released === 1 && fresh.rows.get("il-4444444444").partial_sent_at === null);
-  process.env.TEST_RECIPIENT = "test-inbox@example.com"; sent = [];
+  check("off production with no TEST_RECIPIENT: nothing sent, not done", sent.length === 0 && r.json.lapsed === 1 && !fresh.rows.get("il-4444444444").partial_sent_at);
+  process.env.TEST_RECIPIENT = "test-inbox@example.com"; clock += 16 * 60000; sent = [];
   r = await call(sweep, { method: "GET", headers: AUTH });
   check("off production with TEST_RECIPIENT: everything goes only there",
     sent.length === 2 && sent.every((x) => x.to === "test-inbox@example.com"), sent.map((x) => x.to));
   delete process.env.TEST_RECIPIENT;
 
   // ---- 5. lead.js: the first send closes the session; a completion threads under the partial
-  const L = sessions.memoryStore(); sessions.useStore(L);
+  const L = use(sessions.memoryStore());
   const full = (leadId, token, extra) => Object.assign({ form: "intake", ts: Date.now() - 60000, lead_id: leadId, resume_token: token,
     first_name: NAME, last_name: LAST, email: EMAIL, phone: PHONE, postcode: "3122", suburb: "Hawthorn", state: "VIC",
     intent: "fit", heating: ["boiler_radiators"], outcome: "matched", last_screen: "MATCH", seen: ["S1", "S2", "S3", "S4", "S5", "S7", "MATCH"] }, extra || {});
   process.env.TEST_RECIPIENT = "test-inbox@example.com";
-  // a) finished before 30 minutes: closed, never swept
   await call(save, { body: saveBody("il-5555555555", TOKEN_A) });
   sent = []; await call(lead, { body: full("il-5555555555", TOKEN_A) });
   check("a finished enquiry closes its session", !!L.rows.get("il-5555555555").completed_at);
   const root = sent.find((x) => /il-5555555555/.test(x.subject) && x.messageId);
   check("…its notification is the thread's root, as in stage 1", root && !root.inReplyTo);
+  check("…and its route email goes at once", sent.some((x) => x.to === "test-inbox@example.com" && /good fit|let's talk/i.test(x.subject + x.text)));
   clock += 31 * 60000; sent = [];
   r = await call(sweep, { method: "GET", headers: AUTH });
   check("…and the sweep never emails it", r.json.swept === 0 && sent.length === 0);
-  // b) a partial went first: the completion replies in its thread
   await call(save, { body: saveBody("il-6666666666", TOKEN_B) });
-  clock += 31 * 60000; await call(sweep, { method: "GET", headers: AUTH });
+  clock += 31 * 60000;
+  process.env.VERCEL_ENV = "production"; await call(sweep, { method: "GET", headers: AUTH }); delete process.env.VERCEL_ENV;
   sent = []; await call(lead, { body: full("il-6666666666", TOKEN_B) });
   const reply = sent.find((x) => /il-6666666666/.test(x.subject) && x.inReplyTo);
   check("a completion after a partial replies in the partial's thread",
     reply && reply.inReplyTo === "<intake-il-6666666666@thermaldawn.com>" && /^Re: /.test(reply.subject) && !reply.messageId);
+  check("…and still gets its route email (Nick, 11 Oct: both emails)", sent.filter((x) => x.to === "test-inbox@example.com" && !/il-6666666666/.test(x.subject)).length === 1);
   delete process.env.TEST_RECIPIENT;
 
   // ---- 6. resume ------------------------------------------------------------------
-  const Rz = sessions.memoryStore(); sessions.useStore(Rz);
+  const Rz = use(sessions.memoryStore());
   await call(save, { body: saveBody("il-7777777777", TOKEN_A, { last_screen: "S10", answers: Object.assign({ heating: ["boiler_underfloor"] }, STEP1) }) });
-  const t7 = sessions.signResume("il-7777777777");
-  r = await call(resume, { body: { t: t7, resume_token: TOKEN_C } });
-  check("a good link brings the answers and last screen back",
+  r = await call(resume, { body: { lead_id: "il-7777777777", resume_token: TOKEN_A } });
+  check("the link's lead and token bring the answers and last screen back",
     r.json.ok === true && r.json.lead_id === "il-7777777777" && r.json.last_screen === "S10" && r.json.answers.heating[0] === "boiler_underfloor");
-  r = await call(save, { body: saveBody("il-7777777777", TOKEN_A) });
-  check("…the old token can no longer save", r.json.saved === false);
-  r = await call(save, { body: saveBody("il-7777777777", TOKEN_C) });
-  check("…the new one can", r.json.saved === true);
-  r = await call(resume, { body: { t: t7.slice(0, -2) + "xx", resume_token: TOKEN_B } });
-  check("a tampered link gets nothing", r.json.ok === false && !r.json.answers);
-  await Rz.complete("il-7777777777", sessions.hashToken(TOKEN_C));
-  r = await call(resume, { body: { t: t7, resume_token: TOKEN_B } });
+  check("…without the sealed token", r.json.ok === true && !("_rt" in r.json.answers));
+  r = await call(resume, { body: { lead_id: "il-7777777777", resume_token: TOKEN_B } });
+  check("a wrong token gets nothing", r.json.ok === false && !r.json.answers);
+  clock += 31 * 86400000;
+  r = await call(resume, { body: { lead_id: "il-7777777777", resume_token: TOKEN_A } });
+  check("after 30 days it can't be reopened", r.json.ok === false);
+  clock -= 31 * 86400000;
+  await Rz.complete("il-7777777777", TOKEN_A);
+  r = await call(resume, { body: { lead_id: "il-7777777777", resume_token: TOKEN_A } });
   check("a completed session can't be reopened", r.json.ok === false);
 
   sessions.useStore(null);

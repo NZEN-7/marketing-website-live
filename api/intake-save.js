@@ -8,7 +8,8 @@
 
    Screens, as the lead form has them: the honeypot, the page stamp (3 s), and
    a per-IP cap sized for one save per screen. The first save fixes the row's
-   token hash; a later save with another token is refused by the database.
+   token hash; a later save with another token is refused by the database
+   (Pete's intake_session_save).
    Nothing about the visitor is logged: a request ID and a code only.
 
    The reply is always quick and quiet: 204 for a beacon or a screened post,
@@ -62,9 +63,10 @@ module.exports = async function intakeSave(req, res) {
   const store = sessions.store();
   if (store.skip) { log(reqId, store.skip); return reply(false); }
   try {
-    const r = await store.save(body.lead_id, sessions.hashToken(body.resume_token), patch);
-    if (r === "inserted" || r === "updated") return reply(true);
-    log(reqId, r === "refused" ? "token_refused" : r === "closed" ? "session_closed" : "unexpected_reply");
+    // The token rides in the answers sealed (for the partial email's link); the database hashes the raw one.
+    patch.answers._rt = sessions.sealToken(body.resume_token);
+    if (await store.save(body.lead_id, body.resume_token, patch)) return reply(true);
+    log(reqId, "save_refused");      // another token, finished, or past 30 days
     return reply(false);
   } catch (err) {
     log(reqId, err && err.code ? err.code : "rpc_failed");

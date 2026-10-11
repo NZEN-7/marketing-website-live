@@ -10,7 +10,7 @@
    saved on every screen change (/api/intake-save/), and once more as a beacon
    when the page is hidden, so someone who leaves partway is kept. A partial
    email with a resume link follows 30 minutes later (/api/intake-sweep/);
-   /start/?resume=... reopens the form where they left off.
+   /start/#resume=<lead>.<token> reopens the form where they left off.
    ========================================================================= */
 (function () {
   "use strict";
@@ -531,8 +531,9 @@
   });
 
   // ---------------------------------------------------------------- stage 2: resume
-  // /start/?resume=<signed link from the partial email>: the answers come back,
-  // the fields are filled, and the path to the last screen is replayed so Back works.
+  // /start/#resume=<lead_id>.<token> (the partial email's link; in the fragment, so it
+  // never reaches a server log): the answers come back, the fields are filled, the path
+  // to the last screen is replayed so Back works, and saves go on with that lead and token.
   function fill(a) {
     Object.keys(a).forEach(function (k) {
       var v = a[k];
@@ -548,13 +549,13 @@
     else if (a.postcode) onPostcode();
     if (a.suburb) subText.value = a.suburb;
   }
-  function resume(t) {
+  function resume(leadId, token) {
     return fetch("/api/intake-resume/", { method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ t: t, resume_token: RESUME }) })
+      body: JSON.stringify({ lead_id: leadId, resume_token: token }) })
       .then(function (r) { return r.json(); })
       .then(function (j) {
-        if (!j || !j.ok || !/^il-[0-9a-f]{10}$/.test(j.lead_id || "")) return false;
-        LEAD_ID = j.lead_id;
+        if (!j || !j.ok || j.lead_id !== leadId) return false;
+        LEAD_ID = leadId; RESUME = token;
         fill(j.answers || {});
         var id = "S1", path = [], end = screens[j.last_screen] ? j.last_screen : "S1";
         for (var i = 0; i < 40 && id && id !== end; i++) { seen[id] = true; path.push(id); toggles(); id = nextOf(id); }
@@ -566,11 +567,11 @@
   }
 
   form.classList.add("is-stepped");
-  var resumeLink = (location.search.match(/[?&]resume=([^&]+)/) || [])[1];
+  var resumeLink = /^#resume=(il-[0-9a-f]{10})\.([0-9a-f]{64})$/.exec(location.hash);
   if (resumeLink && window.fetch) {
     try { window.history.replaceState(null, "", location.pathname); } catch (e) {}
     show("intro", false);
-    resume(decodeURIComponent(resumeLink));
+    resume(resumeLink[1], resumeLink[2]);
   } else {
     show("intro", false);
   }

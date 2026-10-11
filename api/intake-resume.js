@@ -1,13 +1,13 @@
 /* =========================================================================
    /api/intake-resume/: reopen a half-finished intake (stage 2, PRD IF7)
    -------------------------------------------------------------------------
-   The partial email carries /start/?resume=<lead_id.expiry.HMAC>. The page
-   posts that token here with a fresh 64-hex resume token of its own. If the
-   signature and the 30-day expiry check out, the session's token hash is
-   replaced by the new one (so only this browser can save to it from now on)
-   and its answers and last screen come back, for the page to fill in.
+   The partial email links to /start/#resume=<lead_id>.<token> (the fragment
+   never reaches a server). The page posts the lead ID and token here; Pete's
+   intake_session_resume checks the token's hash and the 30-day life, and the
+   answers and last screen come back for the page to fill in. The page then
+   carries on saving with the same lead and token.
 
-   A completed session, an unknown lead or a bad link gets { ok: false } and
+   A completed session, an unknown lead or a wrong token gets { ok: false } and
    the page simply starts fresh. Nothing about the visitor is logged.
    ========================================================================= */
 "use strict";
@@ -38,15 +38,13 @@ module.exports = async function intakeResume(req, res) {
   if (typeof body === "string") { try { body = JSON.parse(body); } catch (_) { body = null; } }
   if (!body || typeof body !== "object") { log(reqId, "invalid_payload"); return no(); }
   if (screened(req, Date.now())) { log(reqId, "rate_limited"); return no(); }
-  const leadId = sessions.verifyResume(body.t);
-  if (!leadId) { log(reqId, "bad_or_expired_link"); return no(); }
-  if (!sessions.TOKEN.test(String(body.resume_token || ""))) { log(reqId, "invalid_token"); return no(); }
+  if (!sessions.LEAD_ID.test(String(body.lead_id || "")) || !sessions.TOKEN.test(String(body.resume_token || ""))) { log(reqId, "invalid_link"); return no(); }
   const store = sessions.store();
   if (store.skip) { log(reqId, store.skip); return no(); }
   try {
-    const r = await store.resume(leadId, sessions.hashToken(body.resume_token));
-    if (!r || typeof r !== "object" || !r.answers) { log(reqId, "no_open_session"); return no(); }
-    return res.status(200).json({ ok: true, lead_id: leadId, answers: r.answers, last_screen: r.last_screen || null });
+    const r = await store.resume(body.lead_id, body.resume_token);
+    if (!r || !r.answers) { log(reqId, "no_open_session"); return no(); }
+    return res.status(200).json({ ok: true, lead_id: body.lead_id, answers: sessions.publicAnswers(r.answers), last_screen: r.last_screen || null });
   } catch (err) {
     log(reqId, err && err.code ? err.code : "rpc_failed");
     return no();

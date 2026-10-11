@@ -76,13 +76,14 @@ const settle = (p) => p.waitForTimeout(250);
       c.setResume({ ok: true, lead_id: 'il-abcdefabcd', last_screen: 'S8', answers: {
         first_name: 'Test', last_name: 'Fixture', email: 'test@example.invalid', postcode: '3122', suburb: 'Hawthorn',
         contact_pref: 'email', intent: 'fit', heating: ['boiler_radiators'] } });
-      await p.goto(new URL('/start/?resume=il-abcdefabcd.1999999999.signedsignedsignedsignedsignedsignedsigne', base).href);
+      const tok = 'd'.repeat(64);
+      await p.goto(new URL('/start/#resume=il-abcdefabcd.' + tok, base).href);
       await current(p, 'S8');
-      assert.equal(c.resumes.length, 1); assert.match(c.resumes[0].t, /^il-abcdefabcd\./); assert.match(c.resumes[0].resume_token, /^[0-9a-f]{64}$/);
-      assert.equal(new URL(p.url()).search, '', 'the link is cleaned out of the address bar');
+      assert.equal(c.resumes.length, 1); assert.equal(c.resumes[0].lead_id, 'il-abcdefabcd'); assert.equal(c.resumes[0].resume_token, tok);
+      assert.equal(new URL(p.url()).hash, '', 'the link is cleaned out of the address bar');
       await p.locator('[name=boiler_condition][value=getting_on]').check(); await next(p); await current(p, 'S10'); await settle(p);
       const last = c.saves[c.saves.length - 1];
-      assert.equal(last.lead_id, 'il-abcdefabcd'); assert.equal(last.resume_token, c.resumes[0].resume_token);
+      assert.equal(last.lead_id, 'il-abcdefabcd'); assert.equal(last.resume_token, tok, 'saves go on with the link token');
       assert.equal(last.answers.email, 'test@example.invalid'); assert.equal(last.answers.boiler_condition, 'getting_on');
       await p.locator('[data-back]').click(); await current(p, 'S8');
       await p.locator('[data-back]').click(); await current(p, 'S7');
@@ -90,8 +91,10 @@ const settle = (p) => p.waitForTimeout(250);
     });
 
     await pageTest('A link that no longer works starts the form fresh', async (p, c, base) => {
-      await p.goto(new URL('/start/?resume=il-abcdefabcd.1.bad', base).href);
+      await p.goto(new URL('/start/#resume=il-abcdefabcd.' + 'e'.repeat(64), base).href);
       await current(p, 'intro'); assert.equal(c.resumes.length, 1);
+      await p.goto(new URL('/start/#resume=not-a-link', base).href);
+      await current(p, 'intro'); assert.equal(c.resumes.length, 1, 'a malformed link is never posted');
     });
   } finally { await browser.close(); s.close && s.close(); }
   console.log(failed ? failed + ' stage 2 browser test(s) failed' : 'All stage 2 browser tests passed');
