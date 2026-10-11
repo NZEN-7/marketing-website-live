@@ -93,8 +93,12 @@ const settle = (p) => p.waitForTimeout(250);
     await pageTest('A link that no longer works starts the form fresh', async (p, c, base) => {
       await p.goto(new URL('/start/#resume=il-abcdefabcd.' + 'e'.repeat(64), base).href);
       await current(p, 'intro'); assert.equal(c.resumes.length, 1);
+      await p.locator('[data-resume-note]').waitFor();
+      assert.match(await p.locator('[data-resume-note]').textContent(), /start again/);
+      await p.goto('about:blank');                                          // a new hash alone doesn't reload
       await p.goto(new URL('/start/#resume=not-a-link', base).href);
       await current(p, 'intro'); assert.equal(c.resumes.length, 1, 'a malformed link is never posted');
+      assert.equal(await p.locator('[data-resume-note]').count(), 0, 'no note without a link');
     });
   } finally { await browser.close(); s.close && s.close(); }
   console.log(failed ? failed + ' stage 2 browser test(s) failed' : 'All stage 2 browser tests passed');
