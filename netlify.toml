@@ -365,3 +365,10 @@
   to = "/404.html"
   status = 404
   force = true
+
+# Stage 2's session layer is required by the intake functions; never served.
+[[redirects]]
+  from = "/api/_sessions.js"
+  to = "/404.html"
+  status = 404
+  force = true

@@ -50,11 +50,17 @@ async function server() {
 async function context(browser,base,local,options={}) {
   const ctx = await browser.newContext({serviceWorkers:'block', viewport:{width:1280,height:900}, reducedMotion:'reduce',...options});
   ctx.setDefaultTimeout(10000);
-  const calls = [], views = [], violations = [], blocked = [];
+  const calls = [], views = [], violations = [], blocked = [], saves = [], resumes = [];
+  let resumeAnswer = { ok: false };
+  const resumeReply = () => resumeAnswer;
   await ctx.route('**/*',async route=> {
     const req = route.request(), url = new URL(req.url());
     if (url.origin === new URL(base).origin && url.pathname.startsWith('/api/')) {
-      if (local) { if(req.method()==='POST') (url.pathname.startsWith('/api/intake-view') ? views : calls).push(JSON.parse(req.postData() || '{}')); return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,sent:true})}); }
+      if (local) {
+        // Stage 2: per-screen saves and the resume call have their own lists, so `calls` still means the enquiry's sends.
+        if (url.pathname.startsWith('/api/intake-save')) { saves.push(JSON.parse(req.postData() || '{}')); return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,saved:true})}); }
+        if (url.pathname.startsWith('/api/intake-resume')) { resumes.push(JSON.parse(req.postData() || '{}')); return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(resumeReply())}); }
+        if(req.method()==='POST') (url.pathname.startsWith('/api/intake-view') ? views : calls).push(JSON.parse(req.postData() || '{}')); return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,sent:true})}); }
       if(req.method()!=='GET') violations.push('Non-GET API attempt');
       blocked.push('api'); return route.abort();
     }
@@ -68,7 +74,7 @@ async function context(browser,base,local,options={}) {
     }
     return route.continue();
   });
-  return {ctx,calls,views,violations,blocked,page:await ctx.newPage()};
+  return {ctx,calls,views,saves,resumes,setResume:(r)=>{resumeAnswer=r;},violations,blocked,page:await ctx.newPage()};
 }
 async function current(p,id) {await p.locator('[data-screen="'+id+'"].is-current').waitFor();}
 async function next(p) {await p.locator('[data-continue]').click();}
