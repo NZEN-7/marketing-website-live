@@ -1684,6 +1684,15 @@
   "functions": {
     "api/lead.js": {
       "includeFiles": "{api/_first-emails/**,assets/js/intake-route.js,assets/email/logo.png}"
+    },
+    "api/intake-sweep.js": {
+      "includeFiles": "{api/_first-emails/**,assets/js/intake-route.js,assets/email/logo.png}"
     }
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/intake-sweep/",
+      "schedule": "*/10 * * * *"
+    }
+  ]
 }
